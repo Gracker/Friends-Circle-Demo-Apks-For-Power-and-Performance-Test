@@ -59,7 +59,11 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             imageView = (ImageView) itemView;
         }
         String url = mImageBeans.get(position);
-        Glide.with(mContext).load(url).apply(mRequestOptions).transition(mDrawableTransitionOptions).into(imageView);
+        int resourceId = mContext.getResources().getIdentifier(
+            url, "drawable", mContext.getPackageName());
+        if (resourceId != 0) {
+            Glide.with(mContext).load(resourceId).apply(mRequestOptions).transition(mDrawableTransitionOptions).into(imageView);
+        }
         return imageView;
     }
 }

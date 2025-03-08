@@ -92,29 +92,23 @@ public class Utils {
                 popup.getMenuInflater().inflate(R.menu.popup_menu_end, popup.getMenu());
             }
             popup.setOnMenuItemClickListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.copy:
-                        if (onItemClickPopupMenuListener != null) {
-                            onItemClickPopupMenuListener.onItemClickCopy(position);
-                        }
-                        break;
-                    case R.id.collection:
-                        if (onItemClickPopupMenuListener != null) {
-                            onItemClickPopupMenuListener.onItemClickCollection(position);
-                        }
-                        break;
-                    case R.id.translation:
-                        if (onItemClickPopupMenuListener != null) {
-                            onItemClickPopupMenuListener.onItemClickTranslation(position);
-                        }
-                        break;
-                    case R.id.hide_translation:
-                        if (onItemClickPopupMenuListener != null) {
-                            onItemClickPopupMenuListener.onItemClickHideTranslation(position);
-                        }
-                        break;
-                    default:
-                        break;
+                int itemId = item.getItemId();
+                if (itemId == R.id.copy) {
+                    if (onItemClickPopupMenuListener != null) {
+                        onItemClickPopupMenuListener.onItemClickCopy(position);
+                    }
+                } else if (itemId == R.id.collection) {
+                    if (onItemClickPopupMenuListener != null) {
+                        onItemClickPopupMenuListener.onItemClickCollection(position);
+                    }
+                } else if (itemId == R.id.translation) {
+                    if (onItemClickPopupMenuListener != null) {
+                        onItemClickPopupMenuListener.onItemClickTranslation(position);
+                    }
+                } else if (itemId == R.id.hide_translation) {
+                    if (onItemClickPopupMenuListener != null) {
+                        onItemClickPopupMenuListener.onItemClickHideTranslation(position);
+                    }
                 }
                 return true;
             });

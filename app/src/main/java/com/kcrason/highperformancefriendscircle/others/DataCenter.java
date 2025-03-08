@@ -76,7 +76,7 @@ public class DataCenter {
 
             UserBean userBean = new UserBean();
             userBean.setUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
-            userBean.setUserAvatarUrl(Constants.IMAGE_URL[(int) (Math.random() * 50)]);
+            userBean.setUserAvatarUrl("avatar_icon");
             friendCircleBean.setUserBean(userBean);
 
 

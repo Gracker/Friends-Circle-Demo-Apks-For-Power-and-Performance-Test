@@ -109,13 +109,9 @@ public class CommentTranslationLayoutView extends LinearLayout implements View.O
 
     @Override
     public boolean onLongClick(View v) {
-        switch (v.getId()) {
-            case R.id.txt_source_content:
-            case R.id.txt_translation_content:
-                Utils.showPopupMenu(getContext(), mOnItemClickPopupMenuListener, mCurrentPosition, v, TranslationState.END);
-                break;
-            default:
-                break;
+        int id = v.getId();
+        if (id == R.id.txt_source_content || id == R.id.txt_translation_content) {
+            Utils.showPopupMenu(getContext(), mOnItemClickPopupMenuListener, mCurrentPosition, v, TranslationState.END);
         }
         return true;
     }

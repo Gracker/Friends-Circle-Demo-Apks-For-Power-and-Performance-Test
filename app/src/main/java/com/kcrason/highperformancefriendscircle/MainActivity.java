@@ -14,11 +14,11 @@ import com.kcrason.highperformancefriendscircle.beans.FriendCircleBean;
 import com.kcrason.highperformancefriendscircle.interfaces.OnPraiseOrCommentClickListener;
 import com.kcrason.highperformancefriendscircle.others.DataCenter;
 import com.kcrason.highperformancefriendscircle.others.FriendsCircleAdapterDivideLine;
-import com.kcrason.highperformancefriendscircle.others.GlideSimpleTarget;
 import com.kcrason.highperformancefriendscircle.utils.Utils;
 import com.kcrason.highperformancefriendscircle.widgets.EmojiPanelView;
 import java.util.List;
-import ch.ielse.view.imagewatcher.ImageWatcher;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -26,12 +26,12 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
-        OnPraiseOrCommentClickListener, ImageWatcher.OnPictureLongPressListener, ImageWatcher.Loader {
+        OnPraiseOrCommentClickListener {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Disposable mDisposable;
     private FriendCircleAdapter mFriendCircleAdapter;
-    private ImageWatcher mImageWatcher;
+    private StfalconImageViewer<String> mImageViewer;
     private EmojiPanelView mEmojiPanelView;
 
     @Override
@@ -63,15 +63,24 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        mImageWatcher = findViewById(R.id.image_watcher);
+        
+        ImageLoader<String> imageLoader = new ImageLoader<String>() {
+            @Override
+            public void loadImage(ImageView imageView, String imageUrl) {
+                int resourceId = imageView.getContext().getResources().getIdentifier(
+                    imageUrl, "drawable", imageView.getContext().getPackageName());
+                if (resourceId != 0) {
+                    Glide.with(imageView.getContext())
+                         .load(resourceId)
+                         .into(imageView);
+                }
+            }
+        };
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new FriendsCircleAdapterDivideLine());
-        mFriendCircleAdapter = new FriendCircleAdapter(this, recyclerView, mImageWatcher);
+        mFriendCircleAdapter = new FriendCircleAdapter(this, recyclerView, imageLoader);
         recyclerView.setAdapter(mFriendCircleAdapter);
-        mImageWatcher.setTranslucentStatus(Utils.calcStatusBarHeight(this));
-        mImageWatcher.setErrorImageRes(R.mipmap.error_picture);
-        mImageWatcher.setOnPictureLongPressListener(this);
-        mImageWatcher.setLoader(this);
         Utils.showSwipeRefreshLayout(mSwipeRefreshLayout, this::asyncMakeData);
     }
 
@@ -116,19 +125,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onBackPressed() {
-        if (!mImageWatcher.handleBackPressed()) {
+        if (mImageViewer != null) {
+            mImageViewer.close();
+        } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void onPictureLongPress(ImageView v, String url, int pos) {
-
-    }
-
-
-    @Override
-    public void load(Context context, String url, ImageWatcher.LoadCallback lc) {
-        Glide.with(context).asBitmap().load(url).into(new GlideSimpleTarget(lc));
     }
 }

@@ -31,7 +31,8 @@ import com.kcrason.highperformancefriendscircle.beans.UserBean;
 import com.kcrason.highperformancefriendscircle.widgets.VerticalCommentWidget;
 import java.util.ArrayList;
 import java.util.List;
-import ch.ielse.view.imagewatcher.ImageWatcher;
+import com.stfalcon.imageviewer.StfalconImageViewer;
+import com.stfalcon.imageviewer.loader.ImageLoader;
 
 /**
  * @author KCrason
@@ -60,11 +61,11 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
 
     private RecyclerView mRecyclerView;
 
-    private ImageWatcher mImageWatcher;
+    private ImageLoader<String> mImageLoader;
 
-    public FriendCircleAdapter(Context context, RecyclerView recyclerView, ImageWatcher imageWatcher) {
+    public FriendCircleAdapter(Context context, RecyclerView recyclerView, ImageLoader<String> imageLoader) {
         this.mContext = context;
-        this.mImageWatcher = imageWatcher;
+        this.mImageLoader = imageLoader;
         mRecyclerView = recyclerView;
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         this.mAvatarSize = Utils.dp2px(44f);
@@ -115,9 +116,13 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
                 wordAndUrlViewHolder.layoutUrl.setOnClickListener(v -> Toast.makeText(mContext, "You Click Layout Url", Toast.LENGTH_SHORT).show());
             } else if (holder instanceof WordAndImagesViewHolder) {
                 WordAndImagesViewHolder wordAndImagesViewHolder = (WordAndImagesViewHolder) holder;
-                wordAndImagesViewHolder.nineGridView.setOnImageClickListener((position1, view) ->
-                    mImageWatcher.show((ImageView) view, wordAndImagesViewHolder.nineGridView.getImageViews(),
-                            friendCircleBean.getImageUrls()));
+                wordAndImagesViewHolder.nineGridView.setOnImageClickListener((clickPosition, view) -> {
+                    if (friendCircleBean.getImageUrls() != null && clickPosition < friendCircleBean.getImageUrls().size()) {
+                        new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
+                                .withStartPosition(clickPosition)
+                                .show();
+                    }
+                });
                 wordAndImagesViewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, mRequestOptions,
                         mDrawableTransitionOptions, friendCircleBean.getImageUrls()));
             }
@@ -144,10 +149,15 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         UserBean userBean = friendCircleBean.getUserBean();
         if (userBean != null) {
             holder.txtUserName.setText(userBean.getUserName());
-            Glide.with(mContext).load(userBean.getUserAvatarUrl())
+            String avatarUrl = userBean.getUserAvatarUrl();
+            int resourceId = mContext.getResources().getIdentifier(
+                avatarUrl, "drawable", mContext.getPackageName());
+            if (resourceId != 0) {
+                Glide.with(mContext).load(resourceId)
                     .apply(mRequestOptions.override(mAvatarSize, mAvatarSize))
                     .transition(mDrawableTransitionOptions)
                     .into(holder.imgAvatar);
+            }
         }
 
         OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();

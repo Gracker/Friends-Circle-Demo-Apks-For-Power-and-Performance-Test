@@ -65,19 +65,15 @@ public class CommentOrPraisePopupWindow extends PopupWindow implements View.OnCl
     @Override
     public void onClick(View v) {
         dismiss();
-        switch (v.getId()) {
-            case R.id.layout_praise:
-                if (mOnPraiseOrCommentClickListener != null) {
-                    mOnPraiseOrCommentClickListener.onPraiseClick(mCurrentPosition);
-                }
-                break;
-            case R.id.layout_comment:
-                if (mOnPraiseOrCommentClickListener != null) {
-                    mOnPraiseOrCommentClickListener.onCommentClick(mCurrentPosition);
-                }
-                break;
-            default:
-                break;
+        int id = v.getId();
+        if (id == R.id.layout_praise) {
+            if (mOnPraiseOrCommentClickListener != null) {
+                mOnPraiseOrCommentClickListener.onPraiseClick(mCurrentPosition);
+            }
+        } else if (id == R.id.layout_comment) {
+            if (mOnPraiseOrCommentClickListener != null) {
+                mOnPraiseOrCommentClickListener.onCommentClick(mCurrentPosition);
+            }
         }
     }
 }
