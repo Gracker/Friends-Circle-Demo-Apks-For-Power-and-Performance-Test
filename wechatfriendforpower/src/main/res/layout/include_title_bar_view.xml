@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="375dp">
+
+    <!-- 背景图片 -->
+    <ImageView
+        android:id="@+id/img_cover"
+        android:layout_width="match_parent"
+        android:layout_height="344dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/avatar1" />
+
+    <!-- 顶部状态栏区域 -->
+    <LinearLayout
+        android:id="@+id/status_bar_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="36dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="4dp">
+
+        <!-- 返回按钮 -->
+        <ImageView
+            android:id="@+id/img_back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="3dp"
+            android:tint="@color/base_FFFFFF"
+            app:srcCompat="@drawable/back_drawable" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- 相机图标 -->
+        <ImageView
+            android:id="@+id/img_camera"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="3dp"
+            android:tint="@color/base_FFFFFF"
+            android:src="@android:drawable/ic_menu_camera" />
+    </LinearLayout>
+
+    <!-- 底部白色空间 -->
+    <View
+        android:id="@+id/bottom_space"
+        android:layout_width="match_parent"
+        android:layout_height="31dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/base_FFFFFF" />
+    
+    <!-- 用户头像 - 一半在背景图内一半在背景图外 -->
+    <ImageView
+        android:id="@+id/img_user_avatar"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"
+        android:layout_alignBottom="@id/img_cover"
+        android:layout_marginBottom="-32dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/avatar2"
+        android:elevation="3dp" />
+        
+    <!-- 用户昵称放到头像左侧 -->
+    <TextView
+        android:id="@+id/txt_user_nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/img_cover"
+        android:layout_toStartOf="@+id/img_user_avatar"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:text="Gracker"
+        android:textColor="@color/base_FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:shadowColor="@color/base_000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="3" />
+</RelativeLayout> 

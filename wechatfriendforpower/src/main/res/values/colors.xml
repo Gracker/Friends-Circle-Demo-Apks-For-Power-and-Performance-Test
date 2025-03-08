@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- 添加与app模块相同的颜色定义 -->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="base_333333">#333333</color>
+    <color name="base_F2F2F2">#f2f2f2</color>
+    <color name="base_F8F8F8">#f8f8f8</color>
+    <color name="base_FFFFFF">#ffffff</color>
+    <color name="base_697A9F">#697A9F</color>
+    <color name="base_F0F0F0">#F0F0F0</color>
+    <color name="base_F5F5F5">#F5F5F5</color>
+    <color name="base_DCDCDC">#DCDCDC</color>
+    <color name="base_B5B5B5">#B5B5B5</color>
+    <color name="base_222230">#222230</color>
+    <color name="base_000000">#000000</color>
+    <color name="base_3FB838">#3FB838</color>
+</resources>
