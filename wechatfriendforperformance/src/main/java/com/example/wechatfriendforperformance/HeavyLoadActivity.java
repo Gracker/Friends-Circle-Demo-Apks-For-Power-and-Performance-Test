@@ -112,10 +112,38 @@ public class HeavyLoadActivity extends AppCompatActivity {
         
         recyclerView.setAdapter(adapter);
         
-        // Load data based on load type
-        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType);
+        // 直接在Activity中生成对应负载类型的数据，不依赖DataCenter的缓存
+        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().generateDataForLoadType(PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
         adapter.setFriendCircleBeans(data);
-        Log.d(TAG, "initRecyclerView: 加载负载类型 = " + mLoadType + " 的数据, 数据条数 = " + (data != null ? data.size() : 0));
+        Log.d(TAG, "initRecyclerView: 加载高负载类型的数据, 数据条数 = " + (data != null ? data.size() : 0));
+        
+        // 打印一些数据统计，确认点赞和评论数量
+        if (data != null && !data.isEmpty()) {
+            int totalPraise = 0;
+            int totalComment = 0;
+            int maxPraise = 0;
+            int maxComment = 0;
+            
+            for (FriendCircleBean bean : data) {
+                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
+                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
+                
+                totalPraise += praiseCount;
+                totalComment += commentCount;
+                maxPraise = Math.max(maxPraise, praiseCount);
+                maxComment = Math.max(maxComment, commentCount);
+            }
+            
+            double avgPraise = (double) totalPraise / data.size();
+            double avgComment = (double) totalComment / data.size();
+            
+            Log.d(TAG, "==================== 高负载 统计信息 ====================");
+            Log.d(TAG, "点赞数量: 总计=" + totalPraise + ", 平均=" + String.format("%.2f", avgPraise) + 
+                    ", 最大=" + maxPraise);
+            Log.d(TAG, "评论数量: 总计=" + totalComment + ", 平均=" + String.format("%.2f", avgComment) + 
+                    ", 最大=" + maxComment);
+            Log.d(TAG, "=================================================");
+        }
         
         Trace.endSection();
     }

@@ -31,6 +31,7 @@ import com.example.wechatfriendforperformance.beans.OtherInfoBean;
 import com.example.wechatfriendforperformance.beans.UserBean;
 import com.example.wechatfriendforperformance.interfaces.OnItemClickPopupMenuListener;
 import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
+import com.example.wechatfriendforperformance.utils.PerformanceSpanUtils;
 import com.example.wechatfriendforperformance.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;

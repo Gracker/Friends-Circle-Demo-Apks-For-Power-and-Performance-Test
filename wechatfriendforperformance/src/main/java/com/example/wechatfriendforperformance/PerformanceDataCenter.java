@@ -409,4 +409,37 @@ public class PerformanceDataCenter {
         Log.d(TAG, "generatePraiseBeans: 完成生成点赞数据，数量=" + praiseBeans.size());
         return praiseBeans;
     }
+
+    /**
+     * 直接生成指定负载类型的数据，不使用缓存
+     * @param loadType 负载类型常量
+     * @return 朋友圈数据列表
+     */
+    public List<FriendCircleBean> generateDataForLoadType(int loadType) {
+        String loadTypeStr;
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                loadTypeStr = "轻负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                loadTypeStr = "中负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                loadTypeStr = "高负载";
+                break;
+            default:
+                loadTypeStr = "未知负载";
+                break;
+        }
+        
+        Log.d(TAG, "generateDataForLoadType: 正在生成" + loadTypeStr + "数据");
+        
+        // 直接生成数据，不使用缓存
+        List<FriendCircleBean> friendCircleBeans = generateFriendCircleBeans(loadType);
+        
+        // 打印统计信息
+        printStatistics(friendCircleBeans, loadType);
+        
+        return friendCircleBeans;
+    }
 } 
