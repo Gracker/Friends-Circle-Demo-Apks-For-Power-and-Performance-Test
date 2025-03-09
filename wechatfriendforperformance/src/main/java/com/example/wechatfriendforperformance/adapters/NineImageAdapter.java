@@ -2,6 +2,7 @@ package com.example.wechatfriendforperformance.adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,19 +65,18 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
         if (convertView == null) {
             imageView = new ImageView(mContext);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            // 设置固定尺寸和边距
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(
+                    mImageSize, mImageSize));
         } else {
             imageView = (ImageView) convertView;
         }
 
         String imageUrl = mImageUrls.get(position);
         
-        // Process image name, remove possible file extension
-        if (imageUrl.contains(".")) {
-            imageUrl = imageUrl.substring(0, imageUrl.lastIndexOf("."));
-        }
-
-        // Try to load from resource ID
+        // 尝试加载测试图片
         try {
+            // 首先尝试直接加载原始路径
             int resourceId = mContext.getResources().getIdentifier(
                     imageUrl.toLowerCase(), "drawable", mContext.getPackageName());
 
@@ -86,16 +86,24 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                         .apply(new RequestOptions().centerCrop())
                         .into(imageView);
             } else {
-                // Load placeholder image
-                Glide.with(mContext)
-                        .load(R.drawable.img_placeholder)
-                        .into(imageView);
+                // 尝试加载test_img_x格式的图片
+                int fallbackId = mContext.getResources().getIdentifier(
+                        "test_img_" + ((position % 10) + 1),
+                        "drawable", mContext.getPackageName());
+                
+                if (fallbackId != 0) {
+                    Glide.with(mContext)
+                            .load(fallbackId)
+                            .apply(new RequestOptions().centerCrop())
+                            .into(imageView);
+                } else {
+                    // 最后使用默认图片
+                    imageView.setBackgroundColor(Color.LTGRAY);
+                }
             }
-        } catch (Resources.NotFoundException e) {
-            // If error, use placeholder image
-            Glide.with(mContext)
-                    .load(R.drawable.img_placeholder)
-                    .into(imageView);
+        } catch (Exception e) {
+            e.printStackTrace();
+            imageView.setBackgroundColor(Color.LTGRAY);
         }
 
         return imageView;

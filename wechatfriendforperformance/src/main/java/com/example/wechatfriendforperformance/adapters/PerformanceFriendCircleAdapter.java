@@ -93,8 +93,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mRecyclerView = recyclerView;
         this.mLayoutInflater = LayoutInflater.from(context);
         
-        // 使用RoundedCorners替代CircleCrop，8dp圆角
-        this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(8));
+        // 使用RoundedCorners替代CircleCrop，增大圆角半径为30dp
+        this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(30));
         
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
@@ -350,18 +350,6 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         if (friendCircleBean.getImageUrls() != null && !friendCircleBean.getImageUrls().isEmpty()) {
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
             viewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, friendCircleBean.getImageUrls()));
-            
-            // 设置图片点击事件 - 使用匿名内部类替代lambda表达式
-            viewHolder.nineGridView.setOnItemClickListener(new NineGridView.OnItemClickListener() {
-                @Override
-                public void onItemClick(View view, int position) {
-                    if (friendCircleBean.getImageUrls() != null && position < friendCircleBean.getImageUrls().size()) {
-                        new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
-                                .withStartPosition(position)
-                                .show();
-                    }
-                }
-            });
         } else {
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
@@ -392,10 +380,6 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             if (hasComment) {
                 viewHolder.recyclerViewComment.removeAllViews();
                 
-                // 创建一个垂直线性布局用于显示评论
-                LinearLayout commentContainer = new LinearLayout(mContext);
-                commentContainer.setOrientation(LinearLayout.VERTICAL);
-                
                 for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
                     // 如果评论文本为空，重新生成
                     if (commentBean.getCommentContentSpan() == null) {
@@ -403,16 +387,18 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     }
                     
                     TextView textView = new TextView(mContext);
+                    textView.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, 
+                            LinearLayout.LayoutParams.WRAP_CONTENT));
                     textView.setTextColor(mContext.getResources().getColor(R.color.base_333333));
                     textView.setTextSize(14);
                     textView.setText(commentBean.getCommentContentSpan());
-                    textView.setPadding(0, 8, 0, 8);
+                    textView.setPadding(16, 8, 16, 8);
                     
-                    commentContainer.addView(textView);
+                    // 直接添加到ViewGroup中
+                    viewHolder.recyclerViewComment.addView(textView);
                 }
                 
-                // 添加评论容器到RecyclerView
-                viewHolder.recyclerViewComment.addView(commentContainer);
                 viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.recyclerViewComment.setVisibility(View.GONE);
@@ -685,7 +671,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         LinearLayout layoutPraiseComment;
         LinearLayout layoutPraise;
         TextView txtPraise;
-        RecyclerView recyclerViewComment;
+        LinearLayout recyclerViewComment;
         View viewLine;
         ImageView imgComment;
 
@@ -701,12 +687,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             layoutPraiseComment = itemView.findViewById(R.id.layout_praise_comment);
             layoutPraise = itemView.findViewById(R.id.layout_praise);
             txtPraise = itemView.findViewById(R.id.txt_praise);
-            recyclerViewComment = itemView.findViewById(R.id.recycler_view_comment);
+            recyclerViewComment = itemView.findViewById(R.id.layout_comment);
             viewLine = itemView.findViewById(R.id.view_line);
             imgComment = itemView.findViewById(R.id.img_comment);
-            
-            // Set comment list
-            recyclerViewComment.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
         }
     }
     

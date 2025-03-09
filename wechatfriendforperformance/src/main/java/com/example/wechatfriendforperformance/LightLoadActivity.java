@@ -72,11 +72,7 @@ public class LightLoadActivity extends AppCompatActivity {
                 new RequestOptions().centerCrop()
         );
 
-        // Try to load from resource ID, note that resource names must be all lowercase
-        titleBar = findViewById(R.id.title_bar);
-        findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
-
-        // If error, use placeholder image
+        // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
     }

@@ -32,7 +32,6 @@ public class HeavyLoadActivity extends AppCompatActivity {
     private static final String TAG = "HeavyLoadActivity";
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
-    private LinearLayout titleBar;
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY;
 
@@ -72,11 +71,7 @@ public class HeavyLoadActivity extends AppCompatActivity {
                 new RequestOptions().centerCrop()
         );
 
-        // Try to load from resource ID, note that resource names must be all lowercase
-        titleBar = findViewById(R.id.title_bar);
-        findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
-
-        // If error, use placeholder image
+        // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
     }

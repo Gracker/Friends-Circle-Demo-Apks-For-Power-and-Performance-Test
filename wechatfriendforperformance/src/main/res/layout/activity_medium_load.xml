@@ -7,40 +7,6 @@
     android:orientation="vertical"
     tools:context=".MediumLoadActivity">
 
-    <LinearLayout
-        android:id="@+id/title_bar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/accent_teal"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/back"
-            android:padding="6dp"
-            android:src="@drawable/ic_back_arrow" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="@string/medium_load_test"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:visibility="invisible" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"

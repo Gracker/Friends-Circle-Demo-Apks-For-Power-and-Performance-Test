@@ -155,11 +155,13 @@
             android:layout_marginBottom="3dp"
             android:background="@color/base_DCDCDC" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_comment"
+        <LinearLayout
+            android:id="@+id/layout_comment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:overScrollMode="never" />
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
     </LinearLayout>
 
     <View
