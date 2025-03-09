@@ -28,6 +28,7 @@ public class NineGridView extends ViewGroup {
     private int mRows;
     private int mSingleWidth;
     private int mItemCount;
+    private OnItemClickListener mOnItemClickListener;
     
     public NineGridView(Context context) {
         super(context);
@@ -66,12 +67,44 @@ public class NineGridView extends ViewGroup {
         
         // Add child views
         for (int i = 0; i < mItemCount; i++) {
-            View itemView = adapter.getView(i, null, this);
+            final View itemView = adapter.getView(i, null, this);
+            final int position = i;
+            
+            // Set click listener for each item
+            itemView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onItemClick(v, position);
+                    }
+                }
+            });
+            
             addView(itemView);
         }
         
         // Request layout
         requestLayout();
+    }
+    
+    /**
+     * Set item click listener
+     * @param listener The listener to be notified when an item is clicked
+     */
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mOnItemClickListener = listener;
+    }
+    
+    /**
+     * Interface definition for a callback to be invoked when an item in this view has been clicked
+     */
+    public interface OnItemClickListener {
+        /**
+         * Callback method to be invoked when an item in this view has been clicked
+         * @param view The view within the adapter that was clicked
+         * @param position The position of the view in the adapter
+         */
+        void onItemClick(View view, int position);
     }
     
     @Override

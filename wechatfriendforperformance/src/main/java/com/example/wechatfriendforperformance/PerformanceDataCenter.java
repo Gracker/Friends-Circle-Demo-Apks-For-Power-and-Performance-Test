@@ -24,6 +24,7 @@ import static com.example.wechatfriendforperformance.PerformanceConstants.*;
 public class PerformanceDataCenter {
 
     private static final String TAG = "PerformanceDataCenter";
+    private static final int FRIEND_CIRCLE_COUNT = 100; // 固定生成100条朋友圈数据
 
     private static final PerformanceDataCenter instance = new PerformanceDataCenter();
     private List<FriendCircleBean> cachedLightLoadFriendCircleBeans;
@@ -156,7 +157,7 @@ public class PerformanceDataCenter {
             
             // Content and other info
             String content = getRandomContent(i);
-            friendCircleBean.setContentSpan(content);
+            friendCircleBean.setContent(content);
             
             // Set publish time
             OtherInfoBean otherInfoBean = new OtherInfoBean();
@@ -370,5 +371,54 @@ public class PerformanceDataCenter {
             default:
                 return "未知负载";
         }
+    }
+    
+    /**
+     * 生成随机用户昵称
+     */
+    private String randomUserNickname(int position) {
+        return USER_NAMES[position % USER_NAMES.length];
+    }
+    
+    /**
+     * 生成随机评论用户名
+     */
+    private String randomCommentUserName(int index, int position) {
+        return USER_NAMES[(position + index + 20) % USER_NAMES.length];
+    }
+    
+    /**
+     * 生成随机点赞用户名
+     */
+    private String randomPraiseUserName(int index, int position) {
+        return USER_NAMES[(position + index + 50) % USER_NAMES.length];
+    }
+    
+    /**
+     * 获取随机内容
+     */
+    private String getRandomContent(int position) {
+        return CONTENTS[position % CONTENTS.length];
+    }
+    
+    /**
+     * 获取随机发布时间
+     */
+    private String getRandomPublishTime(int position) {
+        return TIMES[position % TIMES.length];
+    }
+    
+    /**
+     * 获取随机来源
+     */
+    private String getRandomSource(int position) {
+        return SOURCES[position % SOURCES.length];
+    }
+    
+    /**
+     * 获取随机位置
+     */
+    private String getRandomLocation(int position) {
+        return LOCATIONS[position % LOCATIONS.length];
     }
 } 

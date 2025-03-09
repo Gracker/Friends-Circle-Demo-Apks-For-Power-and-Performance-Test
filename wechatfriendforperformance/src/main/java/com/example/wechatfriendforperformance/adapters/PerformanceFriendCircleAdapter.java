@@ -83,6 +83,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     private Runnable mFrameLoadRunnable;
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
+    private LayoutInflater mLayoutInflater;
+
     public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, int loadType) {
         this.mContext = context;
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -124,11 +126,17 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                                 .transition(mDrawableTransitionOptions)
                                 .into(imageView);
                     } else {
-                        imageView.setImageResource(R.drawable.default_picture);
+                        // 使用默认图片
+                        Glide.with(mContext)
+                                .load(R.drawable.default_avatar)
+                                .into(imageView);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    imageView.setImageResource(R.drawable.default_picture);
+                    // 使用默认图片
+                    Glide.with(mContext)
+                            .load(R.drawable.default_avatar)
+                            .into(imageView);
                 }
             }
         };
@@ -150,8 +158,6 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this(context, recyclerView, loadType);
         this.mImageLoader = imageLoader;
     }
-
-    private LayoutInflater mLayoutInflater;
 
     public void setHeaderView(View headerView) {
         mHeaderView = headerView;
@@ -290,8 +296,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         }
         
         // 设置内容
-        if (!TextUtils.isEmpty(friendCircleBean.getContentSpan())) {
-            viewHolder.txtContent.setText(friendCircleBean.getContentSpan());
+        if (!TextUtils.isEmpty(friendCircleBean.getContent())) {
+            viewHolder.txtContent.setText(friendCircleBean.getContent());
             viewHolder.txtContent.setVisibility(View.VISIBLE);
         } else {
             viewHolder.txtContent.setVisibility(View.GONE);
@@ -302,12 +308,15 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
             viewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, friendCircleBean.getImageUrls()));
             
-            // 设置图片点击事件
-            viewHolder.nineGridView.setOnItemClickListener((view, position1) -> {
-                if (friendCircleBean.getImageUrls() != null && position1 < friendCircleBean.getImageUrls().size()) {
-                    new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
-                            .withStartPosition(position1)
-                            .show();
+            // 设置图片点击事件 - 使用匿名内部类替代lambda表达式
+            viewHolder.nineGridView.setOnItemClickListener(new NineGridView.OnItemClickListener() {
+                @Override
+                public void onItemClick(View view, int position) {
+                    if (friendCircleBean.getImageUrls() != null && position < friendCircleBean.getImageUrls().size()) {
+                        new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
+                                .withStartPosition(position)
+                                .show();
+                    }
                 }
             });
         } else {
@@ -449,6 +458,13 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             }
         }
         Trace.endSection();
+    }
+
+    /**
+     * 模拟计算负载 - 无参数版本，使用默认位置0
+     */
+    private void simulateComputationalLoad() {
+        simulateComputationalLoad(0);
     }
 
     /**
