@@ -186,7 +186,9 @@ public class PerformanceDataCenter {
         Log.d(TAG, "generateFriendCircleBeans: 开始生成负载类型=" + loadType + "的朋友圈数据");
         
         // 确保随机数生成器使用固定种子，保证结果可重现
-        mRandom = new Random(42 + loadType * 100);
+        long randomSeed = 42 + loadType * 100;
+        mRandom = new Random(randomSeed);
+        Log.e(TAG, "随机数种子初始化: loadType=" + loadType + ", 负载类型=" + getLoadTypeString(loadType) + ", randomSeed=" + randomSeed);
         
         for (int i = 0; i < 100; i++) {
             FriendCircleBean bean = new FriendCircleBean();
@@ -327,6 +329,12 @@ public class PerformanceDataCenter {
                 break;
         }
         
+        // 在前5个位置打印更详细的日志
+        if (position < 5) {
+            Log.e(TAG, "详细日志 - generateCommentBeans: position=" + position + ", loadType=" + loadType + 
+                    ", 负载类型=" + getLoadTypeString(loadType) + ", commentCount=" + commentCount);
+        }
+        
         // 打印日志，记录评论数量
         Log.d(TAG, "generateCommentBeans: position=" + position + ", loadType=" + loadType + ", commentCount=" + commentCount);
         
@@ -406,6 +414,12 @@ public class PerformanceDataCenter {
                 break;
         }
         
+        // 在前5个位置打印更详细的日志
+        if (position < 5) {
+            Log.e(TAG, "详细日志 - generatePraiseBeans: position=" + position + ", loadType=" + loadType + 
+                    ", 负载类型=" + getLoadTypeString(loadType) + ", praiseCount=" + praiseCount);
+        }
+        
         // 打印日志，记录点赞数量
         Log.d(TAG, "generatePraiseBeans: position=" + position + ", loadType=" + loadType + ", praiseCount=" + praiseCount);
         
@@ -450,7 +464,7 @@ public class PerformanceDataCenter {
                 break;
         }
         
-        Log.d(TAG, "generateDataForLoadType: 正在生成" + loadTypeStr + "数据");
+        Log.e(TAG, "generateDataForLoadType: 正在生成 loadType=" + loadType + ", 负载类型=" + loadTypeStr + " 的数据");
         
         // 直接生成数据，不使用缓存
         List<FriendCircleBean> friendCircleBeans = generateFriendCircleBeans(loadType);
@@ -458,6 +472,33 @@ public class PerformanceDataCenter {
         // 打印统计信息
         printStatistics(friendCircleBeans, loadType);
         
+        // 打印前5个项目的信息
+        if (friendCircleBeans != null && !friendCircleBeans.isEmpty()) {
+            for (int i = 0; i < Math.min(5, friendCircleBeans.size()); i++) {
+                FriendCircleBean bean = friendCircleBeans.get(i);
+                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
+                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
+                Log.e(TAG, "generateDataForLoadType - 项目[" + i + "] loadType=" + loadType + 
+                        ", 负载类型=" + loadTypeStr + 
+                        ", 点赞数=" + praiseCount + 
+                        ", 评论数=" + commentCount);
+            }
+        }
+        
         return friendCircleBeans;
+    }
+
+    // 添加辅助方法
+    private String getLoadTypeString(int loadType) {
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                return "轻负载";
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                return "中负载";
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                return "高负载";
+            default:
+                return "未知负载类型";
+        }
     }
 } 

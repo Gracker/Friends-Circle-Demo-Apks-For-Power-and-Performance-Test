@@ -96,6 +96,11 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
         
+        // 记录Adapter创建时的详细信息
+        Log.e("PerformanceAdapter", "创建Adapter - context: " + context.getClass().getSimpleName() + 
+                ", loadType: " + loadType + 
+                ", 当前线程: " + Thread.currentThread().getName());
+        
         // Set load type string
         switch (loadType) {
             case LOAD_TYPE_LIGHT:
@@ -533,6 +538,25 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     }
 
     public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
+        // 添加数据设置日志
+        if (friendCircleBeans != null) {
+            Log.e("PerformanceAdapter", "设置数据 - Context: " + mContext.getClass().getSimpleName() + 
+                    ", loadType: " + mLoadType + 
+                    ", 数据大小: " + friendCircleBeans.size());
+            
+            // 打印前5个项目的信息
+            for (int i = 0; i < Math.min(5, friendCircleBeans.size()); i++) {
+                FriendCircleBean bean = friendCircleBeans.get(i);
+                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
+                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
+                Log.e("PerformanceAdapter", "数据项[" + i + "] loadType=" + mLoadType + 
+                        ", 点赞数=" + praiseCount + 
+                        ", 评论数=" + commentCount);
+            }
+        } else {
+            Log.e("PerformanceAdapter", "设置数据 - 数据为空");
+        }
+        
         this.mFriendCircleBeans = friendCircleBeans;
         notifyDataSetChanged();
     }

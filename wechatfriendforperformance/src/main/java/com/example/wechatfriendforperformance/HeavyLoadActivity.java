@@ -124,6 +124,14 @@ public class HeavyLoadActivity extends AppCompatActivity {
             int maxPraise = 0;
             int maxComment = 0;
             
+            // 打印前5个项的详细信息
+            for (int i = 0; i < Math.min(5, data.size()); i++) {
+                FriendCircleBean bean = data.get(i);
+                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
+                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
+                Log.d(TAG, "项目[" + i + "] 点赞数=" + praiseCount + ", 评论数=" + commentCount);
+            }
+            
             for (FriendCircleBean bean : data) {
                 int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
                 int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
