@@ -312,21 +312,50 @@ public class PerformanceDataCenter {
     private List<CommentBean> generateCommentBeans(int position, int loadType) {
         List<CommentBean> commentBeans = new ArrayList<>();
         
-        // Comment count based on load type
+        // Comment count based on load type, use fixed counts to make it more obvious
         int commentCount;
         switch (loadType) {
             case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                commentCount = position % 3; // 0-2 comments for light load
+                commentCount = 2; // 固定2条评论用于轻负载
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                commentCount = position % 8 + 5; // 5-12 comments for medium load
+                commentCount = 8; // 固定8条评论用于中负载
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                commentCount = position % 15 + 10; // 10-24 comments for heavy load
+                commentCount = 20; // 固定20条评论用于高负载
                 break;
             default:
-                commentCount = position % 3;
+                commentCount = 2;
                 break;
+        }
+        
+        // 为第一个项目设置特殊值以便明显区分不同负载类型
+        if (position == 0) {
+            switch (loadType) {
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                    commentCount = 0; // 轻负载第一项无评论
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                    commentCount = 5; // 中负载第一项5条评论
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                    commentCount = 10; // 高负载第一项10条评论
+                    break;
+            }
+        }
+        // 为第二个项目设置特殊值
+        else if (position == 1) {
+            switch (loadType) {
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                    commentCount = 1; // 轻负载第二项1条评论
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                    commentCount = 6; // 中负载第二项6条评论
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                    commentCount = 15; // 高负载第二项15条评论
+                    break;
+            }
         }
         
         // 在前5个位置打印更详细的日志
@@ -397,21 +426,50 @@ public class PerformanceDataCenter {
     private List<PraiseBean> generatePraiseBeans(int position, int loadType) {
         List<PraiseBean> praiseBeans = new ArrayList<>();
         
-        // Like count based on load type
+        // Like count based on load type, use fixed counts
         int praiseCount;
         switch (loadType) {
             case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                praiseCount = position % 3 + 1; // 1-3 likes for light load
+                praiseCount = 3; // 固定3个点赞用于轻负载
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                praiseCount = position % 10 + 5; // 5-14 likes for medium load
+                praiseCount = 10; // 固定10个点赞用于中负载
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                praiseCount = position % 20 + 15; // 15-34 likes for heavy load
+                praiseCount = 25; // 固定25个点赞用于高负载
                 break;
             default:
-                praiseCount = position % 3 + 1;
+                praiseCount = 3;
                 break;
+        }
+        
+        // 为第一个项目设置特殊值以便明显区分不同负载类型
+        if (position == 0) {
+            switch (loadType) {
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                    praiseCount = 1; // 轻负载第一项1个点赞
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                    praiseCount = 5; // 中负载第一项5个点赞
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                    praiseCount = 15; // 高负载第一项15个点赞
+                    break;
+            }
+        }
+        // 为第二个项目设置特殊值
+        else if (position == 1) {
+            switch (loadType) {
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                    praiseCount = 2; // 轻负载第二项2个点赞
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                    praiseCount = 8; // 中负载第二项8个点赞
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                    praiseCount = 20; // 高负载第二项20个点赞
+                    break;
+            }
         }
         
         // 在前5个位置打印更详细的日志
