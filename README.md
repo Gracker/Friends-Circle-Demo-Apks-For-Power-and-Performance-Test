@@ -2,6 +2,8 @@
 
 本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含三个主要模块，分别用于不同方面的测试和研究。
 
+*Read this in [English](README_EN.md)*
+
 ![main_page.jpg](pic/main_page.jpg)
 ![friends_1.jpg](pic/friends_1.jpg)
 ![friends_2.jpg](pic/friends_2.jpg)

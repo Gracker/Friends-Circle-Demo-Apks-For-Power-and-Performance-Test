@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
@@ -33,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.stfalcon.imageviewer.StfalconImageViewer;
 import com.stfalcon.imageviewer.loader.ImageLoader;
+import android.util.Log;
 
 /**
  * @author KCrason
@@ -40,6 +40,8 @@ import com.stfalcon.imageviewer.loader.ImageLoader;
  */
 public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapter.BaseFriendCircleViewHolder>
         implements OnItemClickPopupMenuListener {
+
+    private static final String TAG = "FriendCircleAdapter";
 
     private Context mContext;
 
@@ -113,7 +115,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
                 OnlyWordViewHolder onlyWordViewHolder = (OnlyWordViewHolder) holder;
             } else if (holder instanceof WordAndUrlViewHolder) {
                 WordAndUrlViewHolder wordAndUrlViewHolder = (WordAndUrlViewHolder) holder;
-                wordAndUrlViewHolder.layoutUrl.setOnClickListener(v -> Toast.makeText(mContext, "You Click Layout Url", Toast.LENGTH_SHORT).show());
+                wordAndUrlViewHolder.layoutUrl.setOnClickListener(v -> 
+                    Log.d(TAG, "You Click Layout Url"));
             } else if (holder instanceof WordAndImagesViewHolder) {
                 WordAndImagesViewHolder wordAndImagesViewHolder = (WordAndImagesViewHolder) holder;
                 wordAndImagesViewHolder.nineGridView.setOnImageClickListener((clickPosition, view) -> {
@@ -206,7 +209,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             }
         });
 
-        holder.txtLocation.setOnClickListener(v -> Toast.makeText(mContext, "You Click Location", Toast.LENGTH_SHORT).show());
+        holder.txtLocation.setOnClickListener(v -> 
+            Log.d(TAG, "You Click Location"));
     }
 
     private void setContentShowState(BaseFriendCircleViewHolder holder, FriendCircleBean friendCircleBean) {
@@ -250,7 +254,7 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
 
     @Override
     public void onItemClickCopy(int position) {
-        Toast.makeText(mContext, "已复制", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "已复制");
     }
 
     @Override
@@ -318,7 +322,7 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
 
     @Override
     public void onItemClickCollection(int position) {
-        Toast.makeText(mContext, "已收藏", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "已收藏");
     }
 
 

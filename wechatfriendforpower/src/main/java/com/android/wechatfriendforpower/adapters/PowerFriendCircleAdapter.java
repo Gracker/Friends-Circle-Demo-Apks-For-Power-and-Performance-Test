@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +30,7 @@ import com.stfalcon.imageviewer.loader.ImageLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import android.util.Log;
 
 /**
  * Power测试专用的朋友圈适配器
@@ -40,6 +40,8 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
+    
+    private static final String TAG = "PowerFriendCircleAdapter";
     
     private Context mContext;
     private List<FriendCircleBean> mFriendCircleBeans;
@@ -275,12 +277,12 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public void onItemClickCopy(int position) {
-        Toast.makeText(mContext, "复制成功", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "复制成功");
     }
 
     @Override
     public void onItemClickCollection(int position) {
-        Toast.makeText(mContext, "收藏成功", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "收藏成功");
     }
 
     @Override

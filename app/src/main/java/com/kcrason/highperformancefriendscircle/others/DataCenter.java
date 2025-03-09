@@ -14,6 +14,7 @@ import com.kcrason.highperformancefriendscircle.utils.SpanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -21,6 +22,14 @@ import java.util.List;
  * @date 2018/5/2
  */
 public class DataCenter {
+
+    // 使用固定种子的Random实例，确保每次生成的数据一致
+    private static final Random sRandom = new Random(42);
+    
+    // 获取0到max-1之间的随机整数
+    private static int getRandomInt(int max) {
+        return sRandom.nextInt(max);
+    }
 
     public static void init() {
         new Thread(DataCenter::loadEmojis).start();
@@ -59,7 +68,7 @@ public class DataCenter {
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             FriendCircleBean friendCircleBean = new FriendCircleBean();
-            int randomValue = (int) (Math.random() * 300);
+            int randomValue = getRandomInt(300);
             if (randomValue < 100) {
                 friendCircleBean.setViewType(Constants.FriendCircleType.FRIEND_CIRCLE_TYPE_ONLY_WORD);
             } else if (randomValue < 200) {
@@ -72,17 +81,17 @@ public class DataCenter {
             List<PraiseBean> praiseBeans = makePraiseBeans();
             friendCircleBean.setPraiseSpan(SpanUtils.makePraiseSpan(context, praiseBeans));
             friendCircleBean.setPraiseBeans(praiseBeans);
-            friendCircleBean.setContent(Constants.CONTENT[(int) (Math.random() * 10)]);
+            friendCircleBean.setContent(Constants.CONTENT[getRandomInt(10)]);
 
             UserBean userBean = new UserBean();
-            userBean.setUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
+            userBean.setUserName(Constants.USER_NAME[getRandomInt(30)]);
             userBean.setUserAvatarUrl("avatar_icon");
             friendCircleBean.setUserBean(userBean);
 
 
             OtherInfoBean otherInfoBean = new OtherInfoBean();
-            otherInfoBean.setTime(Constants.TIMES[(int) (Math.random() * 20)]);
-            int random = (int) (Math.random() * 30);
+            otherInfoBean.setTime(Constants.TIMES[getRandomInt(20)]);
+            int random = getRandomInt(30);
             if (random < 20) {
                 otherInfoBean.setSource(Constants.SOURCE[random]);
             } else {
@@ -97,14 +106,13 @@ public class DataCenter {
 
     private static List<String> makeImages() {
         List<String> imageBeans = new ArrayList<>();
-        int randomCount = (int) (Math.random() * 9);
-        if (randomCount == 0) {
-            randomCount = randomCount + 1;
-        } else if (randomCount == 8) {
-            randomCount = randomCount + 1;
+        int randomCount = getRandomInt(9) + 1; // 确保至少有1张图片
+        // 对于9张图片的特殊情况处理，确保九宫格布局
+        if (randomCount == 8) {
+            randomCount = 9;
         }
         for (int i = 0; i < randomCount; i++) {
-            imageBeans.add(Constants.IMAGE_URL[(int) (Math.random() * 50)]);
+            imageBeans.add(Constants.IMAGE_URL[getRandomInt(50)]);
         }
         return imageBeans;
     }
@@ -112,10 +120,10 @@ public class DataCenter {
 
     private static List<PraiseBean> makePraiseBeans() {
         List<PraiseBean> praiseBeans = new ArrayList<>();
-        int randomCount = (int) (Math.random() * 20);
+        int randomCount = getRandomInt(20);
         for (int i = 0; i < randomCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
-            praiseBean.setPraiseUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
+            praiseBean.setPraiseUserName(Constants.USER_NAME[getRandomInt(30)]);
             praiseBeans.add(praiseBean);
         }
         return praiseBeans;
@@ -124,19 +132,19 @@ public class DataCenter {
 
     private static List<CommentBean> makeCommentBeans(Context context) {
         List<CommentBean> commentBeans = new ArrayList<>();
-        int randomCount = (int) (Math.random() * 20);
+        int randomCount = getRandomInt(20);
         for (int i = 0; i < randomCount; i++) {
             CommentBean commentBean = new CommentBean();
-            if ((int) (Math.random() * 100) % 2 == 0) {
+            if (getRandomInt(100) % 2 == 0) {
                 commentBean.setCommentType(Constants.CommentType.COMMENT_TYPE_SINGLE);
-                commentBean.setChildUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
+                commentBean.setChildUserName(Constants.USER_NAME[getRandomInt(30)]);
             } else {
                 commentBean.setCommentType(Constants.CommentType.COMMENT_TYPE_REPLY);
-                commentBean.setChildUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
-                commentBean.setParentUserName(Constants.USER_NAME[(int) (Math.random() * 30)]);
+                commentBean.setChildUserName(Constants.USER_NAME[getRandomInt(30)]);
+                commentBean.setParentUserName(Constants.USER_NAME[getRandomInt(30)]);
             }
 
-            commentBean.setCommentContent(Constants.COMMENT_CONTENT[(int) (Math.random() * 30)]);
+            commentBean.setCommentContent(Constants.COMMENT_CONTENT[getRandomInt(30)]);
             commentBean.build(context);
             commentBeans.add(commentBean);
         }

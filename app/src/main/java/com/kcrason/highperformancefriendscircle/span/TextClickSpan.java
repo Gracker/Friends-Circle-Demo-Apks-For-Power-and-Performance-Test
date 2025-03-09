@@ -5,8 +5,8 @@ import android.graphics.Color;
 import androidx.core.content.ContextCompat;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.kcrason.highperformancefriendscircle.R;
 
@@ -16,6 +16,7 @@ import com.kcrason.highperformancefriendscircle.R;
  */
 public class TextClickSpan extends ClickableSpan {
 
+    private static final String TAG = "TextClickSpan";
     private Context mContext;
 
     private String mUserName;
@@ -40,6 +41,6 @@ public class TextClickSpan extends ClickableSpan {
 
     @Override
     public void onClick(View widget) {
-        Toast.makeText(mContext, "You Click " + mUserName, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "You Click " + mUserName);
     }
 }

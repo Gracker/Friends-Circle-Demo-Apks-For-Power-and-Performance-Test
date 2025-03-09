@@ -1,8 +1,7 @@
 package com.example.wechatfriendforperformance;
 
 import android.content.Context;
-import android.text.SpannableStringBuilder;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.example.wechatfriendforperformance.beans.CommentBean;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
@@ -330,12 +329,23 @@ public class PerformanceDataCenter {
             return praiseBeans;
         }
         
+        // 确保随机数生成的可重现性
+        Random random = new Random(position * 50 + loadType * 5);
+        
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
             
             UserBean userBean = new UserBean();
             userBean.setUserId(String.valueOf(30000 + i + position * 100));
-            userBean.setUserName(randomPraiseUserName(i, position));
+            
+            // 使用随机数确定用户名，但保持一致性
+            int nameIndex = (position + i) % USER_NAMES.length;
+            if (random.nextBoolean()) {
+                // 有50%的概率使用随机名称，但依然是确定性的
+                nameIndex = random.nextInt(USER_NAMES.length);
+            }
+            userBean.setUserName(USER_NAMES[nameIndex]);
+            
             userBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
             
             praiseBean.setUserBean(userBean);
@@ -381,17 +391,11 @@ public class PerformanceDataCenter {
     }
     
     /**
-     * 生成随机评论用户名
+     * 生成随机评论用户名，确保每次生成的结果一致
      */
     private String randomCommentUserName(int index, int position) {
+        // 使用固定的公式生成名称索引，确保结果可重现
         return USER_NAMES[(position + index + 20) % USER_NAMES.length];
-    }
-    
-    /**
-     * 生成随机点赞用户名
-     */
-    private String randomPraiseUserName(int index, int position) {
-        return USER_NAMES[(position + index + 50) % USER_NAMES.length];
     }
     
     /**

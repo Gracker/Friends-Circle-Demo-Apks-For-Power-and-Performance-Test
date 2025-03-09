@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.kcrason.highperformancefriendscircle.R;
 import com.kcrason.highperformancefriendscircle.others.SimpleWeakObjectPool;
@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class VerticalCommentWidget extends LinearLayout implements ViewGroup.OnHierarchyChangeListener, OnItemClickPopupMenuListener {
 
+    private static final String TAG = "VerticalCommentWidget";
     private List<CommentBean> mCommentBeans;
 
     private LinearLayout.LayoutParams mLayoutParams;
@@ -215,7 +216,7 @@ public class VerticalCommentWidget extends LinearLayout implements ViewGroup.OnH
 
     @Override
     public void onItemClickCopy(int position) {
-        Toast.makeText(getContext(), "已复制", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "已复制");
     }
 
     @Override
@@ -243,7 +244,7 @@ public class VerticalCommentWidget extends LinearLayout implements ViewGroup.OnH
 
     @Override
     public void onItemClickCollection(int position) {
-        Toast.makeText(getContext(), "已收藏", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "已收藏");
     }
 
 

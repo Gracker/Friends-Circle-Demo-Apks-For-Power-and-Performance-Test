@@ -10,7 +10,6 @@ import android.os.Trace;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +22,7 @@ import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAd
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
 
 import java.util.List;
+import android.util.Log;
 
 /**
  * Heavy Load Activity, each frame calculation is heavy, high load during sliding
@@ -52,19 +52,8 @@ public class HeavyLoadActivity extends AppCompatActivity {
         }
         
         // 使用Toast显示当前负载类型
-        String loadTypeStr = "高负载";
-        switch (mLoadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                loadTypeStr = "轻负载";
-                break;
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                loadTypeStr = "中负载";
-                break;
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                loadTypeStr = "高负载";
-                break;
-        }
-        Toast.makeText(this, "当前模式: " + loadTypeStr, Toast.LENGTH_SHORT).show();
+        String loadTypeStr = getLoadTypeString(mLoadType);
+        Log.d(TAG, "onResume: 当前模式: " + loadTypeStr);
 
         // Process image name, remove possible file extension
         imageLoader = Glide.with(this).asDrawable().apply(

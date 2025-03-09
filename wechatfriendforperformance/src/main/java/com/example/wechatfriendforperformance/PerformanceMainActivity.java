@@ -3,9 +3,9 @@ package com.example.wechatfriendforperformance;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Trace;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -64,7 +64,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, LightLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
-            Toast.makeText(this, "启动轻负载测试", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "启动轻负载测试");
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load) {
@@ -73,7 +73,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, MediumLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
-            Toast.makeText(this, "启动中负载测试", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "启动中负载测试");
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load) {
@@ -82,7 +82,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, HeavyLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
-            Toast.makeText(this, "启动高负载测试", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "启动高负载测试");
             startActivity(intent);
             Trace.endSection();
         }

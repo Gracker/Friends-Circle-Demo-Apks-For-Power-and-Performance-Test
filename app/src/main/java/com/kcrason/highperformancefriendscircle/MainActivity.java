@@ -7,7 +7,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import com.bumptech.glide.Glide;
 import com.kcrason.highperformancefriendscircle.adapters.FriendCircleAdapter;
 import com.kcrason.highperformancefriendscircle.beans.FriendCircleBean;
@@ -113,13 +115,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     @Override
-    public void onPraiseClick(int position) {
-        Toast.makeText(this, "You Click Praise!", Toast.LENGTH_SHORT).show();
+    public void onPraiseClick(View view, int position) {
+        Log.d(TAG, "You Click Praise!");
+        mEmojiPanelView.showEmojiPanel();
     }
 
     @Override
-    public void onCommentClick(int position) {
-//        Toast.makeText(this, "you click comment", Toast.LENGTH_SHORT).show();
+    public void onCommentClick(View view, int position) {
         mEmojiPanelView.showEmojiPanel();
     }
 

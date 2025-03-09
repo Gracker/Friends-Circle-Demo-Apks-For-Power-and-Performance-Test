@@ -10,7 +10,6 @@ import android.os.Trace;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +22,7 @@ import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAd
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
 
 import java.util.List;
+import android.util.Log;
 
 /**
  * Medium Load Activity, each frame calculation is medium, medium load during sliding
@@ -51,21 +51,6 @@ public class MediumLoadActivity extends AppCompatActivity {
             mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
         }
         
-        // 使用Toast显示当前负载类型
-        String loadTypeStr = "中负载";
-        switch (mLoadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                loadTypeStr = "轻负载";
-                break;
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                loadTypeStr = "中负载";
-                break;
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                loadTypeStr = "高负载";
-                break;
-        }
-        Toast.makeText(this, "当前模式: " + loadTypeStr, Toast.LENGTH_SHORT).show();
-
         // Process image name, remove possible file extension
         imageLoader = Glide.with(this).asDrawable().apply(
                 new RequestOptions().centerCrop()
@@ -88,6 +73,9 @@ public class MediumLoadActivity extends AppCompatActivity {
             // 刷新数据，确保显示正确的点赞和评论数量
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
+
+        String loadTypeStr = getLoadTypeString(mLoadType);
+        Log.d(TAG, "onResume: 当前模式: " + loadTypeStr);
     }
 
     private void initRecyclerView() {
