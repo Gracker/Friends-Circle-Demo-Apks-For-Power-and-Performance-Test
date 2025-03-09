@@ -83,28 +83,31 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             imageView = (ImageView) convertView;
         }
         
-        // 直接加载测试图片
+        // 尝试加载图片
         try {
             String url = mImageUrls.get(position);
+            boolean imageLoaded = false;
             
-            // 简化处理：直接尝试使用test_img_x作为资源名称
-            int testImgIndex = (position % 12) + 1; // 使用1-12的图片资源
-            String resourceName = "test_img_" + testImgIndex;
-            
+            // 1. 首先尝试直接使用URL作为资源名称
             int resourceId = mContext.getResources().getIdentifier(
-                    resourceName, "drawable", mContext.getPackageName());
+                    url, "drawable", mContext.getPackageName());
             
             if (resourceId != 0) {
-                // 发现资源，加载它
                 Glide.with(mContext)
                     .load(resourceId)
                     .apply(mRequestOptions)
                     .transition(mDrawableTransitionOptions)
                     .into(imageView);
-            } else {
-                // 尝试直接使用原始URL作为资源名称
+                imageLoaded = true;
+            }
+            
+            // 2. 如果未加载成功，尝试使用local系列图片
+            if (!imageLoaded) {
+                int localImgIndex = (position % 11) + 1; // 使用1-11的范围
+                String localResource = "local" + localImgIndex;
+                
                 resourceId = mContext.getResources().getIdentifier(
-                    url, "drawable", mContext.getPackageName());
+                        localResource, "drawable", mContext.getPackageName());
                 
                 if (resourceId != 0) {
                     Glide.with(mContext)
@@ -112,10 +115,31 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                         .apply(mRequestOptions)
                         .transition(mDrawableTransitionOptions)
                         .into(imageView);
-                } else {
-                    // 设置默认背景色
-                    imageView.setBackgroundColor(Color.LTGRAY);
+                    imageLoaded = true;
                 }
+            }
+            
+            // 3. 如果仍未加载成功，尝试使用avatar系列图片
+            if (!imageLoaded) {
+                int avatarImgIndex = (position % 11) + 1; // 使用1-11的范围
+                String avatarResource = "avatar" + avatarImgIndex;
+                
+                resourceId = mContext.getResources().getIdentifier(
+                        avatarResource, "drawable", mContext.getPackageName());
+                
+                if (resourceId != 0) {
+                    Glide.with(mContext)
+                        .load(resourceId)
+                        .apply(mRequestOptions)
+                        .transition(mDrawableTransitionOptions)
+                        .into(imageView);
+                    imageLoaded = true;
+                }
+            }
+            
+            // 4. 如果所有尝试都失败，设置默认颜色
+            if (!imageLoaded) {
+                imageView.setBackgroundColor(Color.LTGRAY);
             }
         } catch (Exception e) {
             e.printStackTrace();

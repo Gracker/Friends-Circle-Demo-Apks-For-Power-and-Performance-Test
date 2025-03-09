@@ -184,25 +184,39 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             return;
         }
         
-        // 加载背景图
+        // 设置背景图片
         ImageView imgCover = mHeaderView.findViewById(R.id.img_cover);
         if (imgCover != null) {
             try {
+                // 优先尝试加载main_bg
                 int coverResourceId = mContext.getResources().getIdentifier(
                     "main_bg", "drawable", mContext.getPackageName());
+                
                 if (coverResourceId != 0) {
                     Glide.with(mContext)
                         .load(coverResourceId)
+                        .transition(mDrawableTransitionOptions)
                         .into(imgCover);
                 } else {
-                    // 尝试加载test_img_1作为背景
-                    int testImgResourceId = mContext.getResources().getIdentifier(
-                        "test_img_1", "drawable", mContext.getPackageName());
-                    if (testImgResourceId != 0) {
-                        Glide.with(mContext)
-                            .load(testImgResourceId)
-                            .into(imgCover);
-                    } else {
+                    // 依次尝试加载local系列图片作为背景
+                    boolean bgLoaded = false;
+                    for (int i = 1; i <= 11 && !bgLoaded; i++) {
+                        String localName = "local" + i;
+                        int localId = mContext.getResources().getIdentifier(
+                            localName, "drawable", mContext.getPackageName());
+                        
+                        if (localId != 0) {
+                            Glide.with(mContext)
+                                .load(localId)
+                                .transition(mDrawableTransitionOptions)
+                                .into(imgCover);
+                            bgLoaded = true;
+                            break;
+                        }
+                    }
+                    
+                    // 如果仍然没有加载到图片，使用默认背景
+                    if (!bgLoaded) {
                         imgCover.setImageResource(R.drawable.default_background);
                     }
                 }
@@ -216,26 +230,40 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         ImageView imgUserAvatar = mHeaderView.findViewById(R.id.img_user_avatar);
         if (imgUserAvatar != null) {
             try {
+                // 先尝试加载固定的main_avatar头像
                 int avatarResourceId = mContext.getResources().getIdentifier(
                     "main_avatar", "drawable", mContext.getPackageName());
+                
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                         .load(avatarResourceId)
                         .apply(mRequestOptions)
+                        .transition(mDrawableTransitionOptions)
                         .into(imgUserAvatar);
                 } else {
-                    // 尝试加载avatar1作为头像
-                    int avatar1ResourceId = mContext.getResources().getIdentifier(
-                        "avatar1", "drawable", mContext.getPackageName());
-                    if (avatar1ResourceId != 0) {
-                        Glide.with(mContext)
-                            .load(avatar1ResourceId)
-                            .apply(mRequestOptions)
-                            .into(imgUserAvatar);
-                    } else {
+                    // 依次尝试加载avatar1到avatar11中的一个头像
+                    boolean avatarLoaded = false;
+                    for (int i = 1; i <= 11 && !avatarLoaded; i++) {
+                        String avatarName = "avatar" + i;
+                        int avatarId = mContext.getResources().getIdentifier(
+                            avatarName, "drawable", mContext.getPackageName());
+                        
+                        if (avatarId != 0) {
+                            Glide.with(mContext)
+                                .load(avatarId)
+                                .apply(mRequestOptions)
+                                .transition(mDrawableTransitionOptions)
+                                .into(imgUserAvatar);
+                            avatarLoaded = true;
+                        }
+                    }
+                    
+                    // 如果上面都加载失败，则使用默认头像
+                    if (!avatarLoaded) {
                         Glide.with(mContext)
                             .load(R.drawable.default_avatar)
                             .apply(mRequestOptions)
+                            .transition(mDrawableTransitionOptions)
                             .into(imgUserAvatar);
                     }
                 }
@@ -244,6 +272,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 Glide.with(mContext)
                     .load(R.drawable.default_avatar)
                     .apply(mRequestOptions)
+                    .transition(mDrawableTransitionOptions)
                     .into(imgUserAvatar);
             }
         }
@@ -313,8 +342,10 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             // 设置用户头像
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
+                // 首先尝试直接加载原始URL
                 int avatarResourceId = mContext.getResources().getIdentifier(
-                        avatarUrl.toLowerCase(), "drawable", mContext.getPackageName());
+                        avatarUrl, "drawable", mContext.getPackageName());
+                
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                             .load(avatarResourceId)
@@ -322,11 +353,27 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                             .transition(mDrawableTransitionOptions)
                             .into(viewHolder.imgAvatar);
                 } else {
-                    Glide.with(mContext)
-                            .load(R.drawable.default_avatar)
-                            .apply(mRequestOptions)
-                            .transition(mDrawableTransitionOptions)
-                            .into(viewHolder.imgAvatar);
+                    // 尝试加载avatar系列头像
+                    int avatarIndex = dataPosition % 11 + 1; // 使用1-11范围
+                    String avatarResource = "avatar" + avatarIndex;
+                    
+                    int avatarSeriesId = mContext.getResources().getIdentifier(
+                            avatarResource, "drawable", mContext.getPackageName());
+                    
+                    if (avatarSeriesId != 0) {
+                        Glide.with(mContext)
+                                .load(avatarSeriesId)
+                                .apply(mRequestOptions)
+                                .transition(mDrawableTransitionOptions)
+                                .into(viewHolder.imgAvatar);
+                    } else {
+                        // 如果都失败，使用默认头像
+                        Glide.with(mContext)
+                                .load(R.drawable.default_avatar)
+                                .apply(mRequestOptions)
+                                .transition(mDrawableTransitionOptions)
+                                .into(viewHolder.imgAvatar);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
