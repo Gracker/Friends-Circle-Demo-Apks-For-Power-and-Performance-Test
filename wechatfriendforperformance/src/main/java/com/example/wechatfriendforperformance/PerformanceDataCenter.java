@@ -162,10 +162,10 @@ public class PerformanceDataCenter {
                 commentCount = position % 3; // 0-2 comments for light load
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                commentCount = position % 6 + 2; // 2-7 comments for medium load
+                commentCount = position % 8 + 5; // 5-12 comments for medium load
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                commentCount = position % 10 + 5; // 5-14 comments for heavy load
+                commentCount = position % 15 + 10; // 10-24 comments for heavy load
                 break;
             default:
                 commentCount = position % 3;
@@ -223,10 +223,10 @@ public class PerformanceDataCenter {
                 praiseCount = position % 3 + 1; // 1-3 likes for light load
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                praiseCount = position % 6 + 3; // 3-8 likes for medium load
+                praiseCount = position % 10 + 5; // 5-14 likes for medium load
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                praiseCount = position % 12 + 8; // 8-19 likes for heavy load
+                praiseCount = position % 20 + 15; // 15-34 likes for heavy load
                 break;
             default:
                 praiseCount = position % 3 + 1;

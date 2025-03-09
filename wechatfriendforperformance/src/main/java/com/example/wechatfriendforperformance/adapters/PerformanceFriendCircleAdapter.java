@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -73,6 +75,11 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     
     // String to identify current load type
     private String mLoadTypeString;
+    
+    // Variables for continuous frame load simulation
+    private boolean mIsScrolling = false;
+    private Runnable mFrameLoadRunnable;
+    private Handler mHandler = new Handler(Looper.getMainLooper());
 
     public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, int loadType) {
         this.mContext = context;
@@ -215,6 +222,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         // Execute different computation based on load type
         simulateComputationalLoad(dataPosition);
         
+        // Start continuous load simulation if not already started
+        startContinuousLoadSimulation();
+        
         // Set user information
         UserBean userBean = friendCircleBean.getUserBean();
         if (userBean != null) {
@@ -340,10 +350,10 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 iterations = 5; // Light load: only do a small amount of work per frame
                 break;
             case LOAD_TYPE_MEDIUM:
-                iterations = 300; // Medium load: medium number of calculations per frame
+                iterations = 800; // Medium load: increased for more pressure
                 break;
             case LOAD_TYPE_HEAVY:
-                iterations = 1200; // Heavy load: large amount of calculation per frame
+                iterations = 2000; // Heavy load: significantly increased for heavy pressure
                 break;
             default:
                 iterations = 5;
@@ -364,8 +374,81 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     mRandom.nextInt(256)
             ));
             mCanvas.drawCircle(x, y, 10, mPaint);
+            
+            // Add more complex calculations for medium and heavy loads
+            if (mLoadType == LOAD_TYPE_MEDIUM || mLoadType == LOAD_TYPE_HEAVY) {
+                double sinValue = Math.sin(x) * Math.cos(y);
+                double tanValue = Math.tan(x * 0.1);
+                // Prevent compiler optimization
+                if (sinValue > 0.999 && tanValue > 100) {
+                    mPaint.setStrokeWidth((float) (sinValue + tanValue));
+                }
+            }
         }
         Trace.endSection();
+    }
+
+    /**
+     * Start a continuous background load to simulate pressure on each frame
+     */
+    private void startContinuousLoadSimulation() {
+        if (mFrameLoadRunnable == null) {
+            mFrameLoadRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
+                        // Only add extra load during scrolling
+                        int extraLoadIterations;
+                        switch (mLoadType) {
+                            case LOAD_TYPE_LIGHT:
+                                extraLoadIterations = 0; // No extra load for light load
+                                break;
+                            case LOAD_TYPE_MEDIUM:
+                                extraLoadIterations = 200; // Moderate extra load for medium
+                                break;
+                            case LOAD_TYPE_HEAVY:
+                                extraLoadIterations = 500; // Heavy extra load for heavy
+                                break;
+                            default:
+                                extraLoadIterations = 0;
+                                break;
+                        }
+                        
+                        if (extraLoadIterations > 0) {
+                            Trace.beginSection("FriendCircleAdapter_continuousLoad");
+                            for (int i = 0; i < extraLoadIterations; i++) {
+                                float x = mRandom.nextFloat() * 100;
+                                float y = mRandom.nextFloat() * 100;
+                                
+                                mPaint.setColor(Color.argb(
+                                        mRandom.nextInt(256),
+                                        mRandom.nextInt(256),
+                                        mRandom.nextInt(256),
+                                        mRandom.nextInt(256)
+                                ));
+                                mCanvas.drawCircle(x, y, 10, mPaint);
+                            }
+                            Trace.endSection();
+                        }
+                    }
+                    
+                    // Schedule next frame computation
+                    mHandler.postDelayed(this, 16); // Roughly 60fps
+                }
+            };
+            
+            // Start the continuous load
+            mHandler.post(mFrameLoadRunnable);
+            
+            // Set up scroll state change listener to detect scrolling
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    mIsScrolling = newState != RecyclerView.SCROLL_STATE_IDLE;
+                }
+            });
+        }
     }
 
     @Override
