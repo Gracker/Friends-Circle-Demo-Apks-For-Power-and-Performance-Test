@@ -42,6 +42,15 @@ public class PerformanceDataCenter {
         return instance;
     }
     
+    /**
+     * 清除缓存的数据，确保下次获取数据时重新生成
+     */
+    public void clearCachedData() {
+        cachedLightLoadFriendCircleBeans = null;
+        cachedMediumLoadFriendCircleBeans = null;
+        cachedHeavyLoadFriendCircleBeans = null;
+    }
+    
     public List<FriendCircleBean> getFriendCircleBeans() {
         return getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
     }

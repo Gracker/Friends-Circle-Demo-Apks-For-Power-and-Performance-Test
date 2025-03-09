@@ -344,6 +344,14 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
      */
     private void simulateComputationalLoad(int position) {
         Trace.beginSection("FriendCircleAdapter_simulateComputationalLoad");
+        
+        // 确保Canvas已经初始化
+        if (mCanvas == null || mBitmapList.isEmpty()) {
+            Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(bitmap);
+            mBitmapList.add(bitmap);
+        }
+        
         int iterations;
         switch (mLoadType) {
             case LOAD_TYPE_LIGHT:
@@ -393,6 +401,13 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
      */
     private void startContinuousLoadSimulation() {
         if (mFrameLoadRunnable == null) {
+            // 确保Canvas已经初始化
+            if (mCanvas == null || mBitmapList.isEmpty()) {
+                Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+                mCanvas = new Canvas(bitmap);
+                mBitmapList.add(bitmap);
+            }
+            
             mFrameLoadRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -427,6 +442,16 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                                         mRandom.nextInt(256)
                                 ));
                                 mCanvas.drawCircle(x, y, 10, mPaint);
+                                
+                                // 增加额外计算
+                                if (mLoadType == LOAD_TYPE_HEAVY) {
+                                    double sinValue = Math.sin(x) * Math.cos(y);
+                                    double tanValue = Math.tan(x * 0.1);
+                                    // 防止编译器优化
+                                    if (sinValue > 0.999 && tanValue > 100) {
+                                        mPaint.setStrokeWidth((float) (sinValue + tanValue));
+                                    }
+                                }
                             }
                             Trace.endSection();
                         }
@@ -449,6 +474,31 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 }
             });
         }
+    }
+
+    /**
+     * 停止持续帧负载模拟，释放资源
+     */
+    public void stopContinuousLoadSimulation() {
+        if (mHandler != null && mFrameLoadRunnable != null) {
+            mHandler.removeCallbacks(mFrameLoadRunnable);
+            mFrameLoadRunnable = null;
+        }
+    }
+    
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        stopContinuousLoadSimulation();
+        
+        // 释放Bitmap资源
+        for (Bitmap bitmap : mBitmapList) {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+        }
+        mBitmapList.clear();
+        mCanvas = null;
     }
 
     @Override
