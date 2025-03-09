@@ -2,18 +2,13 @@ package com.example.wechatfriendforperformance;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,13 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
-import com.example.wechatfriendforperformance.interfaces.OnItemClickListener;
 import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
-import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.util.List;
 
@@ -41,45 +32,6 @@ public class LightLoadActivity extends AppCompatActivity implements OnPraiseOrCo
     private LinearLayout titleBar;
 
     private RequestBuilder<Drawable> imageLoader;
-
-    private ImageLoader<String> mImageLoader = new ImageLoader<String>() {
-        @Override
-        public void loadImage(ImageView imageView, String imageUrl) {
-            Trace.beginSection("LightLoad_loadImage");
-            try {
-                // Process image name, remove possible file extension
-                String imageName = imageUrl;
-                if (imageName.contains(".")) {
-                    imageName = imageName.substring(0, imageName.lastIndexOf("."));
-                }
-                
-                // Try to load from resource ID, note that resource names must be all lowercase
-                int resourceId = getResources().getIdentifier(
-                    imageName.toLowerCase(), "drawable", getPackageName());
-                
-                if (resourceId != 0) {
-                    Glide.with(LightLoadActivity.this)
-                        .load(resourceId)
-                        .centerCrop()
-                        .into(imageView);
-                } else {
-                    // Load placeholder image
-                    Glide.with(LightLoadActivity.this)
-                        .load(R.drawable.img_placeholder)
-                        .centerCrop()
-                        .into(imageView);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                // If error, use placeholder image
-                Glide.with(LightLoadActivity.this)
-                    .load(R.drawable.img_placeholder)
-                    .centerCrop()
-                    .into(imageView);
-            }
-            Trace.endSection();
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

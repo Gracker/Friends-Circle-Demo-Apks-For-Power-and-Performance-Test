@@ -74,13 +74,10 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     // String to identify current load type
     private String mLoadTypeString;
 
-    public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
-                                         ImageLoader<String> imageLoader, int loadType) {
+    public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, int loadType) {
         this.mContext = context;
-        this.mImageLoader = imageLoader;
-        this.mRecyclerView = recyclerView;
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        this.mAvatarSize = dpToPx(44f);
+        this.mRecyclerView = recyclerView;
         this.mLayoutInflater = LayoutInflater.from(context);
         
         // Use rounded rectangle instead of circular crop, with 8dp corner radius to match the original project
@@ -111,8 +108,14 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         mBitmapList.add(bitmap);
         
         if (context instanceof OnPraiseOrCommentClickListener) {
-            this.mOnPraiseOrCommentClickListener = (OnPraiseOrCommentClickListener) context;
+            mOnPraiseOrCommentClickListener = (OnPraiseOrCommentClickListener) context;
         }
+    }
+
+    public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
+                                     ImageLoader<String> imageLoader, int loadType) {
+        this(context, recyclerView, loadType);
+        this.mImageLoader = imageLoader;
     }
 
     private LayoutInflater mLayoutInflater;

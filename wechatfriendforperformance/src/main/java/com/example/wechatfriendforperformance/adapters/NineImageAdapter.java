@@ -1,41 +1,51 @@
 package com.example.wechatfriendforperformance.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import androidx.core.content.ContextCompat;
-
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforperformance.R;
 import com.example.wechatfriendforperformance.widgets.NineGridView;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.List;
 
 /**
- * 九宫格图片适配器，与原项目保持一致
+ * Adapter for NineGridView to display images in a grid
  */
 public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
 
-    private List<String> mImageUrls;
     private Context mContext;
-    private RequestOptions mRequestOptions;
-    private DrawableTransitionOptions mDrawableTransitionOptions;
+    private List<String> mImageUrls;
+    private int mImageSize;
 
+    /**
+     * Constructor
+     * 
+     * @param context Context
+     * @param imageUrls List of image URLs to display
+     */
     public NineImageAdapter(Context context, List<String> imageUrls) {
         this.mContext = context;
         this.mImageUrls = imageUrls;
-        this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         
-        // 屏幕宽度的三分之一作为图片大小
-        int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
-        int itemSize = (screenWidth - 2 * dpToPx(4) - dpToPx(54)) / 3;
-        this.mRequestOptions = new RequestOptions()
-            .centerCrop()
-            .override(itemSize, itemSize);
+        // One third of screen width as image size
+        DisplayMetrics dm = context.getResources().getDisplayMetrics();
+        int screenWidth = dm.widthPixels;
+        mImageSize = (screenWidth - 2 * 6) / 3;
+    }
+
+    /**
+     * Get the data list
+     * 
+     * @return List of image URLs
+     */
+    public List<String> getImageData() {
+        return mImageUrls;
     }
 
     @Override
@@ -45,58 +55,49 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
 
     @Override
     public String getItem(int position) {
-        return mImageUrls == null ? null :
-                position < mImageUrls.size() ? mImageUrls.get(position) : null;
+        return mImageUrls == null ? null : mImageUrls.get(position);
     }
 
     @Override
-    public View getView(int position, View itemView) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
-        if (itemView == null) {
+        if (convertView == null) {
             imageView = new ImageView(mContext);
-            imageView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.white));
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         } else {
-            imageView = (ImageView) itemView;
+            imageView = (ImageView) convertView;
         }
+
+        String imageUrl = mImageUrls.get(position);
         
-        String url = mImageUrls.get(position);
+        // Process image name, remove possible file extension
+        if (imageUrl.contains(".")) {
+            imageUrl = imageUrl.substring(0, imageUrl.lastIndexOf("."));
+        }
+
+        // Try to load from resource ID
         try {
-            // 处理图片名称，去掉可能的文件扩展名
-            String imageName = url;
-            if (imageName.contains(".")) {
-                imageName = imageName.substring(0, imageName.lastIndexOf("."));
-            }
-            
-            // 尝试从资源ID加载
             int resourceId = mContext.getResources().getIdentifier(
-                imageName.toLowerCase(), "drawable", mContext.getPackageName());
-            
+                    imageUrl.toLowerCase(), "drawable", mContext.getPackageName());
+
             if (resourceId != 0) {
                 Glide.with(mContext)
-                    .load(resourceId)
-                    .apply(mRequestOptions)
-                    .transition(mDrawableTransitionOptions)
-                    .into(imageView);
+                        .load(resourceId)
+                        .apply(new RequestOptions().centerCrop())
+                        .into(imageView);
             } else {
-                // 加载占位图
-                imageView.setImageResource(R.drawable.img_placeholder);
+                // Load placeholder image
+                Glide.with(mContext)
+                        .load(R.drawable.img_placeholder)
+                        .into(imageView);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            // 如果出错，使用占位图
-            imageView.setImageResource(R.drawable.img_placeholder);
+        } catch (Resources.NotFoundException e) {
+            // If error, use placeholder image
+            Glide.with(mContext)
+                    .load(R.drawable.img_placeholder)
+                    .into(imageView);
         }
-        
+
         return imageView;
-    }
-    
-    /**
-     * dp转px
-     */
-    private int dpToPx(float dp) {
-        final float scale = mContext.getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
     }
 }

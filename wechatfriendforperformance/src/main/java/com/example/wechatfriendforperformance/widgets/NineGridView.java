@@ -134,4 +134,34 @@ public class NineGridView extends ViewGroup {
         float density = getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
     }
+    
+    /**
+     * Nine Grid Adapter interface for providing views to NineGridView
+     */
+    public interface NineGridAdapter<T> {
+        /**
+         * Get the number of items in the adapter
+         * 
+         * @return Item count
+         */
+        int getCount();
+        
+        /**
+         * Get the item at the specified position
+         * 
+         * @param position Position of the item
+         * @return The item at the position
+         */
+        T getItem(int position);
+        
+        /**
+         * Get a View that displays the data at the specified position
+         * 
+         * @param position Position of the item
+         * @param convertView Old view to reuse, if possible
+         * @param parent The parent that this view will eventually be attached to
+         * @return A View corresponding to the data at the position
+         */
+        View getView(int position, View convertView, ViewGroup parent);
+    }
 } 

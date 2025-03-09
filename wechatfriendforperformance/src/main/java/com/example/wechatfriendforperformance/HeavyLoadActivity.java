@@ -1,132 +1,155 @@
 package com.example.wechatfriendforperformance;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Trace;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
 import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
-import com.bumptech.glide.Glide;
-import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import java.util.List;
 
 /**
- * 高负载Activity，每一帧的计算量大，滑动过程中CPU和GPU负载重
+ * Heavy Load Activity, each frame calculation is heavy, significant load during sliding
  */
 public class HeavyLoadActivity extends AppCompatActivity implements OnPraiseOrCommentClickListener {
 
-    private PerformanceFriendCircleAdapter mFriendCircleAdapter;
+    private RecyclerView recyclerView;
+    private PerformanceFriendCircleAdapter adapter;
+    private LinearLayout titleBar;
 
-    private ImageLoader<String> mImageLoader = new ImageLoader<String>() {
-        @Override
-        public void loadImage(ImageView imageView, String imageUrl) {
-            try {
-                // 处理图片名称，去掉可能的文件扩展名
-                String imageName = imageUrl;
-                if (imageName.contains(".")) {
-                    imageName = imageName.substring(0, imageName.lastIndexOf("."));
-                }
-                
-                // 尝试从资源ID加载，注意资源名称必须全小写
-                int resourceId = getResources().getIdentifier(
-                    imageName.toLowerCase(), "drawable", getPackageName());
-                
-                if (resourceId != 0) {
-                    Glide.with(HeavyLoadActivity.this)
-                        .load(resourceId)
-                        .centerCrop()
-                        .into(imageView);
-                } else {
-                    // 加载占位图
-                    Glide.with(HeavyLoadActivity.this)
-                        .load(R.drawable.img_placeholder)
-                        .centerCrop()
-                        .into(imageView);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                // 如果出错，使用占位图
-                Glide.with(HeavyLoadActivity.this)
-                    .load(R.drawable.img_placeholder)
-                    .centerCrop()
-                    .into(imageView);
-            }
-        }
-    };
+    private RequestBuilder<Drawable> imageLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Trace.beginSection("HeavyLoadActivity_onCreate");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_performance_friend_circle);
+        setContentView(R.layout.activity_heavy_load);
 
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        // Process image name, remove possible file extension
+        imageLoader = Glide.with(this).asDrawable().apply(
+                new RequestOptions().centerCrop()
+        );
+
+        // Try to load from resource ID, note that resource names must be all lowercase
+        titleBar = findViewById(R.id.title_bar);
+        findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
+
+        // Load placeholder image
+        Glide.with(this)
+                .load(R.drawable.avatar_placeholder)
+                .preload();
+
+        // If error, use placeholder image
+        recyclerView = findViewById(R.id.recycler_view);
+        initRecyclerView();
+        Trace.endSection();
+    }
+
+    @Override
+    protected void onResume() {
+        Trace.beginSection("HeavyLoadActivity_onResume");
+        super.onResume();
+        Trace.endSection();
+    }
+
+    private void initRecyclerView() {
+        Trace.beginSection("HeavyLoadActivity_initRecyclerView");
         
-        // 设置布局管理器
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
+        // Set layout manager
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
-        // 创建适配器，使用高负载模式
-        mFriendCircleAdapter = new PerformanceFriendCircleAdapter(
-            this, recyclerView, mImageLoader, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
+        // Create adapter, using heavy load mode
+        adapter = new PerformanceFriendCircleAdapter(this, recyclerView, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
         
-        // 添加顶部视图
-        View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, recyclerView, false);
-        mFriendCircleAdapter.setHeaderView(headerView);
+        // Add header view
+        View headerView = getLayoutInflater().inflate(R.layout.item_header_view, recyclerView, false);
+        adapter.setHeaderView(headerView);
         
-        recyclerView.setAdapter(mFriendCircleAdapter);
+        recyclerView.setAdapter(adapter);
         
-        // 加载数据
-        loadData();
+        // Load data
+        adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans());
         
-        // 预加载图片
+        // Preload images
         preloadImages();
+        
+        Trace.endSection();
     }
-    
-    /**
-     * 加载朋友圈数据
-     */
-    private void loadData() {
-        List<FriendCircleBean> friendCircleBeans = PerformanceDataCenter.makeFriendCircleBeans(this);
-        mFriendCircleAdapter.setFriendCircleBeans(friendCircleBeans);
-    }
-    
-    /**
-     * 预加载图片，以提高渲染性能
-     */
+
     private void preloadImages() {
-        // 预加载头像
-        for (String avatar : PerformanceDataCenter.AVATAR_URLS) {
-            int avatarResourceId = getResources().getIdentifier(
-                avatar, "drawable", getPackageName());
-            if (avatarResourceId != 0) {
-                Glide.with(this).load(avatarResourceId).preload();
+        Trace.beginSection("HeavyLoadActivity_preloadImages");
+        List<FriendCircleBean> beans = PerformanceDataCenter.getInstance().getFriendCircleBeans();
+        
+        // Preload avatars
+        for (FriendCircleBean bean : beans) {
+            if (bean.getUserBean() != null && bean.getUserBean().getUserAvatarUrl() != null) {
+                String avatarUrl = bean.getUserBean().getUserAvatarUrl();
+                if (avatarUrl.contains(".")) {
+                    avatarUrl = avatarUrl.substring(0, avatarUrl.lastIndexOf("."));
+                }
+                preloadImage(this, avatarUrl);
             }
         }
         
-        // 预加载图片
-        for (String image : PerformanceConstants.SINGLE_IMAGE_URLS) {
-            int imageResourceId = getResources().getIdentifier(
-                image, "drawable", getPackageName());
-            if (imageResourceId != 0) {
-                Glide.with(this).load(imageResourceId).preload();
+        // Preload images
+        for (FriendCircleBean bean : beans) {
+            if (bean.getImageUrls() != null) {
+                for (String imageUrl : bean.getImageUrls()) {
+                    preloadImage(this, imageUrl);
+                }
             }
+        }
+        Trace.endSection();
+    }
+
+    private void preloadImage(Context context, String imageName) {
+        try {
+            int resourceId = context.getResources().getIdentifier(
+                    imageName.toLowerCase(), "drawable", context.getPackageName());
+            if (resourceId != 0) {
+                Glide.with(context).load(resourceId).preload();
+            }
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void onPraiseClick(int position) {
-        // 点赞功能，性能测试版本不需要实际功能
+        // Like functionality, performance test version doesn't need actual functionality
+        Trace.beginSection("HeavyLoadActivity_onPraiseClick");
+        // Simulate like operation
+        Trace.endSection();
     }
 
     @Override
-    public void onCommentClick(int position) {
-        // 评论功能，性能测试版本不需要实际功能
+    public void onCommentClick(View view, int position) {
+        // Comment functionality, performance test version doesn't need actual functionality
+        Trace.beginSection("HeavyLoadActivity_onCommentClick");
+        // Simulate comment operation
+        Trace.endSection();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 } 
