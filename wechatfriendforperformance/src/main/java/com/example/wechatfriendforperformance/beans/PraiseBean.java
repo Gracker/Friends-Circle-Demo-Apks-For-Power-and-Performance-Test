@@ -8,6 +8,9 @@ public class PraiseBean {
     private String praiseUserId;
     private String praiseUserName;
     
+    // Add UserBean field
+    private UserBean userBean;
+    
     public String getPraiseUserId() {
         return praiseUserId;
     }
@@ -22,5 +25,21 @@ public class PraiseBean {
     
     public void setPraiseUserName(String praiseUserName) {
         this.praiseUserName = praiseUserName;
+    }
+    
+    /**
+     * Get the user bean
+     * @return UserBean
+     */
+    public UserBean getUserBean() {
+        return userBean;
+    }
+    
+    /**
+     * Set the user bean
+     * @param userBean User bean
+     */
+    public void setUserBean(UserBean userBean) {
+        this.userBean = userBean;
     }
 } 

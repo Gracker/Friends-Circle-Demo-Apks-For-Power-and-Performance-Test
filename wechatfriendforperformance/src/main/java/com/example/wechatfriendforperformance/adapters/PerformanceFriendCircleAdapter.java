@@ -106,10 +106,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(bitmap);
         mBitmapList.add(bitmap);
-        
-        if (context instanceof OnPraiseOrCommentClickListener) {
-            mOnPraiseOrCommentClickListener = (OnPraiseOrCommentClickListener) context;
-        }
+        mPaint = new Paint();
     }
 
     public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
@@ -326,12 +323,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         }
         
         // Set comment icon click event
-        final int finalDataPosition = dataPosition;
-        viewHolder.imgComment.setOnClickListener(v -> {
-            if (mOnPraiseOrCommentClickListener != null) {
-                mOnPraiseOrCommentClickListener.onCommentClick(finalDataPosition);
-            }
-        });
+        viewHolder.imgComment.setOnClickListener(null);
         
         Trace.endSection();
     }

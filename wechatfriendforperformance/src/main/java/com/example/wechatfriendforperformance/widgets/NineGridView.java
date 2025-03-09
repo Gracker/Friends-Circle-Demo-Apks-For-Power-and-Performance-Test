@@ -96,11 +96,11 @@ public class NineGridView extends ViewGroup {
         // Measure child views
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            measureChild(child, mSingleWidth, mSingleWidth);
+            measureChildWithMargins(child, mSingleWidth, mSingleWidth);
         }
     }
     
-    private void measureChild(View child, int width, int height) {
+    protected void measureChildWithMargins(View child, int width, int height) {
         int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
         int heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         child.measure(widthSpec, heightSpec);

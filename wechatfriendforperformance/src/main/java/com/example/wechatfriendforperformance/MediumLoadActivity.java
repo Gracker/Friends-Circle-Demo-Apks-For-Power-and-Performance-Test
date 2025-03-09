@@ -18,14 +18,13 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
-import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
 
 import java.util.List;
 
 /**
  * Medium Load Activity, each frame calculation is medium, moderate load during sliding
  */
-public class MediumLoadActivity extends AppCompatActivity implements OnPraiseOrCommentClickListener {
+public class MediumLoadActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
@@ -126,22 +125,6 @@ public class MediumLoadActivity extends AppCompatActivity implements OnPraiseOrC
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onPraiseClick(int position) {
-        // Like functionality, performance test version doesn't need actual functionality
-        Trace.beginSection("MediumLoadActivity_onPraiseClick");
-        // Simulate like operation
-        Trace.endSection();
-    }
-
-    @Override
-    public void onCommentClick(View view, int position) {
-        // Comment functionality, performance test version doesn't need actual functionality
-        Trace.beginSection("MediumLoadActivity_onCommentClick");
-        // Simulate comment operation
-        Trace.endSection();
     }
 
     @Override

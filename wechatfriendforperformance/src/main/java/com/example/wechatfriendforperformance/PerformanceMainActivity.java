@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Trace;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class PerformanceMainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btnLightLoad, btnMediumLoad, btnHeavyLoad;
-    private TextView tvAppTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +27,12 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
         btnLightLoad = findViewById(R.id.btn_light_load);
         btnMediumLoad = findViewById(R.id.btn_medium_load);
         btnHeavyLoad = findViewById(R.id.btn_heavy_load);
-        tvAppTitle = findViewById(R.id.tv_app_title);
         
         // Set click listeners
         btnLightLoad.setOnClickListener(this);
         btnMediumLoad.setOnClickListener(this);
         btnHeavyLoad.setOnClickListener(this);
+        
         Trace.endSection();
     }
 
@@ -47,7 +45,6 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
 
     @Override
     public void onClick(View v) {
-        Trace.beginSection("PerformanceMainActivity_onClick");
         int id = v.getId();
         
         if (id == R.id.btn_light_load) {
@@ -69,6 +66,5 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             startActivity(intent);
             Trace.endSection();
         }
-        Trace.endSection();
     }
 } 

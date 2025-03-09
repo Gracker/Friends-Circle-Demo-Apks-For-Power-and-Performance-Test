@@ -3,14 +3,14 @@ package com.example.wechatfriendforperformance;
 import android.app.Application;
 
 /**
- * 性能测试专用的Application类
+ * Application class for performance test module
  */
 public class PerformanceApplication extends Application {
-
+    
     @Override
     public void onCreate() {
         super.onCreate();
-        // 初始化应用
-        PerformanceDataCenter.init();
+        // Initialize application
+        PerformanceDataCenter.getInstance();
     }
 } 

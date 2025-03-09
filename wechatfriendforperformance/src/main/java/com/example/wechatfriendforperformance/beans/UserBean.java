@@ -1,19 +1,19 @@
 package com.example.wechatfriendforperformance.beans;
 
 /**
- * 用户数据模型类
+ * User data model class
  */
 public class UserBean {
     
-    private int userId;
+    private String userId;
     private String userName;
     private String userAvatarUrl;
     
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
     
-    public void setUserId(int userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
     

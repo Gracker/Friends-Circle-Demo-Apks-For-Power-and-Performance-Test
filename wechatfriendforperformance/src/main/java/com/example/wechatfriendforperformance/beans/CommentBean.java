@@ -19,6 +19,11 @@ public class CommentBean {
     private String commentContent;
     private SpannableStringBuilder commentContentSpan;
     
+    // Add UserBean fields for From and To users
+    private UserBean fromUserBean;
+    private UserBean toUserBean;
+    private String content;
+    
     public int getCommentType() {
         return commentType;
     }
@@ -56,6 +61,48 @@ public class CommentBean {
     }
     
     /**
+     * Get the from user bean
+     */
+    public UserBean getFromUserBean() {
+        return fromUserBean;
+    }
+    
+    /**
+     * Set the from user bean
+     */
+    public void setFromUserBean(UserBean fromUserBean) {
+        this.fromUserBean = fromUserBean;
+    }
+    
+    /**
+     * Get the to user bean
+     */
+    public UserBean getToUserBean() {
+        return toUserBean;
+    }
+    
+    /**
+     * Set the to user bean
+     */
+    public void setToUserBean(UserBean toUserBean) {
+        this.toUserBean = toUserBean;
+    }
+    
+    /**
+     * Get the content
+     */
+    public String getContent() {
+        return content;
+    }
+    
+    /**
+     * Set the content
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+    
+    /**
      * 构建评论内容样式
      * @param context 上下文
      */
@@ -85,7 +132,7 @@ public class CommentBean {
         }
         
         // 添加评论内容
-        builder.append("：").append(commentContent);
+        builder.append("：").append(commentContent != null ? commentContent : content);
         
         this.commentContentSpan = builder;
     }

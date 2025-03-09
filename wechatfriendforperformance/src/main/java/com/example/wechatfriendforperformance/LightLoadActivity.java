@@ -18,14 +18,13 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
-import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
 
 import java.util.List;
 
 /**
  * Light Load Activity, each frame calculation is small, light load during sliding
  */
-public class LightLoadActivity extends AppCompatActivity implements OnPraiseOrCommentClickListener {
+public class LightLoadActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
@@ -126,22 +125,6 @@ public class LightLoadActivity extends AppCompatActivity implements OnPraiseOrCo
         } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onPraiseClick(int position) {
-        // Like functionality, performance test version doesn't need actual functionality
-        Trace.beginSection("LightLoadActivity_onPraiseClick");
-        // Simulate like operation
-        Trace.endSection();
-    }
-
-    @Override
-    public void onCommentClick(View view, int position) {
-        // Comment functionality, performance test version doesn't need actual functionality
-        Trace.beginSection("LightLoadActivity_onCommentClick");
-        // Simulate comment operation
-        Trace.endSection();
     }
 
     @Override

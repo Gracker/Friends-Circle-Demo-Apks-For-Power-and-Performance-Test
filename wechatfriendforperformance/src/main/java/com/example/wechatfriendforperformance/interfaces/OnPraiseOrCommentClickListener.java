@@ -1,19 +1,22 @@
 package com.example.wechatfriendforperformance.interfaces;
 
+import android.view.View;
+
 /**
- * 点赞和评论点击监听器接口
+ * Interface for handling praise and comment click events
  */
 public interface OnPraiseOrCommentClickListener {
     
     /**
-     * 点赞按钮点击
-     * @param position 数据位置
+     * Called when the praise button is clicked
+     * @param position Position of the item
      */
     void onPraiseClick(int position);
     
     /**
-     * 评论按钮点击
-     * @param position 数据位置
+     * Called when the comment button is clicked
+     * @param view The view that was clicked
+     * @param position Position of the item
      */
-    void onCommentClick(int position);
+    void onCommentClick(View view, int position);
 } 
