@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv_comment"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textColor="#333333"
+    android:textSize="14sp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp"
+    tools:text="用户1 回复 用户2：评论内容" /> 

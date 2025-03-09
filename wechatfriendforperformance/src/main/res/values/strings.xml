@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">微信朋友圈性能测试</string>
+    <string name="title_main">微信朋友圈滑动性能测试</string>
+    <string name="title_select_load">请选择要测试的负载级别：</string>
+    <string name="btn_light_load">轻负载测试</string>
+    <string name="btn_medium_load">中等负载测试</string>
+    <string name="btn_heavy_load">高负载测试</string>
+    <string name="description">本应用模拟了微信朋友圈的滑动场景，用于测试不同计算负载下的滑动性能表现。通过三种不同的负载模式，可以直观对比不同优化方案的效果：\n\n轻负载：每帧计算量小，滑动流畅度高\n\n中等负载：每帧计算量中等，滑动有一定压力\n\n高负载：每帧计算量大，滑动压力重\n\n通过对比不同模式下的表现，可以帮助开发者发现和解决性能瓶颈。</string>
+</resources>

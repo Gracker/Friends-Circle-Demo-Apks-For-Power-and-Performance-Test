@@ -8,6 +8,9 @@
       <SelectionState runConfigName="wechatfriendforpower">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="wechatfriendforperformance">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
