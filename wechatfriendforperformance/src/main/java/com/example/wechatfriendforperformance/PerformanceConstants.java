@@ -270,4 +270,11 @@ public class PerformanceConstants {
         public static final int TRANSLATION_STATE_SHOW = 1;
         public static final int TRANSLATION_STATE_LOADING = 2;
     }
+
+    public final static class CommentType {
+        //单一评论
+        public final static int COMMENT_TYPE_SINGLE = 0;
+        //回复评论
+        public final static int COMMENT_TYPE_REPLY = 1;
+    }
 } 

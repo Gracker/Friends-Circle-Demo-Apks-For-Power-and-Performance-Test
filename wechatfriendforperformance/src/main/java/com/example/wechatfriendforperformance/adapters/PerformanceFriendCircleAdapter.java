@@ -343,7 +343,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 iterations = 300; // Medium load: medium number of calculations per frame
                 break;
             case LOAD_TYPE_HEAVY:
-                iterations = 1000; // Heavy load: large amount of calculation per frame
+                iterations = 1200; // Heavy load: large amount of calculation per frame
                 break;
             default:
                 iterations = 5;

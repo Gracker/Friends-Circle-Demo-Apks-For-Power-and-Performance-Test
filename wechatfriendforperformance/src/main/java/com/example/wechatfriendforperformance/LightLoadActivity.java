@@ -47,11 +47,6 @@ public class LightLoadActivity extends AppCompatActivity {
         titleBar = findViewById(R.id.title_bar);
         findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
 
-        // Load placeholder image
-        Glide.with(this)
-                .load(R.drawable.avatar_placeholder)
-                .preload();
-
         // If error, use placeholder image
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
@@ -83,48 +78,7 @@ public class LightLoadActivity extends AppCompatActivity {
         // Load data
         adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans());
         
-        // Preload images
-        preloadImages();
-        
         Trace.endSection();
-    }
-
-    private void preloadImages() {
-        Trace.beginSection("LightLoadActivity_preloadImages");
-        List<FriendCircleBean> beans = PerformanceDataCenter.getInstance().getFriendCircleBeans();
-        
-        // Preload avatars
-        for (FriendCircleBean bean : beans) {
-            if (bean.getUserBean() != null && bean.getUserBean().getUserAvatarUrl() != null) {
-                String avatarUrl = bean.getUserBean().getUserAvatarUrl();
-                if (avatarUrl.contains(".")) {
-                    avatarUrl = avatarUrl.substring(0, avatarUrl.lastIndexOf("."));
-                }
-                preloadImage(this, avatarUrl);
-            }
-        }
-        
-        // Preload images
-        for (FriendCircleBean bean : beans) {
-            if (bean.getImageUrls() != null) {
-                for (String imageUrl : bean.getImageUrls()) {
-                    preloadImage(this, imageUrl);
-                }
-            }
-        }
-        Trace.endSection();
-    }
-
-    private void preloadImage(Context context, String imageName) {
-        try {
-            int resourceId = context.getResources().getIdentifier(
-                    imageName.toLowerCase(), "drawable", context.getPackageName());
-            if (resourceId != 0) {
-                Glide.with(context).load(resourceId).preload();
-            }
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

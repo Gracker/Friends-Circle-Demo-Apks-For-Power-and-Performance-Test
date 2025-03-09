@@ -22,7 +22,7 @@ import com.example.wechatfriendforperformance.beans.FriendCircleBean;
 import java.util.List;
 
 /**
- * Heavy Load Activity, each frame calculation is heavy, significant load during sliding
+ * Heavy Load Activity, each frame calculation is large, heavy load during sliding
  */
 public class HeavyLoadActivity extends AppCompatActivity {
 
@@ -46,11 +46,6 @@ public class HeavyLoadActivity extends AppCompatActivity {
         // Try to load from resource ID, note that resource names must be all lowercase
         titleBar = findViewById(R.id.title_bar);
         findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
-
-        // Load placeholder image
-        Glide.with(this)
-                .load(R.drawable.avatar_placeholder)
-                .preload();
 
         // If error, use placeholder image
         recyclerView = findViewById(R.id.recycler_view);
@@ -83,48 +78,7 @@ public class HeavyLoadActivity extends AppCompatActivity {
         // Load data
         adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans());
         
-        // Preload images
-        preloadImages();
-        
         Trace.endSection();
-    }
-
-    private void preloadImages() {
-        Trace.beginSection("HeavyLoadActivity_preloadImages");
-        List<FriendCircleBean> beans = PerformanceDataCenter.getInstance().getFriendCircleBeans();
-        
-        // Preload avatars
-        for (FriendCircleBean bean : beans) {
-            if (bean.getUserBean() != null && bean.getUserBean().getUserAvatarUrl() != null) {
-                String avatarUrl = bean.getUserBean().getUserAvatarUrl();
-                if (avatarUrl.contains(".")) {
-                    avatarUrl = avatarUrl.substring(0, avatarUrl.lastIndexOf("."));
-                }
-                preloadImage(this, avatarUrl);
-            }
-        }
-        
-        // Preload images
-        for (FriendCircleBean bean : beans) {
-            if (bean.getImageUrls() != null) {
-                for (String imageUrl : bean.getImageUrls()) {
-                    preloadImage(this, imageUrl);
-                }
-            }
-        }
-        Trace.endSection();
-    }
-
-    private void preloadImage(Context context, String imageName) {
-        try {
-            int resourceId = context.getResources().getIdentifier(
-                    imageName.toLowerCase(), "drawable", context.getPackageName());
-            if (resourceId != 0) {
-                Glide.with(context).load(resourceId).preload();
-            }
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
