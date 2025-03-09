@@ -69,8 +69,10 @@ public class PerformanceDataCenter {
         switch (loadType) {
             case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
                 loadTypeStr = "轻负载";
-                if (cachedLightLoadFriendCircleBeans == null) {
-                    Log.d(TAG, "getFriendCircleBeans: 生成轻负载数据");
+                
+                // 为了调试，每次都重新生成数据
+                if (true || cachedLightLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 强制生成轻负载数据，loadType=" + loadType);
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                     // 打印点赞和评论数量统计
                     printStatistics(cachedLightLoadFriendCircleBeans, loadType);
@@ -80,8 +82,10 @@ public class PerformanceDataCenter {
                 return cachedLightLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
                 loadTypeStr = "中负载";
-                if (cachedMediumLoadFriendCircleBeans == null) {
-                    Log.d(TAG, "getFriendCircleBeans: 生成中负载数据");
+                
+                // 为了调试，每次都重新生成数据
+                if (true || cachedMediumLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 强制生成中负载数据，loadType=" + loadType);
                     cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                     // 打印点赞和评论数量统计
                     printStatistics(cachedMediumLoadFriendCircleBeans, loadType);
@@ -91,8 +95,10 @@ public class PerformanceDataCenter {
                 return cachedMediumLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
                 loadTypeStr = "高负载";
-                if (cachedHeavyLoadFriendCircleBeans == null) {
-                    Log.d(TAG, "getFriendCircleBeans: 生成高负载数据");
+                
+                // 为了调试，每次都重新生成数据
+                if (true || cachedHeavyLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 强制生成高负载数据，loadType=" + loadType);
                     cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                     // 打印点赞和评论数量统计
                     printStatistics(cachedHeavyLoadFriendCircleBeans, loadType);
@@ -102,8 +108,10 @@ public class PerformanceDataCenter {
                 return cachedHeavyLoadFriendCircleBeans;
             default:
                 loadTypeStr = "未知负载，使用轻负载";
-                if (cachedLightLoadFriendCircleBeans == null) {
-                    Log.d(TAG, "getFriendCircleBeans: 生成默认轻负载数据");
+                
+                // 为了调试，每次都重新生成数据
+                if (true || cachedLightLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 强制生成默认轻负载数据，loadType=" + PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
                     // 打印点赞和评论数量统计
                     printStatistics(cachedLightLoadFriendCircleBeans, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
@@ -322,6 +330,10 @@ public class PerformanceDataCenter {
                 
                 // Set comment content
                 commentBean.setContent(COMMENT_CONTENTS[contentIndex]);
+                
+                // 生成时直接设置childUserName和commentContent
+                commentBean.setChildUserName(userBean.getUserName());
+                commentBean.setCommentContent(COMMENT_CONTENTS[contentIndex]);
             } else {
                 commentBean.setCommentType(COMMENT_TYPE_REPLY);
                 int contentIndex = (position + i) % COMMENT_CONTENTS.length;
@@ -339,9 +351,20 @@ public class PerformanceDataCenter {
                 commentBean.setToUserBean(toUserBean);
                 
                 commentBean.setContent(COMMENT_CONTENTS[contentIndex]);
+                
+                // 生成时直接设置childUserName、parentUserName和commentContent
+                commentBean.setChildUserName(fromUserBean.getUserName());
+                commentBean.setParentUserName(toUserBean.getUserName());
+                commentBean.setCommentContent(COMMENT_CONTENTS[contentIndex]);
             }
+            
+            // 直接在这里构建评论内容样式
+            commentBean.build(null);
+            
             commentBeans.add(commentBean);
         }
+        
+        Log.d(TAG, "generateCommentBeans: 完成生成评论数据，数量=" + commentBeans.size());
         return commentBeans;
     }
     
@@ -375,8 +398,15 @@ public class PerformanceDataCenter {
             userBean.setUserName(USER_NAMES[(position + i) % USER_NAMES.length]);
             userBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
             praiseBean.setUserBean(userBean);
+            
+            // 直接设置praiseUserName和praiseUserId
+            praiseBean.setPraiseUserName(userBean.getUserName());
+            praiseBean.setPraiseUserId(userBean.getUserId());
+            
             praiseBeans.add(praiseBean);
         }
+        
+        Log.d(TAG, "generatePraiseBeans: 完成生成点赞数据，数量=" + praiseBeans.size());
         return praiseBeans;
     }
 } 

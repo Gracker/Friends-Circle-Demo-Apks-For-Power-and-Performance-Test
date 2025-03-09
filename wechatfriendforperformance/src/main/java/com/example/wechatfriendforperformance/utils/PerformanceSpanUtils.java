@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
 import com.example.wechatfriendforperformance.PerformanceConstants;
 import com.example.wechatfriendforperformance.beans.PraiseBean;
@@ -16,6 +17,8 @@ import java.util.List;
  */
 public class PerformanceSpanUtils {
 
+    private static final String TAG = "PerformanceSpanUtils";
+
     /**
      * 创建点赞文本样式
      * @param context 上下文
@@ -24,8 +27,11 @@ public class PerformanceSpanUtils {
      */
     public static SpannableStringBuilder makePraiseSpan(Context context, List<PraiseBean> praiseBeans) {
         if (praiseBeans == null || praiseBeans.isEmpty()) {
+            Log.d(TAG, "makePraiseSpan: 点赞列表为空");
             return new SpannableStringBuilder();
         }
+        
+        Log.d(TAG, "makePraiseSpan: 开始构建点赞文本，点赞数量: " + praiseBeans.size());
         
         SpannableStringBuilder builder = new SpannableStringBuilder();
         
@@ -37,12 +43,16 @@ public class PerformanceSpanUtils {
             if (userName == null || userName.isEmpty()) {
                 if (praiseBean.getUserBean() != null) {
                     userName = praiseBean.getUserBean().getUserName();
+                    Log.d(TAG, "makePraiseSpan: 从userBean获取用户名: " + userName);
                 }
                 
                 // 如果仍然为空，使用默认名称
                 if (userName == null || userName.isEmpty()) {
                     userName = "用户" + i;
+                    Log.d(TAG, "makePraiseSpan: 使用默认用户名: " + userName);
                 }
+            } else {
+                Log.d(TAG, "makePraiseSpan: 使用praiseUserName: " + userName);
             }
             
             // 添加用户名
@@ -60,6 +70,7 @@ public class PerformanceSpanUtils {
             }
         }
         
+        Log.d(TAG, "makePraiseSpan: 点赞文本构建完成: " + builder.toString());
         return builder;
     }
 } 

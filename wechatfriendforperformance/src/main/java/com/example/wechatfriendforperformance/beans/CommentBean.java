@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 
 import com.example.wechatfriendforperformance.PerformanceConstants;
 
@@ -12,6 +13,8 @@ import com.example.wechatfriendforperformance.PerformanceConstants;
  * 评论数据模型类
  */
 public class CommentBean {
+    
+    private static final String TAG = "CommentBean";
     
     private int commentType;
     private String childUserName;
@@ -57,6 +60,11 @@ public class CommentBean {
     }
     
     public SpannableStringBuilder getCommentContentSpan() {
+        // 如果还没有创建评论内容样式，则先构建
+        if (commentContentSpan == null) {
+            Log.d(TAG, "getCommentContentSpan: 评论文本未构建，尝试自动构建");
+            build(null);
+        }
         return commentContentSpan;
     }
     
@@ -72,6 +80,10 @@ public class CommentBean {
      */
     public void setFromUserBean(UserBean fromUserBean) {
         this.fromUserBean = fromUserBean;
+        // 自动设置childUserName
+        if (fromUserBean != null && (childUserName == null || childUserName.isEmpty())) {
+            setChildUserName(fromUserBean.getUserName());
+        }
     }
     
     /**
@@ -86,6 +98,10 @@ public class CommentBean {
      */
     public void setToUserBean(UserBean toUserBean) {
         this.toUserBean = toUserBean;
+        // 自动设置parentUserName
+        if (toUserBean != null && (parentUserName == null || parentUserName.isEmpty())) {
+            setParentUserName(toUserBean.getUserName());
+        }
     }
     
     /**
@@ -100,6 +116,10 @@ public class CommentBean {
      */
     public void setContent(String content) {
         this.content = content;
+        // 自动设置commentContent
+        if (content != null && (commentContent == null || commentContent.isEmpty())) {
+            setCommentContent(content);
+        }
     }
     
     /**
@@ -107,6 +127,37 @@ public class CommentBean {
      * @param context 上下文
      */
     public void build(Context context) {
+        Log.d(TAG, "build: 开始构建评论文本 childUserName=" + childUserName + ", parentUserName=" + 
+              parentUserName + ", commentType=" + commentType + ", content=" + 
+              (commentContent != null ? commentContent : content));
+              
+        // 确保必要的字段已设置
+        if (childUserName == null || childUserName.isEmpty()) {
+            if (fromUserBean != null && fromUserBean.getUserName() != null) {
+                childUserName = fromUserBean.getUserName();
+                Log.d(TAG, "build: 自动设置childUserName=" + childUserName);
+            } else {
+                childUserName = "未知用户";
+                Log.d(TAG, "build: 使用默认childUserName");
+            }
+        }
+        
+        if (commentType == PerformanceConstants.CommentType.COMMENT_TYPE_REPLY && 
+            (parentUserName == null || parentUserName.isEmpty())) {
+            if (toUserBean != null && toUserBean.getUserName() != null) {
+                parentUserName = toUserBean.getUserName();
+                Log.d(TAG, "build: 自动设置parentUserName=" + parentUserName);
+            } else {
+                parentUserName = "未知用户";
+                Log.d(TAG, "build: 使用默认parentUserName");
+            }
+        }
+        
+        if (commentContent == null || commentContent.isEmpty()) {
+            commentContent = content;
+            Log.d(TAG, "build: 使用content作为commentContent");
+        }
+              
         SpannableStringBuilder builder = new SpannableStringBuilder();
         
         // 添加评论者用户名
@@ -135,5 +186,6 @@ public class CommentBean {
         builder.append("：").append(commentContent != null ? commentContent : content);
         
         this.commentContentSpan = builder;
+        Log.d(TAG, "build: 评论文本构建完成: " + (commentContentSpan != null ? commentContentSpan.toString() : "null"));
     }
 } 

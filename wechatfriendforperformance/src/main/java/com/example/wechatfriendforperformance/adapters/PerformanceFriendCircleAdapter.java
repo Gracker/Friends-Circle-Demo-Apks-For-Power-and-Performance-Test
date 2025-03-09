@@ -9,7 +9,9 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Trace;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -312,7 +314,18 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             // Set likes
             if (hasPraise) {
                 viewHolder.layoutPraise.setVisibility(View.VISIBLE);
+                
+                // 确保praiseSpan已经设置
+                if (friendCircleBean.getPraiseSpan() == null && friendCircleBean.getPraiseBeans() != null) {
+                    Log.d("PerformanceFriendCircle", "onBindViewHolder: 点赞文本为空，正在重新生成，position=" + dataPosition);
+                    SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(mContext, friendCircleBean.getPraiseBeans());
+                    friendCircleBean.setPraiseSpan(praiseSpan);
+                }
+                
                 viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
+                Log.d("PerformanceFriendCircle", "onBindViewHolder: 设置点赞文本 position=" + dataPosition + 
+                    ", 点赞数量=" + friendCircleBean.getPraiseBeans().size() + 
+                    ", 文本=" + (friendCircleBean.getPraiseSpan() != null ? friendCircleBean.getPraiseSpan().toString() : "null"));
             } else {
                 viewHolder.layoutPraise.setVisibility(View.GONE);
             }
@@ -320,8 +333,19 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             // Set comments
             if (hasComment) {
                 viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
+                
+                // 确保评论内容已构建
+                for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
+                    if (commentBean.getCommentContentSpan() == null) {
+                        Log.d("PerformanceFriendCircle", "onBindViewHolder: 评论文本为空，正在重新生成");
+                        commentBean.build(mContext);
+                    }
+                }
+                
                 CommentAdapter commentAdapter = new CommentAdapter(mContext, friendCircleBean.getCommentBeans());
                 viewHolder.recyclerViewComment.setAdapter(commentAdapter);
+                Log.d("PerformanceFriendCircle", "onBindViewHolder: 设置评论内容 position=" + dataPosition + 
+                    ", 评论数量=" + friendCircleBean.getCommentBeans().size());
             } else {
                 viewHolder.recyclerViewComment.setVisibility(View.GONE);
             }
