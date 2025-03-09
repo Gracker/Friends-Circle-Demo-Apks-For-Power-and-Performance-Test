@@ -57,6 +57,13 @@ public class HeavyLoadActivity extends AppCompatActivity {
     protected void onResume() {
         Trace.beginSection("HeavyLoadActivity_onResume");
         super.onResume();
+        
+        // 确保数据已根据正确的负载类型生成
+        if (adapter != null) {
+            // 刷新数据，确保显示正确的点赞和评论数量
+            adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY));
+        }
+        
         Trace.endSection();
     }
 

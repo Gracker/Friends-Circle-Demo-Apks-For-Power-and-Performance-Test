@@ -47,6 +47,9 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     public void onClick(View v) {
         int id = v.getId();
         
+        // 先清除所有缓存的数据，确保每次都重新生成
+        PerformanceDataCenter.getInstance().clearCachedData();
+        
         if (id == R.id.btn_light_load) {
             Trace.beginSection("PerformanceMainActivity_startLightLoad");
             // Start LightLoad Activity

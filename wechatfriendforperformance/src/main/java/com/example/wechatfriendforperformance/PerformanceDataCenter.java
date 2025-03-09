@@ -2,6 +2,7 @@ package com.example.wechatfriendforperformance;
 
 import android.content.Context;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 
 import com.example.wechatfriendforperformance.beans.CommentBean;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
@@ -21,6 +22,8 @@ import static com.example.wechatfriendforperformance.PerformanceConstants.*;
  * Performance test data center, generate fixed test data
  */
 public class PerformanceDataCenter {
+
+    private static final String TAG = "PerformanceDataCenter";
 
     private static final PerformanceDataCenter instance = new PerformanceDataCenter();
     private List<FriendCircleBean> cachedLightLoadFriendCircleBeans;
@@ -46,6 +49,7 @@ public class PerformanceDataCenter {
      * 清除缓存的数据，确保下次获取数据时重新生成
      */
     public void clearCachedData() {
+        Log.d(TAG, "clearCachedData: 清除所有缓存数据");
         cachedLightLoadFriendCircleBeans = null;
         cachedMediumLoadFriendCircleBeans = null;
         cachedHeavyLoadFriendCircleBeans = null;
@@ -56,24 +60,33 @@ public class PerformanceDataCenter {
     }
 
     public List<FriendCircleBean> getFriendCircleBeans(int loadType) {
+        String loadTypeStr = "";
         switch (loadType) {
             case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                loadTypeStr = "轻负载";
                 if (cachedLightLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 生成轻负载数据");
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 }
                 return cachedLightLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                loadTypeStr = "中负载";
                 if (cachedMediumLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 生成中负载数据");
                     cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 }
                 return cachedMediumLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                loadTypeStr = "高负载";
                 if (cachedHeavyLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 生成高负载数据");
                     cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 }
                 return cachedHeavyLoadFriendCircleBeans;
             default:
+                loadTypeStr = "未知负载，使用轻负载";
                 if (cachedLightLoadFriendCircleBeans == null) {
+                    Log.d(TAG, "getFriendCircleBeans: 生成默认轻负载数据");
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
                 }
                 return cachedLightLoadFriendCircleBeans;
@@ -83,6 +96,8 @@ public class PerformanceDataCenter {
     private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
         // Generate fixed 100 friend circle items
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
+        Log.d(TAG, "generateFriendCircleBeans: 开始生成负载类型=" + loadType + "的朋友圈数据");
+        
         for (int i = 0; i < 100; i++) {
             FriendCircleBean bean = new FriendCircleBean();
             // Set view type, cycling through three types
@@ -181,6 +196,9 @@ public class PerformanceDataCenter {
                 break;
         }
         
+        // 打印日志，记录评论数量
+        Log.d(TAG, "generateCommentBeans: position=" + position + ", loadType=" + loadType + ", commentCount=" + commentCount);
+        
         if (commentCount == 0) {
             return commentBeans; // No comments
         }
@@ -241,6 +259,9 @@ public class PerformanceDataCenter {
                 praiseCount = position % 3 + 1;
                 break;
         }
+        
+        // 打印日志，记录点赞数量
+        Log.d(TAG, "generatePraiseBeans: position=" + position + ", loadType=" + loadType + ", praiseCount=" + praiseCount);
         
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
