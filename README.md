@@ -1,6 +1,11 @@
-# 高性能微信朋友圈测试平台
+# 高性能微信朋友圈测试 Demo
 
-本项目是一个基于微信朋友圈UI的性能测试平台，旨在研究Android滑动性能和功耗表现。项目包含三个主要模块，分别用于不同方面的测试和研究。
+本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含三个主要模块，分别用于不同方面的测试和研究。
+
+![main_page.jpg](pic/main_page.jpg)
+![friends_1.jpg](pic/friends_1.jpg)
+![friends_2.jpg](pic/friends_2.jpg)
+![trace.png](pic/trace.png)
 
 ## 项目结构
 
@@ -8,9 +13,7 @@
 
 ### 1. 原始项目 (app)
 
-原始的高性能微信朋友圈实现，来自fork的项目。这个模块展示了如何高效实现类似微信朋友圈的滑动列表，包含多种性能优化技巧。
-
-![](https://github.com/KCrason/HighPerformanceFriendsCircle/blob/master/app/apk/20180503_222857.gif)
+原始的高性能微信朋友圈实现，来自 fork 的项目。这个模块展示了如何高效实现类似微信朋友圈的滑动列表，包含多种性能优化技巧。
 
 ### 2. 性能测试模块 (wechatfriendforperformance)
 
@@ -20,7 +23,7 @@
 - **中等负载测试**: 每帧计算量中等，滑动有一定压力
 - **高负载测试**: 每帧计算量大，滑动压力重
 
-该模块在关键代码处添加了Trace点，方便使用Perfetto等工具进行性能分析和优化。
+该模块在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
 
 ### 3. 功耗测试模块 (wechatfriendforpower)
 
@@ -28,27 +31,27 @@
 
 ## 性能优化策略
 
-在Android中，要避免列表卡顿，主要从以下几个角度进行优化：
+在 Android 中，要避免列表卡顿，主要从以下几个角度进行优化：
 
-- 减少布局层级，避免过多的Item View的无用布局嵌套
+- 减少布局层级，避免过多的 Item View 的无用布局嵌套
 - 滑动时控制图片加载，停止滑动后再加载图片
-- 避免在Adapter填充数据时做过多计算，复杂计算应在数据准备阶段完成
-- 在数据Bean中完成数据变换操作，如将String转换为SpannableStringBuilder
-- 减少onMeasure()和onLayout()的调用次数
-- 实现View对象的缓存，减少View的创建
+- 避免在 Adapter 填充数据时做过多计算，复杂计算应在数据准备阶段完成
+- 在数据 Bean 中完成数据变换操作，如将 String 转换为 SpannableStringBuilder
+- 减少 onMeasure() 和 onLayout() 的调用次数
+- 实现 View 对象的缓存，减少 View 的创建
 
 ## 如何使用
 
-1. 运行`app`模块查看原始的高性能朋友圈实现
-2. 运行`wechatfriendforperformance`模块进行性能测试：
+1. 运行 `app` 模块查看原始的高性能朋友圈实现
+2. 运行 `wechatfriendforperformance` 模块进行性能测试：
    - 选择不同的负载级别
-   - 使用Perfetto或其他性能分析工具收集数据
-   - 分析Trace结果进行性能优化
-3. 运行`wechatfriendforpower`模块测试功耗表现
+   - 使用 Perfetto 或其他性能分析工具收集数据
+   - 分析 Trace 结果进行性能优化
+3. 运行 `wechatfriendforpower` 模块测试功耗表现
 
 ## 特别鸣谢
 
-感谢原项目作者[KCrason](https://github.com/KCrason)的杰出工作和[razerdp](https://github.com/razerdp)提供的View缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能和功耗测试模块。
+感谢原项目作者 [KCrason](https://github.com/KCrason) 的杰出工作和 [razerdp](https://github.com/razerdp) 提供的 View 缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能和功耗测试模块。
 
 ## 未来计划
 
@@ -58,4 +61,4 @@
 - 实现表情匹配
 - 实现电话号码匹配等功能
 
-欢迎Star和贡献！
+欢迎 Star 和贡献！

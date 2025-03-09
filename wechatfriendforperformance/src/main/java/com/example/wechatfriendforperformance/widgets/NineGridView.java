@@ -11,143 +11,127 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.wechatfriendforperformance.adapters.NineImageAdapter;
+
+import java.util.List;
+
 /**
- * 九宫格图片控件，与原项目保持一致
+ * NineGridView for displaying images in a grid layout similar to WeChat Moments
  */
 public class NineGridView extends ViewGroup {
 
-    private static final int MAX_COLUMN_COUNT = 3; // 最大列数
-    private static final int ITEM_GAP = 6; // 图片之间的间距，与原项目保持一致
+    private static final int MAX_COLUMN_COUNT = 3; // Maximum number of columns
+    private static final int ITEM_GAP = 6; // Gap between images, consistent with the original project
     
-    private NineGridAdapter<?> mAdapter;
-    private int mColumnCount;
+    private NineImageAdapter mAdapter;
+    private int mColumns;
+    private int mRows;
+    private int mSingleWidth;
     private int mItemCount;
-    private int mItemSize;
     
     public NineGridView(Context context) {
         super(context);
-        init(context);
-    }
-
-    public NineGridView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context);
-    }
-
-    public NineGridView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(context);
-    }
-
-    private void init(Context context) {
-        // 空实现，由setAdapter时设置
     }
     
-    public void setAdapter(NineGridAdapter<?> adapter) {
-        if (adapter == null) {
+    public NineGridView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+    
+    public NineGridView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+    
+    /**
+     * Set adapter for the grid view
+     * @param adapter The adapter to provide images
+     */
+    public void setAdapter(@NonNull NineImageAdapter adapter) {
+        // Empty implementation, set by adapter time
+        this.mAdapter = adapter;
+        List<?> imageList = adapter.getImageData();
+        if (imageList == null) {
             return;
         }
         
-        // 清除旧的视图
+        // Clear old views
         removeAllViews();
-        
-        mAdapter = adapter;
-        mItemCount = adapter.getCount();
-        
-        // 根据图片数量确定列数
-        if (mItemCount == 1) {
-            mColumnCount = 1;
-        } else if (mItemCount == 2 || mItemCount == 4) {
-            mColumnCount = 2;
-        } else {
-            mColumnCount = Math.min(mItemCount, MAX_COLUMN_COUNT);
+        mItemCount = imageList.size();
+        if (mItemCount == 0) {
+            return;
         }
         
-        // 添加子视图
+        // Determine number of columns based on image count
+        mColumns = mItemCount == 4 ? 2 : Math.min(MAX_COLUMN_COUNT, mItemCount);
+        mRows = (int) Math.ceil(mItemCount * 1.0 / mColumns);
+        
+        // Add child views
         for (int i = 0; i < mItemCount; i++) {
-            View itemView = adapter.getView(i, null);
+            View itemView = adapter.getView(i, null, this);
             addView(itemView);
         }
         
-        // 请求重新布局
+        // Request layout
         requestLayout();
     }
-
+    
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        
-        if (mAdapter == null || mItemCount == 0) {
+        if (mItemCount == 0) {
             setMeasuredDimension(0, 0);
             return;
         }
         
-        // 获取控件宽度（不包括padding）
-        int width = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
+        // Get view width (excluding padding)
+        int width = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
         
-        // 计算每个图片的宽度
-        mItemSize = (width - ITEM_GAP * (mColumnCount - 1)) / mColumnCount;
+        // Calculate width for each image
+        mSingleWidth = (width - (mColumns - 1) * dpToPx(ITEM_GAP)) / mColumns;
         
-        // 计算行数
-        int rowCount = (int) Math.ceil(mItemCount * 1.0 / mColumnCount);
+        // Calculate number of rows
+        int height = mRows * mSingleWidth + (mRows - 1) * dpToPx(ITEM_GAP);
         
-        // 计算总高度
-        int totalHeight = rowCount * mItemSize + (rowCount - 1) * ITEM_GAP;
+        // Set new measurement dimensions
+        setMeasuredDimension(width, height);
         
-        // 设置新的测量尺寸
-        setMeasuredDimension(
-            MeasureSpec.getSize(widthMeasureSpec),
-            totalHeight + getPaddingTop() + getPaddingBottom()
-        );
-        
-        // 测量子视图
+        // Measure child views
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            int childWidthSpec = MeasureSpec.makeMeasureSpec(mItemSize, MeasureSpec.EXACTLY);
-            int childHeightSpec = MeasureSpec.makeMeasureSpec(mItemSize, MeasureSpec.EXACTLY);
-            child.measure(childWidthSpec, childHeightSpec);
+            measureChild(child, mSingleWidth, mSingleWidth);
         }
     }
-
+    
+    private void measureChild(View child, int width, int height) {
+        int widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+        int heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+        child.measure(widthSpec, heightSpec);
+    }
+    
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        int childCount = getChildCount();
-        if (childCount == 0) {
+        if (mItemCount == 0) {
             return;
         }
         
-        for (int i = 0; i < childCount; i++) {
+        for (int i = 0; i < mItemCount; i++) {
+            // Calculate child view's row and column position in the grid
+            int row = i / mColumns;
+            int col = i % mColumns;
+            
+            // Calculate child view's position
             View child = getChildAt(i);
+            int l = col * (mSingleWidth + dpToPx(ITEM_GAP));
+            int t = row * (mSingleWidth + dpToPx(ITEM_GAP));
             
-            // 计算子视图在网格中的行列位置
-            int row = i / mColumnCount;
-            int col = i % mColumnCount;
-            
-            // 计算子视图的位置
-            int childLeft = getPaddingLeft() + col * (mItemSize + ITEM_GAP);
-            int childTop = getPaddingTop() + row * (mItemSize + ITEM_GAP);
-            int childRight = childLeft + mItemSize;
-            int childBottom = childTop + mItemSize;
-            
-            // 布局子视图
-            child.layout(childLeft, childTop, childRight, childBottom);
+            // Layout child view
+            child.layout(l, t, l + mSingleWidth, t + mSingleWidth);
         }
     }
     
     /**
-     * dp转px
+     * Convert dp to px
      */
-    private int dpToPx(float dp) {
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
-    }
-    
-    /**
-     * 九宫格适配器接口，与原项目保持一致
-     */
-    public interface NineGridAdapter<T> {
-        int getCount();
-        T getItem(int position);
-        View getView(int position, View itemView);
+    private int dpToPx(int dp) {
+        float density = getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
     }
 } 

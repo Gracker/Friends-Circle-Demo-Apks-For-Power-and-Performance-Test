@@ -5,28 +5,33 @@ import android.os.Bundle;
 import android.os.Trace;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * 性能测试主Activity，用于选择不同负载级别的测试
+ * Performance test main Activity, used to select different load levels for testing
  */
 public class PerformanceMainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private Button btnLightLoad, btnMediumLoad, btnHeavyLoad;
+    private TextView tvAppTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("PerformanceMainActivity_onCreate");
         super.onCreate(savedInstanceState);
-        // 应用无ActionBar的主题
+        // Apply theme without ActionBar
         setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         setContentView(R.layout.activity_performance_main);
-
-        // 初始化按钮
-        Button btnLightLoad = findViewById(R.id.btn_light_load);
-        Button btnMediumLoad = findViewById(R.id.btn_medium_load);
-        Button btnHeavyLoad = findViewById(R.id.btn_heavy_load);
-
-        // 设置点击监听器
+        
+        // Initialize buttons
+        btnLightLoad = findViewById(R.id.btn_light_load);
+        btnMediumLoad = findViewById(R.id.btn_medium_load);
+        btnHeavyLoad = findViewById(R.id.btn_heavy_load);
+        tvAppTitle = findViewById(R.id.tv_app_title);
+        
+        // Set click listeners
         btnLightLoad.setOnClickListener(this);
         btnMediumLoad.setOnClickListener(this);
         btnHeavyLoad.setOnClickListener(this);
@@ -46,19 +51,22 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
         int id = v.getId();
         
         if (id == R.id.btn_light_load) {
-            // 启动轻负载Activity
-            Trace.beginSection("StartLightLoadActivity");
-            startActivity(new Intent(this, LightLoadActivity.class));
+            Trace.beginSection("PerformanceMainActivity_startLightLoad");
+            // Start LightLoad Activity
+            Intent intent = new Intent(this, LightLoadActivity.class);
+            startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load) {
-            // 启动中等负载Activity
-            Trace.beginSection("StartMediumLoadActivity");
-            startActivity(new Intent(this, MediumLoadActivity.class));
+            Trace.beginSection("PerformanceMainActivity_startMediumLoad");
+            // Start MediumLoad Activity
+            Intent intent = new Intent(this, MediumLoadActivity.class);
+            startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load) {
-            // 启动高负载Activity
-            Trace.beginSection("StartHeavyLoadActivity");
-            startActivity(new Intent(this, HeavyLoadActivity.class));
+            Trace.beginSection("PerformanceMainActivity_startHeavyLoad");
+            // Start HeavyLoad Activity
+            Intent intent = new Intent(this, HeavyLoadActivity.class);
+            startActivity(intent);
             Trace.endSection();
         }
         Trace.endSection();

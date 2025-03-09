@@ -12,94 +12,96 @@ import com.example.wechatfriendforperformance.utils.PerformanceSpanUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import static com.example.wechatfriendforperformance.PerformanceConstants.*;
 
 /**
- * 性能测试专用的数据中心，生成固定的测试数据
+ * Performance test data center, generate fixed test data
  */
 public class PerformanceDataCenter {
 
-    // 固定的头像资源名称数组
-    public static final String[] AVATAR_URLS = {
-            "avatar1", "avatar2", "avatar3", "avatar4", "avatar5", 
-            "avatar6", "avatar7", "avatar8", "avatar9", "avatar10", "avatar11"
+    private static final PerformanceDataCenter instance = new PerformanceDataCenter();
+    private List<FriendCircleBean> cachedFriendCircleBeans;
+    
+    // Fixed avatar resource name array
+    private static final String[] AVATAR_RES_NAMES = {
+            "avatar1", "avatar2", "avatar3", "avatar4", "avatar5",
+            "avatar6", "avatar7", "avatar8", "avatar9", "avatar10",
+            "avatar11"
     };
-
-    public static void init() {
-        // 初始化操作，如果需要的话
+    
+    private PerformanceDataCenter() {
+        // Initialization operations, if needed
     }
-
-    /**
-     * 生成固定的朋友圈数据，每次都返回相同的数据
-     */
-    public static List<FriendCircleBean> makeFriendCircleBeans(Context context) {
-        List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
-        
-        // 生成固定的100个朋友圈项目
-        for (int i = 0; i < 100; i++) {
-            FriendCircleBean friendCircleBean = new FriendCircleBean();
-            
-            // 设置视图类型，循环使用三种类型
-            int viewType = i % 3;
-            friendCircleBean.setViewType(viewType);
-            
-            // 设置内容，循环使用预定义的内容
-            int contentIndex = i % PerformanceConstants.CONTENTS.length;
-            friendCircleBean.setContent(PerformanceConstants.CONTENTS[contentIndex]);
-            
-            // 设置评论，根据位置循环变化评论数量
-            friendCircleBean.setCommentBeans(makeCommentBeans(context, i));
-            
-            // 设置点赞，根据位置循环变化点赞数量
-            List<PraiseBean> praiseBeans = makePraiseBeans(i);
-            friendCircleBean.setPraiseSpan(PerformanceSpanUtils.makePraiseSpan(context, praiseBeans));
-            friendCircleBean.setPraiseBeans(praiseBeans);
-            
-            // 设置图片，根据索引循环使用1、3、6、9张图片
-            List<String> imageUrls = makeImageUrls(i);
-            friendCircleBean.setImageUrls(imageUrls);
-            
-            // 设置用户信息
-            UserBean userBean = new UserBean();
-            int userIndex = i % PerformanceConstants.USER_NAMES.length;
-            userBean.setUserName(PerformanceConstants.USER_NAMES[userIndex]);
-            
-            // 根据位置轮流使用avatar1-avatar11作为头像
-            int avatarIndex = i % AVATAR_URLS.length;
-            userBean.setUserAvatarUrl(AVATAR_URLS[avatarIndex]);
-            
-            userBean.setUserId(i);
-            friendCircleBean.setUserBean(userBean);
-            
-            // 设置其他信息
-            OtherInfoBean otherInfoBean = new OtherInfoBean();
-            int timeIndex = i % PerformanceConstants.TIMES.length;
-            otherInfoBean.setTime(PerformanceConstants.TIMES[timeIndex]);
-            int sourceIndex = i % PerformanceConstants.SOURCES.length;
-            otherInfoBean.setSource(PerformanceConstants.SOURCES[sourceIndex]);
-
-            // 设置位置信息，随机选择是否显示位置
-            if (i % 3 == 0) { // 三分之一的概率显示位置
-                int locationIndex = i % PerformanceConstants.LOCATIONS.length;
-                otherInfoBean.setLocation(PerformanceConstants.LOCATIONS[locationIndex]);
-            }
-
-            friendCircleBean.setOtherInfoBean(otherInfoBean);
-            
-            friendCircleBeans.add(friendCircleBean);
+    
+    public static PerformanceDataCenter getInstance() {
+        return instance;
+    }
+    
+    public List<FriendCircleBean> getFriendCircleBeans() {
+        if (cachedFriendCircleBeans == null) {
+            cachedFriendCircleBeans = generateFriendCircleBeans();
         }
-        
+        return cachedFriendCircleBeans;
+    }
+    
+    private List<FriendCircleBean> generateFriendCircleBeans() {
+        // Generate fixed 100 friend circle items
+        List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            FriendCircleBean bean = new FriendCircleBean();
+            // Set view type, cycling through three types
+            int viewType = i % 3;
+            bean.setViewType(viewType);
+            
+            // Set content, cycling through predefined contents
+            bean.setContent(CONTENTS[i % CONTENTS.length]);
+            
+            // Set comments, cycling comment count based on position
+            List<CommentBean> commentBeans = generateCommentBeans(i);
+            bean.setCommentBeans(commentBeans);
+            
+            // Set likes, cycling like count based on position
+            List<PraiseBean> praiseBeans = generatePraiseBeans(i);
+            bean.setPraiseBeans(praiseBeans);
+            
+            // Set images, cycling through 1, 3, 6, 9 images based on index
+            List<String> imageUrls = new ArrayList<>();
+            generateImageUrls(imageUrls, i);
+            bean.setImageUrls(imageUrls);
+            
+            // Set user information
+            UserBean userBean = new UserBean();
+            userBean.setUserId(String.valueOf(i));
+            userBean.setUserName(USER_NAMES[i % USER_NAMES.length]);
+            
+            // Cycle through avatar1-avatar11 as avatars based on position
+            int avatarIndex = i % AVATAR_RES_NAMES.length;
+            userBean.setUserAvatarUrl(AVATAR_RES_NAMES[avatarIndex]);
+            bean.setUserBean(userBean);
+            
+            // Set other information
+            OtherInfoBean otherInfoBean = new OtherInfoBean();
+            otherInfoBean.setTime(TIMES[i % TIMES.length]);
+            otherInfoBean.setSource(SOURCES[i % SOURCES.length]);
+            
+            // Set location information, randomly choose whether to display location
+            if (i % 3 == 0) { // One third probability to show location
+                otherInfoBean.setLocation(LOCATIONS[i % LOCATIONS.length]);
+            }
+            
+            bean.setOtherInfoBean(otherInfoBean);
+            friendCircleBeans.add(bean);
+        }
         return friendCircleBeans;
     }
     
-    /**
-     * 生成图片URL列表，根据索引循环使用1、3、6、9张图片
-     */
-    private static List<String> makeImageUrls(int position) {
-        List<String> imageUrls = new ArrayList<>();
-        
-        // 根据位置决定图片数量：1、3、6、9张循环
+    private void generateImageUrls(List<String> imageUrls, int position) {
+        // Determine image count based on position: cycling through 1, 3, 6, 9 images
         int imageCount;
-        switch (position % 4) {
+        int remainder = position % 4;
+        switch (remainder) {
             case 0:
                 imageCount = 1;
                 break;
@@ -114,70 +116,77 @@ public class PerformanceDataCenter {
                 break;
             default:
                 imageCount = 1;
+                break;
         }
         
-        // 添加图片
+        // Add images
         for (int i = 0; i < imageCount; i++) {
-            int imageIndex = (position + i) % PerformanceConstants.SINGLE_IMAGE_URLS.length;
-            imageUrls.add(PerformanceConstants.SINGLE_IMAGE_URLS[imageIndex]);
+            // Each position uses different subset of images to increase variety
+            int imageIndex = (position + i) % IMAGE_RESOURCES.length;
+            imageUrls.add(IMAGE_RESOURCES[imageIndex]);
         }
-        
-        return imageUrls;
     }
-
-    /**
-     * 生成评论数据，根据位置循环变化评论数量
-     */
-    private static List<CommentBean> makeCommentBeans(Context context, int position) {
+    
+    private List<CommentBean> generateCommentBeans(int position) {
         List<CommentBean> commentBeans = new ArrayList<>();
         
-        // 评论数量循环变化：0-5条
+        // Comment count cycles through 0-5
         int commentCount = position % 6;
+        if (commentCount == 0) {
+            return commentBeans; // No comments
+        }
         
         for (int i = 0; i < commentCount; i++) {
             CommentBean commentBean = new CommentBean();
-            
-            // 为了增加互动性，偶数索引为单条评论，奇数索引为回复评论
+            // To increase interactivity, even indices are single comments, odd indices are reply comments
             if (i % 2 == 0) {
-                commentBean.setCommentType(PerformanceConstants.CommentType.COMMENT_TYPE_SINGLE);
-                int userIndex = (position + i) % PerformanceConstants.USER_NAMES.length;
-                commentBean.setChildUserName(PerformanceConstants.USER_NAMES[userIndex]);
+                commentBean.setCommentType(COMMENT_TYPE_SINGLE);
+                int contentIndex = (position + i) % COMMENT_CONTENTS.length;
+                UserBean userBean = new UserBean();
+                userBean.setUserId(String.valueOf(position * 10 + i));
+                userBean.setUserName(USER_NAMES[(position + i) % USER_NAMES.length]);
+                userBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
+                commentBean.setFromUserBean(userBean);
+                
+                // Set comment content
+                commentBean.setContent(COMMENT_CONTENTS[contentIndex]);
             } else {
-                commentBean.setCommentType(PerformanceConstants.CommentType.COMMENT_TYPE_REPLY);
-                int childUserIndex = (position + i) % PerformanceConstants.USER_NAMES.length;
-                commentBean.setChildUserName(PerformanceConstants.USER_NAMES[childUserIndex]);
-                int parentUserIndex = (position + i + 1) % PerformanceConstants.USER_NAMES.length;
-                commentBean.setParentUserName(PerformanceConstants.USER_NAMES[parentUserIndex]);
+                commentBean.setCommentType(COMMENT_TYPE_REPLY);
+                int contentIndex = (position + i) % COMMENT_CONTENTS.length;
+                
+                UserBean fromUserBean = new UserBean();
+                fromUserBean.setUserId(String.valueOf(position * 10 + i));
+                fromUserBean.setUserName(USER_NAMES[(position + i + 1) % USER_NAMES.length]);
+                fromUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[(i + 1) % AVATAR_RES_NAMES.length]);
+                commentBean.setFromUserBean(fromUserBean);
+                
+                UserBean toUserBean = new UserBean();
+                toUserBean.setUserId(String.valueOf(position * 10 + i - 1));
+                toUserBean.setUserName(USER_NAMES[(position + i - 1) % USER_NAMES.length]);
+                toUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[(i - 1) % AVATAR_RES_NAMES.length]);
+                commentBean.setToUserBean(toUserBean);
+                
+                commentBean.setContent(COMMENT_CONTENTS[contentIndex]);
             }
-            
-            // 设置评论内容
-            int contentIndex = (position + i) % PerformanceConstants.COMMENT_CONTENTS.length;
-            commentBean.setCommentContent(PerformanceConstants.COMMENT_CONTENTS[contentIndex]);
-            commentBean.build(context);
-            
             commentBeans.add(commentBean);
         }
-        
         return commentBeans;
     }
-
-    /**
-     * 生成点赞数据，根据位置循环变化点赞数量
-     */
-    private static List<PraiseBean> makePraiseBeans(int position) {
+    
+    private List<PraiseBean> generatePraiseBeans(int position) {
         List<PraiseBean> praiseBeans = new ArrayList<>();
         
-        // 点赞数量循环变化：1-8个
+        // Like count cycles through 1-8
         int praiseCount = position % 8 + 1;
-        
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
-            int userIndex = (position + i) % PerformanceConstants.USER_NAMES.length;
-            praiseBean.setPraiseUserName(PerformanceConstants.USER_NAMES[userIndex]);
-            praiseBean.setPraiseUserId(String.valueOf(userIndex));
+            UserBean userBean = new UserBean();
+            userBean.setUserId(String.valueOf(position * 10 + i));
+            userBean.setUserName(USER_NAMES[(position + i) % USER_NAMES.length]);
+            userBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
+            praiseBean.setUserBean(userBean);
             praiseBeans.add(praiseBean);
         }
-        
         return praiseBeans;
     }
 } 

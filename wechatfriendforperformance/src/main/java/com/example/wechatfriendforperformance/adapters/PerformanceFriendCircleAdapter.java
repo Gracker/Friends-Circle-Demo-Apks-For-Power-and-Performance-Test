@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ import com.example.wechatfriendforperformance.interfaces.OnItemClickPopupMenuLis
 import com.example.wechatfriendforperformance.interfaces.OnPraiseOrCommentClickListener;
 import com.example.wechatfriendforperformance.widgets.NineGridView;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.stfalcon.imageviewer.StfalconImageViewer;
@@ -44,10 +45,10 @@ import java.util.Random;
 public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         implements OnItemClickPopupMenuListener {
 
-    // 负载类型常量
-    public static final int LOAD_TYPE_LIGHT = 0;  // 轻负载
-    public static final int LOAD_TYPE_MEDIUM = 1; // 中等负载
-    public static final int LOAD_TYPE_HEAVY = 2;  // 高负载
+    // Load type constants
+    public static final int LOAD_TYPE_LIGHT = 0;  // Light load
+    public static final int LOAD_TYPE_MEDIUM = 1; // Medium load
+    public static final int LOAD_TYPE_HEAVY = 2;  // Heavy load
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
@@ -62,16 +63,15 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     private RecyclerView mRecyclerView;
     private ImageLoader<String> mImageLoader;
     private View mHeaderView;
-    private Random mRandom = new Random(0); // 使用固定种子，确保每次运行结果一样
-    private int mLoadType; // 负载类型
+    private Random mRandom = new Random(0); // Using fixed seed to ensure consistent results for each run
+    private int mLoadType; // Load type
     
-    // 用于模拟计算负载的变量
-    private Paint mPaint;
-    private Rect mRect;
+    // Variables for simulating computational load
+    private ArrayList<Bitmap> mBitmapList = new ArrayList<>();
+    private Paint mPaint = new Paint();
     private Canvas mCanvas;
-    private Bitmap mTempBitmap;
     
-    // 标识当前负载类型的字符串
+    // String to identify current load type
     private String mLoadTypeString;
 
     public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
@@ -83,33 +83,32 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mAvatarSize = dpToPx(44f);
         this.mLayoutInflater = LayoutInflater.from(context);
         
-        // 使用圆角矩形替代圆形裁剪，圆角半径为8dp，与原项目保持一致
-        this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(dpToPx(8)));
+        // Use rounded rectangle instead of circular crop, with 8dp corner radius to match the original project
+        this.mRequestOptions = new RequestOptions().transform(new CircleCrop());
         
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
         
-        // 设置负载类型字符串
+        // Set load type string
         switch (loadType) {
             case LOAD_TYPE_LIGHT:
-                mLoadTypeString = "轻负载测试";
+                mLoadTypeString = "Light Load";
                 break;
             case LOAD_TYPE_MEDIUM:
-                mLoadTypeString = "中等负载测试";
+                mLoadTypeString = "Medium Load";
                 break;
             case LOAD_TYPE_HEAVY:
-                mLoadTypeString = "高负载测试";
+                mLoadTypeString = "Heavy Load";
                 break;
             default:
-                mLoadTypeString = "性能测试用户";
+                mLoadTypeString = "Unknown Load";
                 break;
         }
         
-        // 初始化用于模拟计算负载的对象
-        this.mPaint = new Paint();
-        this.mRect = new Rect();
-        this.mTempBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        this.mCanvas = new Canvas(mTempBitmap);
+        // Initialize objects for simulating computational load
+        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        mCanvas = new Canvas(bitmap);
+        mBitmapList.add(bitmap);
         
         if (context instanceof OnPraiseOrCommentClickListener) {
             this.mOnPraiseOrCommentClickListener = (OnPraiseOrCommentClickListener) context;
@@ -204,7 +203,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Trace.beginSection("FriendCircleAdapter_onBindViewHolder");
         if (getItemViewType(position) == TYPE_HEADER) {
-            // header view不处理
+            // header view not processed
             Trace.endSection();
             return;
         }
@@ -213,18 +212,18 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         FriendCircleViewHolder viewHolder = (FriendCircleViewHolder) holder;
         FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
         
-        // 根据负载类型执行不同的计算量
+        // Execute different computation based on load type
         simulateComputationalLoad(dataPosition);
         
-        // 设置用户信息
+        // Set user information
         UserBean userBean = friendCircleBean.getUserBean();
         if (userBean != null) {
             viewHolder.txtUserName.setText(userBean.getUserName());
             
-            // 加载头像 - 使用预定义的RequestOptions实现圆角效果
+            // Load avatar - use predefined RequestOptions for rounded effect
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
-                // 处理文件扩展名
+                // Handle file extension
                 if (avatarUrl.contains(".")) {
                     avatarUrl = avatarUrl.substring(0, avatarUrl.lastIndexOf("."));
                 }
@@ -253,28 +252,28 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             }
         }
         
-        // 设置内容
+        // Set content
         viewHolder.txtContent.setText(friendCircleBean.getContent());
         
-        // 设置图片
+        // Set images
         List<String> imageUrls = friendCircleBean.getImageUrls();
         if (imageUrls != null && !imageUrls.isEmpty()) {
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
-            // 使用新的NineImageAdapter
+            // Use new NineImageAdapter
             NineImageAdapter adapter = new NineImageAdapter(mContext, imageUrls);
             viewHolder.nineGridView.setAdapter(adapter);
         } else {
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
         
-        // 设置其他信息
+        // Set other information
         OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
         if (otherInfoBean != null) {
-            // 设置时间
+            // Set time
             String time = otherInfoBean.getTime();
             viewHolder.txtTime.setText(time);
             
-            // 设置来源
+            // Set source
             String source = otherInfoBean.getSource();
             if (source != null && !source.isEmpty()) {
                 viewHolder.txtSource.setVisibility(View.VISIBLE);
@@ -283,7 +282,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 viewHolder.txtSource.setVisibility(View.GONE);
             }
             
-            // 设置位置 - 根据原项目的实现
+            // Set location - according to the implementation of the original project
             String location = otherInfoBean.getLocation();
             if (location != null && !location.isEmpty()) {
                 viewHolder.txtLocation.setVisibility(View.VISIBLE);
@@ -293,14 +292,14 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             }
         }
         
-        // 设置点赞和评论
+        // Set likes and comments
         boolean hasPraise = friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty();
         boolean hasComment = friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty();
         
         if (hasPraise || hasComment) {
             viewHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
             
-            // 设置点赞
+            // Set likes
             if (hasPraise) {
                 viewHolder.layoutPraise.setVisibility(View.VISIBLE);
                 viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
@@ -308,7 +307,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 viewHolder.layoutPraise.setVisibility(View.GONE);
             }
             
-            // 设置评论
+            // Set comments
             if (hasComment) {
                 viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
                 CommentAdapter commentAdapter = new CommentAdapter(mContext, friendCircleBean.getCommentBeans());
@@ -317,13 +316,13 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 viewHolder.recyclerViewComment.setVisibility(View.GONE);
             }
             
-            // 设置分割线
+            // Set divider
             viewHolder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
             viewHolder.layoutPraiseComment.setVisibility(View.GONE);
         }
         
-        // 设置评论图标点击事件
+        // Set comment icon click event
         final int finalDataPosition = dataPosition;
         viewHolder.imgComment.setOnClickListener(v -> {
             if (mOnPraiseOrCommentClickListener != null) {
@@ -335,38 +334,41 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     }
     
     /**
-     * 模拟不同级别的计算负载
-     * @param position 数据位置
+     * Execute different computation based on load type
+     * @param position Data position
      */
     private void simulateComputationalLoad(int position) {
         Trace.beginSection("FriendCircleAdapter_simulateComputationalLoad");
-        // 根据负载类型执行不同的计算量
         int iterations;
         switch (mLoadType) {
             case LOAD_TYPE_LIGHT:
-                iterations = 5; // 轻负载：每帧只做少量工作
+                iterations = 5; // Light load: only do a small amount of work per frame
                 break;
             case LOAD_TYPE_MEDIUM:
-                iterations = 300; // 中等负载：每帧中等数量计算
+                iterations = 300; // Medium load: medium number of calculations per frame
                 break;
             case LOAD_TYPE_HEAVY:
-                iterations = 1000; // 高负载：每帧大量计算
+                iterations = 1000; // Heavy load: large amount of calculation per frame
                 break;
             default:
                 iterations = 5;
                 break;
         }
         
-        // 执行一些计算，模拟负载
+        // Perform some calculations to simulate load
         for (int i = 0; i < iterations; i++) {
-            // 随机生成一些数据，避免编译器优化掉
-            float x = mRandom.nextFloat() * 1000;
-            float y = mRandom.nextFloat() * 1000;
+            // Generate some random data to prevent compiler from optimizing away
+            float x = mRandom.nextFloat() * 100;
+            float y = mRandom.nextFloat() * 100;
             
-            // 执行一些绘图操作，这会带来CPU和GPU负载
-            mRect.set((int)x, (int)y, (int)(x + 100), (int)(y + 100));
-            mPaint.setColor(0xFF000000 | mRandom.nextInt(0xFFFFFF));
-            mCanvas.drawRect(mRect, mPaint);
+            // Perform some drawing operations, which will bring CPU and GPU load
+            mPaint.setColor(Color.argb(
+                    mRandom.nextInt(256),
+                    mRandom.nextInt(256),
+                    mRandom.nextInt(256),
+                    mRandom.nextInt(256)
+            ));
+            mCanvas.drawCircle(x, y, 10, mPaint);
         }
         Trace.endSection();
     }
@@ -384,7 +386,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
 
     @Override
     public void onItemClickPopupMenu(int position, int itemId) {
-        // 不需要实现
+        // No implementation needed
     }
     
     /**
@@ -438,7 +440,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             viewLine = itemView.findViewById(R.id.view_line);
             imgComment = itemView.findViewById(R.id.img_comment);
             
-            // 设置评论列表
+            // Set comment list
             recyclerViewComment.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
         }
     }
