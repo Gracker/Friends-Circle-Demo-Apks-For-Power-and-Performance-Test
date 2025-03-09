@@ -9,6 +9,7 @@ import com.example.wechatfriendforperformance.beans.OtherInfoBean;
 import com.example.wechatfriendforperformance.beans.PraiseBean;
 import com.example.wechatfriendforperformance.beans.UserBean;
 import com.example.wechatfriendforperformance.utils.PerformanceSpanUtils;
+import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,9 @@ import static com.example.wechatfriendforperformance.PerformanceConstants.*;
 public class PerformanceDataCenter {
 
     private static final PerformanceDataCenter instance = new PerformanceDataCenter();
-    private List<FriendCircleBean> cachedFriendCircleBeans;
+    private List<FriendCircleBean> cachedLightLoadFriendCircleBeans;
+    private List<FriendCircleBean> cachedMediumLoadFriendCircleBeans;
+    private List<FriendCircleBean> cachedHeavyLoadFriendCircleBeans;
     
     // Fixed avatar resource name array
     private static final String[] AVATAR_RES_NAMES = {
@@ -40,13 +43,35 @@ public class PerformanceDataCenter {
     }
     
     public List<FriendCircleBean> getFriendCircleBeans() {
-        if (cachedFriendCircleBeans == null) {
-            cachedFriendCircleBeans = generateFriendCircleBeans();
+        return getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+    }
+
+    public List<FriendCircleBean> getFriendCircleBeans(int loadType) {
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                if (cachedLightLoadFriendCircleBeans == null) {
+                    cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                }
+                return cachedLightLoadFriendCircleBeans;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                if (cachedMediumLoadFriendCircleBeans == null) {
+                    cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                }
+                return cachedMediumLoadFriendCircleBeans;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                if (cachedHeavyLoadFriendCircleBeans == null) {
+                    cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                }
+                return cachedHeavyLoadFriendCircleBeans;
+            default:
+                if (cachedLightLoadFriendCircleBeans == null) {
+                    cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+                }
+                return cachedLightLoadFriendCircleBeans;
         }
-        return cachedFriendCircleBeans;
     }
     
-    private List<FriendCircleBean> generateFriendCircleBeans() {
+    private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
         // Generate fixed 100 friend circle items
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
@@ -58,12 +83,12 @@ public class PerformanceDataCenter {
             // Set content, cycling through predefined contents
             bean.setContent(CONTENTS[i % CONTENTS.length]);
             
-            // Set comments, cycling comment count based on position
-            List<CommentBean> commentBeans = generateCommentBeans(i);
+            // Set comments, cycling comment count based on position and load type
+            List<CommentBean> commentBeans = generateCommentBeans(i, loadType);
             bean.setCommentBeans(commentBeans);
             
-            // Set likes, cycling like count based on position
-            List<PraiseBean> praiseBeans = generatePraiseBeans(i);
+            // Set likes, cycling like count based on position and load type
+            List<PraiseBean> praiseBeans = generatePraiseBeans(i, loadType);
             bean.setPraiseBeans(praiseBeans);
             
             // Set images, cycling through 1, 3, 6, 9 images based on index
@@ -127,11 +152,26 @@ public class PerformanceDataCenter {
         }
     }
     
-    private List<CommentBean> generateCommentBeans(int position) {
+    private List<CommentBean> generateCommentBeans(int position, int loadType) {
         List<CommentBean> commentBeans = new ArrayList<>();
         
-        // Comment count cycles through 0-5
-        int commentCount = position % 6;
+        // Comment count based on load type
+        int commentCount;
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                commentCount = position % 3; // 0-2 comments for light load
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                commentCount = position % 6 + 2; // 2-7 comments for medium load
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                commentCount = position % 10 + 5; // 5-14 comments for heavy load
+                break;
+            default:
+                commentCount = position % 3;
+                break;
+        }
+        
         if (commentCount == 0) {
             return commentBeans; // No comments
         }
@@ -173,11 +213,26 @@ public class PerformanceDataCenter {
         return commentBeans;
     }
     
-    private List<PraiseBean> generatePraiseBeans(int position) {
+    private List<PraiseBean> generatePraiseBeans(int position, int loadType) {
         List<PraiseBean> praiseBeans = new ArrayList<>();
         
-        // Like count cycles through 1-8
-        int praiseCount = position % 8 + 1;
+        // Like count based on load type
+        int praiseCount;
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                praiseCount = position % 3 + 1; // 1-3 likes for light load
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                praiseCount = position % 6 + 3; // 3-8 likes for medium load
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                praiseCount = position % 12 + 8; // 8-19 likes for heavy load
+                break;
+            default:
+                praiseCount = position % 3 + 1;
+                break;
+        }
+        
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
             UserBean userBean = new UserBean();

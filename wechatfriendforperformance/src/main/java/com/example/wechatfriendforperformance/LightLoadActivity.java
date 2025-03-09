@@ -75,8 +75,8 @@ public class LightLoadActivity extends AppCompatActivity {
         
         recyclerView.setAdapter(adapter);
         
-        // Load data
-        adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans());
+        // Load data based on load type
+        adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT));
         
         Trace.endSection();
     }
