@@ -1,5 +1,6 @@
 package com.example.wechatfriendforperformance.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -34,6 +35,7 @@ import com.example.wechatfriendforperformance.utils.PerformanceSpanUtils;
 import com.example.wechatfriendforperformance.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.stfalcon.imageviewer.StfalconImageViewer;
@@ -91,8 +93,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mRecyclerView = recyclerView;
         this.mLayoutInflater = LayoutInflater.from(context);
         
-        // Use rounded rectangle instead of circular crop, with 8dp corner radius to match the original project
-        this.mRequestOptions = new RequestOptions().transform(new CircleCrop());
+        // 使用RoundedCorners替代CircleCrop，8dp圆角
+        this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(8));
         
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
@@ -118,6 +120,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             @Override
             public void loadImage(ImageView imageView, String image) {
                 try {
+                    // 尝试加载图片资源
                     int resourceId = mContext.getResources().getIdentifier(
                             image.toLowerCase(), "drawable", mContext.getPackageName());
                     if (resourceId != 0) {
@@ -126,10 +129,21 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                                 .transition(mDrawableTransitionOptions)
                                 .into(imageView);
                     } else {
-                        // 使用默认图片
-                        Glide.with(mContext)
-                                .load(R.drawable.default_avatar)
-                                .into(imageView);
+                        // 如果找不到资源，尝试加载测试图片
+                        int testImgId = mContext.getResources().getIdentifier(
+                                "test_img_" + (Math.abs(image.hashCode()) % 10 + 1), 
+                                "drawable", mContext.getPackageName());
+                        if (testImgId != 0) {
+                            Glide.with(mContext)
+                                    .load(testImgId)
+                                    .transition(mDrawableTransitionOptions)
+                                    .into(imageView);
+                        } else {
+                            // 如果仍然找不到，使用默认图片
+                            Glide.with(mContext)
+                                    .load(R.drawable.default_avatar)
+                                    .into(imageView);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -181,7 +195,16 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                         .load(coverResourceId)
                         .into(imgCover);
                 } else {
-                    imgCover.setImageResource(R.drawable.default_background);
+                    // 尝试加载test_img_1作为背景
+                    int testImgResourceId = mContext.getResources().getIdentifier(
+                        "test_img_1", "drawable", mContext.getPackageName());
+                    if (testImgResourceId != 0) {
+                        Glide.with(mContext)
+                            .load(testImgResourceId)
+                            .into(imgCover);
+                    } else {
+                        imgCover.setImageResource(R.drawable.default_background);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -201,10 +224,20 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                         .apply(mRequestOptions)
                         .into(imgUserAvatar);
                 } else {
-                    Glide.with(mContext)
-                        .load(R.drawable.default_avatar)
-                        .apply(mRequestOptions)
-                        .into(imgUserAvatar);
+                    // 尝试加载avatar1作为头像
+                    int avatar1ResourceId = mContext.getResources().getIdentifier(
+                        "avatar1", "drawable", mContext.getPackageName());
+                    if (avatar1ResourceId != 0) {
+                        Glide.with(mContext)
+                            .load(avatar1ResourceId)
+                            .apply(mRequestOptions)
+                            .into(imgUserAvatar);
+                    } else {
+                        Glide.with(mContext)
+                            .load(R.drawable.default_avatar)
+                            .apply(mRequestOptions)
+                            .into(imgUserAvatar);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -219,6 +252,16 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         TextView tvUserName = mHeaderView.findViewById(R.id.tv_user_name);
         if (tvUserName != null) {
             tvUserName.setText(mLoadTypeString);
+        }
+        
+        // 设置返回按钮点击事件
+        ImageView imgBack = mHeaderView.findViewById(R.id.img_back);
+        if (imgBack != null) {
+            imgBack.setOnClickListener(v -> {
+                if (mContext instanceof Activity) {
+                    ((Activity) mContext).onBackPressed();
+                }
+            });
         }
     }
 
@@ -323,43 +366,62 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
         
-        // 设置点赞信息
-        if (friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty()) {
-            // 如果点赞文本为空，重新生成
-            if (friendCircleBean.getPraiseSpan() == null) {
-                SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(
-                        mContext, friendCircleBean.getPraiseBeans());
-                friendCircleBean.setPraiseSpan(praiseSpan);
-            }
-            
-            viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
-            viewHolder.layoutPraise.setVisibility(View.VISIBLE);
-        } else {
-            viewHolder.layoutPraise.setVisibility(View.GONE);
-        }
+        // 设置点赞和评论区域的可见性
+        boolean hasPraise = friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty();
+        boolean hasComment = friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty();
         
-        // 设置评论信息
-        if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
-            viewHolder.recyclerViewComment.removeAllViews();
+        if (hasPraise || hasComment) {
+            viewHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
             
-            for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
-                // 如果评论文本为空，重新生成
-                if (commentBean.getCommentContentSpan() == null) {
-                    commentBean.build();
+            // 设置点赞信息
+            if (hasPraise) {
+                // 如果点赞文本为空，重新生成
+                if (friendCircleBean.getPraiseSpan() == null) {
+                    SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(
+                            mContext, friendCircleBean.getPraiseBeans());
+                    friendCircleBean.setPraiseSpan(praiseSpan);
                 }
                 
-                TextView textView = new TextView(mContext);
-                textView.setTextColor(mContext.getResources().getColor(R.color.base_333333));
-                textView.setTextSize(14);
-                textView.setText(commentBean.getCommentContentSpan());
-                textView.setPadding(0, 8, 0, 8);
-                
-                viewHolder.recyclerViewComment.addView(textView);
+                viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
+                viewHolder.layoutPraise.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.layoutPraise.setVisibility(View.GONE);
             }
             
-            viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
+            // 设置评论信息
+            if (hasComment) {
+                viewHolder.recyclerViewComment.removeAllViews();
+                
+                // 创建一个垂直线性布局用于显示评论
+                LinearLayout commentContainer = new LinearLayout(mContext);
+                commentContainer.setOrientation(LinearLayout.VERTICAL);
+                
+                for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
+                    // 如果评论文本为空，重新生成
+                    if (commentBean.getCommentContentSpan() == null) {
+                        commentBean.build();
+                    }
+                    
+                    TextView textView = new TextView(mContext);
+                    textView.setTextColor(mContext.getResources().getColor(R.color.base_333333));
+                    textView.setTextSize(14);
+                    textView.setText(commentBean.getCommentContentSpan());
+                    textView.setPadding(0, 8, 0, 8);
+                    
+                    commentContainer.addView(textView);
+                }
+                
+                // 添加评论容器到RecyclerView
+                viewHolder.recyclerViewComment.addView(commentContainer);
+                viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.recyclerViewComment.setVisibility(View.GONE);
+            }
+            
+            // 设置分隔线
+            viewHolder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
-            viewHolder.recyclerViewComment.setVisibility(View.GONE);
+            viewHolder.layoutPraiseComment.setVisibility(View.GONE);
         }
         
         // 设置其他信息
@@ -396,7 +458,11 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         }
         
         // 设置操作按钮点击事件
-        viewHolder.imgComment.setOnClickListener(null);
+        viewHolder.imgComment.setOnClickListener(v -> {
+            if (mOnPraiseOrCommentClickListener != null) {
+                mOnPraiseOrCommentClickListener.onCommentClick(v, dataPosition);
+            }
+        });
         
         // 模拟计算负载
         simulateComputationalLoad();
