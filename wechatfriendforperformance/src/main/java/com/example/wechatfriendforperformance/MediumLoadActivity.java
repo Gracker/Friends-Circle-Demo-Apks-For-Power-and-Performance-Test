@@ -1,13 +1,16 @@
 package com.example.wechatfriendforperformance;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,17 +29,40 @@ import java.util.List;
  */
 public class MediumLoadActivity extends AppCompatActivity {
 
+    private static final String TAG = "MediumLoadActivity";
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private LinearLayout titleBar;
-
     private RequestBuilder<Drawable> imageLoader;
+    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM; // 默认为中负载
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("MediumLoadActivity_onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medium_load);
+
+        // 从Intent中获取负载类型
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            Log.d(TAG, "onCreate: 从Intent获取负载类型 = " + mLoadType);
+        }
+        
+        // 使用Toast显示当前负载类型
+        String loadTypeStr = "中负载";
+        switch (mLoadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                loadTypeStr = "轻负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                loadTypeStr = "中负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                loadTypeStr = "高负载";
+                break;
+        }
+        Toast.makeText(this, "当前模式: " + loadTypeStr, Toast.LENGTH_SHORT).show();
 
         // Process image name, remove possible file extension
         imageLoader = Glide.with(this).asDrawable().apply(
@@ -58,10 +84,14 @@ public class MediumLoadActivity extends AppCompatActivity {
         Trace.beginSection("MediumLoadActivity_onResume");
         super.onResume();
         
+        // 清空缓存，确保使用正确的负载类型
+        PerformanceDataCenter.getInstance().clearCachedData();
+        
         // 确保数据已根据正确的负载类型生成
         if (adapter != null) {
             // 刷新数据，确保显示正确的点赞和评论数量
-            adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM));
+            adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
+            Log.d(TAG, "onResume: 重新加载负载类型 = " + mLoadType + " 的数据");
         }
         
         Trace.endSection();
@@ -73,8 +103,8 @@ public class MediumLoadActivity extends AppCompatActivity {
         // Set layout manager
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
-        // Create adapter, using medium load mode
-        adapter = new PerformanceFriendCircleAdapter(this, recyclerView, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+        // Create adapter, using specified load mode
+        adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
         
         // Add header view
         View headerView = getLayoutInflater().inflate(R.layout.item_header_view, recyclerView, false);
@@ -83,7 +113,9 @@ public class MediumLoadActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         
         // Load data based on load type
-        adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM));
+        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType);
+        adapter.setFriendCircleBeans(data);
+        Log.d(TAG, "initRecyclerView: 加载负载类型 = " + mLoadType + " 的数据, 数据条数 = " + (data != null ? data.size() : 0));
         
         Trace.endSection();
     }

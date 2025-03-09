@@ -3,6 +3,7 @@ package com.example.wechatfriendforperformance;
 import android.content.Context;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.wechatfriendforperformance.beans.CommentBean;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
@@ -37,8 +38,12 @@ public class PerformanceDataCenter {
             "avatar11"
     };
     
+    // 使用一个固定种子的随机数生成器，确保生成的数据是可重现的
+    private Random mRandom = new Random(42);
+    
     private PerformanceDataCenter() {
         // Initialization operations, if needed
+        Log.d(TAG, "PerformanceDataCenter初始化");
     }
     
     public static PerformanceDataCenter getInstance() {
@@ -67,6 +72,10 @@ public class PerformanceDataCenter {
                 if (cachedLightLoadFriendCircleBeans == null) {
                     Log.d(TAG, "getFriendCircleBeans: 生成轻负载数据");
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                    // 打印点赞和评论数量统计
+                    printStatistics(cachedLightLoadFriendCircleBeans, loadType);
+                } else {
+                    Log.d(TAG, "getFriendCircleBeans: 使用缓存的轻负载数据");
                 }
                 return cachedLightLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
@@ -74,6 +83,10 @@ public class PerformanceDataCenter {
                 if (cachedMediumLoadFriendCircleBeans == null) {
                     Log.d(TAG, "getFriendCircleBeans: 生成中负载数据");
                     cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                    // 打印点赞和评论数量统计
+                    printStatistics(cachedMediumLoadFriendCircleBeans, loadType);
+                } else {
+                    Log.d(TAG, "getFriendCircleBeans: 使用缓存的中负载数据");
                 }
                 return cachedMediumLoadFriendCircleBeans;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
@@ -81,6 +94,10 @@ public class PerformanceDataCenter {
                 if (cachedHeavyLoadFriendCircleBeans == null) {
                     Log.d(TAG, "getFriendCircleBeans: 生成高负载数据");
                     cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
+                    // 打印点赞和评论数量统计
+                    printStatistics(cachedHeavyLoadFriendCircleBeans, loadType);
+                } else {
+                    Log.d(TAG, "getFriendCircleBeans: 使用缓存的高负载数据");
                 }
                 return cachedHeavyLoadFriendCircleBeans;
             default:
@@ -88,15 +105,80 @@ public class PerformanceDataCenter {
                 if (cachedLightLoadFriendCircleBeans == null) {
                     Log.d(TAG, "getFriendCircleBeans: 生成默认轻负载数据");
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+                    // 打印点赞和评论数量统计
+                    printStatistics(cachedLightLoadFriendCircleBeans, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+                } else {
+                    Log.d(TAG, "getFriendCircleBeans: 使用缓存的默认轻负载数据");
                 }
                 return cachedLightLoadFriendCircleBeans;
         }
+    }
+    
+    /**
+     * 打印生成数据的统计信息
+     */
+    private void printStatistics(List<FriendCircleBean> beans, int loadType) {
+        if (beans == null || beans.isEmpty()) {
+            Log.e(TAG, "printStatistics: 数据为空，无法统计");
+            return;
+        }
+        
+        String loadTypeStr;
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                loadTypeStr = "轻负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                loadTypeStr = "中负载";
+                break;
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                loadTypeStr = "高负载";
+                break;
+            default:
+                loadTypeStr = "未知负载";
+                break;
+        }
+        
+        int totalPraise = 0;
+        int totalComment = 0;
+        int minPraise = Integer.MAX_VALUE;
+        int maxPraise = 0;
+        int minComment = Integer.MAX_VALUE;
+        int maxComment = 0;
+        
+        for (FriendCircleBean bean : beans) {
+            int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
+            int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
+            
+            totalPraise += praiseCount;
+            totalComment += commentCount;
+            
+            minPraise = Math.min(minPraise, praiseCount);
+            maxPraise = Math.max(maxPraise, praiseCount);
+            
+            minComment = Math.min(minComment, commentCount);
+            maxComment = Math.max(maxComment, commentCount);
+        }
+        
+        double avgPraise = (double) totalPraise / beans.size();
+        double avgComment = (double) totalComment / beans.size();
+        
+        Log.d(TAG, "==================== " + loadTypeStr + " 统计信息 ====================");
+        Log.d(TAG, "数据条数: " + beans.size());
+        Log.d(TAG, "点赞数量: 总计=" + totalPraise + ", 平均=" + String.format("%.2f", avgPraise) + 
+                ", 最小=" + minPraise + ", 最大=" + maxPraise);
+        Log.d(TAG, "评论数量: 总计=" + totalComment + ", 平均=" + String.format("%.2f", avgComment) + 
+                ", 最小=" + minComment + ", 最大=" + maxComment);
+        Log.d(TAG, "=================================================");
     }
     
     private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
         // Generate fixed 100 friend circle items
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
         Log.d(TAG, "generateFriendCircleBeans: 开始生成负载类型=" + loadType + "的朋友圈数据");
+        
+        // 确保随机数生成器使用固定种子，保证结果可重现
+        mRandom = new Random(42 + loadType * 100);
         
         for (int i = 0; i < 100; i++) {
             FriendCircleBean bean = new FriendCircleBean();
@@ -143,6 +225,8 @@ public class PerformanceDataCenter {
             bean.setOtherInfoBean(otherInfoBean);
             friendCircleBeans.add(bean);
         }
+        
+        Log.d(TAG, "generateFriendCircleBeans: 完成生成负载类型=" + loadType + "的朋友圈数据，数据条数=" + friendCircleBeans.size());
         return friendCircleBeans;
     }
     

@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.os.Trace;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 
 /**
  * Performance test main Activity, used to select different load levels for testing
@@ -14,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 public class PerformanceMainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button btnLightLoad, btnMediumLoad, btnHeavyLoad;
+    
+    // 定义常量，用于Intent传递负载类型
+    public static final String EXTRA_LOAD_TYPE = "load_type";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,8 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     protected void onResume() {
         Trace.beginSection("PerformanceMainActivity_onResume");
         super.onResume();
+        // 确保数据中心的缓存被清空
+        PerformanceDataCenter.getInstance().clearCachedData();
         Trace.endSection();
     }
 
@@ -54,18 +62,27 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Trace.beginSection("PerformanceMainActivity_startLightLoad");
             // Start LightLoad Activity
             Intent intent = new Intent(this, LightLoadActivity.class);
+            // 传递负载类型参数
+            intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            Toast.makeText(this, "启动轻负载测试", Toast.LENGTH_SHORT).show();
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load) {
             Trace.beginSection("PerformanceMainActivity_startMediumLoad");
             // Start MediumLoad Activity
             Intent intent = new Intent(this, MediumLoadActivity.class);
+            // 传递负载类型参数
+            intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            Toast.makeText(this, "启动中负载测试", Toast.LENGTH_SHORT).show();
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load) {
             Trace.beginSection("PerformanceMainActivity_startHeavyLoad");
             // Start HeavyLoad Activity
             Intent intent = new Intent(this, HeavyLoadActivity.class);
+            // 传递负载类型参数
+            intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            Toast.makeText(this, "启动高负载测试", Toast.LENGTH_SHORT).show();
             startActivity(intent);
             Trace.endSection();
         }
