@@ -113,9 +113,9 @@ public class LightLoadActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         
         // 直接在Activity中生成对应负载类型的数据，不依赖DataCenter的缓存
-        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().generateDataForLoadType(PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().generateDataForLoadType(mLoadType);
         adapter.setFriendCircleBeans(data);
-        Log.d(TAG, "initRecyclerView: 加载轻负载类型的数据, 数据条数 = " + (data != null ? data.size() : 0));
+        Log.d(TAG, "initRecyclerView: 加载" + getLoadTypeString(mLoadType) + "类型的数据, 数据条数 = " + (data != null ? data.size() : 0));
         
         // 打印一些数据统计，确认点赞和评论数量
         if (data != null && !data.isEmpty()) {
@@ -137,7 +137,7 @@ public class LightLoadActivity extends AppCompatActivity {
             double avgPraise = (double) totalPraise / data.size();
             double avgComment = (double) totalComment / data.size();
             
-            Log.d(TAG, "==================== 轻负载 统计信息 ====================");
+            Log.d(TAG, "==================== " + getLoadTypeString(mLoadType) + " 统计信息 ====================");
             Log.d(TAG, "点赞数量: 总计=" + totalPraise + ", 平均=" + String.format("%.2f", avgPraise) + 
                     ", 最大=" + maxPraise);
             Log.d(TAG, "评论数量: 总计=" + totalComment + ", 平均=" + String.format("%.2f", avgComment) + 
@@ -162,6 +162,19 @@ public class LightLoadActivity extends AppCompatActivity {
         super.onDestroy();
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
+        }
+    }
+
+    private String getLoadTypeString(int loadType) {
+        switch (loadType) {
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                return "轻负载";
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                return "中负载";
+            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                return "高负载";
+            default:
+                return "未知负载类型";
         }
     }
 } 
