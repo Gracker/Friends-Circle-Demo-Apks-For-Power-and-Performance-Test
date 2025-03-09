@@ -32,9 +32,22 @@ public class PerformanceSpanUtils {
         for (int i = 0; i < praiseBeans.size(); i++) {
             PraiseBean praiseBean = praiseBeans.get(i);
             
+            // 获取用户名，优先使用praiseUserName，如果为空则从userBean获取
+            String userName = praiseBean.getPraiseUserName();
+            if (userName == null || userName.isEmpty()) {
+                if (praiseBean.getUserBean() != null) {
+                    userName = praiseBean.getUserBean().getUserName();
+                }
+                
+                // 如果仍然为空，使用默认名称
+                if (userName == null || userName.isEmpty()) {
+                    userName = "用户" + i;
+                }
+            }
+            
             // 添加用户名
             int start = builder.length();
-            builder.append(praiseBean.getPraiseUserName());
+            builder.append(userName);
             int end = builder.length();
             
             // 设置颜色

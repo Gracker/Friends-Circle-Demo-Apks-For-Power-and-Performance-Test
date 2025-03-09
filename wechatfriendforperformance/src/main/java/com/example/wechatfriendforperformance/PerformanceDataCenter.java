@@ -191,11 +191,32 @@ public class PerformanceDataCenter {
             
             // Set comments, cycling comment count based on position and load type
             List<CommentBean> commentBeans = generateCommentBeans(i, loadType);
+            // 处理评论内容，设置必要的字段
+            for (CommentBean commentBean : commentBeans) {
+                if (commentBean.getFromUserBean() != null) {
+                    commentBean.setChildUserName(commentBean.getFromUserBean().getUserName());
+                }
+                if (commentBean.getToUserBean() != null) {
+                    commentBean.setParentUserName(commentBean.getToUserBean().getUserName());
+                }
+                commentBean.setCommentContent(commentBean.getContent());
+                // 构建带样式的评论内容
+                commentBean.build(null);
+            }
             bean.setCommentBeans(commentBeans);
             
             // Set likes, cycling like count based on position and load type
             List<PraiseBean> praiseBeans = generatePraiseBeans(i, loadType);
+            // 处理点赞内容，设置必要的字段
+            for (PraiseBean praiseBean : praiseBeans) {
+                if (praiseBean.getUserBean() != null) {
+                    praiseBean.setPraiseUserName(praiseBean.getUserBean().getUserName());
+                    praiseBean.setPraiseUserId(praiseBean.getUserBean().getUserId());
+                }
+            }
             bean.setPraiseBeans(praiseBeans);
+            // 生成点赞文本样式
+            bean.setPraiseSpan(PerformanceSpanUtils.makePraiseSpan(null, praiseBeans));
             
             // Set images, cycling through 1, 3, 6, 9 images based on index
             List<String> imageUrls = new ArrayList<>();
