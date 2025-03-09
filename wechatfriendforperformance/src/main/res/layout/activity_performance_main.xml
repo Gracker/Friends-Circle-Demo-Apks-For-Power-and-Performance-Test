@@ -31,49 +31,49 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp">
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:text="@string/title_select_load"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
                     android:textColor="@color/base_333333"
-                    android:layout_marginBottom="16dp" />
-                    
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_light_load"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@color/primary_blue"
                     android:text="@string/btn_light_load"
                     android:textSize="16sp"
-                    android:backgroundTint="@color/primary_blue"
-                    app:cornerRadius="8dp"
-                    android:layout_marginBottom="12dp" />
-                
+                    app:cornerRadius="8dp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_medium_load"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@color/accent_teal"
                     android:text="@string/btn_medium_load"
                     android:textSize="16sp"
-                    android:backgroundTint="@color/accent_teal"
-                    app:cornerRadius="8dp"
-                    android:layout_marginBottom="12dp" />
-                
+                    app:cornerRadius="8dp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_heavy_load"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:backgroundTint="@color/deep_purple"
                     android:text="@string/btn_heavy_load"
                     android:textSize="16sp"
-                    android:backgroundTint="@color/deep_purple"
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
