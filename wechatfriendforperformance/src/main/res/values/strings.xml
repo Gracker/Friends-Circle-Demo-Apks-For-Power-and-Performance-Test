@@ -10,4 +10,7 @@
     <string name="performance_test">Performance Test</string>
     <string name="performance_test_loading">Loading Performance Test Data...</string>
     <string name="back">Back</string>
+    <string name="light_load_test">Light Load Test</string>
+    <string name="medium_load_test">Medium Load Test</string>
+    <string name="heavy_load_test">Heavy Load Test</string>
 </resources>
