@@ -20,6 +20,14 @@ public class CommentBean {
     private String parentUserName;
     private String commentContent;
     private SpannableStringBuilder commentContentSpan;
+    private Context mContext;
+
+    public CommentBean() {
+    }
+
+    public CommentBean(Context context) {
+        this.mContext = context;
+    }
 
     public UserBean getChildUserBean() {
         return childUserBean;
@@ -89,6 +97,14 @@ public class CommentBean {
             return;
         }
         
+        // 确保 Context 不为空
+        if (mContext == null) {
+            // 没有 Context 无法创建带颜色的span
+            commentContentSpan = new SpannableStringBuilder(
+                    TextUtils.isEmpty(childUserName) ? "用户" : childUserName);
+            return;
+        }
+        
         // 获取评论人用户名
         if (TextUtils.isEmpty(childUserName) && childUserBean != null) {
             childUserName = childUserBean.getUserName();
@@ -112,11 +128,20 @@ public class CommentBean {
         if (TextUtils.isEmpty(parentUserName)) {
             // 普通评论
             commentContentSpan = PerformanceSpanUtils.makeSingleCommentSpan(
-                    childUserName, commentContent);
+                    mContext, childUserName, commentContent);
         } else {
             // 回复评论
             commentContentSpan = PerformanceSpanUtils.makeReplyCommentSpan(
-                    childUserName, parentUserName, commentContent);
+                    mContext, childUserName, parentUserName, commentContent);
         }
+    }
+
+    /**
+     * 构建评论文本
+     * @param context Context
+     */
+    public void build(Context context) {
+        this.mContext = context;
+        build();
     }
 } 

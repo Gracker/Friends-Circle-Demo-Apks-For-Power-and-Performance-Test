@@ -40,12 +40,22 @@ public class PerformanceDataCenter {
     // 使用一个固定种子的随机数生成器，确保生成的数据是可重现的
     private Random mRandom = new Random(42);
     
+    private Context mContext;
+    
     private PerformanceDataCenter() {
         // Initialization operations, if needed
     }
     
     public static PerformanceDataCenter getInstance() {
         return instance;
+    }
+    
+    /**
+     * 设置Context，用于生成富文本
+     * @param context 上下文
+     */
+    public void setContext(Context context) {
+        this.mContext = context;
     }
     
     /**
@@ -261,7 +271,7 @@ public class PerformanceDataCenter {
         Random random = new Random(position * 100 + loadType * 10);
         
         for (int i = 0; i < commentCount; i++) {
-            CommentBean commentBean = new CommentBean();
+            CommentBean commentBean = new CommentBean(mContext);
             
             // 评论发起人
             UserBean childUserBean = new UserBean();
@@ -289,7 +299,11 @@ public class PerformanceDataCenter {
             commentBean.setContent(commentContent);
             
             // 构建评论文本
-            commentBean.build();
+            if (mContext != null) {
+                commentBean.build(mContext);
+            } else {
+                commentBean.build(); // 兼容没有Context的情况
+            }
             
             commentBeans.add(commentBean);
         }
@@ -368,6 +382,14 @@ public class PerformanceDataCenter {
         printStatistics(friendCircleBeans, loadType);
         
         return friendCircleBeans;
+    }
+    
+    /**
+     * 直接生成指定负载类型的数据，不使用缓存，并传入Context
+     */
+    public List<FriendCircleBean> generateDataForLoadType(Context context, int loadType) {
+        setContext(context);
+        return generateDataForLoadType(loadType);
     }
     
     private String getLoadTypeString(int loadType) {

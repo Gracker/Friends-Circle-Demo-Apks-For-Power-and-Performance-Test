@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -80,21 +81,22 @@ public class HeavyLoadActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView() {
-        // Set layout manager
+        // 设置布局管理器
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
-        // Create adapter, using specified load mode
-        adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
-        
-        // Add header view - 使用include_title_bar_view.xml而不是item_header_view.xml
-        View headerView = getLayoutInflater().inflate(R.layout.include_title_bar_view, recyclerView, false);
-        adapter.setHeaderView(headerView);
-        
-        recyclerView.setAdapter(adapter);
-        
-        // 直接在Activity中生成对应负载类型的数据，不依赖DataCenter的缓存
-        List<FriendCircleBean> data = PerformanceDataCenter.getInstance().generateDataForLoadType(mLoadType);
-        adapter.setFriendCircleBeans(data);
+        // 创建适配器
+        if (adapter == null) {
+            adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
+            // 添加header view
+            View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, null);
+            adapter.setHeaderView(headerView);
+            recyclerView.setAdapter(adapter);
+            // 设置数据 - 传入Context
+            adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().generateDataForLoadType(this, mLoadType));
+        } else {
+            // 刷新数据 - 传入Context
+            adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().generateDataForLoadType(this, mLoadType));
+        }
     }
 
     private String getLoadTypeString(int loadType) {

@@ -64,7 +64,6 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, LightLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
-            Log.d(TAG, "启动轻负载测试");
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load) {
@@ -73,7 +72,6 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, MediumLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
-            Log.d(TAG, "启动中负载测试");
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load) {
@@ -82,7 +80,6 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Intent intent = new Intent(this, HeavyLoadActivity.class);
             // 传递负载类型参数
             intent.putExtra(EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
-            Log.d(TAG, "启动高负载测试");
             startActivity(intent);
             Trace.endSection();
         }
