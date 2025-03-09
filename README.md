@@ -1,15 +1,61 @@
-# 高性能微信朋友圈
-众所周知，微信朋友圈的列表一直以来被众多研究性能问题的朋友拿来作为模范，对于其实现方式，一直以来有点难以望其项背的感觉。只能默默的感叹微信的开发者是真的牛逼。经过一段时间的研究，现在我将带领大家以全新的认知对微信朋友圈的结构进行分析，并通过自己的方式加以实现。
-先上图：![](https://github.com/KCrason/HighPerformanceFriendsCircle/blob/master/app/apk/20180503_222857.gif)
+# 高性能微信朋友圈测试平台
 
-GIF看着有点卡，可以下载apk自行体验，流畅度和微信几乎无差别：https://github.com/KCrason/HighPerformanceFriendsCircle/blob/master/app/apk/app-debug.apk
+本项目是一个基于微信朋友圈UI的性能测试平台，旨在研究Android滑动性能和功耗表现。项目包含三个主要模块，分别用于不同方面的测试和研究。
 
-我们都知道，在Android中，对于列表的而言，要避免其卡顿，可以从以下几个角度进行优化。
+## 项目结构
 
-- 减少布局层级，避免过多的Item View的无用布局嵌套。
-- 对于有图片的列表，要在滑动时对图片加以控制，即滑动时不加载图片，停止滑动之后再加载图片。
-- 应当避免在Adapter的填充数据时做过多的计算，或者嵌套过多的逻辑判断。对于复杂的计算结果应当在Adapter填充数据之前计算完成。
-- 其他方面的优化则是尽管在数据Bean中完成对各种数据变换的操作，包括复杂的计算，比如将String转换成需要的SpannableStringBuilder等。
-- 最后就是除了要减少onMeasure()和onLayout()的次数之后，我们也需要减少View的创建。减少View的创建我们可以使用一个弱引用的缓存数组和实现View对象的缓存，这里要感谢[razerdp](https://github.com/razerdp)提供的思路。
+本项目包含三个主要模块:
 
-具体的一些其他逻辑，代码中自行研究吧，后续可能还会继续更新该项目，包括表情的匹配，电话号码的匹配等，看自己时间情况。欢迎大家start！
+### 1. 原始项目 (app)
+
+原始的高性能微信朋友圈实现，来自fork的项目。这个模块展示了如何高效实现类似微信朋友圈的滑动列表，包含多种性能优化技巧。
+
+![](https://github.com/KCrason/HighPerformanceFriendsCircle/blob/master/app/apk/20180503_222857.gif)
+
+### 2. 性能测试模块 (wechatfriendforperformance)
+
+专门设计用于测试和比较不同负载下的滑动性能表现。包含三种负载模式：
+
+- **轻负载测试**: 每帧计算量小，滑动流畅度高
+- **中等负载测试**: 每帧计算量中等，滑动有一定压力
+- **高负载测试**: 每帧计算量大，滑动压力重
+
+该模块在关键代码处添加了Trace点，方便使用Perfetto等工具进行性能分析和优化。
+
+### 3. 功耗测试模块 (wechatfriendforpower)
+
+专门设计用于测试不同滑动实现方案对设备功耗的影响。可用于研究优化策略对电池寿命的影响。
+
+## 性能优化策略
+
+在Android中，要避免列表卡顿，主要从以下几个角度进行优化：
+
+- 减少布局层级，避免过多的Item View的无用布局嵌套
+- 滑动时控制图片加载，停止滑动后再加载图片
+- 避免在Adapter填充数据时做过多计算，复杂计算应在数据准备阶段完成
+- 在数据Bean中完成数据变换操作，如将String转换为SpannableStringBuilder
+- 减少onMeasure()和onLayout()的调用次数
+- 实现View对象的缓存，减少View的创建
+
+## 如何使用
+
+1. 运行`app`模块查看原始的高性能朋友圈实现
+2. 运行`wechatfriendforperformance`模块进行性能测试：
+   - 选择不同的负载级别
+   - 使用Perfetto或其他性能分析工具收集数据
+   - 分析Trace结果进行性能优化
+3. 运行`wechatfriendforpower`模块测试功耗表现
+
+## 特别鸣谢
+
+感谢原项目作者[KCrason](https://github.com/KCrason)的杰出工作和[razerdp](https://github.com/razerdp)提供的View缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能和功耗测试模块。
+
+## 未来计划
+
+未来可能会继续更新该项目，包括但不限于：
+- 添加更多性能测试指标
+- 改进功耗测试精度
+- 实现表情匹配
+- 实现电话号码匹配等功能
+
+欢迎Star和贡献！
