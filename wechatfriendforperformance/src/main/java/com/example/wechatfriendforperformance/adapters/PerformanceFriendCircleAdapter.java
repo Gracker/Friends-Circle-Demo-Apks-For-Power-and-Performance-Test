@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.os.Trace;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -96,32 +95,54 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
         
-        // 记录Adapter创建时的详细信息
-        Log.e("PerformanceAdapter", "创建Adapter - context: " + context.getClass().getSimpleName() + 
-                ", loadType: " + loadType + 
-                ", 当前线程: " + Thread.currentThread().getName());
-        
-        // Set load type string
+        // 设置负载类型字符串
         switch (loadType) {
             case LOAD_TYPE_LIGHT:
-                mLoadTypeString = "Light Load";
+                mLoadTypeString = "轻负载";
                 break;
             case LOAD_TYPE_MEDIUM:
-                mLoadTypeString = "Medium Load";
+                mLoadTypeString = "中负载";
                 break;
             case LOAD_TYPE_HEAVY:
-                mLoadTypeString = "Heavy Load";
+                mLoadTypeString = "高负载";
                 break;
             default:
-                mLoadTypeString = "Unknown Load";
+                mLoadTypeString = "未知负载";
                 break;
         }
         
-        // Initialize objects for simulating computational load
-        Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-        mCanvas = new Canvas(bitmap);
-        mBitmapList.add(bitmap);
-        mPaint = new Paint();
+        // 初始化图片加载器
+        mImageLoader = new ImageLoader<String>() {
+            @Override
+            public void loadImage(ImageView imageView, String image) {
+                try {
+                    int resourceId = mContext.getResources().getIdentifier(
+                            image.toLowerCase(), "drawable", mContext.getPackageName());
+                    if (resourceId != 0) {
+                        Glide.with(mContext)
+                                .load(resourceId)
+                                .transition(mDrawableTransitionOptions)
+                                .into(imageView);
+                    } else {
+                        imageView.setImageResource(R.drawable.default_picture);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    imageView.setImageResource(R.drawable.default_picture);
+                }
+            }
+        };
+        
+        // 初始化连续加载模拟
+        mFrameLoadRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mIsScrolling) {
+                    simulateComputationalLoad();
+                    mHandler.postDelayed(this, 16); // 约60fps
+                }
+            }
+        };
     }
 
     public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
@@ -216,156 +237,160 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Trace.beginSection("FriendCircleAdapter_onBindViewHolder");
         if (getItemViewType(position) == TYPE_HEADER) {
-            // header view not processed
-            Trace.endSection();
             return;
         }
         
-        int dataPosition = mHeaderView != null ? position - 1 : position;
-        FriendCircleViewHolder viewHolder = (FriendCircleViewHolder) holder;
+        // 实际数据位置需要减去header
+        int dataPosition = position - (mHeaderView != null ? 1 : 0);
+        if (dataPosition < 0 || dataPosition >= mFriendCircleBeans.size()) {
+            return;
+        }
+        
         FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
+        if (friendCircleBean == null) {
+            return;
+        }
         
-        // Execute different computation based on load type
-        simulateComputationalLoad(dataPosition);
+        FriendCircleViewHolder viewHolder = (FriendCircleViewHolder) holder;
         
-        // Start continuous load simulation if not already started
-        startContinuousLoadSimulation();
-        
-        // Set user information
-        UserBean userBean = friendCircleBean.getUserBean();
-        if (userBean != null) {
+        // 设置用户信息
+        if (friendCircleBean.getUserBean() != null) {
+            UserBean userBean = friendCircleBean.getUserBean();
+            
+            // 设置用户名
             viewHolder.txtUserName.setText(userBean.getUserName());
             
-            // Load avatar - use predefined RequestOptions for rounded effect
+            // 设置用户头像
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
-                // Handle file extension
-                if (avatarUrl.contains(".")) {
-                    avatarUrl = avatarUrl.substring(0, avatarUrl.lastIndexOf("."));
-                }
-                
                 int avatarResourceId = mContext.getResources().getIdentifier(
-                    avatarUrl.toLowerCase(), "drawable", mContext.getPackageName());
-                
+                        avatarUrl.toLowerCase(), "drawable", mContext.getPackageName());
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
-                        .load(avatarResourceId)
-                        .apply(mRequestOptions)
-                        .transition(mDrawableTransitionOptions)
-                        .into(viewHolder.imgAvatar);
+                            .load(avatarResourceId)
+                            .apply(mRequestOptions)
+                            .transition(mDrawableTransitionOptions)
+                            .into(viewHolder.imgAvatar);
                 } else {
                     Glide.with(mContext)
-                        .load(R.drawable.default_avatar)
-                        .apply(mRequestOptions)
-                        .into(viewHolder.imgAvatar);
+                            .load(R.drawable.default_avatar)
+                            .apply(mRequestOptions)
+                            .transition(mDrawableTransitionOptions)
+                            .into(viewHolder.imgAvatar);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 Glide.with(mContext)
-                    .load(R.drawable.default_avatar)
-                    .apply(mRequestOptions)
-                    .into(viewHolder.imgAvatar);
+                        .load(R.drawable.default_avatar)
+                        .apply(mRequestOptions)
+                        .transition(mDrawableTransitionOptions)
+                        .into(viewHolder.imgAvatar);
             }
         }
         
-        // Set content
-        viewHolder.txtContent.setText(friendCircleBean.getContent());
+        // 设置内容
+        if (!TextUtils.isEmpty(friendCircleBean.getContentSpan())) {
+            viewHolder.txtContent.setText(friendCircleBean.getContentSpan());
+            viewHolder.txtContent.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.txtContent.setVisibility(View.GONE);
+        }
         
-        // Set images
-        List<String> imageUrls = friendCircleBean.getImageUrls();
-        if (imageUrls != null && !imageUrls.isEmpty()) {
+        // 设置图片
+        if (friendCircleBean.getImageUrls() != null && !friendCircleBean.getImageUrls().isEmpty()) {
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
-            // Use new NineImageAdapter
-            NineImageAdapter adapter = new NineImageAdapter(mContext, imageUrls);
-            viewHolder.nineGridView.setAdapter(adapter);
+            viewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, friendCircleBean.getImageUrls()));
+            
+            // 设置图片点击事件
+            viewHolder.nineGridView.setOnItemClickListener((view, position1) -> {
+                if (friendCircleBean.getImageUrls() != null && position1 < friendCircleBean.getImageUrls().size()) {
+                    new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
+                            .withStartPosition(position1)
+                            .show();
+                }
+            });
         } else {
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
         
-        // Set other information
-        OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
-        if (otherInfoBean != null) {
-            // Set time
-            String time = otherInfoBean.getTime();
-            viewHolder.txtTime.setText(time);
+        // 设置点赞信息
+        if (friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty()) {
+            // 如果点赞文本为空，重新生成
+            if (friendCircleBean.getPraiseSpan() == null) {
+                SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(
+                        mContext, friendCircleBean.getPraiseBeans());
+                friendCircleBean.setPraiseSpan(praiseSpan);
+            }
             
-            // Set source
-            String source = otherInfoBean.getSource();
-            if (source != null && !source.isEmpty()) {
+            viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
+            viewHolder.layoutPraise.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.layoutPraise.setVisibility(View.GONE);
+        }
+        
+        // 设置评论信息
+        if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
+            viewHolder.recyclerViewComment.removeAllViews();
+            
+            for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
+                // 如果评论文本为空，重新生成
+                if (commentBean.getCommentContentSpan() == null) {
+                    commentBean.build();
+                }
+                
+                TextView textView = new TextView(mContext);
+                textView.setTextColor(mContext.getResources().getColor(R.color.base_333333));
+                textView.setTextSize(14);
+                textView.setText(commentBean.getCommentContentSpan());
+                textView.setPadding(0, 8, 0, 8);
+                
+                viewHolder.recyclerViewComment.addView(textView);
+            }
+            
+            viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.recyclerViewComment.setVisibility(View.GONE);
+        }
+        
+        // 设置其他信息
+        if (friendCircleBean.getOtherInfoBean() != null) {
+            OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
+            
+            // 设置发布时间
+            if (!TextUtils.isEmpty(otherInfoBean.getTime())) {
+                viewHolder.txtTime.setText(otherInfoBean.getTime());
+                viewHolder.txtTime.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.txtTime.setVisibility(View.GONE);
+            }
+            
+            // 设置发布来源
+            if (!TextUtils.isEmpty(otherInfoBean.getSource())) {
+                viewHolder.txtSource.setText(otherInfoBean.getSource());
                 viewHolder.txtSource.setVisibility(View.VISIBLE);
-                viewHolder.txtSource.setText(source);
             } else {
                 viewHolder.txtSource.setVisibility(View.GONE);
             }
             
-            // Set location - according to the implementation of the original project
-            String location = otherInfoBean.getLocation();
-            if (location != null && !location.isEmpty()) {
+            // 设置位置信息
+            if (!TextUtils.isEmpty(otherInfoBean.getLocation())) {
+                viewHolder.txtLocation.setText(otherInfoBean.getLocation());
                 viewHolder.txtLocation.setVisibility(View.VISIBLE);
-                viewHolder.txtLocation.setText(location);
             } else {
                 viewHolder.txtLocation.setVisibility(View.GONE);
             }
-        }
-        
-        // Set likes and comments
-        boolean hasPraise = friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty();
-        boolean hasComment = friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty();
-        
-        if (hasPraise || hasComment) {
-            viewHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
-            
-            // Set likes
-            if (hasPraise) {
-                viewHolder.layoutPraise.setVisibility(View.VISIBLE);
-                
-                // 确保praiseSpan已经设置
-                if (friendCircleBean.getPraiseSpan() == null && friendCircleBean.getPraiseBeans() != null) {
-                    Log.d("PerformanceFriendCircle", "onBindViewHolder: 点赞文本为空，正在重新生成，position=" + dataPosition);
-                    SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(mContext, friendCircleBean.getPraiseBeans());
-                    friendCircleBean.setPraiseSpan(praiseSpan);
-                }
-                
-                viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
-                Log.d("PerformanceFriendCircle", "onBindViewHolder: 设置点赞文本 position=" + dataPosition + 
-                    ", 点赞数量=" + friendCircleBean.getPraiseBeans().size() + 
-                    ", 文本=" + (friendCircleBean.getPraiseSpan() != null ? friendCircleBean.getPraiseSpan().toString() : "null"));
-            } else {
-                viewHolder.layoutPraise.setVisibility(View.GONE);
-            }
-            
-            // Set comments
-            if (hasComment) {
-                viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
-                
-                // 确保评论内容已构建
-                for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
-                    if (commentBean.getCommentContentSpan() == null) {
-                        Log.d("PerformanceFriendCircle", "onBindViewHolder: 评论文本为空，正在重新生成");
-                        commentBean.build(mContext);
-                    }
-                }
-                
-                CommentAdapter commentAdapter = new CommentAdapter(mContext, friendCircleBean.getCommentBeans());
-                viewHolder.recyclerViewComment.setAdapter(commentAdapter);
-                Log.d("PerformanceFriendCircle", "onBindViewHolder: 设置评论内容 position=" + dataPosition + 
-                    ", 评论数量=" + friendCircleBean.getCommentBeans().size());
-            } else {
-                viewHolder.recyclerViewComment.setVisibility(View.GONE);
-            }
-            
-            // Set divider
-            viewHolder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
-            viewHolder.layoutPraiseComment.setVisibility(View.GONE);
+            viewHolder.txtTime.setVisibility(View.GONE);
+            viewHolder.txtSource.setVisibility(View.GONE);
+            viewHolder.txtLocation.setVisibility(View.GONE);
         }
         
-        // Set comment icon click event
+        // 设置操作按钮点击事件
         viewHolder.imgComment.setOnClickListener(null);
         
-        Trace.endSection();
+        // 模拟计算负载
+        simulateComputationalLoad();
     }
     
     /**
@@ -538,25 +563,6 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     }
 
     public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
-        // 添加数据设置日志
-        if (friendCircleBeans != null) {
-            Log.e("PerformanceAdapter", "设置数据 - Context: " + mContext.getClass().getSimpleName() + 
-                    ", loadType: " + mLoadType + 
-                    ", 数据大小: " + friendCircleBeans.size());
-            
-            // 打印前5个项目的信息
-            for (int i = 0; i < Math.min(5, friendCircleBeans.size()); i++) {
-                FriendCircleBean bean = friendCircleBeans.get(i);
-                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
-                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
-                Log.e("PerformanceAdapter", "数据项[" + i + "] loadType=" + mLoadType + 
-                        ", 点赞数=" + praiseCount + 
-                        ", 评论数=" + commentCount);
-            }
-        } else {
-            Log.e("PerformanceAdapter", "设置数据 - 数据为空");
-        }
-        
         this.mFriendCircleBeans = friendCircleBeans;
         notifyDataSetChanged();
     }

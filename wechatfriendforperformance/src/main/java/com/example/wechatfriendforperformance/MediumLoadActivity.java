@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -34,11 +33,10 @@ public class MediumLoadActivity extends AppCompatActivity {
     private PerformanceFriendCircleAdapter adapter;
     private LinearLayout titleBar;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM; // 默认为中负载
+    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Trace.beginSection("MediumLoadActivity_onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medium_load);
 
@@ -46,7 +44,6 @@ public class MediumLoadActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
             mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
-            Log.d(TAG, "onCreate: 从Intent获取负载类型 = " + mLoadType);
         }
         
         // 使用Toast显示当前负载类型
@@ -76,12 +73,10 @@ public class MediumLoadActivity extends AppCompatActivity {
         // If error, use placeholder image
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        Trace.endSection();
     }
 
     @Override
     protected void onResume() {
-        Trace.beginSection("MediumLoadActivity_onResume");
         super.onResume();
         
         // 清空缓存，确保使用正确的负载类型
@@ -91,23 +86,18 @@ public class MediumLoadActivity extends AppCompatActivity {
         if (adapter != null) {
             // 刷新数据，确保显示正确的点赞和评论数量
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
-            Log.d(TAG, "onResume: 重新加载负载类型 = " + mLoadType + " 的数据");
         }
-        
-        Trace.endSection();
     }
 
     private void initRecyclerView() {
-        Trace.beginSection("MediumLoadActivity_initRecyclerView");
-        
         // Set layout manager
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         // Create adapter, using specified load mode
         adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
         
-        // Add header view
-        View headerView = getLayoutInflater().inflate(R.layout.item_header_view, recyclerView, false);
+        // Add header view - 使用include_title_bar_view.xml而不是item_header_view.xml
+        View headerView = getLayoutInflater().inflate(R.layout.include_title_bar_view, recyclerView, false);
         adapter.setHeaderView(headerView);
         
         recyclerView.setAdapter(adapter);
@@ -115,54 +105,6 @@ public class MediumLoadActivity extends AppCompatActivity {
         // 直接在Activity中生成对应负载类型的数据，不依赖DataCenter的缓存
         List<FriendCircleBean> data = PerformanceDataCenter.getInstance().generateDataForLoadType(mLoadType);
         adapter.setFriendCircleBeans(data);
-        Log.d(TAG, "initRecyclerView: 加载" + getLoadTypeString(mLoadType) + "类型的数据, 数据条数 = " + (data != null ? data.size() : 0));
-        
-        // 打印一些数据统计，确认点赞和评论数量
-        if (data != null && !data.isEmpty()) {
-            int totalPraise = 0;
-            int totalComment = 0;
-            int maxPraise = 0;
-            int maxComment = 0;
-            
-            for (FriendCircleBean bean : data) {
-                int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
-                int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
-                
-                totalPraise += praiseCount;
-                totalComment += commentCount;
-                maxPraise = Math.max(maxPraise, praiseCount);
-                maxComment = Math.max(maxComment, commentCount);
-            }
-            
-            double avgPraise = (double) totalPraise / data.size();
-            double avgComment = (double) totalComment / data.size();
-            
-            Log.d(TAG, "==================== " + getLoadTypeString(mLoadType) + " 统计信息 ====================");
-            Log.d(TAG, "点赞数量: 总计=" + totalPraise + ", 平均=" + String.format("%.2f", avgPraise) + 
-                    ", 最大=" + maxPraise);
-            Log.d(TAG, "评论数量: 总计=" + totalComment + ", 平均=" + String.format("%.2f", avgComment) + 
-                    ", 最大=" + maxComment);
-            Log.d(TAG, "=================================================");
-        }
-        
-        Trace.endSection();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish();
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (adapter != null) {
-            adapter.stopContinuousLoadSimulation();
-        }
     }
 
     private String getLoadTypeString(int loadType) {
@@ -174,7 +116,28 @@ public class MediumLoadActivity extends AppCompatActivity {
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
                 return "高负载";
             default:
-                return "未知负载类型";
+                return "未知负载";
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // 清理资源
+        if (adapter != null) {
+            adapter.stopContinuousLoadSimulation();
+        }
+        recyclerView.setAdapter(null);
+        adapter = null;
+        imageLoader = null;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            onBackPressed();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 } 
