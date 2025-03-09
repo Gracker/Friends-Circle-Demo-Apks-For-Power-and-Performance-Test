@@ -197,8 +197,26 @@ public class PerformanceDataCenter {
             // Set content, cycling through predefined contents
             bean.setContent(CONTENTS[i % CONTENTS.length]);
             
+            // 根据负载类型生成不同的position偏移量，
+            // 确保生成不同数量的评论和点赞
+            int positionOffset;
+            switch (loadType) {
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+                    positionOffset = i; // 轻负载使用原始位置
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+                    positionOffset = i + 100; // 中负载使用原始位置+100
+                    break;
+                case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+                    positionOffset = i + 200; // 高负载使用原始位置+200
+                    break;
+                default:
+                    positionOffset = i;
+                    break;
+            }
+            
             // Set comments, cycling comment count based on position and load type
-            List<CommentBean> commentBeans = generateCommentBeans(i, loadType);
+            List<CommentBean> commentBeans = generateCommentBeans(positionOffset, loadType);
             // 处理评论内容，设置必要的字段
             for (CommentBean commentBean : commentBeans) {
                 if (commentBean.getFromUserBean() != null) {
@@ -214,7 +232,7 @@ public class PerformanceDataCenter {
             bean.setCommentBeans(commentBeans);
             
             // Set likes, cycling like count based on position and load type
-            List<PraiseBean> praiseBeans = generatePraiseBeans(i, loadType);
+            List<PraiseBean> praiseBeans = generatePraiseBeans(positionOffset, loadType);
             // 处理点赞内容，设置必要的字段
             for (PraiseBean praiseBean : praiseBeans) {
                 if (praiseBean.getUserBean() != null) {
