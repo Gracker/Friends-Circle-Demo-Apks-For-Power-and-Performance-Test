@@ -86,8 +86,8 @@ public class MediumLoadActivity extends AppCompatActivity {
         // 创建适配器
         if (adapter == null) {
             adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
-            // 添加header view
-            View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, null);
+            // 添加header view - 恢复原有的加载方式
+            View headerView = getLayoutInflater().inflate(R.layout.include_title_bar_view, recyclerView, false);
             adapter.setHeaderView(headerView);
             recyclerView.setAdapter(adapter);
             // 设置数据 - 传入Context
