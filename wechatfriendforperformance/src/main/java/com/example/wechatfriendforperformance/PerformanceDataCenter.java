@@ -249,11 +249,11 @@ public class PerformanceDataCenter {
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
                 // 中负载: 5-12条评论
-                commentCount = position % 8 + 5;
+                commentCount = position % 8 + 8;
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
                 // 高负载: 10-24条评论
-                commentCount = position % 15 + 10;
+                commentCount = position % 15 + 15;
                 break;
             default:
                 // 默认为轻负载
