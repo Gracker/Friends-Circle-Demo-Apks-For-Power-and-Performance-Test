@@ -63,4 +63,8 @@ This project may continue to be updated in the future, including but not limited
 - Implementing emoji matching
 - Implementing phone number matching and other features
 
-Star and contributions welcome! 
+Star and contributions welcome!
+
+## Project Status
+
+[![Android CI](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml) 

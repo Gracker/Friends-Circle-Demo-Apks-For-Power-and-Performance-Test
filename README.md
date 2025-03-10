@@ -64,3 +64,7 @@
 - 实现电话号码匹配等功能
 
 欢迎 Star 和贡献！
+
+## 项目状态
+
+[![Android CI](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
