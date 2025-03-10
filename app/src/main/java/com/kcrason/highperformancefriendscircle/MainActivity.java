@@ -30,6 +30,7 @@ import io.reactivex.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
         OnPraiseOrCommentClickListener {
 
+    private static final String TAG = "MainActivity";
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Disposable mDisposable;
     private FriendCircleAdapter mFriendCircleAdapter;
@@ -115,13 +116,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
     @Override
-    public void onPraiseClick(View view, int position) {
+    public void onPraiseClick(int position) {
         Log.d(TAG, "You Click Praise!");
         mEmojiPanelView.showEmojiPanel();
     }
 
     @Override
-    public void onCommentClick(View view, int position) {
+    public void onCommentClick(int position) {
         mEmojiPanelView.showEmojiPanel();
     }
 
