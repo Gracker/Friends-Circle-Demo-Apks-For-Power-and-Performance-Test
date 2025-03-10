@@ -8,19 +8,56 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 11
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
         java-version: '11'
         distribution: 'temurin'
-        cache: gradle
+        cache: 'gradle'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+      
+    - name: Make Gradle wrapper executable
+      run: chmod +x ./gradlew
+      
+    - name: Build debug APK
+      run: ./gradlew :app:assembleDebug
+      
+    - name: Build wechatfriendforperformance module
+      run: ./gradlew :wechatfriendforperformance:assembleDebug
+      
+    - name: Build wechatfriendforpower module
+      run: ./gradlew :wechatfriendforpower:assembleDebug
+      
+    - name: Upload app debug APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+        if-no-files-found: ignore
+        
+    - name: Upload performance module APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-debug
+        path: wechatfriendforperformance/build/outputs/apk/debug/wechatfriendforperformance-debug.apk
+        if-no-files-found: ignore
+        
+    - name: Upload power module APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: power-debug
+        path: wechatfriendforpower/build/outputs/apk/debug/wechatfriendforpower-debug.apk
+        if-no-files-found: ignore
