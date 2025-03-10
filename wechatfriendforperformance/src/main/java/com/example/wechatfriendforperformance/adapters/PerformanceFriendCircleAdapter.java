@@ -628,7 +628,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     }
                     
                     // Schedule next frame computation
-                    mHandler.postDelayed(this, 16); // Roughly 60fps
+                    mHandler.postDelayed(this, 8); // Roughly 60fps
                 }
             };
             

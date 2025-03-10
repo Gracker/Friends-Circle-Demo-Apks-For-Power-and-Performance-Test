@@ -45,13 +45,13 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
-    private static final int HEAVY_FRAME_INTERVAL = 4; // 每隔这么多帧出现一个"肥"帧
+    private static final int HEAVY_FRAME_INTERVAL = 6; // 每隔这么多帧出现一个"肥"帧
     private Random mRandom = new Random();
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsHeavyFrameEnabled = true;
-    private int mHeavyFrameLoadFactor = 2000; // 负载强度，值越大越"肥"
+    private int mHeavyFrameLoadFactor = 1000; // 负载强度，值越大越"肥"
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

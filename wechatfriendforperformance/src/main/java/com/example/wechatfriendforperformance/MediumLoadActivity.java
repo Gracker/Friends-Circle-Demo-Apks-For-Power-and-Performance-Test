@@ -45,13 +45,13 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
-    private static final int HEAVY_FRAME_INTERVAL = 4; // 与HeavyLoadActivity保持一致的帧间隔
+    private static final int HEAVY_FRAME_INTERVAL = 8; // 与HeavyLoadActivity保持一致的帧间隔
     private Random mRandom = new Random();
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsHeavyFrameEnabled = true;
-    private int mHeavyFrameLoadFactor = 1000; // 负载强度是HeavyLoadActivity的一半
+    private int mHeavyFrameLoadFactor = 800; // 负载强度是HeavyLoadActivity的一半
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
