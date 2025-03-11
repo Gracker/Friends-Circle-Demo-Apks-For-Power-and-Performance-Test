@@ -25,27 +25,13 @@ public class FriendCircleBean {
 
     private boolean isShowPraise;
 
-    private boolean isExpanded;
+    private boolean isExpanded = false;
 
-    public boolean isExpanded() {
-        return isExpanded;
-    }
+    private boolean showComment = false;
 
-    public void setExpanded(boolean expanded) {
-        isExpanded = expanded;
-    }
+    private boolean showPraise = false;
 
-    private boolean isShowComment;
-
-    private boolean isShowCheckAll;
-
-    public boolean isShowCheckAll() {
-        return isShowCheckAll;
-    }
-
-    public void setShowCheckAll(boolean showCheckAll) {
-        isShowCheckAll = showCheckAll;
-    }
+    private boolean showCheckAll = false;
 
     private TranslationState translationState = TranslationState.START;
 
@@ -58,11 +44,27 @@ public class FriendCircleBean {
     }
 
     public boolean isShowComment() {
-        return isShowComment;
+        return showComment;
+    }
+
+    public void setShowComment(boolean showComment) {
+        this.showComment = showComment;
     }
 
     public boolean isShowPraise() {
-        return isShowPraise;
+        return showPraise;
+    }
+
+    public void setShowPraise(boolean showPraise) {
+        this.showPraise = showPraise;
+    }
+
+    public boolean isShowCheckAll() {
+        return showCheckAll;
+    }
+
+    public void setShowCheckAll(boolean showCheckAll) {
+        this.showCheckAll = showCheckAll;
     }
 
     public OtherInfoBean getOtherInfoBean() {
@@ -99,7 +101,7 @@ public class FriendCircleBean {
 
     public void setContentSpan(SpannableStringBuilder contentSpan) {
         this.contentSpan = contentSpan;
-        this.isShowCheckAll = PowerUtils.calculateShowCheckAllText(contentSpan.toString());
+        this.showCheckAll = PowerUtils.calculateShowCheckAllText(contentSpan.toString());
     }
 
     private SpannableStringBuilder contentSpan;
@@ -115,7 +117,7 @@ public class FriendCircleBean {
     }
 
     public void setCommentBeans(List<CommentBean> commentBeans) {
-        isShowComment = commentBeans != null && commentBeans.size() > 0;
+        showComment = commentBeans != null && commentBeans.size() > 0;
         this.commentBeans = commentBeans;
     }
 
@@ -124,7 +126,7 @@ public class FriendCircleBean {
     }
 
     public void setPraiseBeans(List<PraiseBean> praiseBeans) {
-        isShowPraise = praiseBeans != null && praiseBeans.size() > 0;
+        showPraise = praiseBeans != null && praiseBeans.size() > 0;
         this.praiseBeans = praiseBeans;
     }
 

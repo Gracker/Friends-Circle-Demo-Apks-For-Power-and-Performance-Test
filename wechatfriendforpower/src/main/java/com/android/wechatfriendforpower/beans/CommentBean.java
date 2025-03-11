@@ -7,6 +7,9 @@ import com.android.wechatfriendforpower.PowerConstants;
 import com.android.wechatfriendforpower.enums.TranslationState;
 import com.android.wechatfriendforpower.utils.PowerSpanUtils;
 
+/**
+ * 评论信息Bean类
+ */
 public class CommentBean {
 
     private int commentType;
@@ -22,6 +25,12 @@ public class CommentBean {
     private String commentContent;
 
     private TranslationState translationState = TranslationState.START;
+
+    private UserBean childUserBean; // 发表评论的用户
+    private UserBean parentUserBean; // 被回复的用户（如果是回复评论）
+
+    public CommentBean() {
+    }
 
     public void setTranslationState(TranslationState translationState) {
         this.translationState = translationState;
@@ -79,7 +88,6 @@ public class CommentBean {
         this.commentContent = commentContent;
     }
 
-
     /**
      * 富文本内容
      */
@@ -95,5 +103,29 @@ public class CommentBean {
         } else {
             commentContentSpan = PowerSpanUtils.makeReplyCommentSpan(context, parentUserName, childUserName, commentContent);
         }
+    }
+
+    public UserBean getChildUserBean() {
+        return childUserBean;
+    }
+
+    public void setChildUserBean(UserBean childUserBean) {
+        this.childUserBean = childUserBean;
+    }
+
+    public UserBean getParentUserBean() {
+        return parentUserBean;
+    }
+
+    public void setParentUserBean(UserBean parentUserBean) {
+        this.parentUserBean = parentUserBean;
+    }
+
+    public String getContent() {
+        return commentContent;
+    }
+
+    public void setContent(String content) {
+        this.commentContent = content;
     }
 } 

@@ -1,18 +1,22 @@
 package com.android.wechatfriendforpower.beans;
 
+/**
+ * 用户信息Bean类
+ */
 public class UserBean {
-    private String userAvatarUrl;
+    private String userId;  // 用户ID (使用String而不是int类型，以匹配测试)
+    private String userName; // 用户名
+    private String userAvatarUrl; // 用户头像URL
 
-    private String userName;
-
-    private int userId;
-
-    public String getUserAvatarUrl() {
-        return userAvatarUrl;
+    public UserBean() {
     }
 
-    public void setUserAvatarUrl(String userAvatarUrl) {
-        this.userAvatarUrl = userAvatarUrl;
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUserName() {
@@ -23,11 +27,11 @@ public class UserBean {
         this.userName = userName;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getUserAvatarUrl() {
+        return userAvatarUrl;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserAvatarUrl(String userAvatarUrl) {
+        this.userAvatarUrl = userAvatarUrl;
     }
 } 

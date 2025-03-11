@@ -20,8 +20,8 @@ public class BeanTest {
         UserBean userBean = new UserBean();
         
         // 测试设置和获取用户ID
-        userBean.setUserId("test_user_id");
-        assertEquals("test_user_id", userBean.getUserId());
+        userBean.setUserId("123");
+        assertEquals("123", userBean.getUserId());
         
         // 测试设置和获取用户名
         userBean.setUserName("测试用户");

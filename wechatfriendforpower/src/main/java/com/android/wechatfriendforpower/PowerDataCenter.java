@@ -68,7 +68,7 @@ public class PowerDataCenter {
             int avatarIndex = i % AVATAR_URLS.length;
             userBean.setUserAvatarUrl(AVATAR_URLS[avatarIndex]);
             
-            userBean.setUserId(i);
+            userBean.setUserId(String.valueOf(i));
             friendCircleBean.setUserBean(userBean);
             
             // 设置其他信息

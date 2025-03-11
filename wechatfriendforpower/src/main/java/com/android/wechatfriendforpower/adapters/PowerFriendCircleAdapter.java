@@ -38,8 +38,8 @@ import android.util.Log;
 public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         implements OnItemClickPopupMenuListener {
 
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_NORMAL = 1;
+    public static final int TYPE_HEADER = 0;
+    public static final int TYPE_NORMAL = 1;
     
     private static final String TAG = "PowerFriendCircleAdapter";
     
@@ -338,5 +338,32 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             viewLine = itemView.findViewById(R.id.view_line);
             commentLayout = itemView.findViewById(R.id.comment_layout);
         }
+    }
+
+    /**
+     * 设置点赞或评论点击监听器
+     * @param listener 监听器
+     */
+    public void setOnPraiseOrCommentClickListener(OnPraiseOrCommentClickListener listener) {
+        this.mOnPraiseOrCommentClickListener = listener;
+    }
+
+    /**
+     * 点赞或评论点击监听器
+     */
+    public interface OnPraiseOrCommentClickListener {
+        /**
+         * 点赞点击事件
+         * @param friendCircleBean 朋友圈数据
+         * @param position 位置
+         */
+        void onPraiseClick(FriendCircleBean friendCircleBean, int position);
+        
+        /**
+         * 评论点击事件
+         * @param friendCircleBean 朋友圈数据
+         * @param position 位置
+         */
+        void onCommentClick(FriendCircleBean friendCircleBean, int position);
     }
 } 

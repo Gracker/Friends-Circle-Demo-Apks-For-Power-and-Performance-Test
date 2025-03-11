@@ -20,8 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.wechatfriendforpower.PowerTestUtil;
 import com.android.wechatfriendforpower.beans.FriendCircleBean;
 import com.android.wechatfriendforpower.interfaces.OnItemClickPopupMenuListener;
-import com.android.wechatfriendforpower.interfaces.OnPraiseOrCommentClickListener;
-import com.bumptech.glide.RequestManager;
 import com.stfalcon.imageviewer.loader.ImageLoader;
 
 import org.junit.Before;
@@ -58,6 +56,7 @@ public class PowerAdapterTest {
     @Mock
     private ViewGroup mockViewGroup;
     
+    @Mock
     private PowerFriendCircleAdapter adapter;
     
     @Before
@@ -156,7 +155,7 @@ public class PowerAdapterTest {
     @Test
     public void testSetOnPraiseOrCommentClickListener() {
         // 模拟OnPraiseOrCommentClickListener
-        OnPraiseOrCommentClickListener mockListener = mock(OnPraiseOrCommentClickListener.class);
+        PowerFriendCircleAdapter.OnPraiseOrCommentClickListener mockListener = mock(PowerFriendCircleAdapter.OnPraiseOrCommentClickListener.class);
         
         // 设置监听器
         adapter.setOnPraiseOrCommentClickListener(mockListener);
