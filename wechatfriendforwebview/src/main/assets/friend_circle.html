@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>朋友圈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f2;
+            color: #333;
+            line-height: 1.5;
+            padding-bottom: 50px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* 朋友圈顶部 */
+        .header {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background-color: #333;
+            overflow: hidden;
+        }
+        
+        .header-bg {
+            width: 100%;
+            height: 100%;
+            background-image: url('file:///android_asset/main_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.8);
+        }
+        
+        .header-info {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nickname {
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            margin-right: 10px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background-color: #f0f0f0;
+            background-image: url('file:///android_asset/main_avatar.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* 朋友圈列表 */
+        .friend-circle-list {
+            padding: 0;
+        }
+        
+        .friend-circle-item {
+            background-color: white;
+            margin-bottom: 0;
+            padding: 10px 0;
+            border-bottom: none; /* 移除边框，只使用独立的分隔线 */
+        }
+        
+        .user-info {
+            display: flex;
+            margin-bottom: 0;
+            padding: 0 10px;
+        }
+        
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 4px;
+            margin-right: 10px;
+            background-color: #f0f0f0;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .user-detail {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #697A9F;
+            margin-bottom: 0;
+        }
+        
+        .post-content {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            margin-right: 10px;
+            word-break: break-word;
+            color: #333333;
+        }
+        
+        .post-images {
+            display: grid;
+            grid-gap: 4px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+            margin-right: 10px;
+            width: calc(100% - 10px);
+        }
+        
+        /* 统一所有图片布局为正方形，最多3列 */
+        .post-images.one,
+        .post-images.two,
+        .post-images.three,
+        .post-images.four,
+        .post-images.five,
+        .post-images.six,
+        .post-images.seven,
+        .post-images.eight,
+        .post-images.nine {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        
+        .post-images.one {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            max-width: 33.33%;
+        }
+        
+        .post-images.two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 66.67%;
+        }
+        
+        .post-images.one .image-item,
+        .post-images.two .image-item,
+        .post-images.three .image-item,
+        .post-images.four .image-item,
+        .post-images.five .image-item,
+        .post-images.six .image-item,
+        .post-images.seven .image-item,
+        .post-images.eight .image-item,
+        .post-images.nine .image-item {
+            padding-bottom: 100%; /* 保持1:1的正方形比例 */
+        }
+        
+        .image-item {
+            position: relative;
+            padding-bottom: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .image-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #f0f0f0;
+        }
+        
+        .post-meta {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            font-size: 12px;
+            color: #999999;
+            margin-top: 6px;
+            margin-bottom: 0;
+        }
+        
+        .post-time-location {
+            display: flex;
+            align-items: center;
+        }
+        
+        .post-location {
+            margin-left: 8px;
+            color: #337aff;
+        }
+        
+        .post-source {
+            color: #999999;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        /* 点赞和评论区域 */
+        .interaction-area {
+            margin-top: 4px;
+            margin-right: 10px;
+            background-color: #F2F2F2;
+            border-radius: 2px;
+            padding: 4px;
+            margin-left: 0; /* 移除左边距，与内容区域左侧对齐 */
+        }
+        
+        .praise-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .praise-item {
+            color: #697A9F;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
+        .praise-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: none;
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin-right: 4px;
+            vertical-align: -3px;
+            content: "❤️";
+        }
+        
+        .praise-divider {
+            width: 100%;
+            height: 0.5px;
+            background-color: #DCDCDC;
+            margin: 3px 0;
+        }
+        
+        .comment-area {
+            margin-top: 8px;
+        }
+        
+        .comment-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            word-break: break-word;
+        }
+        
+        .comment-name {
+            color: #697A9F;
+            font-weight: 500;
+        }
+        
+        .comment-reply {
+            color: #697A9F;
+            font-weight: 500;
+        }
+        
+        /* 操作区域 */
+        .action-area {
+            display: none;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #337aff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 50px 0;
+            color: #999;
+        }
+        
+        .load-more {
+            text-align: center;
+            padding: 15px;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-bg"></div>
+            <div class="header-info">
+                <div class="nickname">朋友圈</div>
+                <div class="avatar"></div>
+            </div>
+        </div>
+        
+        <div class="friend-circle-list" id="friendCircleList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>加载中...</div>
+            </div>
+        </div>
+        
+        <div class="load-more" id="loadMore" style="display:none;">
+            上拉加载更多
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量
+        let isLoading = false;
+        let loadType = 1; // 默认轻负载
+        let currentItemCount = 0; // 当前已加载的朋友圈条目数量
+        let batchSize = 50; // 每次加载的条目数量
+        const maxItemCount = 2000; // 最大条目数量
+        
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('朋友圈页面已加载');
+            
+            // 尝试获取负载类型
+            try {
+                loadType = Android.getLoadType();
+                console.log('当前负载类型:', loadType);
+            } catch (e) {
+                console.error('获取负载类型失败:', e);
+            }
+            
+            // 减少初始化延迟，加快页面加载速度
+            setTimeout(function() {
+                const loadingElement = document.querySelector('.loading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+                
+                // 如果没有数据，则显示初始提示
+                const friendCircleList = document.getElementById('friendCircleList');
+                if (friendCircleList.children.length <= 1) {
+                    friendCircleList.innerHTML = `
+                        <div class="empty-state">
+                            <p>暂无朋友圈内容</p>
+                            <p>数据将通过原生代码加载</p>
+                        </div>
+                    `;
+                }
+            }, 200); // 降低延迟到200ms
+        });
+        
+        // 加载朋友圈数据
+        function loadFriendCircleData(data) {
+            console.log('接收到朋友圈数据');
+            if (!data || !data.data || !Array.isArray(data.data)) {
+                console.error('数据格式错误');
+                return;
+            }
+            
+            const friendCircleList = document.getElementById('friendCircleList');
+            friendCircleList.innerHTML = ''; // 清空加载提示
+            
+            // 渲染数据
+            data.data.forEach(function(item) {
+                const postHtml = createPostHtml(item);
+                if (postHtml) {
+                    friendCircleList.innerHTML += postHtml;
+                }
+            });
+            
+            // 更新当前条目数量
+            currentItemCount = data.data.length > 0 ? data.data.length - 1 : 0; // 减去header
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 显示加载更多
+            document.getElementById('loadMore').style.display = 'block';
+            
+            // 通知原生代码数据已加载完成
+            try {
+                Android.showToast('朋友圈数据加载完成');
+            } catch (e) {
+                console.error('调用原生方法失败:', e);
+            }
+        }
+        
+        // 创建朋友圈帖子HTML
+        function createPostHtml(item) {
+            if (item.type === 'header') {
+                // 头部特殊处理，已有固定头部，可以跳过
+                return '';
+            }
+            
+            // 处理图片 (最多显示9张)
+            let imagesHtml = '';
+            if (item.images && item.images.length > 0) {
+                const imageCount = Math.min(item.images.length, 9); // 最多显示9张图片
+                const layoutClass = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][imageCount - 1];
+                
+                imagesHtml = `<div class="post-images ${layoutClass}">`;
+                for (let i = 0; i < imageCount; i++) {
+                    // 确保图片序号在1-11之间
+                    const imageIndex = (i % 11) + 1;
+                    const imagePath = `file:///android_asset/local${imageIndex}.jpeg`;
+                    
+                    imagesHtml += `
+                        <div class="image-item" onclick="showImage('local${imageIndex}.jpeg')">
+                            <img src="${imagePath}" alt="朋友圈图片" loading="lazy">
+                        </div>
+                    `;
+                }
+                imagesHtml += `</div>`;
+            }
+            
+            // 处理点赞
+            let praisesHtml = '';
+            if (item.praises && item.praises.length > 0) {
+                praisesHtml = `
+                    <div class="praise-area">
+                        <svg width="16" height="16" viewBox="0 0 1024 1024" style="margin-right: 4px;">
+                            <path fill="#697A9F" d="M711.713554 104.804974c-77.222779 0-151.3388 35.948747-199.713554 92.53451-48.374754-56.585763-122.490775-92.53451-199.713554-92.53451-136.915299 0-244.094344 107.180068-244.094344 244.094344 0 167.537737 150.894685 304.453037 379.456265 511.933485l64.352657 58.361199 64.352657-58.361199C804.913213 653.353378 955.808922 516.438079 955.808922 348.900342 955.808922 211.985042 848.628854 104.804974 711.713554 104.804974zM516.660136 795.149848l-4.660136 4.216022-4.660136-4.216022C296.308543 603.64628 156.952658 477.160517 156.952658 348.900342c0-88.539522 66.793242-155.332764 155.332764-155.332764 68.346621 0 134.917806 44.158732 158.217465 104.738459l82.770122 0c23.521716-60.579727 90.092901-104.738459 158.439522-104.738459 88.539522 0 155.332764 66.793242 155.332764 155.332764C867.046319 477.160517 727.690434 603.64628 516.660136 795.149848z" />
+                        </svg>
+                `;
+                
+                item.praises.forEach(function(praise, index) {
+                    praisesHtml += `<span class="praise-item">${praise}</span>`;
+                    if (index < item.praises.length - 1) {
+                        praisesHtml += `<span>, </span>`;
+                    }
+                });
+                
+                praisesHtml += `</div>`;
+                
+                // 如果同时有评论，添加分割线
+                if (item.comments && item.comments.length > 0) {
+                    praisesHtml += `<div class="praise-divider"></div>`;
+                }
+            }
+            
+            // 处理评论
+            let commentsHtml = '';
+            if (item.comments && item.comments.length > 0) {
+                commentsHtml = `<div class="comment-area">`;
+                
+                item.comments.forEach(function(comment) {
+                    if (comment.replyTo) {
+                        commentsHtml += `
+                            <div class="comment-item">
+                                <span class="comment-name">${comment.username}</span>
+                                <span>回复</span>
+                                <span class="comment-reply">${comment.replyTo}</span>
+                                <span>: ${comment.content}</span>
+                            </div>
+                        `;
+                    } else {
+                        commentsHtml += `
+                            <div class="comment-item">
+                                <span class="comment-name">${comment.username}</span>
+                                <span>: ${comment.content}</span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                commentsHtml += `</div>`;
+            }
+            
+            // 处理位置和来源
+            let locationHtml = '';
+            if (item.location) {
+                locationHtml = `<div class="post-location">${item.location}</div>`;
+            }
+            
+            let sourceHtml = '';
+            if (item.source) {
+                sourceHtml = `<div class="post-source">来自 ${item.source}</div>`;
+            }
+            
+            // 构建完整的帖子HTML
+            return `
+                <div class="friend-circle-item" data-id="${item.id}">
+                    <div class="user-info">
+                        <div class="user-avatar" style="background-image: url('file:///android_asset/avatar${(item.id % 11) + 1}.jpg')"></div>
+                        <div class="user-detail">
+                            <div class="user-name">${item.username}</div>
+                            <div class="post-content">${item.content}</div>
+                            ${imagesHtml}
+                            <div class="post-meta">
+                                <div class="post-time">${item.time}</div>
+                                ${locationHtml ? locationHtml : ''}
+                                ${sourceHtml ? sourceHtml : ''}
+                            </div>
+                            
+                            ${(praisesHtml || commentsHtml) ? `
+                                <div class="interaction-area">
+                                    ${praisesHtml ? praisesHtml : ''}
+                                    ${(praisesHtml && commentsHtml) ? `<div class="praise-divider"></div>` : ''}
+                                    ${commentsHtml ? commentsHtml : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div style="width:100%;height:0.5px;background-color:#DCDCDC;margin-top:8px;"></div>
+                </div>
+            `;
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 滚动加载更多
+            window.addEventListener('scroll', function() {
+                if (isLoading) return;
+                
+                const scrollY = window.scrollY;
+                const windowHeight = window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                
+                // 如果滚动到底部的距离小于100px，加载更多
+                if (documentHeight - scrollY - windowHeight < 100) {
+                    loadMore();
+                }
+            });
+        }
+        
+        // 加载更多数据
+        function loadMore() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            document.getElementById('loadMore').innerText = '正在加载...';
+            
+            // 如果已经达到最大条目数量，则显示全部加载完成
+            if (currentItemCount >= maxItemCount) {
+                document.getElementById('loadMore').innerText = '已加载全部内容';
+                isLoading = false;
+                return;
+            }
+            
+            // 计算本次需要加载的条目数量
+            const loadCount = Math.min(batchSize, maxItemCount - currentItemCount);
+            
+            try {
+                // 尝试调用原生方法加载更多
+                Android.loadMoreItems(loadCount);
+                
+                // 这里先不改变状态，等待原生回调
+            } catch (e) {
+                console.error('调用原生加载更多方法失败:', e);
+                
+                // 原生方法调用失败，使用模拟数据
+                setTimeout(function() {
+                    appendMoreItems(generateMockItems(loadCount, currentItemCount));
+                }, 300);
+            }
+        }
+        
+        // 追加更多朋友圈条目
+        function appendMoreItems(items) {
+            if (!items || !Array.isArray(items)) {
+                console.error('追加条目数据格式错误');
+                isLoading = false;
+                return;
+            }
+            
+            const friendCircleList = document.getElementById('friendCircleList');
+            
+            // 渲染新加载的条目
+            items.forEach(function(item) {
+                const postHtml = createPostHtml(item);
+                if (postHtml) {
+                    friendCircleList.innerHTML += postHtml;
+                }
+            });
+            
+            // 更新条目计数
+            currentItemCount += items.length;
+            
+            // 更新加载状态
+            if (currentItemCount >= maxItemCount) {
+                document.getElementById('loadMore').innerText = '已加载全部内容';
+            } else {
+                document.getElementById('loadMore').innerText = '上拉加载更多';
+            }
+            
+            isLoading = false;
+        }
+        
+        // 生成模拟条目数据（当原生方法不可用时使用）
+        function generateMockItems(count, startIndex) {
+            const mockItems = [];
+            
+            for (let i = 0; i < count; i++) {
+                const id = startIndex + i + 1;
+                mockItems.push({
+                    id: id,
+                    type: 'normal',
+                    username: '用户' + id,
+                    content: '这是动态加载的第' + id + '条朋友圈内容。',
+                    time: Math.floor(Math.random() * 60) + '分钟前',
+                    images: i % 3 === 0 ? ['local' + ((id % 11) + 1) + '.jpeg'] : [],
+                    praises: i % 4 === 0 ? ['用户A', '用户B'] : [],
+                    comments: i % 5 === 0 ? [
+                        { username: '用户C', content: '真不错!' }
+                    ] : []
+                });
+            }
+            
+            return mockItems;
+        }
+        
+        // 原生回调函数，用于接收加载的更多条目
+        function appendFriendCircleData(data) {
+            if (!data || !data.data || !Array.isArray(data.data)) {
+                console.error('追加数据格式错误');
+                isLoading = false;
+                return;
+            }
+            
+            appendMoreItems(data.data);
+        }
+        
+        // 查看图片
+        function showImage(imageUrl) {
+            console.log('查看图片:', imageUrl);
+            try {
+                Android.showImage(imageUrl);
+            } catch (e) {
+                console.error('调用原生查看图片方法失败:', e);
+                alert('查看图片: ' + imageUrl);
+            }
+        }
+    </script>
+</body>
+</html> 
