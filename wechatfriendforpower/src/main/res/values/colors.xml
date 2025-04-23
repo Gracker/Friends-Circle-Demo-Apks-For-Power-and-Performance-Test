@@ -9,9 +9,9 @@
     <color name="white">#FFFFFFFF</color>
     
     <!-- 添加与app模块相同的颜色定义 -->
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#FF5722</color>
+    <color name="colorPrimaryDark">#E64A19</color>
+    <color name="colorAccent">#FF5722</color>
     <color name="base_333333">#333333</color>
     <color name="base_F2F2F2">#f2f2f2</color>
     <color name="base_F8F8F8">#f8f8f8</color>
@@ -24,4 +24,8 @@
     <color name="base_222230">#222230</color>
     <color name="base_000000">#000000</color>
     <color name="base_3FB838">#3FB838</color>
+    <color name="background">#FAFAFA</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="ic_launcher_background">#FF5722</color>
 </resources>

@@ -36,10 +36,10 @@
     <color name="mtk_blue">#1677FF</color>
 
     <!-- 主题颜色 -->
-    <color name="primary">#03A9F4</color>
-    <color name="primary_dark">#0288D1</color>
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
     <color name="primary_light">#B3E5FC</color>
-    <color name="accent">#FF5722</color>
+    <color name="accent">#2196F3</color>
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
@@ -51,4 +51,5 @@
     <color name="deep_purple">#673AB7</color> <!-- 深紫色 -->
     <color name="warm_orange">#FF5722</color> <!-- 暖橙色 -->
     <color name="orange">#FF9800</color>
+    <color name="ic_launcher_background">#2196F3</color>
 </resources> 

@@ -20,5 +20,11 @@
     <color name="base_333333">#333333</color>
     <color name="base_666666">#666666</color>
     <color name="base_999999">#999999</color>
-    <color name="background">#F8F8F8</color>
+    <color name="background">#FAFAFA</color>
+    <color name="primary">#3DDC84</color>
+    <color name="primary_dark">#2BB673</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="accent">#3DDC84</color>
+    <color name="ic_launcher_background">#3DDC84</color>
 </resources>

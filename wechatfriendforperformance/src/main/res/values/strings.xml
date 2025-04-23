@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Performance Module</string>
+    <string name="app_name">微信朋友圈HWUI</string>
     <string name="title_main">微信朋友圈滑动性能测试</string>
     <string name="title_select_load">请选择要测试的负载级别：</string>
     <string name="btn_light_load">Light Load Test</string>
