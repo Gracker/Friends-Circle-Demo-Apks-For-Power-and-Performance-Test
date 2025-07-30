@@ -39,6 +39,13 @@ jobs:
       with:
         fileName: 'release.keystore'
         encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+        
+    - name: Verify keystore file
+      run: |
+        echo "Checking keystore file..."
+        ls -la release.keystore
+        echo "Keystore file path: ${{ github.workspace }}/release.keystore"
+        file release.keystore
       
     - name: Get version info
       id: version
@@ -47,12 +54,14 @@ jobs:
         echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
       
-    - name: Build all release APKs
+    - name: Setup Android app signing
       env:
-        KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
-        KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
+        KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       run: ./gradlew assembleRelease --parallel
       
     - name: Rename APK files with version info
