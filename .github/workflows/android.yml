@@ -39,17 +39,6 @@ jobs:
       with:
         fileName: 'release.keystore'
         encodedString: ${{ secrets.KEYSTORE_BASE64 }}
-        
-    - name: Copy keystore to module directories
-      run: |
-        # 复制keystore文件到各个模块目录，因为build.gradle中查找的是相对路径
-        cp release.keystore app/release.keystore
-        cp release.keystore wechatfriendforperformance/release.keystore
-        cp release.keystore wechatfriendforpower/release.keystore
-        cp release.keystore wechatfriendforwebview/release.keystore
-        
-        echo "Keystore files copied to all module directories"
-        ls -la */release.keystore
       
     - name: Get version info
       id: version
@@ -60,7 +49,7 @@ jobs:
       
     - name: Build all release APKs
       env:
-        KEYSTORE_FILE_PATH: release.keystore
+        KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
         KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
