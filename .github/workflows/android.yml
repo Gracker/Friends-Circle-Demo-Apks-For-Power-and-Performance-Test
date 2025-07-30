@@ -44,9 +44,6 @@ jobs:
     - name: Build all debug APKs
       run: ./gradlew assembleDebug --parallel
       
-    - name: Build all release APKs
-      run: ./gradlew assembleRelease --parallel
-      
     - name: Rename APK files with version info
       run: |
         # 创建release目录
@@ -67,23 +64,6 @@ jobs:
         
         if [ -f "wechatfriendforwebview/build/outputs/apk/debug/wechatfriendforwebview-debug.apk" ]; then
           cp wechatfriendforwebview/build/outputs/apk/debug/wechatfriendforwebview-debug.apk "release-apks/WeChatFriendForWebView-debug-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
-        fi
-        
-        # 重命名Release APKs (无签名版本)
-        if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-          cp app/build/outputs/apk/release/app-release-unsigned.apk "release-apks/HighPerformanceFriendsCircle-release-unsigned-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
-        fi
-        
-        if [ -f "wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release-unsigned.apk" ]; then
-          cp wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release-unsigned.apk "release-apks/WeChatFriendForPerformance-release-unsigned-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
-        fi
-        
-        if [ -f "wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release-unsigned.apk" ]; then
-          cp wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release-unsigned.apk "release-apks/WeChatFriendForPower-release-unsigned-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
-        fi
-        
-        if [ -f "wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release-unsigned.apk" ]; then
-          cp wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release-unsigned.apk "release-apks/WeChatFriendForWebView-release-unsigned-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
         # 列出所有生成的文件
@@ -118,13 +98,10 @@ jobs:
           - WeChatFriendForPower-debug - 功耗测试模块
           - WeChatFriendForWebView-debug - WebView测试模块
           
-          ### Release版本 (未签名，需要手动签名)
-          - 所有模块的release-unsigned版本
-          
           ## 📝 说明
           - Debug版本可以直接安装使用
-          - Release版本未签名，如需发布请使用你的签名密钥进行签名
           - 所有APK都通过了自动化构建和基本检查
+          - 如需Release版本，请在本地配置签名后手动构建
           
           ---
           💡 这是通过GitHub Actions自动生成的发布版本
