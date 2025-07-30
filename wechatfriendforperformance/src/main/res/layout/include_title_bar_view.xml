@@ -28,7 +28,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
-            android:tint="@color/base_FFFFFF"
+            app:tint="@color/base_FFFFFF"
             android:src="@drawable/ic_back_arrow" />
 
         <View
@@ -42,7 +42,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="3dp"
-            android:tint="@color/base_FFFFFF"
+            app:tint="@color/base_FFFFFF"
             android:src="@android:drawable/ic_menu_camera" />
     </LinearLayout>
 

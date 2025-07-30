@@ -89,6 +89,36 @@
 
 欢迎 Star 和贡献！
 
+## 📱 下载应用
+
+### 🚀 自动构建版本
+每次代码更新后，GitHub Actions会自动构建最新版本的APK文件。你可以在[Releases页面](../../releases)下载：
+
+- **HighPerformanceFriendsCircle-debug** - 主应用模块
+- **WeChatFriendForPerformance-debug** - 性能测试模块
+- **WeChatFriendForPower-debug** - 功耗测试模块  
+- **WeChatFriendForWebView-debug** - WebView测试模块
+
+### 📋 版本说明
+- **Debug版本**: 包含调试信息，可直接安装使用
+- **Release版本**: 优化版本，需要签名后才能发布
+
+> 💡 **提示**: Debug版本适合体验和测试，Release版本适合正式使用
+
+## 🔧 开发者指南
+
+### 自动化构建和发布
+本项目配置了完整的CI/CD流程：
+
+- **自动构建**: 每次push到master分支自动构建所有模块
+- **自动发布**: 构建成功后自动创建GitHub Release
+- **手动发布**: 支持手动触发带版本号的正式发布
+
+详细配置说明请查看 [RELEASE_SETUP.md](RELEASE_SETUP.md)
+
+### 签名配置
+如需配置APK签名，请参考 [SIGNING_CONFIG_EXAMPLE.md](SIGNING_CONFIG_EXAMPLE.md)
+
 ## 项目状态
 
-[![Android CI](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
+[![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
