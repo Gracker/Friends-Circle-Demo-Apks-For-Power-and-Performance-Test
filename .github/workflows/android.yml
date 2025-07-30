@@ -39,13 +39,6 @@ jobs:
       with:
         fileName: 'release.keystore'
         encodedString: ${{ secrets.KEYSTORE_BASE64 }}
-        
-    - name: Verify keystore file
-      run: |
-        echo "Checking keystore file..."
-        ls -la release.keystore
-        echo "Keystore file path: ${{ github.workspace }}/release.keystore"
-        file release.keystore
       
     - name: Get version info
       id: version
