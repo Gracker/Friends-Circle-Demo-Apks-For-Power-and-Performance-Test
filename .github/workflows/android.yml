@@ -34,6 +34,12 @@ jobs:
     - name: Make Gradle wrapper executable
       run: chmod +x ./gradlew
       
+    - name: Decode Keystore
+      uses: timheuer/base64-to-file@v1
+      with:
+        fileName: 'release.keystore'
+        encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+      
     - name: Get version info
       id: version
       run: |
@@ -41,29 +47,34 @@ jobs:
         echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
       
-    - name: Build all debug APKs
-      run: ./gradlew assembleDebug --parallel
+    - name: Build all release APKs
+      env:
+        KEYSTORE_FILE_PATH: release.keystore
+        KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: ./gradlew assembleRelease --parallel
       
     - name: Rename APK files with version info
       run: |
         # 创建release目录
         mkdir -p release-apks
         
-        # 重命名Debug APKs
-        if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-          cp app/build/outputs/apk/debug/app-debug.apk "release-apks/HighPerformanceFriendsCircle-debug-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        # 重命名Release APKs
+        if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+          cp app/build/outputs/apk/release/app-release.apk "release-apks/HighPerformanceFriendsCircle-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforperformance/build/outputs/apk/debug/wechatfriendforperformance-debug.apk" ]; then
-          cp wechatfriendforperformance/build/outputs/apk/debug/wechatfriendforperformance-debug.apk "release-apks/WeChatFriendForPerformance-debug-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release.apk" ]; then
+          cp wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release.apk "release-apks/WeChatFriendForPerformance-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforpower/build/outputs/apk/debug/wechatfriendforpower-debug.apk" ]; then
-          cp wechatfriendforpower/build/outputs/apk/debug/wechatfriendforpower-debug.apk "release-apks/WeChatFriendForPower-debug-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release.apk" ]; then
+          cp wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release.apk "release-apks/WeChatFriendForPower-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforwebview/build/outputs/apk/debug/wechatfriendforwebview-debug.apk" ]; then
-          cp wechatfriendforwebview/build/outputs/apk/debug/wechatfriendforwebview-debug.apk "release-apks/WeChatFriendForWebView-debug-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release.apk" ]; then
+          cp wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release.apk "release-apks/WeChatFriendForWebView-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
         # 列出所有生成的文件
@@ -84,7 +95,7 @@ jobs:
         tag_name: auto-build-${{ steps.version.outputs.BUILD_TIME }}
         name: "自动构建 ${{ steps.version.outputs.BUILD_TIME }}"
         body: |
-          🤖 **自动构建发布**
+          🚀 **自动构建发布 (Release版本)**
           
           📅 **构建时间**: ${{ steps.version.outputs.BUILD_TIME }}
           🔗 **提交**: ${{ steps.version.outputs.SHORT_SHA }}
@@ -92,19 +103,25 @@ jobs:
           
           ## 📦 包含的APK文件
           
-          ### Debug版本 (可直接安装)
-          - HighPerformanceFriendsCircle-debug - 主应用模块
-          - WeChatFriendForPerformance-debug - 性能测试模块  
-          - WeChatFriendForPower-debug - 功耗测试模块
-          - WeChatFriendForWebView-debug - WebView测试模块
+          ### 🎯 Release版本 (已签名，生产就绪)
+          - HighPerformanceFriendsCircle-release - 主应用模块
+          - WeChatFriendForPerformance-release - 性能测试模块  
+          - WeChatFriendForPower-release - 功耗测试模块
+          - WeChatFriendForWebView-release - WebView测试模块
           
           ## 📝 说明
-          - Debug版本可以直接安装使用
-          - 所有APK都通过了自动化构建和基本检查
-          - 如需Release版本，请在本地配置签名后手动构建
+          - ✅ Release版本，已使用正式签名密钥签名
+          - ✅ 优化版本，性能更好，体积更小
+          - ✅ 所有APK都通过了自动化构建和签名验证
+          - ✅ 可直接安装使用，适合生产环境
+          
+          ## 🔧 安装说明
+          1. 下载对应的APK文件
+          2. 在Android设备上启用"允许安装未知来源应用"
+          3. 直接安装APK文件即可使用
           
           ---
-          💡 这是通过GitHub Actions自动生成的发布版本
+          💡 这是通过GitHub Actions自动生成的正式发布版本
         files: release-apks/*
         draft: false
         prerelease: false
