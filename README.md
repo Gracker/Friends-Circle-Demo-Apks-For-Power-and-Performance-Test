@@ -1,13 +1,26 @@
 # 高性能微信朋友圈测试 Demo
 
+## 📊 项目状态
+
+[![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
+[![API Level](https://img.shields.io/badge/API-21%2B-blue.svg)](https://android-arsenal.com/api?level=21)
+[![Gradle](https://img.shields.io/badge/Gradle-8.2.2-blue.svg)](https://gradle.org)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
+[![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
+[![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
+
 本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含四个主要模块，分别用于不同方面的测试和研究。
 
 *Read this in [English](README_EN.md)*
 
-![main_page.jpg](pic/main_page.jpg)
-![friends_1.jpg](pic/friends_1.jpg)
-![friends_2.jpg](pic/friends_2.jpg)
-![trace.png](pic/trace.png)
+## APK 说明
+1. app-releas : 原项目 App，进去后是一个随机展示的 微信朋友圈 界面，仅作保留使用。
+2. wechatfriendforperformance-release ：用来测试性能的 App，使用标准的 AOSP 实现。进去后有三种负载可以选择，主要测试平台性能 or Power。
+3. wechatfriendforpower-release：原项目 App 魔改，进去后是一个固定显示内容的 微信朋友圈 界面，每次进去显示的内容和每个位置的 item 都是一样的，用来测试固定性能 or Power。
+4. wechatfriendforwebview-release ：用来测试性能的 App，使用标准的 WebView 实现。进去后有三种负载可以选择，主要测试平台性能  or Power。
 
 ## 项目结构
 
@@ -119,6 +132,9 @@
 ### 签名配置
 如需配置APK签名，请参考 [SIGNING_CONFIG_EXAMPLE.md](SIGNING_CONFIG_EXAMPLE.md)
 
-## 项目状态
 
-[![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
+# 项目截图
+![main_page.jpg](pic/main_page.jpg)
+![friends_1.jpg](pic/friends_1.jpg)
+![friends_2.jpg](pic/friends_2.jpg)
+![trace.png](pic/trace.png)
