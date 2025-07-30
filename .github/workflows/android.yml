@@ -45,19 +45,19 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk-released/debug/app-debug.apk-released
         if-no-files-found: ignore
         
     - name: Upload performance module APK
       uses: actions/upload-artifact@v4
       with:
         name: performance-debug
-        path: wechatfriendforperformance/build/outputs/apk/debug/wechatfriendforperformance-debug.apk
+        path: wechatfriendforperformance/build/outputs/apk-released/debug/wechatfriendforperformance-debug.apk-released
         if-no-files-found: ignore
         
     - name: Upload power module APK
       uses: actions/upload-artifact@v4
       with:
         name: power-debug
-        path: wechatfriendforpower/build/outputs/apk/debug/wechatfriendforpower-debug.apk
+        path: wechatfriendforpower/build/outputs/apk-released/debug/wechatfriendforpower-debug.apk-released
         if-no-files-found: ignore
