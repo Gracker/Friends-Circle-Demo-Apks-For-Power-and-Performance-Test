@@ -12,7 +12,7 @@ import com.android.wechatfriendforpower.adapters.PowerFriendCircleAdapter;
 import com.android.wechatfriendforpower.beans.FriendCircleBean;
 import com.android.wechatfriendforpower.interfaces.OnPraiseOrCommentClickListener;
 import com.bumptech.glide.Glide;
-import com.stfalcon.imageviewer.loader.ImageLoader;
+// 移除ImageLoader import
 
 import java.util.List;
 
@@ -30,26 +30,12 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         
-        // 创建图片加载器，从本地资源加载图片
-        ImageLoader<String> imageLoader = new ImageLoader<String>() {
-            @Override
-            public void loadImage(ImageView imageView, String imageUrl) {
-                int resourceId = imageView.getContext().getResources().getIdentifier(
-                    imageUrl, "drawable", imageView.getContext().getPackageName());
-                if (resourceId != 0) {
-                    Glide.with(imageView.getContext())
-                         .load(resourceId)
-                         .into(imageView);
-                }
-            }
-        };
-        
         // 设置布局管理器
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         
         // 创建适配器
-        mFriendCircleAdapter = new PowerFriendCircleAdapter(this, recyclerView, imageLoader);
+        mFriendCircleAdapter = new PowerFriendCircleAdapter(this, recyclerView);
         
         // 添加顶部视图
         View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, recyclerView, false);

@@ -71,7 +71,7 @@ public class PowerActivity extends AppCompatActivity implements PowerFriendCircl
         recyclerView.setLayoutManager(layoutManager);
         
         // 设置适配器
-        adapter = new PowerFriendCircleAdapter(this, recyclerView, null);
+        adapter = new PowerFriendCircleAdapter(this, recyclerView);
         adapter.setOnPraiseOrCommentClickListener(this);
         recyclerView.setAdapter(adapter);
         

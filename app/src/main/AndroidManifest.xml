@@ -23,6 +23,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activitys.EmojiPanelActivity"/>
+        <activity 
+            android:name=".ImageViewerActivity"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
     </application>
 
 </manifest>

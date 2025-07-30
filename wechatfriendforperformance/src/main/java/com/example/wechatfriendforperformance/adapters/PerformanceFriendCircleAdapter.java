@@ -38,8 +38,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.stfalcon.imageviewer.StfalconImageViewer;
-import com.stfalcon.imageviewer.loader.ImageLoader;
+// 移除StfalconImageViewer相关imports
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +66,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     private OnPraiseOrCommentClickListener mOnPraiseOrCommentClickListener;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
-    private ImageLoader<String> mImageLoader;
+    // 移除ImageLoader成员变量
     private View mHeaderView;
     private Random mRandom = new Random(0); // Using fixed seed to ensure consistent results for each run
     private int mLoadType; // Load type
@@ -115,45 +114,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 break;
         }
         
-        // 初始化图片加载器
-        mImageLoader = new ImageLoader<String>() {
-            @Override
-            public void loadImage(ImageView imageView, String image) {
-                try {
-                    // 尝试加载图片资源
-                    int resourceId = mContext.getResources().getIdentifier(
-                            image.toLowerCase(), "drawable", mContext.getPackageName());
-                    if (resourceId != 0) {
-                        Glide.with(mContext)
-                                .load(resourceId)
-                                .transition(mDrawableTransitionOptions)
-                                .into(imageView);
-                    } else {
-                        // 如果找不到资源，尝试加载测试图片
-                        int testImgId = mContext.getResources().getIdentifier(
-                                "test_img_" + (Math.abs(image.hashCode()) % 10 + 1), 
-                                "drawable", mContext.getPackageName());
-                        if (testImgId != 0) {
-                            Glide.with(mContext)
-                                    .load(testImgId)
-                                    .transition(mDrawableTransitionOptions)
-                                    .into(imageView);
-                        } else {
-                            // 如果仍然找不到，使用默认图片
-                            Glide.with(mContext)
-                                    .load(R.drawable.default_avatar)
-                                    .into(imageView);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    // 使用默认图片
-                    Glide.with(mContext)
-                            .load(R.drawable.default_avatar)
-                            .into(imageView);
-                }
-            }
-        };
+        // 移除ImageLoader初始化代码
         
         // 初始化连续加载模拟
         mFrameLoadRunnable = new Runnable() {
@@ -167,11 +128,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         };
     }
 
-    public PerformanceFriendCircleAdapter(Context context, RecyclerView recyclerView, 
-                                     ImageLoader<String> imageLoader, int loadType) {
-        this(context, recyclerView, loadType);
-        this.mImageLoader = imageLoader;
-    }
+    // 移除带ImageLoader参数的构造函数
 
     public void setHeaderView(View headerView) {
         mHeaderView = headerView;

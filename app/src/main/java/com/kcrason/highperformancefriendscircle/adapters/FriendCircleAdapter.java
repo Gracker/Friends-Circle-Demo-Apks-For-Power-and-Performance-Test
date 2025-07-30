@@ -30,8 +30,7 @@ import com.kcrason.highperformancefriendscircle.beans.UserBean;
 import com.kcrason.highperformancefriendscircle.widgets.VerticalCommentWidget;
 import java.util.ArrayList;
 import java.util.List;
-import com.stfalcon.imageviewer.StfalconImageViewer;
-import com.stfalcon.imageviewer.loader.ImageLoader;
+// 移除StfalconImageViewer相关imports
 import android.util.Log;
 
 /**
@@ -63,11 +62,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
 
     private RecyclerView mRecyclerView;
 
-    private ImageLoader<String> mImageLoader;
-
-    public FriendCircleAdapter(Context context, RecyclerView recyclerView, ImageLoader<String> imageLoader) {
+    public FriendCircleAdapter(Context context, RecyclerView recyclerView) {
         this.mContext = context;
-        this.mImageLoader = imageLoader;
         mRecyclerView = recyclerView;
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         this.mAvatarSize = Utils.dp2px(44f);
@@ -121,9 +117,10 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
                 WordAndImagesViewHolder wordAndImagesViewHolder = (WordAndImagesViewHolder) holder;
                 wordAndImagesViewHolder.nineGridView.setOnImageClickListener((clickPosition, view) -> {
                     if (friendCircleBean.getImageUrls() != null && clickPosition < friendCircleBean.getImageUrls().size()) {
-                        new StfalconImageViewer.Builder<>(mContext, friendCircleBean.getImageUrls(), mImageLoader)
-                                .withStartPosition(clickPosition)
-                                .show();
+                        // 简单的图片点击处理，显示Toast
+                        android.widget.Toast.makeText(mContext, 
+                            "点击了第" + (clickPosition + 1) + "张图片", 
+                            android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
                 wordAndImagesViewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, mRequestOptions,

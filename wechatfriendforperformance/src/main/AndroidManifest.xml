@@ -35,6 +35,11 @@
             android:name=".HeavyLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
             
+        <!-- 图片查看器Activity -->
+        <activity 
+            android:name=".ImageViewerActivity"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            
     </application>
 
 </manifest>

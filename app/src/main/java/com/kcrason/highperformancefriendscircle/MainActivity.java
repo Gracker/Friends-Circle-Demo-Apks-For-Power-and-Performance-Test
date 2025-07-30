@@ -19,8 +19,7 @@ import com.kcrason.highperformancefriendscircle.others.FriendsCircleAdapterDivid
 import com.kcrason.highperformancefriendscircle.utils.Utils;
 import com.kcrason.highperformancefriendscircle.widgets.EmojiPanelView;
 import java.util.List;
-import com.stfalcon.imageviewer.StfalconImageViewer;
-import com.stfalcon.imageviewer.loader.ImageLoader;
+// 移除StfalconImageViewer相关imports
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -34,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Disposable mDisposable;
     private FriendCircleAdapter mFriendCircleAdapter;
-    private StfalconImageViewer<String> mImageViewer;
+    // 移除StfalconImageViewer成员变量
     private EmojiPanelView mEmojiPanelView;
 
     @Override
@@ -67,22 +66,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         });
         
-        ImageLoader<String> imageLoader = new ImageLoader<String>() {
-            @Override
-            public void loadImage(ImageView imageView, String imageUrl) {
-                int resourceId = imageView.getContext().getResources().getIdentifier(
-                    imageUrl, "drawable", imageView.getContext().getPackageName());
-                if (resourceId != 0) {
-                    Glide.with(imageView.getContext())
-                         .load(resourceId)
-                         .into(imageView);
-                }
-            }
-        };
-        
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new FriendsCircleAdapterDivideLine());
-        mFriendCircleAdapter = new FriendCircleAdapter(this, recyclerView, imageLoader);
+        mFriendCircleAdapter = new FriendCircleAdapter(this, recyclerView);
         recyclerView.setAdapter(mFriendCircleAdapter);
         Utils.showSwipeRefreshLayout(mSwipeRefreshLayout, this::asyncMakeData);
     }
@@ -128,10 +114,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onBackPressed() {
-        if (mImageViewer != null) {
-            mImageViewer.close();
-        } else {
-            super.onBackPressed();
-        }
+        super.onBackPressed();
     }
 }

@@ -1,6 +1,6 @@
+# Android Studio / IntelliJ IDEA
 *.iml
 .gradle
-/local.properties
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
@@ -9,7 +9,112 @@
 /.idea/caches
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
+/.idea/misc.xml
+/.idea/vcs.xml
+/.idea/shelf/
+/.idea/uiDesigner.xml
+/.idea/dbnavigator.xml
+
+# Local configuration files
+/local.properties
+
+# Build directories
 /build
-/captures
+/*/build
 .externalNativeBuild
+.cxx/
+/captures
+
+# APK and AAB files (except apk-released directory for public download)
+*.aab
+*.ap_
+*.dex
+# 忽略所有APK文件，除了apk-released目录
+*.apk
+# 但允许apk-released目录下的APK文件
+!/apk-released/
+!/apk-released/*.apk
+
+# Build output directories
+/apk/
+/*/debug/
+/*/release/
+
+# 密钥库和签名相关文件 (CRITICAL: 绝对不能提交！)
+keystore.properties
+*.keystore
+*.jks
+*.p12
+*.key
+release.properties
+signing.properties
+
+# 构建脚本生成的安装脚本
+install_all_apks.sh
+
+# Proguard
+/proguard/
+/*/proguard/
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Android Lint
+lint-results.html
+lint-results.xml
+
+# Google Services (Firebase等配置文件)
+google-services.json
+GoogleService-Info.plist
+
+# NDK
+obj/
+.externalNativeBuild/
+
+# Gradle
+.gradle/
+gradle.properties.local
+gradle-app.setting
+
+# Navigation
+/.navigation/
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+
+# Version control
+.svn/
+.git/
+
+# Backup files
+*.backup
+*.bak
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+
+# 测试和调试文件
+/test-output/
+/perfetto-trace/

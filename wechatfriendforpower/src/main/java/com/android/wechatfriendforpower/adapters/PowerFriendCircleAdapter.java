@@ -24,8 +24,7 @@ import com.android.wechatfriendforpower.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.stfalcon.imageviewer.StfalconImageViewer;
-import com.stfalcon.imageviewer.loader.ImageLoader;
+// 移除StfalconImageViewer相关imports
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +50,11 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private OnPraiseOrCommentClickListener mOnPraiseOrCommentClickListener;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
-    private ImageLoader<String> mImageLoader;
     private View mHeaderView;
     private Random mRandom = new Random(0); // 使用固定种子，确保每次运行结果一样
 
-    public PowerFriendCircleAdapter(Context context, RecyclerView recyclerView, ImageLoader<String> imageLoader) {
+    public PowerFriendCircleAdapter(Context context, RecyclerView recyclerView) {
         this.mContext = context;
-        this.mImageLoader = imageLoader;
         this.mRecyclerView = recyclerView;
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         this.mAvatarSize = PowerUtils.dp2px(44f);
