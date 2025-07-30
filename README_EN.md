@@ -1,8 +1,27 @@
-# High Performance WeChat Friend Circle Demo
+# WeChat Friend Circle Demo
+
+## 📊 Project Status
+
+[![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
+[![API Level](https://img.shields.io/badge/API-21%2B-blue.svg)](https://android-arsenal.com/api?level=21)
+[![Gradle](https://img.shields.io/badge/Gradle-8.2.2-blue.svg)](https://gradle.org)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
+[![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
+[![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
+[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
 This project is a performance testing platform based on WeChat Friend Circle UI, designed to study Android scrolling performance and power consumption. The project contains four main modules for testing and research in different aspects.
 
 *Read this in [Chinese](README.md)*
+
+## APK Description
+1. **app-release**: Original project App, displays a randomly generated WeChat Friend Circle interface, kept for reference only.
+2. **wechatfriendforperformance-release**: Performance testing App using standard AOSP implementation. Three load options available for testing platform performance or power consumption.
+3. **wechatfriendforpower-release**: Modified original project App that displays fixed content WeChat Friend Circle interface. Each entry shows identical content and item positions for consistent performance or power testing.
+4. **wechatfriendforwebview-release**: Performance testing App using standard WebView implementation. Three load options available for testing platform performance or power consumption.
+5. **Flutter version test APK**: https://github.com/Gracker/Friends-Circle-Demo-Flutter-Apks-For-Power-and-Performance-Test
 
 ![main_page.jpg](pic/main_page.jpg)
 ![friends_1.jpg](pic/friends_1.jpg)
@@ -87,8 +106,4 @@ This project may continue to be updated in the future, including but not limited
 - Implementing phone number matching and other features
 - Adding Compose implementation version to compare more technical solutions
 
-Star and contributions welcome!
-
-## Project Status
-
-[![Android CI](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml) 
+Star and contributions welcome! 
