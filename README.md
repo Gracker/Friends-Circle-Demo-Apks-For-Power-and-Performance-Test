@@ -29,7 +29,7 @@
 
 ### 3. 功耗测试模块 (wechatfriendforpower)
 
-专门设计用于测试不同滑动实现方案对设备功耗的影响。可用于研究优化策略对电池寿命的影响。
+主要是单 Activity，每次进去环境都一模一样，内容也不会发生变化。
 
 ### 4. WebView测试模块 (wechatfriendforwebview)
 
