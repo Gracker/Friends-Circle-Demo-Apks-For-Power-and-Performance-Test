@@ -51,13 +51,13 @@ jobs:
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
+        CMD="./gradlew :app:assembleRelease :wechatfriendforperformance:assembleRelease :wechatfriendforpower:assembleRelease :wechatfriendforwebview:assembleRelease :wechatfriendforcustomscroller:assembleRelease :wechatfriendforrenderstress:assembleRelease --parallel"
         if [ -f "release.keystore" ]; then
           echo "使用提供的签名密钥构建Release版本..."
-          # 这里可以添加签名配置，暂时先构建无签名版本
-          ./gradlew assembleRelease --parallel
+          eval "$CMD"
         else
           echo "未提供签名密钥，构建无签名Release版本..."
-          ./gradlew assembleRelease --parallel
+          eval "$CMD"
         fi
       
     - name: Prepare Release Files
@@ -102,6 +102,8 @@ jobs:
           - **WeChatFriendForPerformance** - 性能测试模块
           - **WeChatFriendForPower** - 功耗测试模块  
           - **WeChatFriendForWebView** - WebView性能对比模块
+          - **WeChatFriendForCustomScroller** - 自研 Scroller 性能 / 功耗对比
+          - **WeChatFriendForRenderStress** - RenderThread 压测模块
           
           ## 🔧 安装说明
           1. 下载对应的APK文件

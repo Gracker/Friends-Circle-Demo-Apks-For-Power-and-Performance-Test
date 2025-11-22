@@ -22,6 +22,7 @@
 3. wechatfriendforpower-release：原项目 App 魔改，进去后是一个固定显示内容的 微信朋友圈 界面，每次进去显示的内容和每个位置的 item 都是一样的，用来测试固定性能 or Power。
 4. wechatfriendforwebview-release ：用来测试性能的 App，使用标准的 WebView 实现。进去后有三种负载可以选择，主要测试平台性能  or Power。
 5. wechatfriendforcustomscroller-debug：全新自研滚动容器版本，UI 与 AOSP 版本保持一致，但内部改用 `CustomOverScroller` + 自定义 `CustomTimelineView`，完全绕开 RecyclerView/ListView/OverScroller，可在轻/中/重三档下模拟 OEM 无优化场景。
+6. wechatfriendforrenderstress-debug：基于自研列表的 RenderThread 压测版本。UI 线程仍保持轻量，但通过 `RenderStressOverlayView` 持续触发高半径模糊/Shader，能在滑动过程中制造明显的 RenderThread backlog 与 GPU 压力。
 
 ## 项目结构
 
@@ -61,6 +62,12 @@
 - 通过 Hilt + MVVM + Room 构建数据流，启动即缓存 100 条固定数据，方便对比 OEM 场景
 - 继续提供轻/中/重三档负载，并在自定义 View 内模拟 CPU/GPU 压力，便于验证厂商对 `OverScroller` 的自定义优化差异
 
+### 6. RenderThread压测模块 (wechatfriendforrenderstress)
+
+- 代码骨架与自定义 Scroller 模块一致，同样依赖 `CustomOverScroller`
+- 借助 `RenderStressOverlayView` 在滑动事件触发时应用高阶模糊 / Shader 链，模拟“UI 线程快、RenderThread 过载”的真实现象
+- 轻负载仅展示；中负载使用中等模糊并轻微扰动；重负载叠加高半径模糊与多层合成，常见 RenderThread > 1 vsync 的调度
+
 ## 性能优化策略
 
 在 Android 中，要避免列表卡顿，主要从以下几个角度进行优化：
@@ -84,6 +91,14 @@
    - 选择不同的负载级别
    - 体验不同负载下WebView的滑动流畅度
    - 滑动到底部测试动态加载功能
+5. 运行 `wechatfriendforcustomscroller` 模块体验自定义滚动容器：
+   - 在主界面选择轻/中/重三档
+   - 观察完全自研 Scroller 在无 OEM 优化场景下的真实表现
+   - 使用 Perfetto/ADB Systrace 对比不同滚动栈
+6. 运行 `wechatfriendforrenderstress` 模块验证 RenderThread 负载：
+   - 选择轻/中/重负载，滑动列表即可触发对应的模糊/Shader 压力
+   - 结合 Perfetto 中的 `RenderThread` 舞台观察 GPU 时间是否超过 vsync
+   - 对比 OEM 的 SurfaceFlinger/RenderThread 调度策略
 5. 运行 `wechatfriendforcustomscroller` 模块体验自定义滚动容器：
    - 在主界面选择轻/中/重三档
    - 观察完全自研 Scroller 在无 OEM 优化场景下的真实表现
@@ -123,6 +138,7 @@
 - **WeChatFriendForPower-debug** - 功耗测试模块  
 - **WeChatFriendForWebView-debug** - WebView测试模块
 - **WeChatFriendForCustomScroller-debug** - 自定义Scroller测试模块（亦可直接在仓库 `apk/wechatfriendforcustomscroller-debug.apk` 安装体验）
+- **WeChatFriendForRenderStress-debug** - RenderThread压测模块（重负载 RenderThread/SurfaceFlinger 监测用）
 
 ### 📋 版本说明
 - **Debug版本**: 包含调试信息，可直接安装使用

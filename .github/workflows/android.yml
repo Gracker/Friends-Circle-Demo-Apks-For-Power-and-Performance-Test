@@ -54,7 +54,15 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
         KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-      run: ./gradlew assembleRelease --parallel
+      run: >
+        ./gradlew
+        :app:assembleRelease
+        :wechatfriendforperformance:assembleRelease
+        :wechatfriendforpower:assembleRelease
+        :wechatfriendforwebview:assembleRelease
+        :wechatfriendforcustomscroller:assembleRelease
+        :wechatfriendforrenderstress:assembleRelease
+        --parallel
       
     - name: Rename APK files with version info
       run: |
@@ -80,6 +88,10 @@ jobs:
         
         if [ -f "wechatfriendforcustomscroller/build/outputs/apk/release/wechatfriendforcustomscroller-release.apk" ]; then
           cp wechatfriendforcustomscroller/build/outputs/apk/release/wechatfriendforcustomscroller-release.apk "release-apks/WeChatFriendForCustomScroller-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendforrenderstress/build/outputs/apk/release/wechatfriendforrenderstress-release.apk" ]; then
+          cp wechatfriendforrenderstress/build/outputs/apk/release/wechatfriendforrenderstress-release.apk "release-apks/WeChatFriendForRenderStress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
         # 列出所有生成的文件

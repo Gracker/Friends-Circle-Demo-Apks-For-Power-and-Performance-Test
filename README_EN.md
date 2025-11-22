@@ -12,7 +12,7 @@
 [![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
-This project is a performance testing platform based on WeChat Friend Circle UI, designed to study Android scrolling performance and power consumption. The project contains four main modules for testing and research in different aspects.
+This project is a performance testing platform based on WeChat Friend Circle UI, designed to study Android scrolling performance and power consumption. The project now ships with multiple specialized APKs that cover CPU-heavy, RenderThread-heavy, power-sensitive and WebView scenarios.
 
 *Read this in [Chinese](README.md)*
 
@@ -21,7 +21,9 @@ This project is a performance testing platform based on WeChat Friend Circle UI,
 2. **wechatfriendforperformance-release**: Performance testing App using standard AOSP implementation. Three load options available for testing platform performance or power consumption.
 3. **wechatfriendforpower-release**: Modified original project App that displays fixed content WeChat Friend Circle interface. Each entry shows identical content and item positions for consistent performance or power testing.
 4. **wechatfriendforwebview-release**: Performance testing App using standard WebView implementation. Three load options available for testing platform performance or power consumption.
-5. **Flutter version test APK**: https://github.com/Gracker/Friends-Circle-Demo-Flutter-Apks-For-Power-and-Performance-Test
+5. **wechatfriendforcustomscroller-debug**: Purely custom `CustomTimelineView` + `CustomOverScroller` implementation that bypasses RecyclerView/ListView to study OEM optimizations (or the lack thereof) under light/medium/heavy loads.
+6. **wechatfriendforrenderstress-debug**: RenderThread-focused APK. UI thread remains lightweight while `RenderStressOverlayView` keeps the RenderThread busy with large blur / shader chains, perfect for GPU/vsync analysis.
+7. **Flutter version test APK**: https://github.com/Gracker/Friends-Circle-Demo-Flutter-Apks-For-Power-and-Performance-Test
 
 ![main_page.jpg](pic/main_page.jpg)
 ![friends_1.jpg](pic/friends_1.jpg)
@@ -60,6 +62,18 @@ Implements the Friend Circle interface using WebView to test performance differe
 
 This module implements JavaScript and Java interaction, supports dynamic loading of up to 200 Friend Circle data items, and resolves the flickering issue when scrolling to the bottom.
 
+### 5. Custom Scroller Module (wechatfriendforcustomscroller)
+
+- Replaces RecyclerView/ListView with a fully custom `CustomTimelineView` + `CustomOverScroller` stack, mirroring Weibo/QQ style implementations.
+- Same MVVM + Room data pipeline as other modules so the dataset is deterministic.
+- Three load profiles inject CPU & bitmap work directly inside the timeline view to evaluate OEM optimizations without interference from system Scroller tweaks.
+
+### 6. RenderThread Stress Module (wechatfriendforrenderstress)
+
+- Builds on top of the custom scroller APK but shifts the pressure to RenderThread/GPU.
+- `RenderStressOverlayView` applies large blur/shader chains while the list is scrolling, keeping the UI thread light but saturating the renderer.
+- Ideal for Perfetto traces focusing on RenderThread backlog, SurfaceFlinger vsync misses, and OEM GPU scheduling strategies.
+
 ## Performance Optimization Strategies
 
 In Android, to avoid list stuttering, optimize from the following aspects:
@@ -83,6 +97,8 @@ In Android, to avoid list stuttering, optimize from the following aspects:
    - Select different load levels
    - Experience scrolling smoothness under different loads
    - Scroll to the bottom to test dynamic loading functionality
+5. Run the `wechatfriendforcustomscroller` module to evaluate OEM optimizations without RecyclerView/ListView involvement.
+6. Run the `wechatfriendforrenderstress` module when you need long RenderThread spans (e.g. for GPU/vsync analysis).
 
 ## Performance Test Comparison
 
