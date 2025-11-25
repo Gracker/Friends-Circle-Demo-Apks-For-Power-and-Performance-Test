@@ -20,6 +20,11 @@
             </intent-filter>
         </activity>
         
+        <!-- 最轻负载Activity -->
+        <activity
+            android:name=".MinimalLoadActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
         <!-- 轻负载Activity -->
         <activity
             android:name=".LightLoadActivity"
@@ -33,6 +38,36 @@
         <!-- 高负载Activity -->
         <activity
             android:name=".HeavyLoadActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 帧间轻负载Activity -->
+        <activity
+            android:name=".LightLoadBetweenFramesActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 帧间中等负载Activity -->
+        <activity
+            android:name=".MediumLoadBetweenFramesActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 帧间高负载Activity -->
+        <activity
+            android:name=".HeavyLoadBetweenFramesActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 轻混合负载Activity -->
+        <activity
+            android:name=".LightMixedLoadActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 中混合负载Activity -->
+        <activity
+            android:name=".MediumMixedLoadActivity"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 高混合负载Activity -->
+        <activity
+            android:name=".HeavyMixedLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
             
         <!-- 图片查看器Activity -->

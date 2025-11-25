@@ -73,14 +73,14 @@ public class WebViewDataCenter {
                 count = 50;  // 中负载，50条数据
                 break;
             case WebViewMainActivity.LOAD_TYPE_HEAVY:
-                count = 100; // 重负载，100条数据
+                count = 100; // 高负载，100条数据
                 break;
             default:
                 count = 30;
                 break;
         }
         
-        String jsonData = generateFriendCircleJsonData(count);
+        String jsonData = generateFriendCircleJsonData(count, loadType);
         
         // 缓存生成的数据
         cachedJsonData.put(loadType, jsonData);
@@ -93,9 +93,10 @@ public class WebViewDataCenter {
     /**
      * 生成特定数量的朋友圈数据JSON
      * @param count 数据条数
+     * @param loadType 负载类型
      * @return JSON字符串
      */
-    private String generateFriendCircleJsonData(int count) {
+    private String generateFriendCircleJsonData(int count, int loadType) {
         JSONArray friendCircleArray = new JSONArray();
         Random random = new Random(123); // 使用固定的种子值，确保每次生成的数据顺序一致
         
@@ -141,8 +142,25 @@ public class WebViewDataCenter {
                     images.put(image);
                 }
                 
-                // 随机选择评论数量 (0-10条)
-                int commentCount = random.nextInt(11);  // 0-10
+                // 根据负载类型调整评论数量
+                int maxComments;
+                switch (loadType) {
+                    case WebViewMainActivity.LOAD_TYPE_LIGHT:
+                        maxComments = 5;   // 轻负载: 0-4条评论
+                        break;
+                    case WebViewMainActivity.LOAD_TYPE_MEDIUM:
+                        maxComments = 15;  // 中负载: 0-14条评论
+                        break;
+                    case WebViewMainActivity.LOAD_TYPE_HEAVY:
+                        maxComments = 11;  // 高负载: 0-10条评论
+                        break;
+                    default:
+                        maxComments = 11;
+                        break;
+                }
+                
+                // 随机选择评论数量
+                int commentCount = random.nextInt(maxComments);
                 JSONArray comments = new JSONArray();
                 for (int j = 0; j < commentCount; j++) {
                     JSONObject comment = new JSONObject();
@@ -163,8 +181,25 @@ public class WebViewDataCenter {
                     comments.put(comment);
                 }
                 
-                // 随机选择点赞数量 (0-20人)
-                int praiseCount = random.nextInt(21);  // 0-20
+                // 根据负载类型调整点赞数量
+                int maxPraises;
+                switch (loadType) {
+                    case WebViewMainActivity.LOAD_TYPE_LIGHT:
+                        maxPraises = 15;   // 轻负载: 0-14个点赞
+                        break;
+                    case WebViewMainActivity.LOAD_TYPE_MEDIUM:
+                        maxPraises = 35;   // 中负载: 0-34个点赞
+                        break;
+                    case WebViewMainActivity.LOAD_TYPE_HEAVY:
+                        maxPraises = 21;   // 高负载: 0-20个点赞
+                        break;
+                    default:
+                        maxPraises = 21;
+                        break;
+                }
+                
+                // 随机选择点赞数量
+                int praiseCount = random.nextInt(maxPraises);
                 JSONArray praises = new JSONArray();
                 for (int j = 0; j < praiseCount; j++) {
                     String praiser = WebViewConstants.USER_NAMES[(userIndex + j) % WebViewConstants.USER_NAMES.length];

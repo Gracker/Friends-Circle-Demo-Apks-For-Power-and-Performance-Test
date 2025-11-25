@@ -252,7 +252,7 @@ public class PerformanceDataCenter {
                 commentCount = position % 8 + 8;
                 break;
             case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                // 高负载: 10-24条评论
+                // 高负载: 15-29条评论
                 commentCount = position % 15 + 15;
                 break;
             default:

@@ -51,6 +51,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         implements OnItemClickPopupMenuListener {
 
     // Load type constants
+    public static final int LOAD_TYPE_MINIMAL = -1; // Minimal load (lightest case)
     public static final int LOAD_TYPE_LIGHT = 0;  // Light load
     public static final int LOAD_TYPE_MEDIUM = 1; // Medium load
     public static final int LOAD_TYPE_HEAVY = 2;  // Heavy load
@@ -100,6 +101,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         
         // 设置负载类型字符串
         switch (loadType) {
+            case LOAD_TYPE_MINIMAL:
+                mLoadTypeString = "最轻负载";
+                break;
             case LOAD_TYPE_LIGHT:
                 mLoadTypeString = "轻负载";
                 break;
@@ -474,6 +478,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         
         int iterations;
         switch (mLoadType) {
+            case LOAD_TYPE_MINIMAL:
+                iterations = 0; // Minimal load: no computational load at all
+                break;
             case LOAD_TYPE_LIGHT:
                 iterations = 5; // Light load: only do a small amount of work per frame
                 break;
@@ -542,6 +549,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                         // Only add extra load during scrolling
                         int extraLoadIterations;
                         switch (mLoadType) {
+                            case LOAD_TYPE_MINIMAL:
+                                extraLoadIterations = 0; // No extra load for minimal load
+                                break;
                             case LOAD_TYPE_LIGHT:
                                 extraLoadIterations = 0; // No extra load for light load
                                 break;
