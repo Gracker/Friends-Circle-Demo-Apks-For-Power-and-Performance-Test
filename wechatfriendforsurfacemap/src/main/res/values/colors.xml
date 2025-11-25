@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#2196F3</color>
+    <color name="primary_blue">#2196F3</color>
+    <color name="accent_green">#4CAF50</color>
+    <color name="deep_purple">#673AB7</color>
+    <color name="orange">#FF9800</color>
+    <color name="teal">#009688</color>
+    
+    <color name="base_333333">#333333</color>
+    <color name="base_666666">#666666</color>
+    <color name="base_999999">#999999</color>
+    <color name="base_F2F2F2">#F2F2F2</color>
+    
+    <color name="map_grid_line">#CCCCCC</color>
+    <color name="map_background">#E8E8E8</color>
+    <color name="map_road">#FFFFFF</color>
+    <color name="map_water">#A5D6F7</color>
+    <color name="map_park">#C8E6C9</color>
+</resources>
+
+

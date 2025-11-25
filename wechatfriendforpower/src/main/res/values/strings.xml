@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Power微信朋友圈</string>
+    <string name="app_name">HWUI-Power</string>
+    <string name="title_main">Power Consumption Test</string>
+    <string name="description">This app measures power consumption during Friends Circle scrolling scenarios.</string>
 </resources>

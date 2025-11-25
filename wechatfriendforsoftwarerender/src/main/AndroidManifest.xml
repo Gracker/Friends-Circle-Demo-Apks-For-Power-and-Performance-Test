@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name=".SoftwareRenderApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.HighPerformanceFriendsCircle"
+        android:hardwareAccelerated="false">
+        
+        <!-- 主Activity，用于选择不同负载级别 -->
+        <activity
+            android:name=".SoftwareRenderMainActivity"
+            android:exported="true"
+            android:hardwareAccelerated="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- 最轻负载Activity -->
+        <activity
+            android:name=".MinimalLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 轻负载Activity -->
+        <activity
+            android:name=".LightLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 中等负载Activity -->
+        <activity
+            android:name=".MediumLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 高负载Activity -->
+        <activity
+            android:name=".HeavyLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 帧间轻负载Activity -->
+        <activity
+            android:name=".LightLoadBetweenFramesActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 帧间中等负载Activity -->
+        <activity
+            android:name=".MediumLoadBetweenFramesActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 帧间高负载Activity -->
+        <activity
+            android:name=".HeavyLoadBetweenFramesActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 轻混合负载Activity -->
+        <activity
+            android:name=".LightMixedLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 中混合负载Activity -->
+        <activity
+            android:name=".MediumMixedLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 高混合负载Activity -->
+        <activity
+            android:name=".HeavyMixedLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+            
+        <!-- 图片查看器Activity -->
+        <activity 
+            android:name=".ImageViewerActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            
+    </application>
+
+</manifest>
+
+

@@ -1,18 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">RenderStress朋友圈</string>
-    <string name="title_main">RenderThread 压测滑动</string>
-    <string name="title_select_load">请选择要测试的负载级别：</string>
-    <string name="btn_light_load">Light Load Test</string>
-    <string name="btn_medium_load">Medium Load Test</string>
-    <string name="btn_heavy_load">Heavy Load Test</string>
-    <string name="description">该 APK 专注于模拟「UI 线程轻，RenderThread 重」的朋友圈滑动场景。通过三档负载可以观察不同 OEM 在硬件渲染栈上的调度策略：\n\n轻负载：纯展示，无额外渲染压力\n\n中负载：持续触发中等强度的模糊 / Shader 特效\n\n高负载：额外叠加高半径模糊与多层合成，RenderThread 经常超出一个 vsync。</string>
+    <string name="app_name">HWUI-RenderStress</string>
+    <string name="title_main">RenderThread Stress Test</string>
+    
+    <!-- Load section titles -->
+    <string name="title_minimal_load">Minimal Load</string>
+    <string name="title_in_frame_load">In-Frame Load Test</string>
+    <string name="title_between_frame_load">Between-Frame Load Test</string>
+    <string name="title_mixed_load">Mixed Load Test</string>
+    <string name="title_select_load">Select Load Level:</string>
+    <string name="title_about">About</string>
+    
+    <!-- Button labels -->
+    <string name="btn_minimal_load">Minimal Load</string>
+    <string name="btn_light_load">In-Frame Light Load</string>
+    <string name="btn_medium_load">In-Frame Medium Load</string>
+    <string name="btn_heavy_load">In-Frame Heavy Load</string>
+    <string name="btn_light_between_frames">Between-Frame Light Load</string>
+    <string name="btn_medium_between_frames">Between-Frame Medium Load</string>
+    <string name="btn_heavy_between_frames">Between-Frame Heavy Load</string>
+    <string name="btn_light_mixed">Mixed Light Load</string>
+    <string name="btn_medium_mixed">Mixed Medium Load</string>
+    <string name="btn_heavy_mixed">Mixed Heavy Load</string>
+    
+    <!-- Description -->
+    <string name="description">This APK focuses on simulating "light UI thread, heavy RenderThread" scroll scenarios for Friends Circle. Through 10 load levels, you can observe different OEM scheduling strategies in hardware rendering stack:\n\nThis app provides 10 different load levels:\n• Minimal Load: No additional load\n• In-Frame Loads (3): Execute load during frame rendering with blur/shader effects\n• Between-Frame Loads (3): Execute load between frames\n• Mixed Loads (3): Combined in-frame and between-frame loads with multi-layer composition</string>
+    
+    <!-- Status messages -->
+    <string name="loading_feed">Loading custom scroll list...</string>
+    <string name="load_failed">Load failed, please retry</string>
     <string name="performance_test">Performance Test</string>
     <string name="performance_test_loading">Loading Performance Test Data...</string>
     <string name="back">Back</string>
     <string name="light_load_test">Light Load Test</string>
     <string name="medium_load_test">Medium Load Test</string>
     <string name="heavy_load_test">Heavy Load Test</string>
-    <string name="loading_feed">加载自定义滚动列表…</string>
-    <string name="load_failed">加载失败，请重试</string>
+    
+    <!-- Copyright -->
+    <string name="copyright">© 2025 Friends Circle Performance Test App</string>
 </resources>

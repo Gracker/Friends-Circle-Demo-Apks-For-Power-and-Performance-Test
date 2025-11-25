@@ -24,7 +24,8 @@
             android:gravity="center"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="32dp" />
-            
+        
+        <!-- 最轻负载 -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,7 +43,41 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="选择负载级别"
+                    android:text="最轻负载"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_minimal_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="最轻负载模式"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+            
+        <!-- 帧内负载 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="帧内负载测试"
                     android:textColor="@color/base_333333"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -53,7 +88,7 @@
                     android:layout_height="56dp"
                     android:layout_marginBottom="12dp"
                     android:backgroundTint="@color/primary_blue"
-                    android:text="轻负载模式"
+                    android:text="帧内轻负载"
                     android:textSize="16sp"
                     app:cornerRadius="8dp" />
 
@@ -63,7 +98,7 @@
                     android:layout_height="56dp"
                     android:layout_marginBottom="12dp"
                     android:backgroundTint="@color/accent_teal"
-                    android:text="中负载模式"
+                    android:text="帧内中负载"
                     android:textSize="16sp"
                     app:cornerRadius="8dp" />
 
@@ -72,12 +107,121 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:backgroundTint="@color/deep_purple"
-                    android:text="重负载模式"
+                    android:text="帧内高负载"
                     android:textSize="16sp"
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
         
+        <!-- 帧间负载 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="帧间负载测试"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF9800"
+                    android:text="帧间轻负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF5722"
+                    android:text="帧间中负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#E91E63"
+                    android:text="帧间高负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        
+        <!-- 混合负载 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="混合负载测试"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_mixed"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#00BCD4"
+                    android:text="混合轻负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_mixed"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#009688"
+                    android:text="混合中负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_mixed"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#795548"
+                    android:text="混合高负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        
+        <!-- 应用简介 -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,7 +246,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="WebView版朋友圈使用WebView加载HTML页面来渲染朋友圈内容，通过JavaScript与原生应用交互，实现类似原生的用户体验。本应用提供了三种不同负载级别，用于测试WebView在不同数据量和复杂度下的性能表现。"
+                    android:text="WebView版朋友圈使用WebView加载HTML页面来渲染朋友圈内容。\n\n本应用提供了10种不同负载级别：\n• 最轻负载：不添加任何负载\n• 帧内负载(3种)：在渲染帧期间执行负载\n• 帧间负载(3种)：在帧与帧之间执行负载\n• 混合负载(3种)：同时执行帧内和帧间负载"
                     android:textSize="14sp"
                     android:textColor="@color/base_666666"
                     android:lineSpacingExtra="6dp" />
@@ -116,6 +260,7 @@
             android:textColor="@color/base_999999"
             android:textSize="12sp"
             android:gravity="center"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
     </LinearLayout>
-</ScrollView> 
+</ScrollView>

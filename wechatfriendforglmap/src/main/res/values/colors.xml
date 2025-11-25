@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#3F51B5</color>
+    <color name="primary_indigo">#3F51B5</color>
+    <color name="primary_orange">#FF5722</color>
+    <color name="teal">#009688</color>
+    <color name="deep_purple">#673AB7</color>
+    <color name="orange">#FF9800</color>
+    <color name="blue">#2196F3</color>
+    <color name="base_333333">#333333</color>
+    <color name="base_666666">#666666</color>
+    <color name="base_999999">#999999</color>
+    <color name="base_F2F2F2">#F2F2F2</color>
+</resources>
+

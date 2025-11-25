@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MixedRender" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">#E91E63</item>
+        <item name="colorPrimaryVariant">#C2185B</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSecondary">#9C27B0</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    </style>
+    <style name="Theme.MixedRender.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+</resources>
+

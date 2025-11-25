@@ -12,11 +12,13 @@ import com.example.wechatfriendforcustomscroller.databinding.ActivityCustomScrol
 import com.example.wechatfriendforcustomscroller.ui.state.CustomScrollUiState;
 import com.example.wechatfriendforcustomscroller.ui.timeline.CustomTimelineView;
 import com.example.wechatfriendforcustomscroller.ui.timeline.FriendCircleItemRenderer;
+import com.example.wechatfriendforcustomscroller.ui.timeline.LoadStressSimulator;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
- * 显示自定义Scroller列表的核心Activity。
+ * Core Activity for displaying custom scroller list.
+ * Supports all 10 load types including minimal, in-frame, between-frame, and mixed loads.
  */
 @AndroidEntryPoint
 public class CustomScrollFeedActivity extends AppCompatActivity {
@@ -51,6 +53,11 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             viewModel.loadFeed(loadType);
+        }
+        
+        // Start background tasks for between-frame and mixed loads
+        if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
+            LoadStressSimulator.getInstance().startBackgroundTasks(loadType);
         }
     }
 
@@ -90,7 +97,8 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        // Stop background tasks
+        LoadStressSimulator.getInstance().stopBackgroundTasks();
         super.onDestroy();
     }
 }
-

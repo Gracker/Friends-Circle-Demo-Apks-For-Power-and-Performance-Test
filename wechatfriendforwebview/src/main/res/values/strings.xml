@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WebView微信朋友圈</string>
+    <string name="app_name">WebView-List</string>
+    
+    <!-- Load section titles -->
+    <string name="title_minimal_load">Minimal Load</string>
+    <string name="title_in_frame_load">In-Frame Load Test</string>
+    <string name="title_between_frame_load">Between-Frame Load Test</string>
+    <string name="title_mixed_load">Mixed Load Test</string>
+    <string name="title_about">About</string>
 </resources>

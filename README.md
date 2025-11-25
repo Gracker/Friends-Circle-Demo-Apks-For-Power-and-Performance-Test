@@ -12,21 +12,46 @@
 [![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
-本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含四个主要模块，分别用于不同方面的测试和研究。
+本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含多个主要模块，分别用于不同方面的测试和研究。
 
 *Read this in [English](README_EN.md)*
 
+## 负载类型说明
+
+所有测试模块都支持10种负载类型，覆盖不同的性能测试场景：
+
+| 类型 | 负载名称 | 说明 |
+|------|----------|------|
+| 最轻负载 | Minimal Load | 不添加任何额外负载 |
+| 帧内轻负载 | In-Frame Light | 每帧内执行轻量计算 |
+| 帧内中负载 | In-Frame Medium | 每帧内执行中等计算 |
+| 帧内高负载 | In-Frame Heavy | 每帧内执行密集计算 |
+| 帧间轻负载 | Between-Frame Light | 帧与帧之间执行轻量任务 |
+| 帧间中负载 | Between-Frame Medium | 帧与帧之间执行中等任务 |
+| 帧间高负载 | Between-Frame Heavy | 帧与帧之间执行密集任务 |
+| 混合轻负载 | Mixed Light | 同时执行帧内和帧间轻量负载 |
+| 混合中负载 | Mixed Medium | 同时执行帧内和帧间中等负载 |
+| 混合高负载 | Mixed Heavy | 同时执行帧内和帧间密集负载 |
+
 ## APK 说明
-1. app-releas : 原项目 App，进去后是一个随机展示的 微信朋友圈 界面，仅作保留使用。
-2. wechatfriendforperformance-release ：用来测试性能的 App，使用标准的 AOSP 实现。进去后有三种负载可以选择，主要测试平台性能 or Power。
-3. wechatfriendforpower-release：原项目 App 魔改，进去后是一个固定显示内容的 微信朋友圈 界面，每次进去显示的内容和每个位置的 item 都是一样的，用来测试固定性能 or Power。
-4. wechatfriendforwebview-release ：用来测试性能的 App，使用标准的 WebView 实现。进去后有三种负载可以选择，主要测试平台性能  or Power。
-5. wechatfriendforcustomscroller-debug：全新自研滚动容器版本，UI 与 AOSP 版本保持一致，但内部改用 `CustomOverScroller` + 自定义 `CustomTimelineView`，完全绕开 RecyclerView/ListView/OverScroller，可在轻/中/重三档下模拟 OEM 无优化场景。
-6. wechatfriendforrenderstress-debug：基于自研列表的 RenderThread 压测版本。UI 线程仍保持轻量，但通过 `RenderStressOverlayView` 持续触发高半径模糊/Shader，能在滑动过程中制造明显的 RenderThread backlog 与 GPU 压力。
+
+1. **app-release**: 原项目 App，进去后是一个随机展示的微信朋友圈界面，仅作保留使用。
+2. **wechatfriendforperformance-release**: 用来测试性能的 App，使用标准的 AOSP 实现。支持10种负载类型。
+3. **wechatfriendforpower-release**: 原项目 App 魔改，进去后是一个固定显示内容的微信朋友圈界面，用来测试固定环境下的性能或功耗。
+4. **wechatfriendforwebview-release**: 用来测试性能的 App，使用标准的 WebView 实现。支持10种负载类型。
+5. **wechatfriendforcustomscroller-debug**: 全新自研滚动容器版本，使用 `CustomOverScroller` + 自定义 `CustomTimelineView`，支持10种负载类型。
+6. **wechatfriendforrenderstress-debug**: 基于自研列表的 RenderThread 压测版本，支持10种负载类型。
+7. **wechatfriendforsoftwarerender-debug**: 软件渲染版本，禁用硬件加速，只有UI Thread，支持10种负载类型。
+8. **wechatfriendforcompose-debug**: Jetpack Compose版本，使用Kotlin + Compose声明式UI框架开发，支持10种负载类型。
+9. **wechatfriendforsurfacemap-debug**: 高德地图风格Demo，使用SurfaceView实现地图滚动，上下有原生View控件，支持10种负载类型。
+10. **wechatfriendforpurerenderthread-debug**: 纯RenderThread列表滑动，UI Thread不参与渲染，所有绘制在独立渲染线程完成，支持10种负载类型。
+11. **wechatfriendfordualwindow-debug**: 双Window刷新Demo，每帧有2个doFrame和2个RenderThread的drawFrame，支持10种负载类型。
+12. **wechatfriendformixedrender-debug**: 混合渲染Demo，同时有纯RenderThread动画和标准UI+RenderThread渲染，支持10种负载类型。
+13. **wechatfriendforglmap-debug**: OpenGL ES 2.0地图Demo，类似高德/谷歌地图，支持10种负载类型。
 
 ## 项目结构
 
-本项目包含四个主要模块:
+本项目包含以下主要模块:
 
 ### 1. 原始项目 (app)
 
@@ -34,39 +59,91 @@
 
 ### 2. 性能测试模块 (wechatfriendforperformance)
 
-专门设计用于测试和比较不同负载下的滑动性能表现。包含三种负载模式：
-
-- **轻负载测试**: 每帧计算量小，滑动流畅度高
-- **中等负载测试**: 每帧计算量中等，滑动有一定压力
-- **高负载测试**: 每帧计算量大，滑动压力重
-
-该模块在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
+专门设计用于测试和比较不同负载下的滑动性能表现。支持10种负载模式，在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
 
 ### 3. 功耗测试模块 (wechatfriendforpower)
 
-主要是单 Activity，每次进去环境都一模一样，内容也不会发生变化。
+单 Activity 设计，每次进去环境都一模一样，内容固定不变，用于精确的功耗测试。
 
 ### 4. WebView测试模块 (wechatfriendforwebview)
 
-使用WebView实现朋友圈界面，用于测试WebView与原生实现在性能方面的差异。包含三种负载级别：
-
-- **轻负载WebView**: 基础渲染，无额外负载
-- **中负载WebView**: 添加适量JavaScript和DOM操作
-- **重负载WebView**: 添加密集JavaScript计算和DOM操作
-
-该模块实现了JavaScript与Java交互，支持动态加载最多200条朋友圈数据，解决了滑动到底部闪烁的问题。
+使用WebView实现朋友圈界面，用于测试WebView与原生实现在性能方面的差异。支持10种负载级别，实现了JavaScript与Java交互，支持动态加载最多200条朋友圈数据。
 
 ### 5. 自定义Scroller测试模块 (wechatfriendforcustomscroller)
 
 - 完全保留 AOSP UI，但移除了 RecyclerView/ListView，采用自研的 `CustomTimelineView` + `CustomOverScroller`
-- 通过 Hilt + MVVM + Room 构建数据流，启动即缓存 100 条固定数据，方便对比 OEM 场景
-- 继续提供轻/中/重三档负载，并在自定义 View 内模拟 CPU/GPU 压力，便于验证厂商对 `OverScroller` 的自定义优化差异
+- 通过 Hilt + MVVM + Room 构建数据流，启动即缓存 100 条固定数据
+- 支持10种负载类型，便于验证厂商对 `OverScroller` 的自定义优化差异
 
 ### 6. RenderThread压测模块 (wechatfriendforrenderstress)
 
 - 代码骨架与自定义 Scroller 模块一致，同样依赖 `CustomOverScroller`
-- 借助 `RenderStressOverlayView` 在滑动事件触发时应用高阶模糊 / Shader 链，模拟“UI 线程快、RenderThread 过载”的真实现象
-- 轻负载仅展示；中负载使用中等模糊并轻微扰动；重负载叠加高半径模糊与多层合成，常见 RenderThread > 1 vsync 的调度
+- 借助 `RenderStressOverlayView` 在滑动事件触发时应用高阶模糊 / Shader 链
+- 支持10种负载类型，模拟"UI 线程快、RenderThread 过载"的真实现象
+
+### 7. 软件渲染测试模块 (wechatfriendforsoftwarerender)
+
+使用软件渲染模式（禁用硬件加速）的朋友圈实现：
+
+- **禁用硬件加速**：通过 `android:hardwareAccelerated="false"` 配置
+- **只有UI Thread**：没有RenderThread，所有绑制操作在主线程完成
+- 支持10种负载类型，适合测试CPU密集型场景
+
+### 8. Compose测试模块 (wechatfriendforcompose)
+
+使用Jetpack Compose开发的朋友圈实现：
+
+- **声明式UI**：使用Kotlin + Compose声明式UI框架
+- **LazyColumn**：替代RecyclerView的列表组件
+- **Coil图片加载**：Compose友好的图片加载库
+- 支持10种负载类型，方便对比框架性能差异
+
+### 9. SurfaceView地图测试模块 (wechatfriendforsurfacemap)
+
+模拟高德地图风格的Demo应用：
+
+- **SurfaceView地图**：使用SurfaceView在独立线程渲染地图网格
+- **原生控件叠加**：顶部导航栏和底部控制面板使用原生View
+- **滚动手势支持**：支持拖拽和惯性滚动
+- 支持10种负载类型，测试SurfaceView与原生View混合场景
+
+### 10. 纯RenderThread测试模块 (wechatfriendforpurerenderthread)
+
+纯RenderThread列表滑动实现：
+
+- **UI Thread零渲染**：主线程只处理触摸事件，不参与任何绘制
+- **独立渲染线程**：所有绘制操作在专门的渲染线程完成
+- **SurfaceView实现**：利用SurfaceView的独立Surface
+- 支持10种负载类型，验证纯渲染线程方案的性能表现
+
+### 11. 双Window测试模块 (wechatfriendfordualwindow)
+
+双Window同时刷新渲染：
+
+- **双Window同时存在**：主Window + 悬浮Overlay Window
+- **双doFrame回调**：systrace中每帧有2个doFrame
+- **双RenderThread**：每帧有2个RenderThread的drawFrame
+- **需要悬浮窗权限**：使用WindowManager添加第二个Window
+- 支持10种负载类型，测试多Window场景的性能表现
+
+### 12. 混合渲染测试模块 (wechatfriendformixedrender)
+
+混合两种渲染管线的Demo：
+
+- **纯RenderThread动画**：顶部SurfaceView使用独立渲染线程
+- **标准UI+RenderThread**：底部RecyclerView使用正常View层级
+- **模拟视频覆盖场景**：类似视频播放器叠加在可滑动列表上
+- 支持10种负载类型，分析混合渲染的性能特征
+
+### 13. OpenGL地图测试模块 (wechatfriendforglmap)
+
+OpenGL ES 2.0地图渲染Demo：
+
+- **GLSurfaceView**：硬件加速的OpenGL渲染
+- **地图元素**：网格、道路、建筑物、标记点
+- **手势支持**：拖拽平移和捏合缩放
+- **原生UI叠加**：搜索栏和控制按钮
+- 支持10种负载类型，GPU密集型场景测试
 
 ## 性能优化策略
 
@@ -83,26 +160,13 @@
 
 1. 运行 `app` 模块查看原始的高性能朋友圈实现
 2. 运行 `wechatfriendforperformance` 模块进行性能测试：
-   - 选择不同的负载级别
+   - 选择10种负载级别中的任意一种
    - 使用 Perfetto 或其他性能分析工具收集数据
    - 分析 Trace 结果进行性能优化
 3. 运行 `wechatfriendforpower` 模块测试功耗表现
-4. 运行 `wechatfriendforwebview` 模块测试WebView性能：
-   - 选择不同的负载级别
-   - 体验不同负载下WebView的滑动流畅度
-   - 滑动到底部测试动态加载功能
-5. 运行 `wechatfriendforcustomscroller` 模块体验自定义滚动容器：
-   - 在主界面选择轻/中/重三档
-   - 观察完全自研 Scroller 在无 OEM 优化场景下的真实表现
-   - 使用 Perfetto/ADB Systrace 对比不同滚动栈
-6. 运行 `wechatfriendforrenderstress` 模块验证 RenderThread 负载：
-   - 选择轻/中/重负载，滑动列表即可触发对应的模糊/Shader 压力
-   - 结合 Perfetto 中的 `RenderThread` 舞台观察 GPU 时间是否超过 vsync
-   - 对比 OEM 的 SurfaceFlinger/RenderThread 调度策略
-5. 运行 `wechatfriendforcustomscroller` 模块体验自定义滚动容器：
-   - 在主界面选择轻/中/重三档
-   - 观察完全自研 Scroller 在无 OEM 优化场景下的真实表现
-   - 使用 Perfetto/ADB Systrace 对比不同滚动栈
+4. 运行 `wechatfriendforwebview` 模块测试WebView性能
+5. 运行 `wechatfriendforcustomscroller` 模块体验自定义滚动容器
+6. 运行 `wechatfriendforrenderstress` 模块验证 RenderThread 负载
 
 ## 性能测试对比
 
@@ -124,7 +188,7 @@
 - 改进功耗测试精度
 - 实现表情匹配
 - 实现电话号码匹配等功能
-- 增加Compose实现版本，对比更多技术方案
+- 增加更多实现版本
 
 欢迎 Star 和贡献！
 
@@ -134,11 +198,18 @@
 每次代码更新后，GitHub Actions会自动构建最新版本的APK文件。你可以在[Releases页面](../../releases)下载：
 
 - **HighPerformanceFriendsCircle-debug** - 主应用模块
-- **WeChatFriendForPerformance-debug** - 性能测试模块
+- **WeChatFriendForPerformance-debug** - 性能测试模块 (10种负载)
 - **WeChatFriendForPower-debug** - 功耗测试模块  
-- **WeChatFriendForWebView-debug** - WebView测试模块
-- **WeChatFriendForCustomScroller-debug** - 自定义Scroller测试模块（亦可直接在仓库 `apk/wechatfriendforcustomscroller-debug.apk` 安装体验）
-- **WeChatFriendForRenderStress-debug** - RenderThread压测模块（重负载 RenderThread/SurfaceFlinger 监测用）
+- **WeChatFriendForWebView-debug** - WebView测试模块 (10种负载)
+- **WeChatFriendForCustomScroller-debug** - 自定义Scroller测试模块 (10种负载)
+- **WeChatFriendForRenderStress-debug** - RenderThread压测模块 (10种负载)
+- **WeChatFriendForSoftwareRender-debug** - 软件渲染测试模块 (10种负载)
+- **WeChatFriendForCompose-debug** - Compose测试模块 (10种负载)
+- **WeChatFriendForSurfaceMap-debug** - SurfaceView地图测试模块 (10种负载)
+- **WeChatFriendForPureRenderThread-debug** - 纯RenderThread测试模块 (10种负载)
+- **WeChatFriendForDualWindow-debug** - 双Window刷新测试模块 (10种负载)
+- **WeChatFriendForMixedRender-debug** - 混合渲染测试模块 (10种负载)
+- **WeChatFriendForGLMap-debug** - OpenGL地图测试模块 (10种负载)
 
 ### 📋 版本说明
 - **Debug版本**: 包含调试信息，可直接安装使用

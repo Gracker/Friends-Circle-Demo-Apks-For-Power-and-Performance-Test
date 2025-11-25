@@ -62,14 +62,21 @@ jobs:
         :wechatfriendforwebview:assembleRelease
         :wechatfriendforcustomscroller:assembleRelease
         :wechatfriendforrenderstress:assembleRelease
+        :wechatfriendforsoftwarerender:assembleRelease
+        :wechatfriendforcompose:assembleRelease
+        :wechatfriendforsurfacemap:assembleRelease
+        :wechatfriendforpurerenderthread:assembleRelease
+        :wechatfriendfordualwindow:assembleRelease
+        :wechatfriendformixedrender:assembleRelease
+        :wechatfriendforglmap:assembleRelease
         --parallel
       
     - name: Rename APK files with version info
       run: |
-        # 创建release目录
+        # Create release directory
         mkdir -p release-apks
         
-        # 重命名Release APKs
+        # Rename Release APKs
         if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
           cp app/build/outputs/apk/release/app-release.apk "release-apks/HighPerformanceFriendsCircle-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
@@ -94,7 +101,35 @@ jobs:
           cp wechatfriendforrenderstress/build/outputs/apk/release/wechatfriendforrenderstress-release.apk "release-apks/WeChatFriendForRenderStress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        # 列出所有生成的文件
+        if [ -f "wechatfriendforsoftwarerender/build/outputs/apk/release/wechatfriendforsoftwarerender-release.apk" ]; then
+          cp wechatfriendforsoftwarerender/build/outputs/apk/release/wechatfriendforsoftwarerender-release.apk "release-apks/WeChatFriendForSoftwareRender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendforcompose/build/outputs/apk/release/wechatfriendforcompose-release.apk" ]; then
+          cp wechatfriendforcompose/build/outputs/apk/release/wechatfriendforcompose-release.apk "release-apks/WeChatFriendForCompose-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendforsurfacemap/build/outputs/apk/release/wechatfriendforsurfacemap-release.apk" ]; then
+          cp wechatfriendforsurfacemap/build/outputs/apk/release/wechatfriendforsurfacemap-release.apk "release-apks/WeChatFriendForSurfaceMap-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendforpurerenderthread/build/outputs/apk/release/wechatfriendforpurerenderthread-release.apk" ]; then
+          cp wechatfriendforpurerenderthread/build/outputs/apk/release/wechatfriendforpurerenderthread-release.apk "release-apks/WeChatFriendForPureRenderThread-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendfordualwindow/build/outputs/apk/release/wechatfriendfordualwindow-release.apk" ]; then
+          cp wechatfriendfordualwindow/build/outputs/apk/release/wechatfriendfordualwindow-release.apk "release-apks/WeChatFriendForDualWindow-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendformixedrender/build/outputs/apk/release/wechatfriendformixedrender-release.apk" ]; then
+          cp wechatfriendformixedrender/build/outputs/apk/release/wechatfriendformixedrender-release.apk "release-apks/WeChatFriendForMixedRender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "wechatfriendforglmap/build/outputs/apk/release/wechatfriendforglmap-release.apk" ]; then
+          cp wechatfriendforglmap/build/outputs/apk/release/wechatfriendforglmap-release.apk "release-apks/WeChatFriendForGLMap-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        # List all generated files
         echo "Generated APK files:"
         ls -la release-apks/
       
@@ -110,35 +145,44 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: auto-build-${{ steps.version.outputs.BUILD_TIME }}
-        name: "自动构建 ${{ steps.version.outputs.BUILD_TIME }}"
+        name: "Auto Build ${{ steps.version.outputs.BUILD_TIME }}"
         body: |
-          🚀 **自动构建发布 (Release版本)**
+          🚀 **Automated Build Release**
           
-          📅 **构建时间**: ${{ steps.version.outputs.BUILD_TIME }}
-          🔗 **提交**: ${{ steps.version.outputs.SHORT_SHA }}
-          🌿 **分支**: ${{ steps.version.outputs.BRANCH_NAME }}
+          📅 **Build Time**: ${{ steps.version.outputs.BUILD_TIME }}
+          🔗 **Commit**: ${{ steps.version.outputs.SHORT_SHA }}
+          🌿 **Branch**: ${{ steps.version.outputs.BRANCH_NAME }}
           
-          ## 📦 包含的APK文件
+          ## 📦 Included APK Files (10 Load Types Supported)
           
-          ### 🎯 Release版本 (已签名，生产就绪)
-          - HighPerformanceFriendsCircle-release - 主应用模块
-          - WeChatFriendForPerformance-release - 性能测试模块  
-          - WeChatFriendForPower-release - 功耗测试模块
-          - WeChatFriendForWebView-release - WebView测试模块
+          ### 🎯 Release Version (Signed, Production Ready)
+          - **HighPerformanceFriendsCircle-release** - Main Application
+          - **WeChatFriendForPerformance-release** - Performance Testing (10 load types)
+          - **WeChatFriendForPower-release** - Power Consumption Testing
+          - **WeChatFriendForWebView-release** - WebView Testing (10 load types)
+          - **WeChatFriendForCustomScroller-release** - Custom Scroller Testing (10 load types)
+          - **WeChatFriendForRenderStress-release** - RenderThread Stress Testing (10 load types)
+          - **WeChatFriendForSoftwareRender-release** - Software Rendering Testing (10 load types)
+          - **WeChatFriendForCompose-release** - Jetpack Compose Testing (10 load types)
+          - **WeChatFriendForSurfaceMap-release** - SurfaceView Map Demo (10 load types)
+          - **WeChatFriendForPureRenderThread-release** - Pure RenderThread List (10 load types)
+          - **WeChatFriendForDualWindow-release** - Dual Window Rendering (10 load types)
+          - **WeChatFriendForMixedRender-release** - Mixed Rendering Demo (10 load types)
+          - **WeChatFriendForGLMap-release** - OpenGL ES Map Demo (10 load types)
           
-          ## 📝 说明
-          - ✅ Release版本，已使用正式签名密钥签名
-          - ✅ 优化版本，性能更好，体积更小
-          - ✅ 所有APK都通过了自动化构建和签名验证
-          - ✅ 可直接安装使用，适合生产环境
+          ## 📝 Notes
+          - ✅ Release version, signed with production key
+          - ✅ Optimized for better performance and smaller size
+          - ✅ All APKs passed automated build and signing verification
+          - ✅ Ready for installation and production use
           
-          ## 🔧 安装说明
-          1. 下载对应的APK文件
-          2. 在Android设备上启用"允许安装未知来源应用"
-          3. 直接安装APK文件即可使用
+          ## 🔧 Installation
+          1. Download the APK file
+          2. Enable "Install from unknown sources" on your Android device
+          3. Install the APK file
           
           ---
-          💡 这是通过GitHub Actions自动生成的正式发布版本
+          💡 This is an automated release generated by GitHub Actions
         files: release-apks/*
         draft: false
         prerelease: false
