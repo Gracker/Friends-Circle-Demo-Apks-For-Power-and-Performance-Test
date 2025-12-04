@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <!-- 视频播放器容器 -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:use_controller="false"
+        app:resize_mode="zoom"
+        app:surface_type="surface_view" />
+
+    <!-- 加载指示器 -->
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@color/white" />
+
+    <!-- 右侧互动按钮区域 -->
+    <LinearLayout
+        android:id="@+id/right_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="160dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <!-- 头像 + 关注 -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp">
+
+            <ImageView
+                android:id="@+id/iv_avatar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/avatar_circle"
+                android:scaleType="centerCrop"
+                android:padding="2dp" />
+
+            <ImageView
+                android:id="@+id/iv_follow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginTop="38dp"
+                android:background="@drawable/follow_button"
+                android:padding="4dp"
+                android:src="@drawable/ic_plus" />
+        </FrameLayout>
+
+        <!-- 点赞 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_like"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_heart" />
+
+            <TextView
+                android:id="@+id/tv_like_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="7361"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 评论 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_comment"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_comment" />
+
+            <TextView
+                android:id="@+id/tv_comment_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="363"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 收藏 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_favorite"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_star" />
+
+            <TextView
+                android:id="@+id/tv_favorite_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="189"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 分享 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_share"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/ic_share" />
+
+            <TextView
+                android:id="@+id/tv_share_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="705"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- 音乐唱片 -->
+        <ImageView
+            android:id="@+id/iv_music_disc"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/ic_music_disc" />
+
+    </LinearLayout>
+
+    <!-- 左下角视频信息 -->
+    <LinearLayout
+        android:id="@+id/video_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="80dp"
+        android:orientation="vertical">
+
+        <!-- 作者名称 -->
+        <TextView
+            android:id="@+id/tv_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@LS."
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- 视频描述 -->
+        <TextView
+            android:id="@+id/tv_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="2025格兰芬多·鏖战腾冲 赛事第一视角🏆 #比赛现场 #公路..."
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <!-- 位置信息 -->
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="📍 泸州市·泸州发现王国"
+            android:textColor="@color/douyin_text_secondary"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</FrameLayout>
+

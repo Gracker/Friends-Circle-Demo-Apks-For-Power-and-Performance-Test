@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/base_F2F2F2"
+    tools:context=".PerformanceMainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginTop="40dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title_main"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/base_333333"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="32dp" />
+            
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/title_select_load"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Minimal Load -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_minimal_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@android:color/holo_green_light"
+                    android:text="最轻负载 (Minimal)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Original Load Types -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@color/primary_blue"
+                    android:text="轻负载 (帧内)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@color/accent_teal"
+                    android:text="中负载 (帧内)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="@color/deep_purple"
+                    android:text="高负载 (帧内)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="16dp"
+                    android:background="@color/divider" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="帧间负载 (Between Frame Load)"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Between Frame Load Types -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_load_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#4FC3F7"
+                    android:text="轻负载 (帧间)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_load_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#4DD0E1"
+                    android:text="中等负载 (帧间)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_load_between_frames"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#7986CB"
+                    android:text="高负载 (帧间)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Separator -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="16dp"
+                    android:background="@color/divider" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="混合负载 (帧内 + 帧间)"
+                    android:textColor="@color/base_333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Mixed Load Types -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_mixed_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF7043"
+                    android:text="轻负载 (混合)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_mixed_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#F4511E"
+                    android:text="中负载 (混合)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_mixed_load"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#E57373"
+                    android:text="高负载 (混合)"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="应用介绍"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/base_333333"
+                    android:layout_marginBottom="8dp" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/description"
+                    android:textSize="14sp"
+                    android:textColor="@color/base_666666"
+                    android:lineSpacingExtra="6dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="© 2025 朋友圈性能测试应用"
+            android:textColor="@color/base_999999"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="24dp" />
+    </LinearLayout>
+</ScrollView> 

@@ -48,6 +48,7 @@
 11. **wechatfriendfordualwindow-debug**: 双Window刷新Demo，每帧有2个doFrame和2个RenderThread的drawFrame，支持10种负载类型。
 12. **wechatfriendformixedrender-debug**: 混合渲染Demo，同时有纯RenderThread动画和标准UI+RenderThread渲染，支持10种负载类型。
 13. **wechatfriendforglmap-debug**: OpenGL ES 2.0地图Demo，类似高德/谷歌地图，支持10种负载类型。
+14. **wechatfriendfordouyin-debug**: 抖音风格视频滑动Demo，使用自研 `VerticalVideoScroller` + `VideoOverScroller` 实现全屏视频翻页切换，滑动时间与速度相关（200ms-600ms）。
 
 ## 项目结构
 
@@ -145,6 +146,17 @@ OpenGL ES 2.0地图渲染Demo：
 - **原生UI叠加**：搜索栏和控制按钮
 - 支持10种负载类型，GPU密集型场景测试
 
+### 14. 抖音风格视频滑动模块 (wechatfriendfordouyin)
+
+模拟抖音的全屏视频滑动体验：
+
+- **全屏视频播放**：每个视频占满整个屏幕，沉浸式体验
+- **自研滚动容器**：`VerticalVideoScroller` + `VideoOverScroller` 实现翻页式滚动
+- **速度感知动画**：滑动时间与滑动速度相关，范围 200ms - 600ms
+- **智能切换**：滑动过半自动切换到下一个视频
+- **完美UI还原**：底部导航栏、右侧互动按钮、左下角信息区域
+- 使用 Media3 ExoPlayer 进行视频播放
+
 ## 性能优化策略
 
 在 Android 中，要避免列表卡顿，主要从以下几个角度进行优化：
@@ -210,6 +222,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **WeChatFriendForDualWindow-debug** - 双Window刷新测试模块 (10种负载)
 - **WeChatFriendForMixedRender-debug** - 混合渲染测试模块 (10种负载)
 - **WeChatFriendForGLMap-debug** - OpenGL地图测试模块 (10种负载)
+- **WeChatFriendForDouyin-debug** - 抖音风格视频滑动模块
 
 ### 📋 版本说明
 - **Debug版本**: 包含调试信息，可直接安装使用

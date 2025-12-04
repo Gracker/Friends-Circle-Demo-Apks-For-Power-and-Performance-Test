@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 标准Material设计颜色 -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- 基础颜色 -->
+    <color name="base_FFFFFF">#FFFFFF</color>
+    <color name="base_000000">#000000</color>
+    <color name="base_EEEEEE">#EEEEEE</color>
+    <color name="base_F8F8F8">#F8F8F8</color>
+    <color name="base_F2F2F2">#F2F2F2</color>
+    <color name="base_DCDCDC">#DCDCDC</color>
+    <color name="base_697A9F">#697A9F</color>
+    <color name="base_666666">#666666</color>
+    <color name="base_999999">#999999</color>
+    <color name="base_333333">#333333</color>
+    
+    <!-- 功能颜色 -->
+    <color name="praise_item_text">#576B95</color>
+    <color name="default_background">#1E88E5</color>
+    <color name="background_gray">#F2F2F2</color>
+    <color name="transparent">#00000000</color>
+    
+    <!-- MTK标志性颜色 -->
+    <color name="mtk_yellow">#FFCC00</color>
+    <color name="mtk_yellow_dark">#E6B800</color>
+    <color name="mtk_black">#1A1A1A</color>
+    <color name="mtk_text_gray">#7C7C7C</color>
+    <color name="mtk_white">#FFFFFF</color>
+    <color name="mtk_blue">#1677FF</color>
+
+    <!-- 主题颜色 -->
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#B3E5FC</color>
+    <color name="accent">#2196F3</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#BDBDBD</color>
+    
+    <!-- 高级配色方案 -->
+    <color name="primary_blue">#1A73E8</color> <!-- Google蓝 -->
+    <color name="accent_teal">#009688</color> <!-- 清新绿 -->
+    <color name="deep_purple">#673AB7</color> <!-- 深紫色 -->
+    <color name="warm_orange">#FF5722</color> <!-- 暖橙色 -->
+    <color name="orange">#FF9800</color>
+    <color name="ic_launcher_background">#2196F3</color>
+</resources> 

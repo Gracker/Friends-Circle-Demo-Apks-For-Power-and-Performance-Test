@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.DouyinDemo" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/douyin_pink</item>
+        <item name="colorPrimaryDark">@color/douyin_bg</item>
+        <item name="colorAccent">@color/douyin_cyan</item>
+        <item name="android:windowBackground">@color/douyin_bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/douyin_nav_bg</item>
+    </style>
+
+    <style name="Theme.DouyinDemo.Fullscreen" parent="Theme.DouyinDemo">
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+</resources>
+

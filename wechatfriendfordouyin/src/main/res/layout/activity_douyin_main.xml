@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:fitsSystemWindows="false">
+
+    <!-- 视频滑动容器 -->
+    <com.example.wechatfriendfordouyin.view.VerticalVideoScroller
+        android:id="@+id/video_scroller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 顶部标签栏 -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp">
+
+        <ImageView
+            android:id="@+id/btn_live"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="@string/live" />
+
+        <TextView
+            android:id="@+id/tab_attention"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="关注"
+            android:textColor="@color/douyin_tab_unselected"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tab_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="成都"
+            android:textColor="@color/douyin_tab_unselected"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tab_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="团购"
+            android:textColor="@color/douyin_tab_unselected"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tab_mall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="商城"
+            android:textColor="@color/douyin_tab_unselected"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tab_hot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:text="推荐"
+            android:textColor="@color/douyin_tab_selected"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="@string/live" />
+
+    </LinearLayout>
+
+    <!-- 底部导航栏 -->
+    <LinearLayout
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="@color/douyin_nav_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp">
+
+        <!-- 首页 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_home" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="首页"
+                android:textColor="@color/douyin_tab_selected"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- 朋友 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_friends" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="朋友"
+                android:textColor="@color/douyin_tab_unselected"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- 拍摄按钮 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="28dp">
+
+                <!-- 青色底层 -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:background="@drawable/add_button_cyan" />
+
+                <!-- 粉色底层 -->
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:background="@drawable/add_button_pink" />
+
+                <!-- 白色主按钮 -->
+                <TextView
+                    android:layout_width="38dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@drawable/add_button_white"
+                    android:gravity="center"
+                    android:text="+"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- 消息 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_message" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="消息"
+                android:textColor="@color/douyin_tab_unselected"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <!-- 我 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="我"
+                android:textColor="@color/douyin_tab_unselected"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>
+

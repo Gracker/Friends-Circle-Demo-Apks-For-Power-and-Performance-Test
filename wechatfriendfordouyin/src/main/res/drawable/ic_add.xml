@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Cyan layer -->
+    <item android:left="-2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/douyin_cyan"/>
+            <corners android:radius="8dp"/>
+            <size android:width="44dp" android:height="28dp"/>
+        </shape>
+    </item>
+    <!-- Pink layer -->
+    <item android:right="-2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/douyin_pink"/>
+            <corners android:radius="8dp"/>
+            <size android:width="44dp" android:height="28dp"/>
+        </shape>
+    </item>
+    <!-- White center -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/white"/>
+            <corners android:radius="8dp"/>
+            <size android:width="44dp" android:height="28dp"/>
+        </shape>
+    </item>
+</layer-list>
+

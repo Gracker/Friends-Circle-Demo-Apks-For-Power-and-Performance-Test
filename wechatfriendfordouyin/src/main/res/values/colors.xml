@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FF161823</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="douyin_pink">#FFFF2D55</color>
+    <color name="douyin_cyan">#FF00F0FF</color>
+    <color name="douyin_yellow">#FFFFC400</color>
+    <color name="douyin_bg">#FF161823</color>
+    <color name="douyin_nav_bg">#FF0D0D0D</color>
+    <color name="douyin_text_primary">#FFFFFFFF</color>
+    <color name="douyin_text_secondary">#99FFFFFF</color>
+    <color name="douyin_tab_selected">#FFFFFFFF</color>
+    <color name="douyin_tab_unselected">#80FFFFFF</color>
+    <color name="overlay_black">#80000000</color>
+    <color name="transparent">#00000000</color>
+</resources>
+
