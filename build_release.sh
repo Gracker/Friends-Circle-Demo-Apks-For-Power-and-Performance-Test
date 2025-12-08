@@ -75,9 +75,10 @@ OUTPUT_DIR="apk-released"
 mkdir -p "$OUTPUT_DIR"
 log_info "输出目录: $OUTPUT_DIR"
 
-# 设置签名环境变量
+# 设置签名环境变量（支持两种命名方式）
 export KEYSTORE_FILE_PATH="$KEYSTORE_FILE_PATH"
 export KEYSTORE_PASSWORD="$KEYSTORE_PASSWORD"
+export STORE_PASSWORD="$KEYSTORE_PASSWORD"
 export KEY_ALIAS="$KEY_ALIAS"
 export KEY_PASSWORD="$KEY_PASSWORD"
 
@@ -104,24 +105,33 @@ log_info "复制APK文件到 $OUTPUT_DIR 目录..."
 SUCCESS_COUNT=0
 TOTAL_COUNT=0
 
-# 定义模块和APK文件映射
-MODULES="app wechatfriendforperformance wechatfriendforpower wechatfriendforwebview"
-APK_NAMES="app-release wechatfriendforperformance-release wechatfriendforpower-release wechatfriendforwebview-release"
-MODULE_NAMES="主应用 性能测试 电量测试 WebView版本"
-
-# 转换为数组
-set -- $MODULES
-MODULES_ARRAY=("$@")
-set -- $APK_NAMES  
-APK_NAMES_ARRAY=("$@")
-set -- $MODULE_NAMES
-MODULE_NAMES_ARRAY=("$@")
+# 定义模块数组（目录名|APK名|显示名）
+declare -a MODULE_CONFIG=(
+    "app|app-release|主应用"
+    "aosp-performance|aosp-performance-release|AOSP性能测试"
+    "aosp-power|aosp-power-release|AOSP电量测试"
+    "aosp-picasso|aosp-picasso-release|AOSP-Picasso"
+    "aosp-customscroller|aosp-customscroller-release|AOSP自定义滚动"
+    "aosp-renderstress|aosp-renderstress-release|AOSP渲染压测"
+    "aosp-softwarerender|aosp-softwarerender-release|AOSP软件渲染"
+    "aosp-douyin|aosp-douyin-release|AOSP抖音版本"
+    "aosp-video|aosp-video-release|AOSP视频版本"
+    "aosp-purerenderthread|aosp-purerenderthread-release|AOSP纯渲染线程"
+    "aosp-dualwindow|aosp-dualwindow-release|AOSP双窗口"
+    "aosp-mixedrender|aosp-mixedrender-release|AOSP混合渲染"
+    "compose|compose-release|Compose版本"
+    "webview|webview-release|WebView版本"
+    "webview-surface|webview-surface-release|WebView-Surface"
+    "webview-texture|webview-texture-release|WebView-Texture"
+    "webview-imagereader|webview-imagereader-release|WebView-ImageReader"
+    "surface-map|surface-map-release|Surface地图"
+    "gl-map|gl-map-release|GL地图"
+)
 
 # 处理每个模块
-for i in $(seq 0 3); do
-    MODULE="${MODULES_ARRAY[$i]}"
-    APK_NAME="${APK_NAMES_ARRAY[$i]}"
-    MODULE_NAME="${MODULE_NAMES_ARRAY[$i]}"
+for config in "${MODULE_CONFIG[@]}"; do
+    # 解析配置
+    IFS='|' read -r MODULE APK_NAME MODULE_NAME <<< "$config"
     
     SOURCE_APK="${MODULE}/build/outputs/apk/release/${APK_NAME}.apk"
     TARGET_APK="$OUTPUT_DIR/${APK_NAME}-v${VERSION_NAME}.apk"

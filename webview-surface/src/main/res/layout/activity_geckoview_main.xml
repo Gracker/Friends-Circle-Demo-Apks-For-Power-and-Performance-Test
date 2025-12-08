@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F2F2F2"
+    tools:context=".GeckoViewMainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginTop="40dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GeckoView SurfaceView\n朋友圈测试"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp" />
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="渲染模式: SurfaceView (独立Surface)"
+            android:textSize="14sp"
+            android:textColor="#673AB7"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
+        
+        <!-- 最轻负载 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/card_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="最轻负载"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_minimal_load"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/button_green"
+                android:text="最轻负载模式"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+            
+        <!-- 帧内负载 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/card_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="帧内负载测试"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_light_load"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_blue"
+                android:text="帧内轻负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_medium_load"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_teal"
+                android:text="帧内中负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_heavy_load"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/button_purple"
+                android:text="帧内高负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+        
+        <!-- 帧间负载 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/card_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="帧间负载测试"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_light_between_frames"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_orange"
+                android:text="帧间轻负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_medium_between_frames"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_deep_orange"
+                android:text="帧间中负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_heavy_between_frames"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/button_pink"
+                android:text="帧间高负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+        
+        <!-- 混合负载 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/card_background">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="混合负载测试"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_light_mixed"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_cyan"
+                android:text="混合轻负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_medium_mixed"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/button_teal"
+                android:text="混合中负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btn_heavy_mixed"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/button_brown"
+                android:text="混合高负载"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
+        
+        <!-- 应用简介 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/card_background">
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="GeckoView SurfaceView版简介"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="8dp" />
+            
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="使用 Mozilla GeckoView (Firefox引擎) 渲染。\n\n渲染模式: SurfaceView\n• GeckoView 渲染直接输出到独立 Surface\n• Surface 直接提交到 SurfaceFlinger\n• 绕过 App 的 RenderThread\n• 类似 Chrome App 的渲染方式\n\n本应用提供了10种不同负载级别进行性能测试。"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:lineSpacingExtra="6dp" />
+        </LinearLayout>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="© 2025 GeckoView SurfaceView测试应用"
+            android:textColor="#999999"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp" />
+    </LinearLayout>
+</ScrollView>

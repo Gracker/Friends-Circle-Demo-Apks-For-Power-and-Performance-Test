@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- 
+    渲染模式：ImageReader 模拟
+    使用 TextureView 进行 GeckoView 渲染
+    然后通过 getBitmap() 获取位图
+    通过额外的 Bitmap 拷贝步骤模拟 ImageReader 的开销
+    合成路径需要经过 App 的 UI Thread + RenderThread
+    类似淘宝天猫页面的渲染方式
+    -->
+    
+    <!-- TextureView 用于 GeckoView 渲染 -->
+    <TextureView
+        android:id="@+id/texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:progressTint="@color/primary_blue" />
+
+</FrameLayout>

@@ -33,60 +33,80 @@ All test modules support 10 load types covering different performance testing sc
 | Mixed Medium | Mixed Medium Load | Both in-frame and between-frame medium loads |
 | Mixed Heavy | Mixed Heavy Load | Both in-frame and between-frame heavy loads |
 
-## APK Description
-
-1. **app-release**: Original project App, displays a randomly generated WeChat Friend Circle interface, kept for reference only.
-2. **wechatfriendforperformance-release**: Performance testing App using standard AOSP implementation. Supports 10 load types.
-3. **wechatfriendforpower-release**: Modified original project App with fixed content display for consistent performance/power testing.
-4. **wechatfriendforwebview-release**: Performance testing App using WebView implementation. Supports 10 load types.
-5. **wechatfriendforcustomscroller-debug**: Custom `CustomTimelineView` + `CustomOverScroller` implementation. Supports 10 load types.
-6. **wechatfriendforrenderstress-debug**: RenderThread stress testing APK. Supports 10 load types.
-7. **wechatfriendforsoftwarerender-debug**: Software rendering version (hardware acceleration disabled). Supports 10 load types.
-8. **wechatfriendforcompose-debug**: Jetpack Compose version. Supports 10 load types.
-9. **wechatfriendforsurfacemap-debug**: Amap-style SurfaceView map demo with native controls. Supports 10 load types.
-10. **wechatfriendforpurerenderthread-debug**: Pure RenderThread list scrolling, UI Thread does not participate in rendering. Supports 10 load types.
-11. **wechatfriendfordualwindow-debug**: Dual window rendering demo (2 doFrame + 2 RenderThread drawFrame per vsync). Supports 10 load types.
-12. **wechatfriendformixedrender-debug**: Mixed rendering demo with pure RenderThread animation and standard UI+RenderThread. Supports 10 load types.
-13. **wechatfriendforglmap-debug**: OpenGL ES 2.0 map demo similar to Google Maps. Supports 10 load types.
-
-![main_page.jpg](pic/main_page.jpg)
-![friends_1.jpg](pic/friends_1.jpg)
-![friends_2.jpg](pic/friends_2.jpg)
-![trace.png](pic/trace.png)
-
 ## Project Structure
 
-This project contains the following main modules:
+The project is organized by implementation type:
+
+### AOSP Modules (Standard Android UI + RenderThread)
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `app` | Original project with random Friend Circle display |
+| `aosp-performance` | Performance testing with 10 load types |
+| `aosp-power` | Power consumption testing with fixed content |
+| `aosp-picasso` | Using Picasso image loading library |
+| `aosp-customscroller` | Custom CustomOverScroller + CustomTimelineView |
+| `aosp-renderstress` | RenderThread stress testing |
+| `aosp-softwarerender` | Software rendering (hardware acceleration disabled) |
+| `aosp-douyin` | Douyin-style video scrolling |
+| `aosp-video` | Video Feed version |
+| `aosp-purerenderthread` | Pure RenderThread list scrolling |
+| `aosp-dualwindow` | Dual Window rendering demo |
+| `aosp-mixedrender` | Mixed rendering demo |
+
+### Compose Module
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `compose` | Jetpack Compose implementation |
+
+### WebView Modules
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `webview` | Standard WebView implementation |
+| `webview-surface` | WebView + SurfaceView |
+| `webview-texture` | WebView + TextureView |
+| `webview-imagereader` | WebView + ImageReader |
+
+### Surface & GL Modules
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `surface-map` | SurfaceView Map Demo |
+| `gl-map` | OpenGL ES 2.0 Map Demo |
+
+## Module Details
 
 ### 1. Original Project (app)
 
 The original high-performance WeChat Friend Circle implementation, from the forked project. This module demonstrates how to efficiently implement a scrolling list similar to WeChat Friend Circle, including various performance optimization techniques.
 
-### 2. Performance Testing Module (wechatfriendforperformance)
+### 2. Performance Testing Module (aosp-performance)
 
 Specifically designed to test and compare scrolling performance under different loads. Supports 10 load modes with Trace points at key code locations for performance analysis using tools like Perfetto.
 
-### 3. Power Consumption Testing Module (wechatfriendforpower)
+### 3. Power Consumption Testing Module (aosp-power)
 
 Single Activity design with fixed environment and content for precise power consumption testing.
 
-### 4. WebView Testing Module (wechatfriendforwebview)
+### 4. WebView Testing Module (webview)
 
 Implements the Friend Circle interface using WebView to test performance differences between WebView and native implementation. Supports 10 load levels with JavaScript-Java interaction and dynamic loading of up to 200 items.
 
-### 5. Custom Scroller Module (wechatfriendforcustomscroller)
+### 5. Custom Scroller Module (aosp-customscroller)
 
 - Replaces RecyclerView/ListView with custom `CustomTimelineView` + `CustomOverScroller`
 - Built with Hilt + MVVM + Room data pipeline
 - Supports 10 load types for evaluating OEM optimizations
 
-### 6. RenderThread Stress Module (wechatfriendforrenderstress)
+### 6. RenderThread Stress Module (aosp-renderstress)
 
 - Based on custom scroller architecture with `CustomOverScroller`
 - `RenderStressOverlayView` applies blur/shader chains during scrolling
 - Supports 10 load types for GPU/vsync analysis
 
-### 7. Software Rendering Module (wechatfriendforsoftwarerender)
+### 7. Software Rendering Module (aosp-softwarerender)
 
 Software rendering mode implementation (hardware acceleration disabled):
 
@@ -94,7 +114,7 @@ Software rendering mode implementation (hardware acceleration disabled):
 - **UI Thread Only**: No RenderThread, all rendering on main thread
 - Supports 10 load types for CPU-intensive testing
 
-### 8. Compose Module (wechatfriendforcompose)
+### 8. Compose Module (compose)
 
 Jetpack Compose implementation:
 
@@ -103,7 +123,7 @@ Jetpack Compose implementation:
 - **Coil Image Loading**: Compose-friendly image loading
 - Supports 10 load types for framework performance comparison
 
-### 9. SurfaceView Map Module (wechatfriendforsurfacemap)
+### 9. SurfaceView Map Module (surface-map)
 
 Amap-style map demo application:
 
@@ -112,7 +132,7 @@ Amap-style map demo application:
 - **Scroll Gesture Support**: Supports drag and fling scrolling
 - Supports 10 load types for testing SurfaceView + native View mixed scenarios
 
-### 10. Pure RenderThread Module (wechatfriendforpurerenderthread)
+### 10. Pure RenderThread Module (aosp-purerenderthread)
 
 Pure RenderThread list scrolling implementation:
 
@@ -121,7 +141,7 @@ Pure RenderThread list scrolling implementation:
 - **SurfaceView Implementation**: Utilizes SurfaceView's independent Surface
 - Supports 10 load types for validating pure render thread performance
 
-### 11. Dual Window Module (wechatfriendfordualwindow)
+### 11. Dual Window Module (aosp-dualwindow)
 
 Dual window rendering demonstration:
 
@@ -131,7 +151,7 @@ Dual window rendering demonstration:
 - **Overlay Permission Required**: Uses WindowManager for second window
 - Supports 10 load types for testing multi-window scenarios
 
-### 12. Mixed Rendering Module (wechatfriendformixedrender)
+### 12. Mixed Rendering Module (aosp-mixedrender)
 
 Mixed rendering combining two pipelines:
 
@@ -140,7 +160,7 @@ Mixed rendering combining two pipelines:
 - **Simulates Video Overlay**: Like video player overlay on scrollable list
 - Supports 10 load types for analyzing mixed rendering performance
 
-### 13. OpenGL Map Module (wechatfriendforglmap)
+### 13. OpenGL Map Module (gl-map)
 
 OpenGL ES 2.0 map rendering demo:
 
@@ -149,6 +169,17 @@ OpenGL ES 2.0 map rendering demo:
 - **Gesture Support**: Pan and pinch-to-zoom
 - **Native UI Overlays**: Search bar and control buttons
 - Supports 10 load types for GPU-intensive testing
+
+### 14. Douyin-style Video Module (aosp-douyin)
+
+Simulates Douyin's full-screen video scrolling experience:
+
+- **Full-screen Video**: Each video occupies the entire screen for immersive experience
+- **Custom Scroll Container**: `VerticalVideoScroller` + `VideoOverScroller` for page-style scrolling
+- **Speed-aware Animation**: Scroll duration ranges from 200ms to 600ms based on velocity
+- **Smart Switching**: Auto-switch when scrolled past midpoint
+- **Perfect UI Recreation**: Bottom navigation, right-side interaction buttons, bottom-left info area
+- Uses Media3 ExoPlayer for video playback
 
 ## Performance Optimization Strategies
 
@@ -164,14 +195,14 @@ In Android, to avoid list stuttering, optimize from the following aspects:
 ## How to Use
 
 1. Run the `app` module to view the original high-performance Friend Circle implementation
-2. Run the `wechatfriendforperformance` module for performance testing:
+2. Run the `aosp-performance` module for performance testing:
    - Select any of the 10 load levels
    - Use Perfetto or other performance analysis tools
    - Analyze Trace results for optimization
-3. Run the `wechatfriendforpower` module to test power consumption
-4. Run the `wechatfriendforwebview` module to test WebView performance
-5. Run the `wechatfriendforcustomscroller` module to evaluate custom scroller
-6. Run the `wechatfriendforrenderstress` module for RenderThread analysis
+3. Run the `aosp-power` module to test power consumption
+4. Run the `webview` module to test WebView performance
+5. Run the `aosp-customscroller` module to evaluate custom scroller
+6. Run the `aosp-renderstress` module for RenderThread analysis
 
 ## Performance Test Comparison
 
@@ -194,3 +225,10 @@ Thanks to [KCrason](https://github.com/KCrason) for the original project and [ra
 - Adding more implementation versions
 
 Star and contributions welcome!
+
+## Screenshots
+
+![main_page.jpg](pic/main_page.jpg)
+![friends_1.jpg](pic/friends_1.jpg)
+![friends_2.jpg](pic/friends_2.jpg)
+![trace.png](pic/trace.png)

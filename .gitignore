@@ -25,15 +25,14 @@
 .cxx/
 /captures
 
-# APK and AAB files (except apk-released directory for public download)
+# APK and AAB files
 *.aab
 *.ap_
 *.dex
-# 忽略所有APK文件，除了apk-released目录
 *.apk
-# 但允许apk-released目录下的APK文件
-!/apk-released/
-!/apk-released/*.apk
+
+# APK发布目录 (GitHub有100MB文件大小限制，APK通过Release发布)
+/apk-released/
 
 # Build output directories
 /apk/

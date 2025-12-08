@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme - 使用 Android 原生主题避免 AppCompat 依赖冲突 -->
+    <style name="Theme.HighPerformanceFriendsCircle" parent="android:Theme.Material.Light.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="android:colorPrimary">@color/purple_500</item>
+        <item name="android:colorPrimaryDark">@color/purple_700</item>
+        <item name="android:colorAccent">@color/teal_200</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/purple_700</item>
+    </style>
+
+    <style name="Theme.HighPerformanceFriendsCircle.NoActionBar" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorPrimary">@color/purple_500</item>
+        <item name="android:colorPrimaryDark">@color/purple_700</item>
+        <item name="android:colorAccent">@color/teal_200</item>
+        <item name="android:statusBarColor">@color/purple_700</item>
+    </style>
+</resources>
+

@@ -57,18 +57,24 @@ jobs:
       run: >
         ./gradlew
         :app:assembleRelease
-        :wechatfriendforperformance:assembleRelease
-        :wechatfriendforpower:assembleRelease
-        :wechatfriendforwebview:assembleRelease
-        :wechatfriendforcustomscroller:assembleRelease
-        :wechatfriendforrenderstress:assembleRelease
-        :wechatfriendforsoftwarerender:assembleRelease
-        :wechatfriendforcompose:assembleRelease
-        :wechatfriendforsurfacemap:assembleRelease
-        :wechatfriendforpurerenderthread:assembleRelease
-        :wechatfriendfordualwindow:assembleRelease
-        :wechatfriendformixedrender:assembleRelease
-        :wechatfriendforglmap:assembleRelease
+        :aosp-performance:assembleRelease
+        :aosp-power:assembleRelease
+        :aosp-picasso:assembleRelease
+        :aosp-customscroller:assembleRelease
+        :aosp-renderstress:assembleRelease
+        :aosp-softwarerender:assembleRelease
+        :aosp-douyin:assembleRelease
+        :aosp-video:assembleRelease
+        :aosp-purerenderthread:assembleRelease
+        :aosp-dualwindow:assembleRelease
+        :aosp-mixedrender:assembleRelease
+        :compose:assembleRelease
+        :webview:assembleRelease
+        :webview-surface:assembleRelease
+        :webview-texture:assembleRelease
+        :webview-imagereader:assembleRelease
+        :surface-map:assembleRelease
+        :gl-map:assembleRelease
         --parallel
       
     - name: Rename APK files with version info
@@ -76,57 +82,86 @@ jobs:
         # Create release directory
         mkdir -p release-apks
         
-        # Rename Release APKs
+        # Copy and rename APKs with new naming convention
+        # Main app
         if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-          cp app/build/outputs/apk/release/app-release.apk "release-apks/HighPerformanceFriendsCircle-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "release-apks/app-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release.apk" ]; then
-          cp wechatfriendforperformance/build/outputs/apk/release/wechatfriendforperformance-release.apk "release-apks/WeChatFriendForPerformance-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        # AOSP modules
+        if [ -f "aosp-performance/build/outputs/apk/release/aosp-performance-release.apk" ]; then
+          cp aosp-performance/build/outputs/apk/release/aosp-performance-release.apk "release-apks/aosp-performance-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release.apk" ]; then
-          cp wechatfriendforpower/build/outputs/apk/release/wechatfriendforpower-release.apk "release-apks/WeChatFriendForPower-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-power/build/outputs/apk/release/aosp-power-release.apk" ]; then
+          cp aosp-power/build/outputs/apk/release/aosp-power-release.apk "release-apks/aosp-power-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release.apk" ]; then
-          cp wechatfriendforwebview/build/outputs/apk/release/wechatfriendforwebview-release.apk "release-apks/WeChatFriendForWebView-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-picasso/build/outputs/apk/release/aosp-picasso-release.apk" ]; then
+          cp aosp-picasso/build/outputs/apk/release/aosp-picasso-release.apk "release-apks/aosp-picasso-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforcustomscroller/build/outputs/apk/release/wechatfriendforcustomscroller-release.apk" ]; then
-          cp wechatfriendforcustomscroller/build/outputs/apk/release/wechatfriendforcustomscroller-release.apk "release-apks/WeChatFriendForCustomScroller-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-customscroller/build/outputs/apk/release/aosp-customscroller-release.apk" ]; then
+          cp aosp-customscroller/build/outputs/apk/release/aosp-customscroller-release.apk "release-apks/aosp-customscroller-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforrenderstress/build/outputs/apk/release/wechatfriendforrenderstress-release.apk" ]; then
-          cp wechatfriendforrenderstress/build/outputs/apk/release/wechatfriendforrenderstress-release.apk "release-apks/WeChatFriendForRenderStress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-renderstress/build/outputs/apk/release/aosp-renderstress-release.apk" ]; then
+          cp aosp-renderstress/build/outputs/apk/release/aosp-renderstress-release.apk "release-apks/aosp-renderstress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforsoftwarerender/build/outputs/apk/release/wechatfriendforsoftwarerender-release.apk" ]; then
-          cp wechatfriendforsoftwarerender/build/outputs/apk/release/wechatfriendforsoftwarerender-release.apk "release-apks/WeChatFriendForSoftwareRender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-softwarerender/build/outputs/apk/release/aosp-softwarerender-release.apk" ]; then
+          cp aosp-softwarerender/build/outputs/apk/release/aosp-softwarerender-release.apk "release-apks/aosp-softwarerender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforcompose/build/outputs/apk/release/wechatfriendforcompose-release.apk" ]; then
-          cp wechatfriendforcompose/build/outputs/apk/release/wechatfriendforcompose-release.apk "release-apks/WeChatFriendForCompose-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-douyin/build/outputs/apk/release/aosp-douyin-release.apk" ]; then
+          cp aosp-douyin/build/outputs/apk/release/aosp-douyin-release.apk "release-apks/aosp-douyin-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforsurfacemap/build/outputs/apk/release/wechatfriendforsurfacemap-release.apk" ]; then
-          cp wechatfriendforsurfacemap/build/outputs/apk/release/wechatfriendforsurfacemap-release.apk "release-apks/WeChatFriendForSurfaceMap-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-video/build/outputs/apk/release/aosp-video-release.apk" ]; then
+          cp aosp-video/build/outputs/apk/release/aosp-video-release.apk "release-apks/aosp-video-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforpurerenderthread/build/outputs/apk/release/wechatfriendforpurerenderthread-release.apk" ]; then
-          cp wechatfriendforpurerenderthread/build/outputs/apk/release/wechatfriendforpurerenderthread-release.apk "release-apks/WeChatFriendForPureRenderThread-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-purerenderthread/build/outputs/apk/release/aosp-purerenderthread-release.apk" ]; then
+          cp aosp-purerenderthread/build/outputs/apk/release/aosp-purerenderthread-release.apk "release-apks/aosp-purerenderthread-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendfordualwindow/build/outputs/apk/release/wechatfriendfordualwindow-release.apk" ]; then
-          cp wechatfriendfordualwindow/build/outputs/apk/release/wechatfriendfordualwindow-release.apk "release-apks/WeChatFriendForDualWindow-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-dualwindow/build/outputs/apk/release/aosp-dualwindow-release.apk" ]; then
+          cp aosp-dualwindow/build/outputs/apk/release/aosp-dualwindow-release.apk "release-apks/aosp-dualwindow-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendformixedrender/build/outputs/apk/release/wechatfriendformixedrender-release.apk" ]; then
-          cp wechatfriendformixedrender/build/outputs/apk/release/wechatfriendformixedrender-release.apk "release-apks/WeChatFriendForMixedRender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        if [ -f "aosp-mixedrender/build/outputs/apk/release/aosp-mixedrender-release.apk" ]; then
+          cp aosp-mixedrender/build/outputs/apk/release/aosp-mixedrender-release.apk "release-apks/aosp-mixedrender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
-        if [ -f "wechatfriendforglmap/build/outputs/apk/release/wechatfriendforglmap-release.apk" ]; then
-          cp wechatfriendforglmap/build/outputs/apk/release/wechatfriendforglmap-release.apk "release-apks/WeChatFriendForGLMap-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        # Compose module
+        if [ -f "compose/build/outputs/apk/release/compose-release.apk" ]; then
+          cp compose/build/outputs/apk/release/compose-release.apk "release-apks/compose-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        # WebView modules
+        if [ -f "webview/build/outputs/apk/release/webview-release.apk" ]; then
+          cp webview/build/outputs/apk/release/webview-release.apk "release-apks/webview-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "webview-surface/build/outputs/apk/release/webview-surface-release.apk" ]; then
+          cp webview-surface/build/outputs/apk/release/webview-surface-release.apk "release-apks/webview-surface-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "webview-texture/build/outputs/apk/release/webview-texture-release.apk" ]; then
+          cp webview-texture/build/outputs/apk/release/webview-texture-release.apk "release-apks/webview-texture-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "webview-imagereader/build/outputs/apk/release/webview-imagereader-release.apk" ]; then
+          cp webview-imagereader/build/outputs/apk/release/webview-imagereader-release.apk "release-apks/webview-imagereader-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        # Surface and GL modules
+        if [ -f "surface-map/build/outputs/apk/release/surface-map-release.apk" ]; then
+          cp surface-map/build/outputs/apk/release/surface-map-release.apk "release-apks/surface-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "gl-map/build/outputs/apk/release/gl-map-release.apk" ]; then
+          cp gl-map/build/outputs/apk/release/gl-map-release.apk "release-apks/gl-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
         # List all generated files
@@ -153,22 +188,34 @@ jobs:
           🔗 **Commit**: ${{ steps.version.outputs.SHORT_SHA }}
           🌿 **Branch**: ${{ steps.version.outputs.BRANCH_NAME }}
           
-          ## 📦 Included APK Files (10 Load Types Supported)
+          ## 📦 Included APK Files (19 Modules)
           
-          ### 🎯 Release Version (Signed, Production Ready)
-          - **HighPerformanceFriendsCircle-release** - Main Application
-          - **WeChatFriendForPerformance-release** - Performance Testing (10 load types)
-          - **WeChatFriendForPower-release** - Power Consumption Testing
-          - **WeChatFriendForWebView-release** - WebView Testing (10 load types)
-          - **WeChatFriendForCustomScroller-release** - Custom Scroller Testing (10 load types)
-          - **WeChatFriendForRenderStress-release** - RenderThread Stress Testing (10 load types)
-          - **WeChatFriendForSoftwareRender-release** - Software Rendering Testing (10 load types)
-          - **WeChatFriendForCompose-release** - Jetpack Compose Testing (10 load types)
-          - **WeChatFriendForSurfaceMap-release** - SurfaceView Map Demo (10 load types)
-          - **WeChatFriendForPureRenderThread-release** - Pure RenderThread List (10 load types)
-          - **WeChatFriendForDualWindow-release** - Dual Window Rendering (10 load types)
-          - **WeChatFriendForMixedRender-release** - Mixed Rendering Demo (10 load types)
-          - **WeChatFriendForGLMap-release** - OpenGL ES Map Demo (10 load types)
+          ### 🎯 AOSP Modules (Standard Android UI + RenderThread)
+          - **app** - Main Application
+          - **aosp-performance** - Performance Testing
+          - **aosp-power** - Power Consumption Testing
+          - **aosp-picasso** - Picasso Image Loading
+          - **aosp-customscroller** - Custom Scroller Testing
+          - **aosp-renderstress** - RenderThread Stress Testing
+          - **aosp-softwarerender** - Software Rendering Testing
+          - **aosp-douyin** - Douyin-style Video Scrolling
+          - **aosp-video** - Video Feed Testing
+          - **aosp-purerenderthread** - Pure RenderThread List
+          - **aosp-dualwindow** - Dual Window Rendering
+          - **aosp-mixedrender** - Mixed Rendering Demo
+          
+          ### 🎨 Compose Module
+          - **compose** - Jetpack Compose Implementation
+          
+          ### 🌐 WebView Modules
+          - **webview** - Standard WebView
+          - **webview-surface** - WebView with SurfaceView
+          - **webview-texture** - WebView with TextureView
+          - **webview-imagereader** - WebView with ImageReader
+          
+          ### 🗺️ Surface & GL Modules
+          - **surface-map** - SurfaceView Map Demo
+          - **gl-map** - OpenGL ES Map Demo
           
           ## 📝 Notes
           - ✅ Release version, signed with production key
