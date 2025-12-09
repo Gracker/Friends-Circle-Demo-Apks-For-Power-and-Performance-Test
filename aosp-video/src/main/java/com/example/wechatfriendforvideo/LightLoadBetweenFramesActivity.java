@@ -42,17 +42,19 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
     // 用于在帧之间执行负载的成员变量
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mRandom = new Random(LoadConfig.TASK_INTERVAL_SEED); // 使用统一配置的随机种子
-    private Random mTaskDecisionRandom = new Random(LoadConfig.COMPUTATION_SEED); // 用于决定是否执行任务的随机数生成器
+    private Random mRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
+    private Random mTaskDecisionRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsBetweenFrameLoadEnabled = true;
-    private float mTaskExecutionProbability = LoadConfig.LightLoadBetweenFrames.TASK_EXECUTION_PROBABILITY; // 使用配置的任务执行概率
+    private boolean mIsScrolling = false;
+    private float mTaskExecutionProbability = LoadConfig.LightLoadBetweenFrames.TASK_EXECUTION_PROBABILITY;
     
-    // 用于存储计算结果，防止编译器优化
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
+    
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,13 +80,28 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
         
-        // 初始化用于创建帧间负载的组件
         initBetweenFrameLoadComponents();
         
-        // 注册Choreographer帧回调
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        mChoreographer.postFrameCallback(this);
+        
+        initScrollListener();
+        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+    }
+    
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mIsScrolling = false;
+                } else if (!mIsScrolling) {
+                    mIsScrolling = true;
+                    mChoreographer.postFrameCallback(LightLoadBetweenFramesActivity.this);
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
     }
     
     /**
@@ -99,26 +116,16 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         mPaint.setAntiAlias(true);
     }
     
-    /**
-     * Choreographer的doFrame回调，根据随机概率决定是否执行帧间负载
-     */
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (mIsBetweenFrameLoadEnabled) {
-            // 使用固定种子的随机数决定是否执行帧间负载任务
+        if (mIsBetweenFrameLoadEnabled && mIsScrolling) {
             if (mTaskDecisionRandom.nextFloat() < mTaskExecutionProbability) {
-                // 在帧回调完成后执行负载任务（帧与帧之间）
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        executeBetweenFrameLoad();
-                    }
+                mHandler.post(() -> {
+                    if (mIsScrolling) executeBetweenFrameLoad();
                 });
             }
+            mChoreographer.postFrameCallback(this);
         }
-        
-        // 注册下一帧回调
-        mChoreographer.postFrameCallback(this);
     }
     
     /**

@@ -24,6 +24,7 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = true;
+    private boolean isScrolling = false;
     private final Random random = new Random(12345L);
     
     // 混合负载配置
@@ -49,10 +50,18 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
         paint.setAntiAlias(true);
         
         choreographer = Choreographer.getInstance();
-        choreographer.postFrameCallback(this);
         
-        scheduleNextBetweenFrameTask();
-        scheduleNextDoFrameTask();
+        // 添加滚动监听 - 仅在WebView滚动时执行负载任务
+        if (webView != null) {
+            webView.setOnScrollChangeListener((v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                if (!isScrolling && (scrollX != oldScrollX || scrollY != oldScrollY)) {
+                    isScrolling = true;
+                    choreographer.postFrameCallback(this);
+                    scheduleNextBetweenFrameTask();
+                    scheduleNextDoFrameTask();
+                }
+            });
+        }
         
         Trace.endSection();
     }
@@ -64,39 +73,31 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
     
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (isTaskSchedulingEnabled) {
+        if (isTaskSchedulingEnabled && isScrolling) {
             choreographer.postFrameCallback(this);
         }
     }
     
     private void scheduleNextDoFrameTask() {
-        if (!isTaskSchedulingEnabled) return;
-        
+        if (!isTaskSchedulingEnabled || !isScrolling) return;
         int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
-        
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
-            
+            if (!isTaskSchedulingEnabled || !isScrolling) return;
             Trace.beginSection("HeavyMixedWV_doFrameLoad");
             executeDoFrameHeavyLoad();
             Trace.endSection();
-            
             scheduleNextDoFrameTask();
         }, intervalMs);
     }
     
     private void scheduleNextBetweenFrameTask() {
-        if (!isTaskSchedulingEnabled) return;
-        
+        if (!isTaskSchedulingEnabled || !isScrolling) return;
         int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
-        
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
-            
+            if (!isTaskSchedulingEnabled || !isScrolling) return;
             Trace.beginSection("HeavyMixedWV_betweenFrameLoad");
             executeBetweenFrameHeavyLoad();
             Trace.endSection();
-            
             scheduleNextBetweenFrameTask();
         }, intervalMs);
     }
@@ -188,17 +189,14 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isTaskSchedulingEnabled) {
-            isTaskSchedulingEnabled = true;
-            choreographer.postFrameCallback(this);
-            scheduleNextBetweenFrameTask();
-            scheduleNextDoFrameTask();
-        }
+        isTaskSchedulingEnabled = true;
+        isScrolling = false;
     }
     
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;
+        isScrolling = false;
         handler.removeCallbacksAndMessages(null);
         if (bitmap != null && !bitmap.isRecycled()) {
             bitmap.recycle();

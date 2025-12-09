@@ -59,12 +59,15 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     
     // 控制变量
     private boolean mIsTaskSchedulingEnabled = true;
+    private boolean mIsScrolling = false;
     private long mTaskExecutionCount = 0;
     private long mDoFrameTaskExecutionCount = 0;
     
     // 用于存储计算结果，防止编译器优化
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
+    
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,14 +93,31 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         // 初始化用于创建Task的组件
         initTaskComponents();
         
-        // 注册Choreographer帧回调(仅用于基础渲染，不执行额外负载)
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        mChoreographer.postFrameCallback(this);
         
-        // 启动两个独立的Task调度器
-        scheduleNextBetweenFrameTask(); // 帧间任务调度器
-        scheduleNextDoFrameTask();      // doFrame任务调度器
+        initScrollListener();
+        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+    }
+    
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mIsScrolling = false;
+                    mHandler.removeCallbacksAndMessages(null);
+                    Log.d(TAG, "列表停止滚动，停止负载任务");
+                } else if (!mIsScrolling) {
+                    mIsScrolling = true;
+                    mChoreographer.postFrameCallback(LightMixedLoadActivity.this);
+                    scheduleNextBetweenFrameTask();
+                    scheduleNextDoFrameTask();
+                    Log.d(TAG, "列表开始滚动，启动负载任务");
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
     }
     
     /**
@@ -116,9 +136,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
      */
     @Override
     public void doFrame(long frameTimeNanos) {
-        // 这里仅注册下一帧回调，保持基础渲染循环
-        // 不在doFrame中执行额外负载，负载由scheduleNextTask管理
-        if (mIsTaskSchedulingEnabled) {
+        if (mIsTaskSchedulingEnabled && mIsScrolling) {
             mChoreographer.postFrameCallback(this);
         }
     }
@@ -127,49 +145,32 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
      * 调度下一个帧间Task执行，使用随机间隔
      */
     private void scheduleNextBetweenFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
-            return;
-        }
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) return;
         
-        // 生成随机间隔时间 (16ms - 83ms)
-        int intervalMs = MIN_TASK_INTERVAL_MS + 
-                        mTaskIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        int intervalMs = MIN_TASK_INTERVAL_MS + mTaskIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
-        Log.d(TAG, "调度下一个帧间Task，间隔: " + intervalMs + "ms");
-        
-        // 使用Handler.postDelayed安排下一个帧间Task
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (!mIsScrolling) return;
                 mTaskExecutionCount++;
                 executeBetweenFrameLightLoad();
-                // 执行完当前Task后，继续调度下一个
                 scheduleNextBetweenFrameTask();
             }
         }, intervalMs);
     }
     
-    /**
-     * 调度下一个doFrame Task执行，使用随机间隔
-     */
     private void scheduleNextDoFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
-            return;
-        }
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) return;
         
-        // 生成随机间隔时间 (16ms - 83ms)
-        int intervalMs = MIN_TASK_INTERVAL_MS + 
-                        mDoFrameIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        int intervalMs = MIN_TASK_INTERVAL_MS + mDoFrameIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
-        Log.d(TAG, "调度下一个doFrame Task，间隔: " + intervalMs + "ms");
-        
-        // 使用Handler.postDelayed安排下一个doFrame Task
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (!mIsScrolling) return;
                 mDoFrameTaskExecutionCount++;
                 executeDoFrameLightLoad();
-                // 执行完当前Task后，继续调度下一个
                 scheduleNextDoFrameTask();
             }
         }, intervalMs);
@@ -259,24 +260,16 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     protected void onResume() {
         super.onResume();
         
-        // 清空缓存，确保使用正确的负载类型
         PerformanceDataCenter.getInstance().clearCachedData();
         
-        // 确保数据已根据正确的负载类型生成
         if (adapter != null) {
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
 
         Log.d(TAG, "onResume: " + LoadConfig.getLoadConfigDescription("LightMixedLoad"));
-        Log.d(TAG, "Task间隔: " + MIN_TASK_INTERVAL_MS + "-" + MAX_TASK_INTERVAL_MS + "ms");
         
-        // 恢复Task调度和帧回调
-        if (!mIsTaskSchedulingEnabled) {
-            mIsTaskSchedulingEnabled = true;
-            mChoreographer.postFrameCallback(this);
-            scheduleNextBetweenFrameTask();
-            scheduleNextDoFrameTask();
-        }
+        mIsTaskSchedulingEnabled = true;
+        mIsScrolling = false;
     }
     
     @Override
@@ -314,15 +307,18 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // 清理资源
+        if (recyclerView != null && mScrollListener != null) {
+            recyclerView.removeOnScrollListener(mScrollListener);
+        }
+        
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
         }
         recyclerView.setAdapter(null);
         adapter = null;
         
-        // 停止Task调度和帧回调，释放资源
         mIsTaskSchedulingEnabled = false;
+        mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
         if (mBitmap != null) {
             mBitmap.recycle();
@@ -330,8 +326,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         }
         mCanvas = null;
         
-        Log.d(TAG, "onDestroy: 资源已清理，总共执行了 " + mTaskExecutionCount + " 个帧间Task, " + 
-                   mDoFrameTaskExecutionCount + " 个doFrame Task");
+        Log.d(TAG, "onDestroy: 总共执行了 " + mTaskExecutionCount + " 个帧间Task, " + mDoFrameTaskExecutionCount + " 个doFrame Task");
     }
 
 

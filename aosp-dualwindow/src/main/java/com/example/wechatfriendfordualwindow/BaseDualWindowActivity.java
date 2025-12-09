@@ -42,6 +42,23 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity {
         secondWindowView = new SecondWindowView(this);
         secondWindowView.setLoadType(getLoadType());
         
+        // Sync second window animation with main window scroll state
+        mainWindowView.setScrollStateListener(new MainWindowView.ScrollStateListener() {
+            @Override
+            public void onScrollStart() {
+                if (isSecondWindowAdded) {
+                    secondWindowView.startAnimation();
+                }
+            }
+            
+            @Override
+            public void onScrollStop() {
+                if (isSecondWindowAdded) {
+                    secondWindowView.stopAnimation();
+                }
+            }
+        });
+        
         // Check overlay permission and add second window
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Settings.canDrawOverlays(this)) {
@@ -78,7 +95,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity {
         try {
             windowManager.addView(secondWindowView, params);
             isSecondWindowAdded = true;
-            secondWindowView.startAnimation();
+            // Don't auto-start animation, it will be started when main window scrolls
         } catch (Exception e) {
             Toast.makeText(this, "Failed to add second window: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -89,9 +106,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isSecondWindowAdded) {
-            secondWindowView.startAnimation();
-        }
+        // Animation is now controlled by main window scroll state
     }
 
     @Override

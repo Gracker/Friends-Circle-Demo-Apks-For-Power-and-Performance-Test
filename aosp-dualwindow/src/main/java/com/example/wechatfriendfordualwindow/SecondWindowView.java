@@ -106,8 +106,10 @@ public class SecondWindowView extends View implements Choreographer.FrameCallbac
         
         Trace.endSection();
         
-        // Schedule next frame
-        choreographer.postFrameCallback(this);
+        // Only schedule next frame if still animating
+        if (isAnimating) {
+            choreographer.postFrameCallback(this);
+        }
     }
 
     @Override

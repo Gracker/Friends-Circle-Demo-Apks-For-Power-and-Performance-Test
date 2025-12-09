@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主题色 -->
+    <color name="primary">#5D4037</color>
+    <color name="primary_dark">#3E2723</color>
+    <color name="accent">#FF8A65</color>
+    
+    <!-- 阅读背景色 -->
+    <color name="reading_bg">#FFF8E1</color>
+    <color name="reading_bg_dark">#1A1A1A</color>
+    <color name="reading_bg_green">#E8F5E9</color>
+    <color name="reading_bg_sepia">#F5F5DC</color>
+    
+    <!-- 文字颜色 -->
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_dark_mode">#CCCCCC</color>
+    
+    <!-- 菜单颜色 -->
+    <color name="menu_bg">#E0E0E0</color>
+    <color name="menu_bg_alpha">#CC000000</color>
+    <color name="menu_text">#FFFFFF</color>
+    <color name="menu_icon">#FFFFFF</color>
+    
+    <!-- 分割线 -->
+    <color name="divider">#E0E0E0</color>
+    
+    <!-- 透明 -->
+    <color name="transparent">#00000000</color>
+    <color name="semi_transparent">#80000000</color>
+</resources>
+

@@ -25,8 +25,13 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
 
     @Override
     protected void performLoadTask() {
-        Log.d(TAG, "混合轻负载模式");
+        Log.d(TAG, "混合轻负载模式 - 等待滚动时启动");
         isRunning = true;
+    }
+    
+    @Override
+    protected void handleFling(float velocityX, float velocityY) {
+        super.handleFling(velocityX, velocityY);
         startBetweenFramesLoad();
     }
     
@@ -34,7 +39,7 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (isRunning) {
+                if (isRunning && isFling) {
                     double result = 0;
                     for (int i = 0; i < 500; i++) {
                         result += Math.sqrt(i);
@@ -63,10 +68,7 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isRunning) {
-            isRunning = true;
-            startBetweenFramesLoad();
-        }
+        isRunning = true;
     }
     
     @Override

@@ -45,13 +45,16 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
-    private static final int HEAVY_FRAME_INTERVAL = 8; // 与HeavyLoadActivity保持一致的帧间隔
+    private static final int HEAVY_FRAME_INTERVAL = 8;
     private Random mRandom = new Random();
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsHeavyFrameEnabled = true;
-    private int mHeavyFrameLoadFactor = 800; // 负载强度是HeavyLoadActivity的一半
+    private boolean mIsScrolling = false;
+    private int mHeavyFrameLoadFactor = 800;
+    
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +81,25 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
         
-        // 初始化用于创建"肥"帧的组件
         initHeavyFrameComponents();
         
-        // 注册Choreographer帧回调
         mChoreographer = Choreographer.getInstance();
-        mChoreographer.postFrameCallback(this);
+        initScrollListener();
+    }
+    
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mIsScrolling = false;
+                } else if (!mIsScrolling) {
+                    mIsScrolling = true;
+                    mChoreographer.postFrameCallback(MediumLoadActivity.this);
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
     }
     
     /**
@@ -96,27 +112,17 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         mPaint.setAntiAlias(true);
     }
     
-    /**
-     * Choreographer的doFrame回调，在动画阶段执行
-     * 每隔HEAVY_FRAME_INTERVAL帧就执行一次中等负载任务
-     */
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (mIsHeavyFrameEnabled) {
+        if (mIsHeavyFrameEnabled && mIsScrolling) {
             mFrameCount++;
-            
-            // 每隔指定帧数执行一次高负载任务
             if (mFrameCount % HEAVY_FRAME_INTERVAL == 0) {
                 Trace.beginSection("MediumLoadActivity_doFrame_heavyTask");
                 executeHeavyTask();
                 Trace.endSection();
-                
-                Log.d(TAG, "执行了一个'肥'帧任务，当前帧: " + mFrameCount);
             }
+            mChoreographer.postFrameCallback(this);
         }
-        
-        // 注册下一帧回调
-        mChoreographer.postFrameCallback(this);
     }
     
     /**

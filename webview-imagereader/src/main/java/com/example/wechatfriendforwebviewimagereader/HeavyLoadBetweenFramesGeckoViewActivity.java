@@ -25,8 +25,13 @@ public class HeavyLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewImageR
 
     @Override
     protected void performLoadTask() {
-        Log.d(TAG, "帧间高负载模式");
+        Log.d(TAG, "帧间高负载模式 - 等待滚动时启动");
         isRunning = true;
+    }
+    
+    @Override
+    protected void handleFling(float velocityX, float velocityY) {
+        super.handleFling(velocityX, velocityY);
         startBetweenFramesLoad();
     }
     
@@ -34,7 +39,7 @@ public class HeavyLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewImageR
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (isRunning) {
+                if (isRunning && isFling) {
                     double result = 0;
                     for (int i = 0; i < 20000; i++) {
                         result += Math.sqrt(i) * Math.sin(i) * Math.cos(i);
@@ -59,10 +64,7 @@ public class HeavyLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewImageR
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isRunning) {
-            isRunning = true;
-            startBetweenFramesLoad();
-        }
+        isRunning = true;
     }
     
     @Override

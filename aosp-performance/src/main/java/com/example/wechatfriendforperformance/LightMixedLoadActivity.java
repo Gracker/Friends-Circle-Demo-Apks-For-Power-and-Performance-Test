@@ -60,12 +60,16 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     
     // 控制变量
     private boolean mIsTaskSchedulingEnabled = true;
+    private boolean mIsScrolling = false; // 是否正在滚动
     private long mTaskExecutionCount = 0;
     private long mDoFrameTaskExecutionCount = 0;
     
     // 用于存储计算结果，防止编译器优化
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
+    
+    // 滚动监听器
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,11 +101,60 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         // 注册Choreographer帧回调(仅用于基础渲染，不执行额外负载)
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        mChoreographer.postFrameCallback(this);
         
-        // 启动两个独立的Task调度器
-        scheduleNextBetweenFrameTask(); // 帧间任务调度器
-        scheduleNextDoFrameTask();      // doFrame任务调度器
+        // 初始化滚动监听器 - 只有在滚动时才执行负载任务
+        initScrollListener();
+        
+        // 注意：不再在onCreate中启动Task调度器
+        // 任务调度器只在列表滚动时启动
+        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+    }
+    
+    /**
+     * 初始化滚动监听器
+     * 只有在列表滚动时才执行帧间负载和doFrame负载
+     */
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // 列表停止滚动，停止任务调度
+                    mIsScrolling = false;
+                    stopTaskScheduling();
+                    Log.d(TAG, "列表停止滚动，停止负载任务");
+                } else {
+                    // 列表开始滚动，启动任务调度
+                    if (!mIsScrolling) {
+                        mIsScrolling = true;
+                        startTaskScheduling();
+                        Log.d(TAG, "列表开始滚动，启动负载任务");
+                    }
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
+    }
+    
+    /**
+     * 启动任务调度
+     */
+    private void startTaskScheduling() {
+        if (!mIsTaskSchedulingEnabled) {
+            mIsTaskSchedulingEnabled = true;
+        }
+        mChoreographer.postFrameCallback(this);
+        scheduleNextBetweenFrameTask();
+        scheduleNextDoFrameTask();
+    }
+    
+    /**
+     * 停止任务调度
+     */
+    private void stopTaskScheduling() {
+        mHandler.removeCallbacksAndMessages(null);
     }
     
     /**
@@ -117,21 +170,22 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     /**
      * Choreographer的doFrame回调，仅用于基础渲染，不执行额外负载
      * 负载任务由独立的调度器管理
+     * 只有在列表滚动时才继续帧回调
      */
     @Override
     public void doFrame(long frameTimeNanos) {
-        // 这里仅注册下一帧回调，保持基础渲染循环
-        // 不在doFrame中执行额外负载，负载由scheduleNextTask管理
-        if (mIsTaskSchedulingEnabled) {
+        // 只有在列表滚动时才继续帧回调
+        if (mIsTaskSchedulingEnabled && mIsScrolling) {
             mChoreographer.postFrameCallback(this);
         }
     }
     
     /**
      * 调度下一个帧间Task执行，使用随机间隔
+     * 只有在列表滚动时才调度
      */
     private void scheduleNextBetweenFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) {
             return;
         }
         
@@ -145,6 +199,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (!mIsScrolling) return; // 停止滚动则不执行
                 mTaskExecutionCount++;
                 executeBetweenFrameLightLoad();
                 // 执行完当前Task后，继续调度下一个
@@ -155,9 +210,10 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     
     /**
      * 调度下一个doFrame Task执行，使用随机间隔
+     * 只有在列表滚动时才调度
      */
     private void scheduleNextDoFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) {
             return;
         }
         
@@ -171,6 +227,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                if (!mIsScrolling) return; // 停止滚动则不执行
                 mDoFrameTaskExecutionCount++;
                 executeDoFrameLightLoad();
                 // 执行完当前Task后，继续调度下一个
@@ -274,13 +331,10 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         Log.d(TAG, "onResume: " + LoadConfig.getLoadConfigDescription("LightMixedLoad"));
         Log.d(TAG, "Task间隔: " + MIN_TASK_INTERVAL_MS + "-" + MAX_TASK_INTERVAL_MS + "ms");
         
-        // 恢复Task调度和帧回调
-        if (!mIsTaskSchedulingEnabled) {
-            mIsTaskSchedulingEnabled = true;
-            mChoreographer.postFrameCallback(this);
-            scheduleNextBetweenFrameTask();
-            scheduleNextDoFrameTask();
-        }
+        // 恢复任务调度启用状态，但不立即启动任务
+        // 任务只在列表滚动时启动
+        mIsTaskSchedulingEnabled = true;
+        mIsScrolling = false;
     }
     
     @Override
@@ -318,6 +372,11 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 移除滚动监听器
+        if (recyclerView != null && mScrollListener != null) {
+            recyclerView.removeOnScrollListener(mScrollListener);
+        }
+        
         // 清理资源
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
@@ -328,6 +387,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         
         // 停止Task调度和帧回调，释放资源
         mIsTaskSchedulingEnabled = false;
+        mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
         if (mBitmap != null) {
             mBitmap.recycle();

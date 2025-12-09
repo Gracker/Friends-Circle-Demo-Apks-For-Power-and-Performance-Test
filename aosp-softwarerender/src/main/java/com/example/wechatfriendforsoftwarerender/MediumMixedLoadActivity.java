@@ -60,6 +60,7 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     
     // 控制变量
     private boolean mIsTaskSchedulingEnabled = true;
+    private boolean mIsScrolling = false;
     private long mTaskExecutionCount = 0;
     private long mDoFrameTaskExecutionCount = 0;
     
@@ -67,6 +68,8 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
     private volatile long mDataProcessingResult = 0L;
+    
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,14 +98,29 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
         // 初始化用于创建Task的组件
         initTaskComponents();
         
-        // 注册Choreographer帧回调(仅用于基础渲染，不执行额外负载)
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        mChoreographer.postFrameCallback(this);
         
-        // 启动两个独立的Task调度器
-        scheduleNextBetweenFrameTask(); // 帧间任务调度器
-        scheduleNextDoFrameTask();      // doFrame任务调度器
+        initScrollListener();
+        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+    }
+    
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    mIsScrolling = false;
+                    mHandler.removeCallbacksAndMessages(null);
+                } else if (!mIsScrolling) {
+                    mIsScrolling = true;
+                    mChoreographer.postFrameCallback(MediumMixedLoadActivity.this);
+                    scheduleNextBetweenFrameTask();
+                    scheduleNextDoFrameTask();
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
     }
     
     /**
@@ -115,68 +133,32 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
         mPaint.setAntiAlias(true);
     }
     
-    /**
-     * Choreographer的doFrame回调，仅用于基础渲染，不执行额外负载
-     * 负载任务由独立的调度器管理
-     */
     @Override
     public void doFrame(long frameTimeNanos) {
-        // 这里仅注册下一帧回调，保持基础渲染循环
-        // 不在doFrame中执行额外负载，负载由scheduleNextTask管理
-        if (mIsTaskSchedulingEnabled) {
+        if (mIsTaskSchedulingEnabled && mIsScrolling) {
             mChoreographer.postFrameCallback(this);
         }
     }
     
-    /**
-     * 调度下一个帧间Task执行，使用随机间隔
-     */
     private void scheduleNextBetweenFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
-            return;
-        }
-        
-        // 生成随机间隔时间 (16ms - 83ms)
-        int intervalMs = MIN_TASK_INTERVAL_MS + 
-                        mTaskIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
-        
-        Log.d(TAG, "调度下一个帧间Task，间隔: " + intervalMs + "ms");
-        
-        // 使用Handler.postDelayed安排下一个帧间Task
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mTaskExecutionCount++;
-                executeBetweenFrameMediumLoad();
-                // 执行完当前Task后，继续调度下一个
-                scheduleNextBetweenFrameTask();
-            }
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) return;
+        int intervalMs = MIN_TASK_INTERVAL_MS + mTaskIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        mHandler.postDelayed(() -> {
+            if (!mIsScrolling) return;
+            mTaskExecutionCount++;
+            executeBetweenFrameMediumLoad();
+            scheduleNextBetweenFrameTask();
         }, intervalMs);
     }
     
-    /**
-     * 调度下一个doFrame Task执行，使用随机间隔
-     */
     private void scheduleNextDoFrameTask() {
-        if (!mIsTaskSchedulingEnabled) {
-            return;
-        }
-        
-        // 生成随机间隔时间 (16ms - 83ms)
-        int intervalMs = MIN_TASK_INTERVAL_MS + 
-                        mDoFrameIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
-        
-        Log.d(TAG, "调度下一个doFrame Task，间隔: " + intervalMs + "ms");
-        
-        // 使用Handler.postDelayed安排下一个doFrame Task
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mDoFrameTaskExecutionCount++;
-                executeDoFrameMediumLoad();
-                // 执行完当前Task后，继续调度下一个
-                scheduleNextDoFrameTask();
-            }
+        if (!mIsTaskSchedulingEnabled || !mIsScrolling) return;
+        int intervalMs = MIN_TASK_INTERVAL_MS + mDoFrameIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        mHandler.postDelayed(() -> {
+            if (!mIsScrolling) return;
+            mDoFrameTaskExecutionCount++;
+            executeDoFrameMediumLoad();
+            scheduleNextDoFrameTask();
         }, intervalMs);
     }
     

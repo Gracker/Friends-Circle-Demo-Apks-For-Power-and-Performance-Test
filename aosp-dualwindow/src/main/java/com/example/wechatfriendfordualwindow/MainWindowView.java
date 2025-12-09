@@ -37,6 +37,13 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
     private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
     private final Random random = new Random(12345L);
     
+    // Callback for scroll state changes
+    public interface ScrollStateListener {
+        void onScrollStart();
+        void onScrollStop();
+    }
+    private ScrollStateListener scrollStateListener;
+    
     private static final int ITEM_COUNT = 50;
     private static final int ITEM_HEIGHT = 120;
     
@@ -108,15 +115,25 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
         this.loadType = loadType;
     }
     
+    public void setScrollStateListener(ScrollStateListener listener) {
+        this.scrollStateListener = listener;
+    }
+    
     public void startAnimation() {
         if (!isAnimating) {
             isAnimating = true;
             choreographer.postFrameCallback(this);
+            if (scrollStateListener != null) {
+                scrollStateListener.onScrollStart();
+            }
         }
     }
     
     public void stopAnimation() {
         isAnimating = false;
+        if (scrollStateListener != null) {
+            scrollStateListener.onScrollStop();
+        }
     }
 
     @Override
@@ -136,7 +153,7 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
             invalidate();
             choreographer.postFrameCallback(this);
         } else {
-            isAnimating = false;
+            stopAnimation();
         }
         
         Trace.endSection();

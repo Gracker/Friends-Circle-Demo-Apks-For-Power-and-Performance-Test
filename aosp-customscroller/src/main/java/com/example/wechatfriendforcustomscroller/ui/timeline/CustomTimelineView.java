@@ -357,6 +357,8 @@ public class CustomTimelineView extends ViewGroup {
         }
         continuousLoadRunning = true;
         loadHandler.post(continuousLoadRunnable);
+        // 通知 LoadStressSimulator 开始滚动
+        LoadStressSimulator.getInstance().onScrollStart();
     }
 
     private void stopContinuousLoad() {
@@ -365,6 +367,8 @@ public class CustomTimelineView extends ViewGroup {
         }
         continuousLoadRunning = false;
         loadHandler.removeCallbacks(continuousLoadRunnable);
+        // 通知 LoadStressSimulator 停止滚动
+        LoadStressSimulator.getInstance().onScrollStop();
     }
 
     private void stopContinuousLoadIfIdle() {

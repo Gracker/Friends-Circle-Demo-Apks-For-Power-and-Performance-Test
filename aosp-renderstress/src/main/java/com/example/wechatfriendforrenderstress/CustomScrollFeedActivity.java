@@ -38,6 +38,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = false;
+    private boolean isScrolling = false;
     private final Random random = new Random(12345L);
     
     private static final int MIN_TASK_INTERVAL_MS = 16;
@@ -69,17 +70,40 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             viewModel.loadFeed(loadType);
         }
         
-        // Start background tasks for between-frame and mixed loads
+        // Initialize choreographer for between-frame and mixed loads
         if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
             choreographer = Choreographer.getInstance();
             isTaskSchedulingEnabled = true;
-            scheduleNextBetweenFrameTask();
-            
-            if (LoadProfile.isMixedLoad(loadType)) {
-                choreographer.postFrameCallback(this);
-                scheduleNextDoFrameTask();
-            }
+            // Don't start tasks here - they will be started when scrolling begins
+            // The CustomTimelineView will notify us through scroll callbacks
+            setupScrollListener();
         }
+    }
+    
+    private void setupScrollListener() {
+        CustomTimelineView timelineView = binding.customTimelineView;
+        timelineView.setScrollCallback(new CustomTimelineView.ScrollCallback() {
+            @Override
+            public void onScrollStart() {
+                if (!isScrolling && isTaskSchedulingEnabled) {
+                    isScrolling = true;
+                    scheduleNextBetweenFrameTask();
+                    if (LoadProfile.isMixedLoad(loadType)) {
+                        choreographer.postFrameCallback(CustomScrollFeedActivity.this);
+                        scheduleNextDoFrameTask();
+                    }
+                }
+            }
+            
+            @Override
+            public void onScrollStop() {
+                isScrolling = false;
+                handler.removeCallbacksAndMessages(null);
+                if (choreographer != null) {
+                    choreographer.removeFrameCallback(CustomScrollFeedActivity.this);
+                }
+            }
+        });
     }
 
     private void renderState(CustomScrollUiState state) {
@@ -118,30 +142,30 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (isTaskSchedulingEnabled && LoadProfile.isMixedLoad(loadType)) {
+        if (isTaskSchedulingEnabled && isScrolling && LoadProfile.isMixedLoad(loadType)) {
             choreographer.postFrameCallback(this);
         }
     }
     
     private void scheduleNextDoFrameTask() {
-        if (!isTaskSchedulingEnabled || !LoadProfile.isMixedLoad(loadType)) return;
+        if (!isTaskSchedulingEnabled || !isScrolling || !LoadProfile.isMixedLoad(loadType)) return;
         
         int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
+            if (!isTaskSchedulingEnabled || !isScrolling) return;
             executeDoFrameLoad();
             scheduleNextDoFrameTask();
         }, intervalMs);
     }
     
     private void scheduleNextBetweenFrameTask() {
-        if (!isTaskSchedulingEnabled) return;
+        if (!isTaskSchedulingEnabled || !isScrolling) return;
         
         int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
+            if (!isTaskSchedulingEnabled || !isScrolling) return;
             executeBetweenFrameLoad();
             scheduleNextBetweenFrameTask();
         }, intervalMs);

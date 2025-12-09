@@ -47,6 +47,7 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsBetweenFrameLoadEnabled = true;
+    private boolean mIsScrolling = false; // 是否正在滚动
     private float mTaskExecutionProbability = 0.7f; // 70%的概率执行帧间任务
     
     // 用于存储计算结果，防止编译器优化
@@ -54,6 +55,9 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     private volatile int mImageProcessingResult = 0;
     private volatile long mDataProcessingResult = 0L;
     private volatile double mComplexMathResult = 0.0;
+    
+    // 滚动监听器
+    private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +89,40 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         // 注册Choreographer帧回调
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        mChoreographer.postFrameCallback(this);
+        
+        // 初始化滚动监听器 - 只有在滚动时才执行负载任务
+        initScrollListener();
+        
+        // 注意：不再在onCreate中启动帧回调
+        // 帧回调只在列表滚动时启动
+        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+    }
+    
+    /**
+     * 初始化滚动监听器
+     * 只有在列表滚动时才执行帧间负载
+     */
+    private void initScrollListener() {
+        mScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // 列表停止滚动，停止负载
+                    mIsScrolling = false;
+                    Log.d(TAG, "列表停止滚动，停止负载任务");
+                } else {
+                    // 列表开始滚动，启动帧回调
+                    if (!mIsScrolling) {
+                        mIsScrolling = true;
+                        mChoreographer.postFrameCallback(HeavyLoadBetweenFramesActivity.this);
+                        Log.d(TAG, "列表开始滚动，启动负载任务");
+                    }
+                }
+            }
+        };
+        recyclerView.addOnScrollListener(mScrollListener);
     }
     
     /**
@@ -100,24 +137,28 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     
     /**
      * Choreographer的doFrame回调，根据随机概率决定是否执行帧间负载
+     * 只有在列表滚动时才执行
      */
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (mIsBetweenFrameLoadEnabled) {
+        // 只有在列表滚动时才执行负载和继续帧回调
+        if (mIsBetweenFrameLoadEnabled && mIsScrolling) {
             // 使用固定种子的随机数决定是否执行帧间负载任务
             if (mTaskDecisionRandom.nextFloat() < mTaskExecutionProbability) {
                 // 在帧回调完成后执行负载任务（帧与帧之间）
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        executeBetweenFrameLoad();
+                        if (mIsScrolling) { // 再次检查滚动状态
+                            executeBetweenFrameLoad();
+                        }
                     }
                 });
             }
+            
+            // 注册下一帧回调（只在滚动时继续）
+            mChoreographer.postFrameCallback(this);
         }
-        
-        // 注册下一帧回调
-        mChoreographer.postFrameCallback(this);
     }
     
     /**
@@ -423,11 +464,10 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         String loadTypeStr = getLoadTypeString(mLoadType);
         Log.d(TAG, "onResume: 当前模式: " + loadTypeStr + " (帧间负载)");
         
-        // 如果已经停止了帧回调，重新启动
-        if (!mIsBetweenFrameLoadEnabled) {
-            mIsBetweenFrameLoadEnabled = true;
-            mChoreographer.postFrameCallback(this);
-        }
+        // 恢复负载启用状态，但不立即启动帧回调
+        // 帧回调只在列表滚动时启动
+        mIsBetweenFrameLoadEnabled = true;
+        mIsScrolling = false;
     }
     
     @Override
@@ -474,6 +514,11 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 移除滚动监听器
+        if (recyclerView != null && mScrollListener != null) {
+            recyclerView.removeOnScrollListener(mScrollListener);
+        }
+        
         // 清理资源
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
@@ -484,6 +529,7 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         
         // 停止帧回调并释放资源
         mIsBetweenFrameLoadEnabled = false;
+        mIsScrolling = false;
         if (mBitmap != null) {
             mBitmap.recycle();
             mBitmap = null;

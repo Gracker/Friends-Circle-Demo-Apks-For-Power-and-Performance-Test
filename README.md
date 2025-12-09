@@ -50,6 +50,7 @@
 | `aosp-softwarerender` | 软件渲染版本（禁用硬件加速） |
 | `aosp-douyin` | 抖音风格视频滑动 |
 | `aosp-video` | 视频 Feed 版本 |
+| `aosp-ebook` | 电子书阅读器 Demo |
 | `aosp-purerenderthread` | 纯 RenderThread 列表滑动 |
 | `aosp-dualwindow` | 双 Window 刷新 Demo |
 | `aosp-mixedrender` | 混合渲染 Demo |
@@ -181,6 +182,18 @@ OpenGL ES 2.0地图渲染Demo：
 - **完美UI还原**：底部导航栏、右侧互动按钮、左下角信息区域
 - 使用 Media3 ExoPlayer 进行视频播放
 
+### 15. 电子书阅读器模块 (aosp-ebook)
+
+模拟电子书阅读器的翻页体验：
+
+- **EPUB 支持**：支持标准 EPUB 格式电子书解析
+- **触摸翻页**：点击左侧上一页，点击右侧下一页，点击中间显示菜单
+- **滑动翻页**：支持左右滑动翻页，带有平滑动画效果
+- **阅读菜单**：顶部和底部菜单（模拟），包含目录、亮度、字体、主题、设置等功能
+- **进度显示**：底部显示当前页码，支持进度条快速跳转
+- **沉浸阅读**：全屏模式，暖黄色护眼背景
+- 默认加载《巨婴国》电子书
+
 ## 性能优化策略
 
 在 Android 中，要避免列表卡顿，主要从以下几个角度进行优化：
@@ -243,6 +256,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **aosp-softwarerender** - 软件渲染测试模块 (10种负载)
 - **aosp-douyin** - 抖音风格视频滑动模块
 - **aosp-video** - 视频Feed模块
+- **aosp-ebook** - 电子书阅读器模块
 - **aosp-purerenderthread** - 纯RenderThread测试模块 (10种负载)
 - **aosp-dualwindow** - 双Window刷新测试模块 (10种负载)
 - **aosp-mixedrender** - 混合渲染测试模块 (10种负载)

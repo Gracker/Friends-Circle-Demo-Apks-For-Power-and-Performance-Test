@@ -33,6 +33,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private boolean mIsRunning = false;
+    private boolean mIsScrolling = false; // 是否正在滚动
     private int mCurrentLoadType = LoadProfile.LOAD_TYPE_LIGHT;
 
     private LoadStressSimulator() {
@@ -56,19 +57,12 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     
     /**
      * 启动后台任务调度（用于帧间和混合负载）
+     * 注意：这个方法现在只设置loadType，实际任务调度由滚动状态控制
      */
     public void startBackgroundTasks(@LoadProfile.LoadType int loadType) {
         mCurrentLoadType = loadType;
         mIsRunning = true;
-        
-        if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
-            scheduleNextBetweenFrameTask();
-        }
-        
-        if (LoadProfile.isMixedLoad(loadType)) {
-            mChoreographer.postFrameCallback(this);
-            scheduleNextDoFrameTask();
-        }
+        // 不再在这里启动任务调度，任务只在滚动时启动
     }
     
     /**
@@ -76,23 +70,53 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
      */
     public void stopBackgroundTasks() {
         mIsRunning = false;
+        mIsScrolling = false;
+        mHandler.removeCallbacksAndMessages(null);
+    }
+    
+    /**
+     * 通知列表开始滚动，启动负载任务
+     */
+    public void onScrollStart() {
+        if (!mIsRunning) return;
+        
+        if (!mIsScrolling) {
+            mIsScrolling = true;
+            
+            if (LoadProfile.isBetweenFramesLoad(mCurrentLoadType) || LoadProfile.isMixedLoad(mCurrentLoadType)) {
+                scheduleNextBetweenFrameTask();
+            }
+            
+            if (LoadProfile.isMixedLoad(mCurrentLoadType)) {
+                mChoreographer.postFrameCallback(this);
+                scheduleNextDoFrameTask();
+            }
+        }
+    }
+    
+    /**
+     * 通知列表停止滚动，停止负载任务
+     */
+    public void onScrollStop() {
+        mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
     }
     
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (mIsRunning && LoadProfile.isMixedLoad(mCurrentLoadType)) {
+        // 只有在滚动时才继续帧回调
+        if (mIsRunning && mIsScrolling && LoadProfile.isMixedLoad(mCurrentLoadType)) {
             mChoreographer.postFrameCallback(this);
         }
     }
     
     private void scheduleNextDoFrameTask() {
-        if (!mIsRunning || !LoadProfile.isMixedLoad(mCurrentLoadType)) return;
+        if (!mIsRunning || !mIsScrolling || !LoadProfile.isMixedLoad(mCurrentLoadType)) return;
         
         int intervalMs = MIN_TASK_INTERVAL_MS + RANDOM.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
         mHandler.postDelayed(() -> {
-            if (!mIsRunning) return;
+            if (!mIsRunning || !mIsScrolling) return;
             
             Trace.beginSection("CustomScroll_doFrameLoad");
             executeDoFrameLoad(mCurrentLoadType);
@@ -103,12 +127,12 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     }
     
     private void scheduleNextBetweenFrameTask() {
-        if (!mIsRunning) return;
+        if (!mIsRunning || !mIsScrolling) return;
         
         int intervalMs = MIN_TASK_INTERVAL_MS + RANDOM.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
         
         mHandler.postDelayed(() -> {
-            if (!mIsRunning) return;
+            if (!mIsRunning || !mIsScrolling) return;
             
             Trace.beginSection("CustomScroll_betweenFrameLoad");
             executeBetweenFrameLoad(mCurrentLoadType);

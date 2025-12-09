@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">电子书阅读器</string>
+    <string name="loading">正在加载...</string>
+    <string name="page_format">第 %1$d / %2$d 页</string>
+    <string name="chapter_format">第 %1$d 章</string>
+    <string name="menu_contents">目录</string>
+    <string name="menu_brightness">亮度</string>
+    <string name="menu_font_size">字体</string>
+    <string name="menu_theme">主题</string>
+    <string name="menu_settings">设置</string>
+    <string name="menu_bookmark">书签</string>
+    <string name="menu_back">返回</string>
+    <string name="tap_left_hint">点击左侧上一页</string>
+    <string name="tap_right_hint">点击右侧下一页</string>
+    <string name="tap_center_hint">点击中间显示菜单</string>
+</resources>
+
