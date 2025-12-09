@@ -54,23 +54,18 @@
 | `aosp-purerenderthread` | 纯 RenderThread 列表滑动 |
 | `aosp-dualwindow` | 双 Window 刷新 Demo |
 | `aosp-mixedrender` | 混合渲染 Demo |
-
-### Compose 模块
-
-| 模块目录 | 说明 |
-|---------|------|
 | `compose` | Jetpack Compose 实现版本 |
 
 ### WebView 模块
 
 | 模块目录 | 说明 |
 |---------|------|
-| `webview` | 标准 WebView 实现 |
+| `webview` | 标准 WebView Functor 实现 |
 | `webview-surface` | WebView + SurfaceView |
 | `webview-texture` | WebView + TextureView |
 | `webview-imagereader` | WebView + ImageReader |
 
-### Surface & GL 模块
+### Map 模块
 
 | 模块目录 | 说明 |
 |---------|------|
@@ -260,17 +255,15 @@ OpenGL ES 2.0地图渲染Demo：
 - **aosp-purerenderthread** - 纯RenderThread测试模块 (10种负载)
 - **aosp-dualwindow** - 双Window刷新测试模块 (10种负载)
 - **aosp-mixedrender** - 混合渲染测试模块 (10种负载)
-
-**Compose 模块：**
 - **compose** - Jetpack Compose测试模块 (10种负载)
 
 **WebView 模块：**
-- **webview** - WebView测试模块 (10种负载)
+- **webview** - WebView Functor测试模块 (10种负载)
 - **webview-surface** - WebView+SurfaceView
 - **webview-texture** - WebView+TextureView
 - **webview-imagereader** - WebView+ImageReader
 
-**Surface & GL 模块：**
+**Map 模块：**
 - **surface-map** - SurfaceView地图测试模块 (10种负载)
 - **gl-map** - OpenGL地图测试模块 (10种负载)
 

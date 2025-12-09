@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#E91E63</color>
+    <color name="ic_launcher_background">#2196F3</color>
     <color name="primary_pink">#E91E63</color>
     <color name="primary_purple">#9C27B0</color>
     <color name="teal">#009688</color>

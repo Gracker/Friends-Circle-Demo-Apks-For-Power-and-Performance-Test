@@ -26,5 +26,5 @@
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
     <color name="accent">#3DDC84</color>
-    <color name="ic_launcher_background">#3DDC84</color>
+    <color name="ic_launcher_background">#4CAF50</color>
 </resources>

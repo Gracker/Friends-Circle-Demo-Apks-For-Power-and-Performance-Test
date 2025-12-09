@@ -11,7 +11,7 @@
     <!-- 从原始模块复制的颜色 -->
     <color name="mtk_text_gray">#999999</color>
     <color name="background_gray">#F2F2F2</color>
-    <color name="ic_launcher_background">#07C160</color>
+    <color name="ic_launcher_background">#2196F3</color>
     <color name="base_333333">#333333</color>
     <color name="base_666666">#666666</color>
     <color name="base_999999">#999999</color>
