@@ -19,13 +19,14 @@ import com.example.wechatfriendforrenderstress.ui.timeline.FriendCircleItemRende
 import java.util.Random;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Core Activity for displaying RenderThread stress test list.
- * Supports all 11 load types including minimal, in-frame, between-frame, mixed, and long-frame loads.
+ * 使用统一的 LoadSimulator 执行负载
  */
 @AndroidEntryPoint
 public class CustomScrollFeedActivity extends AppCompatActivity implements Choreographer.FrameCallback {
@@ -40,6 +41,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     // Background task management
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
+    private LoadSimulator mLoadSimulator;
     private boolean isTaskSchedulingEnabled = false;
     private boolean isScrolling = false;
     private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
@@ -77,7 +79,9 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             viewModel.loadFeed(loadType);
         }
         
-        // Initialize choreographer for between-frame, mixed, and long-frame loads
+        // Initialize LoadSimulator and choreographer
+        mLoadSimulator = new LoadSimulator();
+        
         if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType) 
                 || LoadType.isLongFrameLoad(loadType)) {
             choreographer = Choreographer.getInstance();
@@ -186,9 +190,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         
         if (elapsedTime >= longFrameTriggerTimes[currentLongFrameIndex]) {
             if (currentTime - lastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
-                android.os.Trace.beginSection("RenderStress_longFrameLoad_" + (currentLongFrameIndex + 1));
-                executeLongFrameLoad();
-                android.os.Trace.endSection();
+                mLoadSimulator.executeLongFrameLoad("RenderStress_longFrameLoad_" + (currentLongFrameIndex + 1));
                 lastLongFrameTime = currentTime;
                 currentLongFrameIndex++;
             }
@@ -199,15 +201,6 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         }
     }
     
-    private void executeLongFrameLoad() {
-        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
-        double sum = 0;
-        for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
-            sum += Math.log(i + 1) + Math.tan(i * 0.01);
-        }
-    }
-    
     private void scheduleNextDoFrameTask() {
         if (!isTaskSchedulingEnabled || !isScrolling || !LoadType.isMixedLoad(loadType)) return;
         
@@ -215,7 +208,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         
         handler.postDelayed(() -> {
             if (!isTaskSchedulingEnabled || !isScrolling) return;
-            executeDoFrameLoad();
+            mLoadSimulator.executeDoFrameLoad(loadType, "RenderStress_doFrameLoad");
             scheduleNextDoFrameTask();
         }, intervalMs);
     }
@@ -228,66 +221,23 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         
         handler.postDelayed(() -> {
             if (!isTaskSchedulingEnabled || !isScrolling) return;
-            executeBetweenFrameLoad();
+            if (LoadType.isBetweenFramesLoad(loadType)) {
+                mLoadSimulator.executePureBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad");
+            } else if (LoadType.isMixedLoad(loadType)) {
+                mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad");
+            }
             scheduleNextBetweenFrameTask();
         }, intervalMs);
-    }
-    
-    private void executeDoFrameLoad() {
-        int intensity = LoadConfig.getDoFrameIntensity(convertToLoadType(loadType));
-        if (intensity == 0) return;
-        
-        double sum = 0;
-        for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) + Math.cos(i * 0.1) + Math.sqrt(i + 1);
-        }
-    }
-    
-    private int convertToLoadType(int loadProfileType) {
-        switch (loadProfileType) {
-            case LoadType.MINIMAL: return com.example.loadconfig.LoadType.MINIMAL;
-            case LoadType.LIGHT: return com.example.loadconfig.LoadType.LIGHT;
-            case LoadType.MEDIUM: return com.example.loadconfig.LoadType.MEDIUM;
-            case LoadType.HEAVY: return com.example.loadconfig.LoadType.HEAVY;
-            case LoadType.LIGHT_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES;
-            case LoadType.MEDIUM_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES;
-            case LoadType.HEAVY_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES;
-            case LoadType.LIGHT_MIXED: return com.example.loadconfig.LoadType.LIGHT_MIXED;
-            case LoadType.MEDIUM_MIXED: return com.example.loadconfig.LoadType.MEDIUM_MIXED;
-            case LoadType.HEAVY_MIXED: return com.example.loadconfig.LoadType.HEAVY_MIXED;
-            case LoadType.LONG_FRAME: return com.example.loadconfig.LoadType.LONG_FRAME;
-            default: return com.example.loadconfig.LoadType.MINIMAL;
-        }
-    }
-    
-    private void executeBetweenFrameLoad() {
-        int convertedType = convertToLoadType(loadType);
-        int intensity;
-        boolean isHeavy = false;
-        
-        if (com.example.loadconfig.LoadType.isBetweenFramesLoad(convertedType)) {
-            intensity = LoadConfig.getBetweenFrameIntensity(convertedType);
-            isHeavy = (convertedType == com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES);
-        } else if (com.example.loadconfig.LoadType.isMixedLoad(convertedType)) {
-            intensity = LoadConfig.getMixedBetweenFrameIntensity(convertedType);
-            isHeavy = (convertedType == com.example.loadconfig.LoadType.HEAVY_MIXED);
-        } else {
-            return;
-        }
-        
-        double sum = 0;
-        for (int i = 1; i <= intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i);
-            if (isHeavy) {
-                sum += Math.log(i) + Math.tan(i * 0.01);
-            }
-        }
     }
 
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
+        }
         super.onDestroy();
     }
 }

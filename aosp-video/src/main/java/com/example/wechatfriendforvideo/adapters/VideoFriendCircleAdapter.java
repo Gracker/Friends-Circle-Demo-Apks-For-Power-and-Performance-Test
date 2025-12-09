@@ -2,15 +2,11 @@ package com.example.wechatfriendforvideo.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Trace;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.util.Log;
@@ -57,6 +53,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 /**
@@ -87,10 +84,8 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED); // Using fixed seed to ensure consistent results for each run
     private int mLoadType; // Load type
     
-    // Variables for simulating computational load
-    private ArrayList<Bitmap> mBitmapList = new ArrayList<>();
-    private Paint mPaint = new Paint();
-    private Canvas mCanvas;
+    // 统一负载模拟器
+    private LoadSimulator mLoadSimulator;
     
     // String to identify current load type
     private String mLoadTypeString;
@@ -121,14 +116,15 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         // 使用统一的 LoadType.toLabel() 获取负载类型字符串
         mLoadTypeString = "视频-" + LoadType.toLabel(loadType);
         
-        // 移除ImageLoader初始化代码
+        // 初始化负载模拟器
+        mLoadSimulator = new LoadSimulator();
         
         // 初始化连续加载模拟
         mFrameLoadRunnable = new Runnable() {
             @Override
             public void run() {
                 if (mIsScrolling) {
-                    simulateComputationalLoad();
+                    mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_continuousLoad");
                     mHandler.postDelayed(this, 16); // 约60fps
                 }
             }
@@ -455,7 +451,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         // 新增：处理视频类型
         if (holder instanceof VideoViewHolder) {
             bindVideoViewHolder((VideoViewHolder) holder, friendCircleBean, position);
-            simulateComputationalLoad();
+            mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
             return;
         }
         
@@ -627,128 +623,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         });
         
         // 模拟计算负载
-        simulateComputationalLoad();
-    }
-    
-    /**
-     * Execute different computation based on load type
-     * @param position Data position
-     */
-    private void simulateComputationalLoad(int position) {
-        Trace.beginSection("FriendCircleAdapter_simulateComputationalLoad");
-        
-        // 确保Canvas已经初始化
-        if (mCanvas == null || mBitmapList.isEmpty()) {
-            Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
-            mCanvas = new Canvas(bitmap);
-            mBitmapList.add(bitmap);
-        }
-        
-        // 使用统一的 LoadConfig 获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(mLoadType);
-        
-        // Perform some calculations to simulate load
-        for (int i = 0; i < iterations; i++) {
-            // Generate some random data to prevent compiler from optimizing away
-            float x = mRandom.nextFloat() * 100;
-            float y = mRandom.nextFloat() * 100;
-            
-            // Perform some drawing operations, which will bring CPU and GPU load
-            mPaint.setColor(Color.argb(
-                    mRandom.nextInt(256),
-                    mRandom.nextInt(256),
-                    mRandom.nextInt(256),
-                    mRandom.nextInt(256)
-            ));
-            mCanvas.drawCircle(x, y, 10, mPaint);
-            
-            // Add more complex calculations for medium and heavy loads
-            if (mLoadType == LoadType.MEDIUM || mLoadType == LoadType.HEAVY ||
-                mLoadType == LoadType.MEDIUM_MIXED || mLoadType == LoadType.HEAVY_MIXED) {
-                double sinValue = Math.sin(x) * Math.cos(y);
-                double tanValue = Math.tan(x * 0.1);
-                // Prevent compiler optimization
-                if (sinValue > 0.999 && tanValue > 100) {
-                    mPaint.setStrokeWidth((float) (sinValue + tanValue));
-                }
-            }
-        }
-        Trace.endSection();
-    }
-
-    /**
-     * 模拟计算负载 - 无参数版本，使用默认位置0
-     */
-    private void simulateComputationalLoad() {
-        simulateComputationalLoad(0);
-    }
-
-    /**
-     * Start a continuous background load to simulate pressure on each frame
-     */
-    private void startContinuousLoadSimulation() {
-        if (mFrameLoadRunnable == null) {
-            // 确保Canvas已经初始化
-            if (mCanvas == null || mBitmapList.isEmpty()) {
-                Bitmap bitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
-                mCanvas = new Canvas(bitmap);
-                mBitmapList.add(bitmap);
-            }
-            
-            mFrameLoadRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
-                        // Only add extra load during scrolling
-                        // 使用统一的 LoadConfig 获取帧间负载强度
-                        int extraLoadIterations = LoadConfig.getBetweenFrameIntensity(mLoadType);
-                        
-                        if (extraLoadIterations > 0) {
-                            Trace.beginSection("FriendCircleAdapter_continuousLoad");
-                            for (int i = 0; i < extraLoadIterations; i++) {
-                                float x = mRandom.nextFloat() * 100;
-                                float y = mRandom.nextFloat() * 100;
-                                
-                                mPaint.setColor(Color.argb(
-                                        mRandom.nextInt(256),
-                                        mRandom.nextInt(256),
-                                        mRandom.nextInt(256),
-                                        mRandom.nextInt(256)
-                                ));
-                                mCanvas.drawCircle(x, y, 10, mPaint);
-                                
-                                // 增加额外计算
-                                if (mLoadType == LoadType.HEAVY || mLoadType == LoadType.HEAVY_MIXED ||
-                                    mLoadType == LoadType.HEAVY_BETWEEN_FRAMES) {
-                                    double sinValue = Math.sin(x) * Math.cos(y);
-                                    double tanValue = Math.tan(x * 0.1);
-                                    // 防止编译器优化
-                                    if (sinValue > 0.999 && tanValue > 100) {
-                                        mPaint.setStrokeWidth((float) (sinValue + tanValue));
-                                    }
-                                }
-                            }
-                            Trace.endSection();
-                        }
-                    }
-                    
-                    // Schedule next frame computation
-                    mHandler.postDelayed(this, 8); // Roughly 60fps
-                }
-            };
-            
-            // Start the continuous load
-            mHandler.post(mFrameLoadRunnable);
-            
-            // Set up scroll state change listener to detect scrolling
-            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                    mIsScrolling = newState != RecyclerView.SCROLL_STATE_IDLE;
-                }
-            });
-        }
+        mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
     }
 
     /**
@@ -785,14 +660,11 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         stopContinuousLoadSimulation();
         releaseAllPlayers();
         
-        // 释放Bitmap资源
-        for (Bitmap bitmap : mBitmapList) {
-            if (bitmap != null && !bitmap.isRecycled()) {
-                bitmap.recycle();
-            }
+        // 释放负载模拟器资源
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
         }
-        mBitmapList.clear();
-        mCanvas = null;
     }
     
     // 新增：释放所有视频播放器

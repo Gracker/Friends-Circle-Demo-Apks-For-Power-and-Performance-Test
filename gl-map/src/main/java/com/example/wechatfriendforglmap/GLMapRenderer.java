@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 import java.util.Random;
@@ -26,6 +27,7 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "GLMapRenderer";
     
     private int loadType = LoadType.MINIMAL;
+    private LoadSimulator mLoadSimulator;
     
     // Long frame state
     private long scrollStartTime = 0;
@@ -83,6 +85,16 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
 
     public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
+        if (mLoadSimulator == null) {
+            mLoadSimulator = new LoadSimulator();
+        }
+    }
+    
+    public void release() {
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
+        }
     }
     
     public void setOffset(float dx, float dy) {
@@ -145,11 +157,8 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     }
     
     private void executeLongFrameLoad() {
-        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
-        double sum = 0;
-        for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
-            sum += Math.log(i + 1) + Math.tan(i * 0.01);
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeLongFrameLoad("GLMap_longFrameLoad");
         }
     }
 
@@ -350,17 +359,10 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
             checkAndExecuteLongFrame();
         }
         
-        // 使用统一的 LoadConfig 方法获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(loadType);
-        
-        if (iterations == 0) return;
-        
-        Trace.beginSection("GLMap_executeLoad");
-        double sum = 0;
-        for (int i = 0; i < iterations; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+        // 使用 LoadSimulator 执行帧内负载
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeInFrameLoad(loadType, "GLMap_inFrameLoad");
         }
-        Trace.endSection();
     }
     
     private static int loadShader(int type, String shaderCode) {

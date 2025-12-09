@@ -179,49 +179,49 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     
     private void startLightLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, LightLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
     
     private void startMediumLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, MediumLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
     
     private void startHeavyLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, HeavyLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
     
     private void startLightMixedLoadActivity() {
         Intent intent = new Intent(this, LightMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_MIXED);
         startActivity(intent);
         finish();
     }
     
     private void startMediumMixedLoadActivity() {
         Intent intent = new Intent(this, MediumMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_MIXED);
         startActivity(intent);
         finish();
     }
     
     private void startHeavyMixedLoadActivity() {
         Intent intent = new Intent(this, HeavyMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_MIXED);
         startActivity(intent);
         finish();
     }
     
     private void startLongFrameLoadActivity() {
         Intent intent = new Intent(this, LongFrameLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LONG_FRAME);
         startActivity(intent);
         finish();
     }
@@ -279,7 +279,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start LightLoadBetweenFrames Activity
             Intent intent = new Intent(this, LightLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load_between_frames) {
@@ -287,7 +287,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start MediumLoadBetweenFrames Activity
             Intent intent = new Intent(this, MediumLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load_between_frames) {
@@ -295,7 +295,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start HeavyLoadBetweenFrames Activity
             Intent intent = new Intent(this, HeavyLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_light_mixed_load) {
@@ -303,7 +303,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start Light MixedLoad Activity
             Intent intent = new Intent(this, LightMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_MIXED);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_mixed_load) {
@@ -311,7 +311,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start Medium MixedLoad Activity
             Intent intent = new Intent(this, MediumMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_MIXED);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_mixed_load) {
@@ -319,7 +319,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start Heavy MixedLoad Activity
             Intent intent = new Intent(this, HeavyMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_MIXED);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_long_frame_load) {
@@ -327,7 +327,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             // Start Long Frame Load Activity
             Intent intent = new Intent(this, LongFrameLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LONG_FRAME);
             startActivity(intent);
             Trace.endSection();
         }

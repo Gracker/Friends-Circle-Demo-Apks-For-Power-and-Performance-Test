@@ -1,9 +1,5 @@
 package com.example.wechatfriendforcustomscroller.ui.timeline;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Trace;
@@ -11,6 +7,7 @@ import android.util.Log;
 import android.view.Choreographer;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 import java.util.Random;
@@ -25,14 +22,12 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     
     // 使用 LoadConfig 中的配置
     private static final Random RANDOM = new Random(LoadConfig.COMPUTATION_SEED);
-    private static final Paint PAINT = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private static Bitmap sBitmap;
-    private static Canvas sCanvas;
     
     // 单例和状态管理
     private static LoadStressSimulator sInstance;
     private final Handler mHandler;
     private final Choreographer mChoreographer;
+    private LoadSimulator mLoadSimulator;
     private boolean mIsRunning = false;
     private boolean mIsScrolling = false;
     private int mCurrentLoadType = LoadType.LIGHT;
@@ -47,6 +42,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     private LoadStressSimulator() {
         mHandler = new Handler(Looper.getMainLooper());
         mChoreographer = Choreographer.getInstance();
+        mLoadSimulator = new LoadSimulator();
     }
     
     public static synchronized LoadStressSimulator getInstance() {
@@ -54,14 +50,6 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             sInstance = new LoadStressSimulator();
         }
         return sInstance;
-    }
-
-    private static void ensureCanvas() {
-        if (sBitmap == null || sCanvas == null) {
-            int size = LoadConfig.getBitmapSize(LoadType.MEDIUM);
-            sBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            sCanvas = new Canvas(sBitmap);
-        }
     }
     
     /**
@@ -167,31 +155,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     }
     
     private void executeLongFrameLoad() {
-        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
-        ensureCanvas();
-        
-        for (int i = 0; i < intensity; i++) {
-            float x = RANDOM.nextFloat() * 400;
-            float y = RANDOM.nextFloat() * 400;
-            
-            PAINT.setColor(Color.argb(
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256)
-            ));
-            
-            sCanvas.drawCircle(x, y, 10 + RANDOM.nextFloat() * 20, PAINT);
-            
-            double sinValue = Math.sin(x) * Math.cos(y);
-            double sqrtValue = Math.sqrt(x * x + y * y);
-            double logValue = Math.log(i + 1) + Math.log10(i + 1);
-            
-            if (sqrtValue > 300 && logValue > 5) {
-                PAINT.setARGB((int) sqrtValue % 256, (int) logValue * 25 % 256, 
-                               (int) (sinValue * 100) % 256, 255);
-            }
-        }
+        mLoadSimulator.executeLongFrameLoad("CustomScroll_longFrameLoad");
     }
     
     private void scheduleNextDoFrameTask() {
@@ -230,160 +194,31 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     }
     
     private void executeDoFrameLoad(@LoadType.Type int loadType) {
-        // 使用 LoadConfig 获取强度
-        int intensity = LoadConfig.getDoFrameIntensity(convertToLoadType(loadType));
-        if (intensity == 0) return;
-        
-        double sum = 0;
-        for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) + Math.cos(i * 0.1) + Math.sqrt(i + 1);
-        }
+        mLoadSimulator.executeDoFrameLoad(loadType, "CustomScroll_doFrameLoad");
     }
     
     private void executeBetweenFrameLoad(@LoadType.Type int loadType) {
-        int intensity;
-        boolean isHeavy = false;
-        
-        // 使用 LoadConfig 获取强度
-        int convertedType = convertToLoadType(loadType);
-        if (LoadType.isBetweenFramesLoad(convertedType)) {
-            intensity = LoadConfig.getBetweenFrameIntensity(convertedType);
-            isHeavy = (convertedType == LoadType.HEAVY_BETWEEN_FRAMES);
-        } else if (LoadType.isMixedLoad(convertedType)) {
-            intensity = LoadConfig.getMixedBetweenFrameIntensity(convertedType);
-            isHeavy = (convertedType == LoadType.HEAVY_MIXED);
-        } else {
-            return;
-        }
-        
-        double sum = 0;
-        for (int i = 1; i <= intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i);
-            if (isHeavy) {
-                sum += Math.log(i) + Math.tan(i * 0.01);
-            }
-        }
-        
-        ensureCanvas();
-        int drawCount = Math.min(intensity / 10, 100);
-        for (int i = 0; i < drawCount; i++) {
-            PAINT.setColor(Color.rgb(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256)));
-            sCanvas.drawCircle(RANDOM.nextFloat() * 200, RANDOM.nextFloat() * 200, 5 + RANDOM.nextFloat() * 10, PAINT);
+        if (LoadType.isBetweenFramesLoad(loadType)) {
+            mLoadSimulator.executePureBetweenFrameLoad(loadType, "CustomScroll_betweenFrameLoad");
+        } else if (LoadType.isMixedLoad(loadType)) {
+            mLoadSimulator.executeBetweenFrameLoad(loadType, "CustomScroll_betweenFrameLoad");
         }
     }
     
-    /**
-     * 将 LoadProfile 类型转换为 LoadType
-     */
-    private int convertToLoadType(int loadProfileType) {
-        switch (loadProfileType) {
-            case LoadType.MINIMAL: return LoadType.MINIMAL;
-            case LoadType.LIGHT: return LoadType.LIGHT;
-            case LoadType.MEDIUM: return LoadType.MEDIUM;
-            case LoadType.HEAVY: return LoadType.HEAVY;
-            case LoadType.LIGHT_BETWEEN_FRAMES: return LoadType.LIGHT_BETWEEN_FRAMES;
-            case LoadType.MEDIUM_BETWEEN_FRAMES: return LoadType.MEDIUM_BETWEEN_FRAMES;
-            case LoadType.HEAVY_BETWEEN_FRAMES: return LoadType.HEAVY_BETWEEN_FRAMES;
-            case LoadType.LIGHT_MIXED: return LoadType.LIGHT_MIXED;
-            case LoadType.MEDIUM_MIXED: return LoadType.MEDIUM_MIXED;
-            case LoadType.HEAVY_MIXED: return LoadType.HEAVY_MIXED;
-            case LoadType.LONG_FRAME: return LoadType.LONG_FRAME;
-            default: return LoadType.MINIMAL;
+    private static LoadSimulator sStaticLoadSimulator;
+    
+    private static LoadSimulator getStaticLoadSimulator() {
+        if (sStaticLoadSimulator == null) {
+            sStaticLoadSimulator = new LoadSimulator();
         }
+        return sStaticLoadSimulator;
     }
-
+    
     public static void runAdapterLoad(@LoadType.Type int loadType) {
-        ensureCanvas();
-        
-        // 使用 LoadConfig 获取强度
-        int intensity;
-        switch (loadType) {
-            case LoadType.MINIMAL:
-                intensity = 0;
-                break;
-            case LoadType.LIGHT:
-            case LoadType.LIGHT_BETWEEN_FRAMES:
-            case LoadType.LIGHT_MIXED:
-                intensity = LoadConfig.IN_FRAME_LIGHT_INTENSITY;
-                break;
-            case LoadType.MEDIUM:
-            case LoadType.MEDIUM_BETWEEN_FRAMES:
-            case LoadType.MEDIUM_MIXED:
-                intensity = LoadConfig.IN_FRAME_MEDIUM_INTENSITY;
-                break;
-            case LoadType.HEAVY:
-            case LoadType.HEAVY_BETWEEN_FRAMES:
-            case LoadType.HEAVY_MIXED:
-                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
-                break;
-            case LoadType.LONG_FRAME:
-                // 超长帧负载由 doFrame 回调处理，Adapter 使用 HEAVY 强度
-                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
-                break;
-            default:
-                intensity = 0;
-                break;
-        }
-        
-        if (intensity == 0) return;
-        
-        Trace.beginSection("FriendCircleAdapter_simulateComputationalLoad");
-        performIterations(intensity, loadType >= LoadType.MEDIUM);
-        Trace.endSection();
+        getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_bindLoad");
     }
 
     public static void runContinuousLoad(@LoadType.Type int loadType) {
-        int intensity;
-        switch (loadType) {
-            case LoadType.MINIMAL:
-            case LoadType.LIGHT:
-            case LoadType.LIGHT_BETWEEN_FRAMES:
-            case LoadType.LIGHT_MIXED:
-                intensity = 0;
-                break;
-            case LoadType.MEDIUM:
-            case LoadType.MEDIUM_BETWEEN_FRAMES:
-            case LoadType.MEDIUM_MIXED:
-                intensity = LoadConfig.IN_FRAME_MEDIUM_INTENSITY;
-                break;
-            case LoadType.HEAVY:
-            case LoadType.HEAVY_BETWEEN_FRAMES:
-            case LoadType.HEAVY_MIXED:
-            case LoadType.LONG_FRAME:
-                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
-                break;
-            default:
-                intensity = 0;
-                break;
-        }
-        if (intensity <= 0) return;
-        
-        ensureCanvas();
-        Trace.beginSection("FriendCircleAdapter_continuousLoad");
-        performIterations(intensity, true);
-        Trace.endSection();
-    }
-
-    private static void performIterations(int iterations, boolean includeExtraMath) {
-        for (int i = 0; i < iterations; i++) {
-            float x = RANDOM.nextFloat() * 100;
-            float y = RANDOM.nextFloat() * 100;
-
-            PAINT.setColor(Color.argb(
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256),
-                    RANDOM.nextInt(256)
-            ));
-            sCanvas.drawCircle(x, y, 10, PAINT);
-
-            if (includeExtraMath) {
-                double sinValue = Math.sin(x) * Math.cos(y);
-                double tanValue = Math.tan(x * 0.1);
-                if (sinValue > 0.999 && tanValue > 100) {
-                    PAINT.setStrokeWidth((float) (sinValue + tanValue));
-                }
-            }
-        }
+        getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_continuousLoad");
     }
 }

@@ -18,6 +18,7 @@ import android.view.SurfaceView;
 import android.widget.OverScroller;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 import java.util.Random;
@@ -58,6 +59,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean isBackgroundTaskRunning = false;
+    private LoadSimulator mLoadSimulator;
     
     // Long frame state
     private long scrollStartTime = 0;
@@ -143,6 +145,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 return true;
             }
         });
+        
+        // Initialize load simulator
+        mLoadSimulator = new LoadSimulator();
     }
     
     public void setLoadType(@LoadType.Type int loadType) {
@@ -215,11 +220,8 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     }
     
     private void executeLongFrameLoad() {
-        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
-        double sum = 0;
-        for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
-            sum += Math.log(i + 1) + Math.tan(i * 0.01);
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeLongFrameLoad("MapSurface_longFrameLoad");
         }
     }
     
@@ -241,33 +243,12 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     }
     
     private void executeBetweenFrameLoad() {
-        int intensity;
-        switch (loadType) {
-            case LoadType.LIGHT_BETWEEN_FRAMES:
-                intensity = LoadConfig.BETWEEN_FRAME_LIGHT_INTENSITY;
-                break;
-            case LoadType.LIGHT_MIXED:
-                intensity = LoadConfig.MIXED_BETWEEN_FRAME_LIGHT_INTENSITY;
-                break;
-            case LoadType.MEDIUM_BETWEEN_FRAMES:
-                intensity = LoadConfig.BETWEEN_FRAME_MEDIUM_INTENSITY;
-                break;
-            case LoadType.MEDIUM_MIXED:
-                intensity = LoadConfig.MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY;
-                break;
-            case LoadType.HEAVY_BETWEEN_FRAMES:
-                intensity = LoadConfig.BETWEEN_FRAME_HEAVY_INTENSITY;
-                break;
-            case LoadType.HEAVY_MIXED:
-                intensity = LoadConfig.MIXED_BETWEEN_FRAME_HEAVY_INTENSITY;
-                break;
-            default:
-                return;
-        }
+        if (mLoadSimulator == null) return;
         
-        double sum = 0;
-        for (int i = 1; i <= intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i);
+        if (LoadType.isBetweenFramesLoad(loadType)) {
+            mLoadSimulator.executePureBetweenFrameLoad(loadType, "MapSurface_betweenFrameLoad");
+        } else if (LoadType.isMixedLoad(loadType)) {
+            mLoadSimulator.executeBetweenFrameLoad(loadType, "MapSurface_betweenFrameLoad");
         }
     }
 
