@@ -44,17 +44,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 /**
  * 性能测试专用的朋友圈适配器，支持不同负载级别
+ * 使用统一的 LoadConfig 和 LoadType 进行负载配置
  */
 public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         implements OnItemClickPopupMenuListener {
-
-    // Load type constants
-    public static final int LOAD_TYPE_MINIMAL = -1; // Minimal load (lightest case)
-    public static final int LOAD_TYPE_LIGHT = 0;  // Light load
-    public static final int LOAD_TYPE_MEDIUM = 1; // Medium load
-    public static final int LOAD_TYPE_HEAVY = 2;  // Heavy load
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
@@ -69,7 +67,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     private RecyclerView mRecyclerView;
     // 移除ImageLoader成员变量
     private View mHeaderView;
-    private Random mRandom = new Random(0); // Using fixed seed to ensure consistent results for each run
+    private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED); // Using fixed seed to ensure consistent results for each run
     private int mLoadType; // Load type
     
     // Variables for simulating computational load
@@ -99,24 +97,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
         
-        // 设置负载类型字符串
-        switch (loadType) {
-            case LOAD_TYPE_MINIMAL:
-                mLoadTypeString = "最轻负载";
-                break;
-            case LOAD_TYPE_LIGHT:
-                mLoadTypeString = "轻负载";
-                break;
-            case LOAD_TYPE_MEDIUM:
-                mLoadTypeString = "中负载";
-                break;
-            case LOAD_TYPE_HEAVY:
-                mLoadTypeString = "高负载";
-                break;
-            default:
-                mLoadTypeString = "未知负载";
-                break;
-        }
+        // 使用统一的 LoadType.toLabel() 获取负载类型字符串
+        mLoadTypeString = LoadType.toLabel(loadType);
         
         // 移除ImageLoader初始化代码
         
@@ -476,24 +458,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             mBitmapList.add(bitmap);
         }
         
-        int iterations;
-        switch (mLoadType) {
-            case LOAD_TYPE_MINIMAL:
-                iterations = 0; // Minimal load: no computational load at all
-                break;
-            case LOAD_TYPE_LIGHT:
-                iterations = 5; // Light load: only do a small amount of work per frame
-                break;
-            case LOAD_TYPE_MEDIUM:
-                iterations = 800; // Medium load: increased for more pressure
-                break;
-            case LOAD_TYPE_HEAVY:
-                iterations = 2000; // Heavy load: significantly increased for heavy pressure
-                break;
-            default:
-                iterations = 5;
-                break;
-        }
+        // 使用统一的 LoadConfig 获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(mLoadType);
         
         // Perform some calculations to simulate load
         for (int i = 0; i < iterations; i++) {
@@ -511,7 +477,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             mCanvas.drawCircle(x, y, 10, mPaint);
             
             // Add more complex calculations for medium and heavy loads
-            if (mLoadType == LOAD_TYPE_MEDIUM || mLoadType == LOAD_TYPE_HEAVY) {
+            if (mLoadType == LoadType.MEDIUM || mLoadType == LoadType.HEAVY ||
+                mLoadType == LoadType.MEDIUM_MIXED || mLoadType == LoadType.HEAVY_MIXED) {
                 double sinValue = Math.sin(x) * Math.cos(y);
                 double tanValue = Math.tan(x * 0.1);
                 // Prevent compiler optimization
@@ -547,24 +514,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                 public void run() {
                     if (mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
                         // Only add extra load during scrolling
-                        int extraLoadIterations;
-                        switch (mLoadType) {
-                            case LOAD_TYPE_MINIMAL:
-                                extraLoadIterations = 0; // No extra load for minimal load
-                                break;
-                            case LOAD_TYPE_LIGHT:
-                                extraLoadIterations = 0; // No extra load for light load
-                                break;
-                            case LOAD_TYPE_MEDIUM:
-                                extraLoadIterations = 200; // Moderate extra load for medium
-                                break;
-                            case LOAD_TYPE_HEAVY:
-                                extraLoadIterations = 500; // Heavy extra load for heavy
-                                break;
-                            default:
-                                extraLoadIterations = 0;
-                                break;
-                        }
+                        // 使用统一的 LoadConfig 获取帧间负载强度
+                        int extraLoadIterations = LoadConfig.getBetweenFrameIntensity(mLoadType);
                         
                         if (extraLoadIterations > 0) {
                             Trace.beginSection("FriendCircleAdapter_continuousLoad");
@@ -581,7 +532,8 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                                 mCanvas.drawCircle(x, y, 10, mPaint);
                                 
                                 // 增加额外计算
-                                if (mLoadType == LOAD_TYPE_HEAVY) {
+                                if (mLoadType == LoadType.HEAVY || mLoadType == LoadType.HEAVY_MIXED ||
+                                    mLoadType == LoadType.HEAVY_BETWEEN_FRAMES) {
                                     double sinValue = Math.sin(x) * Math.cos(y);
                                     double tanValue = Math.tan(x * 0.1);
                                     // 防止编译器优化

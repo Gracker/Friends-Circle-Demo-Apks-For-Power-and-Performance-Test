@@ -31,17 +31,7 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
     // 定义常量，用于Intent传递负载类型
     public static final String EXTRA_LOAD_TYPE = "load_type";
     
-    // WebView负载类型常量
-    public static final int LOAD_TYPE_MINIMAL = 0;
-    public static final int LOAD_TYPE_LIGHT = 1;
-    public static final int LOAD_TYPE_MEDIUM = 2;
-    public static final int LOAD_TYPE_HEAVY = 3;
-    public static final int LOAD_TYPE_LIGHT_BETWEEN_FRAMES = 4;
-    public static final int LOAD_TYPE_MEDIUM_BETWEEN_FRAMES = 5;
-    public static final int LOAD_TYPE_HEAVY_BETWEEN_FRAMES = 6;
-    public static final int LOAD_TYPE_LIGHT_MIXED = 7;
-    public static final int LOAD_TYPE_MEDIUM_MIXED = 8;
-    public static final int LOAD_TYPE_HEAVY_MIXED = 9;
+    // 负载类型使用统一的 LoadType 常量，不再本地定义
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,48 +113,48 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
         WebViewDataCenter.getInstance().clearCachedData();
         
         Intent intent = null;
-        int loadType = LOAD_TYPE_LIGHT;
+        int loadType = com.example.loadconfig.LoadType.LIGHT;
         String loadName = "";
         
         if (id == R.id.btn_minimal_load) {
             intent = new Intent(this, MinimalLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_MINIMAL;
+            loadType = com.example.loadconfig.LoadType.MINIMAL;
             loadName = "最轻负载";
         } else if (id == R.id.btn_light_load) {
             intent = new Intent(this, LightLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_LIGHT;
+            loadType = com.example.loadconfig.LoadType.LIGHT;
             loadName = "帧内轻负载";
         } else if (id == R.id.btn_medium_load) {
             intent = new Intent(this, MediumLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_MEDIUM;
+            loadType = com.example.loadconfig.LoadType.MEDIUM;
             loadName = "帧内中负载";
         } else if (id == R.id.btn_heavy_load) {
             intent = new Intent(this, HeavyLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_HEAVY;
+            loadType = com.example.loadconfig.LoadType.HEAVY;
             loadName = "帧内高负载";
         } else if (id == R.id.btn_light_between_frames) {
             intent = new Intent(this, LightLoadBetweenFramesWebViewActivity.class);
-            loadType = LOAD_TYPE_LIGHT_BETWEEN_FRAMES;
+            loadType = com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES;
             loadName = "帧间轻负载";
         } else if (id == R.id.btn_medium_between_frames) {
             intent = new Intent(this, MediumLoadBetweenFramesWebViewActivity.class);
-            loadType = LOAD_TYPE_MEDIUM_BETWEEN_FRAMES;
+            loadType = com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES;
             loadName = "帧间中负载";
         } else if (id == R.id.btn_heavy_between_frames) {
             intent = new Intent(this, HeavyLoadBetweenFramesWebViewActivity.class);
-            loadType = LOAD_TYPE_HEAVY_BETWEEN_FRAMES;
+            loadType = com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES;
             loadName = "帧间高负载";
         } else if (id == R.id.btn_light_mixed) {
             intent = new Intent(this, LightMixedLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_LIGHT_MIXED;
+            loadType = com.example.loadconfig.LoadType.LIGHT_MIXED;
             loadName = "混合轻负载";
         } else if (id == R.id.btn_medium_mixed) {
             intent = new Intent(this, MediumMixedLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_MEDIUM_MIXED;
+            loadType = com.example.loadconfig.LoadType.MEDIUM_MIXED;
             loadName = "混合中负载";
         } else if (id == R.id.btn_heavy_mixed) {
             intent = new Intent(this, HeavyMixedLoadWebViewActivity.class);
-            loadType = LOAD_TYPE_HEAVY_MIXED;
+            loadType = com.example.loadconfig.LoadType.HEAVY_MIXED;
             loadName = "混合高负载";
         }
         

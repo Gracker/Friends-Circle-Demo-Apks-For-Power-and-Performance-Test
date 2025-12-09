@@ -15,6 +15,9 @@ import android.widget.OverScroller;
 
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 /**
  * Main window view that renders a scrollable list.
  * Combined with SecondWindowView, creates dual-window rendering.
@@ -34,7 +37,7 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
     private Choreographer choreographer;
     private boolean isAnimating = false;
     
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
     
     // Callback for scroll state changes
@@ -111,7 +114,7 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
         return Math.max(0, ITEM_COUNT * ITEM_HEIGHT - getHeight() + 100);
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
     
@@ -175,7 +178,7 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
         canvas.drawRect(0, 0, width, 80, headerPaint);
         textPaint.setColor(Color.WHITE);
         textPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("Window 1 (Main) - " + LoadProfile.toLabel(loadType), width / 2f, 52, textPaint);
+        canvas.drawText("Window 1 (Main) - " + LoadType.toLabel(loadType), width / 2f, 52, textPaint);
         textPaint.setColor(Color.parseColor("#333333"));
         textPaint.setTextAlign(Paint.Align.LEFT);
         
@@ -186,7 +189,7 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
         lastVisible = Math.min(ITEM_COUNT - 1, lastVisible);
         
         // Draw items
-        Random itemRandom = new Random(42);
+        Random itemRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
         for (int i = firstVisible; i <= lastVisible; i++) {
             float y = 90 + i * ITEM_HEIGHT - scrollY;
             drawItem(canvas, i, 10, y, width - 20, ITEM_HEIGHT - 10, itemRandom);
@@ -215,29 +218,8 @@ public class MainWindowView extends View implements Choreographer.FrameCallback 
     }
     
     private void executeLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 100;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 500;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 2000;
-                break;
-            default:
-                iterations = 0;
-        }
+        // 使用统一的 LoadConfig 获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

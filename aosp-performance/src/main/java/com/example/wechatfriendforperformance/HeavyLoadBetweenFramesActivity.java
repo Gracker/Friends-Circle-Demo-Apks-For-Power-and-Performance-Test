@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.loadconfig.LoadConfig;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 
 import java.util.Random;
@@ -36,19 +37,19 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY;
+    private int mLoadType = com.example.loadconfig.LoadType.HEAVY;
     
     // 用于在帧之间执行负载的成员变量
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mRandom = new Random(12345); // 使用固定种子确保可重复性
-    private Random mTaskDecisionRandom = new Random(67890); // 用于决定是否执行任务的随机数生成器
+    private Random mRandom = new Random(LoadConfig.TASK_INTERVAL_SEED); // 使用统一配置的随机种子
+    private Random mTaskDecisionRandom = new Random(LoadConfig.COMPUTATION_SEED); // 用于决定是否执行任务的随机数生成器
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsBetweenFrameLoadEnabled = true;
     private boolean mIsScrolling = false; // 是否正在滚动
-    private float mTaskExecutionProbability = 0.7f; // 70%的概率执行帧间任务
+    private float mTaskExecutionProbability = LoadConfig.HEAVY_TASK_PROBABILITY; // 使用配置的任务执行概率
     
     // 用于存储计算结果，防止编译器优化
     private volatile double mComputationResult = 0.0;
@@ -72,7 +73,7 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         }
         
         imageLoader = Glide.with(this).asDrawable().apply(
@@ -497,18 +498,8 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     }
 
     private String getLoadTypeString(int loadType) {
-        switch (loadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MINIMAL:
-                return "最轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                return "轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                return "中负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                return "高负载";
-            default:
-                return "未知负载";
-        }
+        // 使用统一的 LoadType.toLabel() 获取负载类型标签
+        return com.example.loadconfig.LoadType.toLabel(loadType);
     }
 
     @Override

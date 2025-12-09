@@ -66,6 +66,12 @@
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
             
+        <!-- Long Frame Load -->
+        <activity
+            android:name=".LongFrameMapActivity"
+            android:exported="true"
+            android:theme="@style/Theme.SurfaceMap.NoActionBar" />
+            
     </application>
 
 </manifest>

@@ -35,7 +35,7 @@ public class LightLoadActivity extends AppCompatActivity {
     private SoftwareRenderFriendCircleAdapter adapter;
     private LinearLayout titleBar;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT;
+    private int mLoadType = com.example.loadconfig.LoadType.LIGHT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class LightLoadActivity extends AppCompatActivity {
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         }
         
         // Process image name, remove possible file extension
@@ -101,11 +101,11 @@ public class LightLoadActivity extends AppCompatActivity {
 
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 return "轻负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 return "中负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";

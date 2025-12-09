@@ -40,6 +40,7 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
         binding.btnLightMixed.setOnClickListener(this);
         binding.btnMediumMixed.setOnClickListener(this);
         binding.btnHeavyMixed.setOnClickListener(this);
+        binding.btnLongFrame.setOnClickListener(this);
     }
 
     @Override
@@ -66,6 +67,7 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
         else if (id == R.id.btn_light_mixed) targetActivity = LightMixedActivity.class;
         else if (id == R.id.btn_medium_mixed) targetActivity = MediumMixedActivity.class;
         else if (id == R.id.btn_heavy_mixed) targetActivity = HeavyMixedActivity.class;
+        else if (id == R.id.btn_long_frame) targetActivity = LongFrameActivity.class;
         
         if (targetActivity != null) {
             startActivity(new Intent(this, targetActivity));

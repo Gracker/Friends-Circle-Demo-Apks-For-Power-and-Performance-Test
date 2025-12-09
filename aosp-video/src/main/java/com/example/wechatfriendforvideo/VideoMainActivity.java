@@ -10,7 +10,7 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wechatfriendforvideo.adapters.VideoFriendCircleAdapter;
-import com.example.wechatfriendforvideo.config.LoadConfig;
+import com.example.loadconfig.LoadConfig;
 
 /**
  * Performance test main Activity, used to select different load levels for testing
@@ -20,6 +20,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
     private Button btnMinimalLoad, btnLightLoad, btnMediumLoad, btnHeavyLoad;
     private Button btnLightLoadBetweenFrames, btnMediumLoadBetweenFrames, btnHeavyLoadBetweenFrames;
     private Button btnLightMixedLoad, btnMediumMixedLoad, btnHeavyMixedLoad;
+    private Button btnLongFrameLoad;
     
     // 定义常量，用于Intent传递负载类型
     public static final String EXTRA_LOAD_TYPE = "load_type";
@@ -37,6 +38,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
     public static final String ACTIVITY_TYPE_LIGHT_MIXED = "light_mixed";
     public static final String ACTIVITY_TYPE_MEDIUM_MIXED = "medium_mixed";
     public static final String ACTIVITY_TYPE_HEAVY_MIXED = "heavy_mixed";
+    public static final String ACTIVITY_TYPE_LONG_FRAME = "long_frame";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
         btnLightMixedLoad = findViewById(R.id.btn_light_mixed_load);
         btnMediumMixedLoad = findViewById(R.id.btn_medium_mixed_load);
         btnHeavyMixedLoad = findViewById(R.id.btn_heavy_mixed_load);
+        btnLongFrameLoad = findViewById(R.id.btn_long_frame_load);
         
         // Set click listeners
         btnMinimalLoad.setOnClickListener(this);
@@ -72,6 +75,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
         btnLightMixedLoad.setOnClickListener(this);
         btnMediumMixedLoad.setOnClickListener(this);
         btnHeavyMixedLoad.setOnClickListener(this);
+        btnLongFrameLoad.setOnClickListener(this);
         
         // 检查是否通过命令行直接启动特定Activity
         checkForDirectActivityLaunch();
@@ -134,6 +138,9 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
                     case ACTIVITY_TYPE_HEAVY_MIXED:
                         startHeavyMixedLoadActivity();
                         break;
+                    case ACTIVITY_TYPE_LONG_FRAME:
+                        startLongFrameLoadActivity();
+                        break;
                     default:
                         Log.w("VideoMainActivity", "Unknown activity_type: " + activityType);
                         break;
@@ -144,70 +151,77 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
     
     private void startMinimalLoadActivity() {
         Intent intent = new Intent(this, MinimalLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MINIMAL);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MINIMAL);
         startActivity(intent);
         finish(); // 关闭主Activity，避免返回时显示
     }
     
     private void startLightLoadActivity() {
         Intent intent = new Intent(this, LightLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         startActivity(intent);
         finish();
     }
     
     private void startMediumLoadActivity() {
         Intent intent = new Intent(this, MediumLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         startActivity(intent);
         finish();
     }
     
     private void startHeavyLoadActivity() {
         Intent intent = new Intent(this, HeavyLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         startActivity(intent);
         finish();
     }
     
     private void startLightLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, LightLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         startActivity(intent);
         finish();
     }
     
     private void startMediumLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, MediumLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         startActivity(intent);
         finish();
     }
     
     private void startHeavyLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, HeavyLoadBetweenFramesActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         startActivity(intent);
         finish();
     }
     
     private void startLightMixedLoadActivity() {
         Intent intent = new Intent(this, LightMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         startActivity(intent);
         finish();
     }
     
     private void startMediumMixedLoadActivity() {
         Intent intent = new Intent(this, MediumMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         startActivity(intent);
         finish();
     }
     
     private void startHeavyMixedLoadActivity() {
         Intent intent = new Intent(this, HeavyMixedLoadActivity.class);
-        intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+        startActivity(intent);
+        finish();
+    }
+    
+    private void startLongFrameLoadActivity() {
+        Intent intent = new Intent(this, LongFrameLoadActivity.class);
+        intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         startActivity(intent);
         finish();
     }
@@ -233,7 +247,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start MinimalLoad Activity
             Intent intent = new Intent(this, MinimalLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MINIMAL);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MINIMAL);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_light_load) {
@@ -241,7 +255,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start LightLoad Activity
             Intent intent = new Intent(this, LightLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load) {
@@ -249,7 +263,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start MediumLoad Activity
             Intent intent = new Intent(this, MediumLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load) {
@@ -257,7 +271,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start HeavyLoad Activity
             Intent intent = new Intent(this, HeavyLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_light_load_between_frames) {
@@ -265,7 +279,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start LightLoadBetweenFrames Activity
             Intent intent = new Intent(this, LightLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_load_between_frames) {
@@ -273,7 +287,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start MediumLoadBetweenFrames Activity
             Intent intent = new Intent(this, MediumLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_load_between_frames) {
@@ -281,7 +295,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start HeavyLoadBetweenFrames Activity
             Intent intent = new Intent(this, HeavyLoadBetweenFramesActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_light_mixed_load) {
@@ -289,7 +303,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start Light MixedLoad Activity
             Intent intent = new Intent(this, LightMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_medium_mixed_load) {
@@ -297,7 +311,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start Medium MixedLoad Activity
             Intent intent = new Intent(this, MediumMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
             startActivity(intent);
             Trace.endSection();
         } else if (id == R.id.btn_heavy_mixed_load) {
@@ -305,7 +319,15 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             // Start Heavy MixedLoad Activity
             Intent intent = new Intent(this, HeavyMixedLoadActivity.class);
             // 传递负载类型参数
-            intent.putExtra(EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
+            startActivity(intent);
+            Trace.endSection();
+        } else if (id == R.id.btn_long_frame_load) {
+            Trace.beginSection("VideoMainActivity_startLongFrameLoad");
+            // Start Long Frame Load Activity
+            Intent intent = new Intent(this, LongFrameLoadActivity.class);
+            // 传递负载类型参数
+            intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
             startActivity(intent);
             Trace.endSection();
         }
@@ -317,15 +339,15 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
     private void validateLoadConfiguration() {
         Log.d("LoadConfig", "开始验证负载配置...");
         
-        boolean isValid = LoadConfig.validateLoadConfig();
+        boolean isValid = LoadConfig.validateConfig();
         if (isValid) {
             Log.d("LoadConfig", "✅ 负载配置验证通过");
             
             // 输出配置详情
             Log.d("LoadConfig", "📊 混合负载配置详情:");
-            Log.d("LoadConfig", "  " + LoadConfig.getLoadConfigDescription("LightMixedLoad"));
-            Log.d("LoadConfig", "  " + LoadConfig.getLoadConfigDescription("MediumMixedLoad"));
-            Log.d("LoadConfig", "  " + LoadConfig.getLoadConfigDescription("HeavyMixedLoad"));
+            Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.LIGHT_MIXED));
+            Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.MEDIUM_MIXED));
+            Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.HEAVY_MIXED));
             
             // 输出任务间隔配置
             Log.d("LoadConfig", "📋 任务调度配置:");

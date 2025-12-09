@@ -1,5 +1,7 @@
 package com.example.wechatfriendforglmap;
-public class MediumMixedActivity extends BaseGLMapActivity {
-    @Override protected int getLoadType() { return LoadProfile.LOAD_TYPE_MEDIUM_MIXED; }
-}
 
+import com.example.loadconfig.LoadType;
+
+public class MediumMixedActivity extends BaseGLMapActivity {
+    @Override protected int getLoadType() { return LoadType.MEDIUM_MIXED; }
+}

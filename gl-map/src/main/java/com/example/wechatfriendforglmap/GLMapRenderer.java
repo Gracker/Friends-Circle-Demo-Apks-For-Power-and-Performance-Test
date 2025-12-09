@@ -9,6 +9,9 @@ import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -17,11 +20,20 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * OpenGL ES 2.0 renderer for map-like visualization.
  * Renders a grid of tiles with roads and landmarks, similar to map apps.
+ * Uses LoadConfig for unified load configuration.
  */
 public class GLMapRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "GLMapRenderer";
     
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    private int loadType = LoadType.MINIMAL;
+    
+    // Long frame state
+    private long scrollStartTime = 0;
+    private int longFrameTriggerCount = 0;
+    private int currentLongFrameIndex = 0;
+    private long[] longFrameTriggerTimes;
+    private long lastLongFrameTime = 0;
+    private boolean isScrolling = false;
     
     // Shader handles
     private int program;
@@ -51,7 +63,7 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     private int buildingVertexCount;
     private int markerVertexCount;
     
-    private final Random random = new Random(12345L);
+    private final Random random = new Random(LoadConfig.COMPUTATION_SEED);
     
     // Shaders
     private static final String VERTEX_SHADER =
@@ -69,7 +81,7 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
             "  gl_FragColor = vColor;" +
             "}";
 
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
     
@@ -81,6 +93,64 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     public void setZoom(float scaleFactor) {
         this.zoom *= scaleFactor;
         this.zoom = Math.max(0.5f, Math.min(5f, zoom));
+    }
+    
+    public void onScrollStart() {
+        if (!isScrolling) {
+            isScrolling = true;
+            if (LoadType.isLongFrameLoad(loadType)) {
+                startLongFrameCycle();
+            }
+        }
+    }
+    
+    public void onScrollStop() {
+        isScrolling = false;
+        resetLongFrameState();
+    }
+    
+    private void startLongFrameCycle() {
+        scrollStartTime = System.currentTimeMillis();
+        longFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
+        longFrameTriggerTimes = LoadConfig.getLongFrameTriggerTimes(longFrameTriggerCount);
+        currentLongFrameIndex = 0;
+        lastLongFrameTime = 0;
+    }
+    
+    private void resetLongFrameState() {
+        scrollStartTime = 0;
+        currentLongFrameIndex = 0;
+        longFrameTriggerTimes = null;
+    }
+    
+    private void checkAndExecuteLongFrame() {
+        if (currentLongFrameIndex >= longFrameTriggerCount || longFrameTriggerTimes == null) return;
+        
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - scrollStartTime;
+        
+        if (elapsedTime >= longFrameTriggerTimes[currentLongFrameIndex]) {
+            if (currentTime - lastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
+                Trace.beginSection("GLMap_longFrameLoad_" + (currentLongFrameIndex + 1));
+                executeLongFrameLoad();
+                Trace.endSection();
+                lastLongFrameTime = currentTime;
+                currentLongFrameIndex++;
+            }
+        }
+        
+        if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
+            startLongFrameCycle();
+        }
+    }
+    
+    private void executeLongFrameLoad() {
+        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
+        double sum = 0;
+        for (int i = 0; i < intensity; i++) {
+            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+            sum += Math.log(i + 1) + Math.tan(i * 0.01);
+        }
     }
 
     @Override
@@ -168,7 +238,7 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
         gridVertices = createFloatBuffer(gridCoords, idx);
         
         // Generate roads
-        Random r = new Random(42);
+        Random r = new Random(LoadConfig.DATA_GENERATION_SEED);
         int roadCount = 15;
         float[] roadCoords = new float[roadCount * 6];
         for (int i = 0; i < roadCount; i++) {
@@ -275,29 +345,13 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     }
     
     private void executeLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 200;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 1000;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 5000;
-                break;
-            default:
-                iterations = 0;
+        // Check and execute long frame load
+        if (LoadType.isLongFrameLoad(loadType) && isScrolling) {
+            checkAndExecuteLongFrame();
         }
+        
+        // 使用统一的 LoadConfig 方法获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

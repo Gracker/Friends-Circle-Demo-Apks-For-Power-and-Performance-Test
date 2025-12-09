@@ -17,11 +17,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.OverScroller;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 import java.util.Random;
 
 /**
  * Custom SurfaceView that renders a map-like grid interface.
  * Simulates map tile rendering with scrolling support.
+ * Uses LoadConfig for unified load configuration.
  */
 public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     private static final String TAG = "MapSurfaceView";
@@ -50,14 +54,18 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     private static final int TILE_SIZE = 200;
     
     // Load simulation
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
-    private final Random random = new Random(12345L);
+    private int loadType = LoadType.MINIMAL;
+    private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private boolean isBackgroundTaskRunning = false;
     
-    // Between-frame task scheduling
-    private static final int MIN_TASK_INTERVAL_MS = 16;
-    private static final int MAX_TASK_INTERVAL_MS = 83;
+    // Long frame state
+    private long scrollStartTime = 0;
+    private int longFrameTriggerCount = 0;
+    private int currentLongFrameIndex = 0;
+    private long[] longFrameTriggerTimes;
+    private long lastLongFrameTime = 0;
+    private boolean isScrolling = false;
 
     public MapSurfaceView(Context context) {
         super(context);
@@ -137,11 +145,12 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         });
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
         
         // Start background tasks if needed
-        if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
+        if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType)
+                || LoadType.isLongFrameLoad(loadType)) {
             startBackgroundTasks();
         }
     }
@@ -155,12 +164,70 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     private void stopBackgroundTasks() {
         isBackgroundTaskRunning = false;
         mainHandler.removeCallbacksAndMessages(null);
+        resetLongFrameState();
+    }
+    
+    public void onScrollStateChanged(boolean scrolling) {
+        if (scrolling && !isScrolling) {
+            isScrolling = true;
+            if (LoadType.isLongFrameLoad(loadType)) {
+                startLongFrameCycle();
+            }
+        } else if (!scrolling && isScrolling) {
+            isScrolling = false;
+            resetLongFrameState();
+        }
+    }
+    
+    private void startLongFrameCycle() {
+        scrollStartTime = System.currentTimeMillis();
+        longFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
+        longFrameTriggerTimes = LoadConfig.getLongFrameTriggerTimes(longFrameTriggerCount);
+        currentLongFrameIndex = 0;
+        lastLongFrameTime = 0;
+    }
+    
+    private void resetLongFrameState() {
+        scrollStartTime = 0;
+        currentLongFrameIndex = 0;
+        longFrameTriggerTimes = null;
+    }
+    
+    private void checkAndExecuteLongFrame() {
+        if (currentLongFrameIndex >= longFrameTriggerCount || longFrameTriggerTimes == null) return;
+        
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - scrollStartTime;
+        
+        if (elapsedTime >= longFrameTriggerTimes[currentLongFrameIndex]) {
+            if (currentTime - lastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
+                Trace.beginSection("MapSurface_longFrameLoad_" + (currentLongFrameIndex + 1));
+                executeLongFrameLoad();
+                Trace.endSection();
+                lastLongFrameTime = currentTime;
+                currentLongFrameIndex++;
+            }
+        }
+        
+        if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
+            startLongFrameCycle();
+        }
+    }
+    
+    private void executeLongFrameLoad() {
+        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
+        double sum = 0;
+        for (int i = 0; i < intensity; i++) {
+            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+            sum += Math.log(i + 1) + Math.tan(i * 0.01);
+        }
     }
     
     private void scheduleNextBetweenFrameTask() {
         if (!isBackgroundTaskRunning) return;
+        if (LoadType.isLongFrameLoad(loadType)) return;
         
-        int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
         
         mainHandler.postDelayed(() -> {
             if (!isBackgroundTaskRunning) return;
@@ -176,17 +243,23 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     private void executeBetweenFrameLoad() {
         int intensity;
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                intensity = 200;
+            case LoadType.LIGHT_BETWEEN_FRAMES:
+                intensity = LoadConfig.BETWEEN_FRAME_LIGHT_INTENSITY;
                 break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                intensity = 400;
+            case LoadType.LIGHT_MIXED:
+                intensity = LoadConfig.MIXED_BETWEEN_FRAME_LIGHT_INTENSITY;
                 break;
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                intensity = 800;
+            case LoadType.MEDIUM_BETWEEN_FRAMES:
+                intensity = LoadConfig.BETWEEN_FRAME_MEDIUM_INTENSITY;
+                break;
+            case LoadType.MEDIUM_MIXED:
+                intensity = LoadConfig.MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY;
+                break;
+            case LoadType.HEAVY_BETWEEN_FRAMES:
+                intensity = LoadConfig.BETWEEN_FRAME_HEAVY_INTENSITY;
+                break;
+            case LoadType.HEAVY_MIXED:
+                intensity = LoadConfig.MIXED_BETWEEN_FRAME_HEAVY_INTENSITY;
                 break;
             default:
                 return;
@@ -271,6 +344,11 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         int endTileX = startTileX + (width / TILE_SIZE) + 3;
         int endTileY = startTileY + (height / TILE_SIZE) + 3;
         
+        // Execute long frame load if applicable
+        if (LoadType.isLongFrameLoad(loadType) && isScrolling) {
+            checkAndExecuteLongFrame();
+        }
+        
         // Execute in-frame load
         executeInFrameLoad();
         
@@ -289,7 +367,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         
         // Draw load indicator
         textPaint.setTextSize(32);
-        canvas.drawText(LoadProfile.toLabel(loadType), width / 2f, 50, textPaint);
+        canvas.drawText(LoadType.toLabel(loadType), width / 2f, 50, textPaint);
     }
     
     private void drawTile(Canvas canvas, int tileX, int tileY, float x, float y) {
@@ -339,26 +417,8 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     }
     
     private void executeInFrameLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 100;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 500;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 2000;
-                break;
-            default:
-                iterations = 0;
-        }
+        // 使用统一的 LoadConfig 方法获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

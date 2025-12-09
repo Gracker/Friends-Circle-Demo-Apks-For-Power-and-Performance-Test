@@ -12,6 +12,7 @@ import com.example.wechatfriendforcustomscroller.databinding.ActivityCustomScrol
 import com.example.wechatfriendforcustomscroller.ui.state.CustomScrollUiState;
 import com.example.wechatfriendforcustomscroller.ui.timeline.CustomTimelineView;
 import com.example.wechatfriendforcustomscroller.ui.timeline.FriendCircleItemRenderer;
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.ui.timeline.LoadStressSimulator;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -28,7 +29,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
     private ActivityCustomScrollFeedBinding binding;
     private CustomScrollViewModel viewModel;
     private FriendCircleItemRenderer itemRenderer;
-    private int loadType = LoadProfile.LOAD_TYPE_LIGHT;
+    private int loadType = LoadType.LIGHT;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(CustomScrollViewModel.class);
         itemRenderer = new FriendCircleItemRenderer(this);
 
-        loadType = getIntent().getIntExtra(EXTRA_LOAD_TYPE, LoadProfile.LOAD_TYPE_LIGHT);
+        loadType = getIntent().getIntExtra(EXTRA_LOAD_TYPE, LoadType.LIGHT);
 
         CustomTimelineView timelineView = binding.customTimelineView;
         timelineView.setItemRenderer(itemRenderer);
@@ -55,8 +56,9 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
             viewModel.loadFeed(loadType);
         }
         
-        // Start background tasks for between-frame and mixed loads
-        if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
+        // Start background tasks for between-frame, mixed, and long-frame loads
+        if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType) 
+                || LoadType.isLongFrameLoad(loadType)) {
             LoadStressSimulator.getInstance().startBackgroundTasks(loadType);
         }
     }

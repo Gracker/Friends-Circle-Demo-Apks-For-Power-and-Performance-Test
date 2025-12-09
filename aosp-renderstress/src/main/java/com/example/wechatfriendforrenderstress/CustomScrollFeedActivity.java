@@ -18,11 +18,14 @@ import com.example.wechatfriendforrenderstress.ui.timeline.FriendCircleItemRende
 
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 /**
  * Core Activity for displaying RenderThread stress test list.
- * Supports all 10 load types including minimal, in-frame, between-frame, and mixed loads.
+ * Supports all 11 load types including minimal, in-frame, between-frame, mixed, and long-frame loads.
  */
 @AndroidEntryPoint
 public class CustomScrollFeedActivity extends AppCompatActivity implements Choreographer.FrameCallback {
@@ -32,17 +35,21 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     private ActivityCustomScrollFeedBinding binding;
     private CustomScrollViewModel viewModel;
     private FriendCircleItemRenderer itemRenderer;
-    private int loadType = LoadProfile.LOAD_TYPE_LIGHT;
+    private int loadType = LoadType.LIGHT;
     
     // Background task management
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = false;
     private boolean isScrolling = false;
-    private final Random random = new Random(12345L);
+    private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     
-    private static final int MIN_TASK_INTERVAL_MS = 16;
-    private static final int MAX_TASK_INTERVAL_MS = 83;
+    // Long frame state
+    private long scrollStartTime = 0;
+    private int longFrameTriggerCount = 0;
+    private int currentLongFrameIndex = 0;
+    private long[] longFrameTriggerTimes;
+    private long lastLongFrameTime = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,7 +60,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         viewModel = new ViewModelProvider(this).get(CustomScrollViewModel.class);
         itemRenderer = new FriendCircleItemRenderer(this);
 
-        loadType = getIntent().getIntExtra(EXTRA_LOAD_TYPE, LoadProfile.LOAD_TYPE_LIGHT);
+        loadType = getIntent().getIntExtra(EXTRA_LOAD_TYPE, LoadType.LIGHT);
 
         CustomTimelineView timelineView = binding.customTimelineView;
         timelineView.setItemRenderer(itemRenderer);
@@ -70,12 +77,11 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             viewModel.loadFeed(loadType);
         }
         
-        // Initialize choreographer for between-frame and mixed loads
-        if (LoadProfile.isBetweenFramesLoad(loadType) || LoadProfile.isMixedLoad(loadType)) {
+        // Initialize choreographer for between-frame, mixed, and long-frame loads
+        if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType) 
+                || LoadType.isLongFrameLoad(loadType)) {
             choreographer = Choreographer.getInstance();
             isTaskSchedulingEnabled = true;
-            // Don't start tasks here - they will be started when scrolling begins
-            // The CustomTimelineView will notify us through scroll callbacks
             setupScrollListener();
         }
     }
@@ -87,10 +93,15 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             public void onScrollStart() {
                 if (!isScrolling && isTaskSchedulingEnabled) {
                     isScrolling = true;
-                    scheduleNextBetweenFrameTask();
-                    if (LoadProfile.isMixedLoad(loadType)) {
+                    if (LoadType.isLongFrameLoad(loadType)) {
+                        startLongFrameCycle();
                         choreographer.postFrameCallback(CustomScrollFeedActivity.this);
-                        scheduleNextDoFrameTask();
+                    } else {
+                        scheduleNextBetweenFrameTask();
+                        if (LoadType.isMixedLoad(loadType)) {
+                            choreographer.postFrameCallback(CustomScrollFeedActivity.this);
+                            scheduleNextDoFrameTask();
+                        }
                     }
                 }
             }
@@ -98,6 +109,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             @Override
             public void onScrollStop() {
                 isScrolling = false;
+                resetLongFrameState();
                 handler.removeCallbacksAndMessages(null);
                 if (choreographer != null) {
                     choreographer.removeFrameCallback(CustomScrollFeedActivity.this);
@@ -142,15 +154,64 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (isTaskSchedulingEnabled && isScrolling && LoadProfile.isMixedLoad(loadType)) {
+        if (!isTaskSchedulingEnabled || !isScrolling) return;
+        
+        if (LoadType.isLongFrameLoad(loadType)) {
+            checkAndExecuteLongFrame();
+            choreographer.postFrameCallback(this);
+        } else if (LoadType.isMixedLoad(loadType)) {
             choreographer.postFrameCallback(this);
         }
     }
     
-    private void scheduleNextDoFrameTask() {
-        if (!isTaskSchedulingEnabled || !isScrolling || !LoadProfile.isMixedLoad(loadType)) return;
+    private void startLongFrameCycle() {
+        scrollStartTime = System.currentTimeMillis();
+        longFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
+        longFrameTriggerTimes = LoadConfig.getLongFrameTriggerTimes(longFrameTriggerCount);
+        currentLongFrameIndex = 0;
+        lastLongFrameTime = 0;
+    }
+    
+    private void resetLongFrameState() {
+        scrollStartTime = 0;
+        currentLongFrameIndex = 0;
+        longFrameTriggerTimes = null;
+    }
+    
+    private void checkAndExecuteLongFrame() {
+        if (currentLongFrameIndex >= longFrameTriggerCount || longFrameTriggerTimes == null) return;
         
-        int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - scrollStartTime;
+        
+        if (elapsedTime >= longFrameTriggerTimes[currentLongFrameIndex]) {
+            if (currentTime - lastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
+                android.os.Trace.beginSection("RenderStress_longFrameLoad_" + (currentLongFrameIndex + 1));
+                executeLongFrameLoad();
+                android.os.Trace.endSection();
+                lastLongFrameTime = currentTime;
+                currentLongFrameIndex++;
+            }
+        }
+        
+        if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
+            startLongFrameCycle();
+        }
+    }
+    
+    private void executeLongFrameLoad() {
+        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
+        double sum = 0;
+        for (int i = 0; i < intensity; i++) {
+            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+            sum += Math.log(i + 1) + Math.tan(i * 0.01);
+        }
+    }
+    
+    private void scheduleNextDoFrameTask() {
+        if (!isTaskSchedulingEnabled || !isScrolling || !LoadType.isMixedLoad(loadType)) return;
+        
+        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
         
         handler.postDelayed(() -> {
             if (!isTaskSchedulingEnabled || !isScrolling) return;
@@ -161,8 +222,9 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     
     private void scheduleNextBetweenFrameTask() {
         if (!isTaskSchedulingEnabled || !isScrolling) return;
+        if (!LoadType.isBetweenFramesLoad(loadType) && !LoadType.isMixedLoad(loadType)) return;
         
-        int intervalMs = MIN_TASK_INTERVAL_MS + random.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
         
         handler.postDelayed(() -> {
             if (!isTaskSchedulingEnabled || !isScrolling) return;
@@ -172,20 +234,8 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     }
     
     private void executeDoFrameLoad() {
-        int intensity;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                intensity = 1000;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                intensity = 2000;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                intensity = 4000;
-                break;
-            default:
-                return;
-        }
+        int intensity = LoadConfig.getDoFrameIntensity(convertToLoadType(loadType));
+        if (intensity == 0) return;
         
         double sum = 0;
         for (int i = 0; i < intensity; i++) {
@@ -193,33 +243,36 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         }
     }
     
+    private int convertToLoadType(int loadProfileType) {
+        switch (loadProfileType) {
+            case LoadType.MINIMAL: return com.example.loadconfig.LoadType.MINIMAL;
+            case LoadType.LIGHT: return com.example.loadconfig.LoadType.LIGHT;
+            case LoadType.MEDIUM: return com.example.loadconfig.LoadType.MEDIUM;
+            case LoadType.HEAVY: return com.example.loadconfig.LoadType.HEAVY;
+            case LoadType.LIGHT_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES;
+            case LoadType.MEDIUM_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES;
+            case LoadType.HEAVY_BETWEEN_FRAMES: return com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES;
+            case LoadType.LIGHT_MIXED: return com.example.loadconfig.LoadType.LIGHT_MIXED;
+            case LoadType.MEDIUM_MIXED: return com.example.loadconfig.LoadType.MEDIUM_MIXED;
+            case LoadType.HEAVY_MIXED: return com.example.loadconfig.LoadType.HEAVY_MIXED;
+            case LoadType.LONG_FRAME: return com.example.loadconfig.LoadType.LONG_FRAME;
+            default: return com.example.loadconfig.LoadType.MINIMAL;
+        }
+    }
+    
     private void executeBetweenFrameLoad() {
+        int convertedType = convertToLoadType(loadType);
         int intensity;
         boolean isHeavy = false;
         
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-                intensity = 200;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-                intensity = 400;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-                intensity = 800;
-                isHeavy = true;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                intensity = 120;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                intensity = 160;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                intensity = 107;
-                isHeavy = true;
-                break;
-            default:
-                return;
+        if (com.example.loadconfig.LoadType.isBetweenFramesLoad(convertedType)) {
+            intensity = LoadConfig.getBetweenFrameIntensity(convertedType);
+            isHeavy = (convertedType == com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES);
+        } else if (com.example.loadconfig.LoadType.isMixedLoad(convertedType)) {
+            intensity = LoadConfig.getMixedBetweenFrameIntensity(convertedType);
+            isHeavy = (convertedType == com.example.loadconfig.LoadType.HEAVY_MIXED);
+        } else {
+            return;
         }
         
         double sum = 0;

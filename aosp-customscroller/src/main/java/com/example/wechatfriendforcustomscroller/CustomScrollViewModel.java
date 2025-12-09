@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.data.FriendCircleRepository;
 import com.example.wechatfriendforcustomscroller.di.AppModule;
 import com.example.wechatfriendforcustomscroller.ui.state.CustomScrollUiState;
@@ -35,7 +36,7 @@ public class CustomScrollViewModel extends ViewModel {
         return uiState;
     }
 
-    public void loadFeed(@LoadProfile.LoadType int loadType) {
+    public void loadFeed(@LoadType.Type int loadType) {
         uiState.postValue(CustomScrollUiState.loading(loadType));
         ioExecutor.execute(() -> {
             try {

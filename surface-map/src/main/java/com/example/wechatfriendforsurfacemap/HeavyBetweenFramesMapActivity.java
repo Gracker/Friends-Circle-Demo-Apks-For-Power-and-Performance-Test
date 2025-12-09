@@ -1,10 +1,10 @@
 package com.example.wechatfriendforsurfacemap;
 
+import com.example.loadconfig.LoadType;
+
 public class HeavyBetweenFramesMapActivity extends BaseMapActivity {
     @Override
     protected int getLoadType() {
-        return LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES;
+        return LoadType.HEAVY_BETWEEN_FRAMES;
     }
 }
-
-

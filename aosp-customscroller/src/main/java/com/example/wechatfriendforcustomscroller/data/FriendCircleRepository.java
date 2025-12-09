@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.wechatfriendforcustomscroller.CustomScrollDataGenerator;
-import com.example.wechatfriendforcustomscroller.LoadProfile;
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.beans.FriendCircleBean;
 import com.example.wechatfriendforcustomscroller.data.local.FriendCircleDao;
 import com.example.wechatfriendforcustomscroller.data.local.FriendCircleEntity;
@@ -46,7 +46,7 @@ public class FriendCircleRepository {
      * 读取指定负载的数据，如必要则先生成再缓存。
      */
     @NonNull
-    public List<FriendCircleBean> getFriendCircles(@LoadProfile.LoadType int loadType) {
+    public List<FriendCircleBean> getFriendCircles(@LoadType.Type int loadType) {
         List<FriendCircleEntity> cached = friendCircleDao.getEntriesForLoad(loadType);
         if (cached != null && !cached.isEmpty()) {
             return mapEntities(cached);
@@ -57,7 +57,7 @@ public class FriendCircleRepository {
         return generated;
     }
 
-    private void persist(@LoadProfile.LoadType int loadType, List<FriendCircleBean> beans) {
+    private void persist(@LoadType.Type int loadType, List<FriendCircleBean> beans) {
         friendCircleDao.clearLoadType(loadType);
         if (beans == null || beans.isEmpty()) {
             return;

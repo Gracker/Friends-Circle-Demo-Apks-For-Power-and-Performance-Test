@@ -54,7 +54,7 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         setContentView(R.layout.activity_friend_circle_webview);
         
         // 获取传入的负载类型
-        loadType = getIntent().getIntExtra(WebViewMainActivity.EXTRA_LOAD_TYPE, WebViewMainActivity.LOAD_TYPE_LIGHT);
+        loadType = getIntent().getIntExtra(WebViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         
         // 初始化视图
         initViews();

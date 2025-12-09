@@ -1,10 +1,10 @@
 package com.example.wechatfriendforsurfacemap;
 
+import com.example.loadconfig.LoadType;
+
 public class HeavyMixedMapActivity extends BaseMapActivity {
     @Override
     protected int getLoadType() {
-        return LoadProfile.LOAD_TYPE_HEAVY_MIXED;
+        return LoadType.HEAVY_MIXED;
     }
 }
-
-

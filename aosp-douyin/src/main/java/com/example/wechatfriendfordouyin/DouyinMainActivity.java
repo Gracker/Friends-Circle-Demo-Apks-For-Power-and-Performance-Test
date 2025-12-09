@@ -92,7 +92,7 @@ public class DouyinMainActivity extends AppCompatActivity {
             "骑行在路上，风景在心中 #骑行日记 #户外运动"
         };
 
-        Random random = new Random();
+        Random random = new Random(42L); // 使用固定种子确保数据可重现
         
         // 添加4个视频数据
         mVideoDataList.add(new VideoData(

@@ -1,10 +1,10 @@
 package com.example.wechatfriendforsurfacemap;
 
+import com.example.loadconfig.LoadType;
+
 public class LightMixedMapActivity extends BaseMapActivity {
     @Override
     protected int getLoadType() {
-        return LoadProfile.LOAD_TYPE_LIGHT_MIXED;
+        return LoadType.LIGHT_MIXED;
     }
 }
-
-

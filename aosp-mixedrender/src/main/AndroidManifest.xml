@@ -28,6 +28,7 @@
         <activity android:name=".LightMixedActivity" android:exported="true" android:theme="@style/Theme.MixedRender.NoActionBar" />
         <activity android:name=".MediumMixedActivity" android:exported="true" android:theme="@style/Theme.MixedRender.NoActionBar" />
         <activity android:name=".HeavyMixedActivity" android:exported="true" android:theme="@style/Theme.MixedRender.NoActionBar" />
+        <activity android:name=".LongFrameActivity" android:exported="true" android:theme="@style/Theme.MixedRender.NoActionBar" />
             
     </application>
 

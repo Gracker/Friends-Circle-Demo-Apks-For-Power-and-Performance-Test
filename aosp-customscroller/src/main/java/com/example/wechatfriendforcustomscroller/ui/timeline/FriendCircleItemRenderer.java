@@ -17,7 +17,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.wechatfriendforcustomscroller.LoadProfile;
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.R;
 import com.example.wechatfriendforcustomscroller.adapters.NineImageAdapter;
 import com.example.wechatfriendforcustomscroller.beans.CommentBean;
@@ -56,7 +56,7 @@ public class FriendCircleItemRenderer {
     public void bind(@NonNull View view,
                      @NonNull FriendCircleBean friendCircleBean,
                      int position,
-                     @LoadProfile.LoadType int loadType) {
+                     @LoadType.Type int loadType) {
         FriendCircleViewHolder holder = (FriendCircleViewHolder) view.getTag();
         bindUserSection(holder, friendCircleBean, position);
         bindContentSection(holder, friendCircleBean);
@@ -66,7 +66,7 @@ public class FriendCircleItemRenderer {
     }
 
     public void bindHeaderView(@NonNull View headerView,
-                               @LoadProfile.LoadType int loadType,
+                               @LoadType.Type int loadType,
                                @NonNull Runnable backAction) {
         ImageView cover = headerView.findViewById(R.id.img_cover);
         ImageView avatar = headerView.findViewById(R.id.img_user_avatar);
@@ -75,7 +75,7 @@ public class FriendCircleItemRenderer {
 
         loadDrawableByName(cover, "main_bg", R.drawable.default_background, new RequestOptions().centerCrop());
         loadDrawableByName(avatar, "main_avatar", R.drawable.default_avatar, avatarOptions);
-        name.setText(LoadProfile.toLabel(loadType));
+        name.setText(LoadType.toLabel(loadType));
         back.setOnClickListener(v -> backAction.run());
     }
 

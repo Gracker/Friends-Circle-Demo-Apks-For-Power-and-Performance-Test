@@ -1,5 +1,7 @@
 package com.example.wechatfriendformixedrender;
-public class HeavyLoadActivity extends BaseMixedRenderActivity {
-    @Override protected int getLoadType() { return LoadProfile.LOAD_TYPE_HEAVY; }
-}
 
+import com.example.loadconfig.LoadType;
+
+public class HeavyLoadActivity extends BaseMixedRenderActivity {
+    @Override protected int getLoadType() { return LoadType.HEAVY; }
+}

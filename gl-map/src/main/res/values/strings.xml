@@ -6,6 +6,7 @@
     <string name="title_in_frame_load">In-Frame Load Test</string>
     <string name="title_between_frame_load">Between-Frame Load Test</string>
     <string name="title_mixed_load">Mixed Load Test</string>
+    <string name="title_long_frame_load">Long Frame Load Test</string>
     <string name="title_about">About</string>
     <string name="btn_minimal_load">Minimal Load</string>
     <string name="btn_light_load">In-Frame Light Load</string>
@@ -17,7 +18,8 @@
     <string name="btn_light_mixed">Mixed Light Load</string>
     <string name="btn_medium_mixed">Mixed Medium Load</string>
     <string name="btn_heavy_mixed">Mixed Heavy Load</string>
-    <string name="description">This app demonstrates OpenGL ES 2.0 map rendering, similar to Google Maps or Amap.\n\nFeatures:\n• GLSurfaceView for hardware-accelerated rendering\n• Pan and pinch-to-zoom gestures\n• Map grid, roads, buildings, and markers\n• Native UI overlays (search bar, controls)\n\nSupports 10 load types for performance testing.</string>
+    <string name="btn_long_frame">Long Frame Load (HEAVY×10)</string>
+    <string name="description">This app demonstrates OpenGL ES 2.0 map rendering, similar to Google Maps or Amap.\n\nFeatures:\n• GLSurfaceView for hardware-accelerated rendering\n• Pan and pinch-to-zoom gestures\n• Map grid, roads, buildings, and markers\n• Native UI overlays (search bar, controls)\n\nSupports 11 load types including Long Frame Load for performance testing.</string>
     <string name="copyright">© 2025 GL Map Performance Test App</string>
     <string name="search_hint">Search location...</string>
     <string name="btn_zoom_in">+</string>

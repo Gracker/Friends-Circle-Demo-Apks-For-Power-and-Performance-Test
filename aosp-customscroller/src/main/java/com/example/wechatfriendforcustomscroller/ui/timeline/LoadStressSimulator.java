@@ -7,34 +7,42 @@ import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Trace;
+import android.util.Log;
 import android.view.Choreographer;
 
-import com.example.wechatfriendforcustomscroller.LoadProfile;
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
 
 import java.util.Random;
 
 /**
- * 复用 wechatfriendforperformance 模块的负载配置，支持所有10种负载类型。
- * 包括：最轻负载、帧内负载(3种)、帧间负载(3种)、混合负载(3种)
+ * 负载模拟器，支持所有11种负载类型。
+ * 使用统一的 LoadConfig 配置负载参数。
  */
 public final class LoadStressSimulator implements Choreographer.FrameCallback {
 
-    private static final Random RANDOM = new Random(12345L);
+    private static final String TAG = "LoadStressSimulator";
+    
+    // 使用 LoadConfig 中的配置
+    private static final Random RANDOM = new Random(LoadConfig.COMPUTATION_SEED);
     private static final Paint PAINT = new Paint(Paint.ANTI_ALIAS_FLAG);
     private static Bitmap sBitmap;
     private static Canvas sCanvas;
-    
-    // 帧间任务配置
-    private static final int MIN_TASK_INTERVAL_MS = 16;
-    private static final int MAX_TASK_INTERVAL_MS = 83;
     
     // 单例和状态管理
     private static LoadStressSimulator sInstance;
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private boolean mIsRunning = false;
-    private boolean mIsScrolling = false; // 是否正在滚动
-    private int mCurrentLoadType = LoadProfile.LOAD_TYPE_LIGHT;
+    private boolean mIsScrolling = false;
+    private int mCurrentLoadType = LoadType.LIGHT;
+    
+    // 超长帧相关
+    private long mScrollStartTime = 0;
+    private int mLongFrameTriggerCount = 0;
+    private int mCurrentLongFrameIndex = 0;
+    private long[] mLongFrameTriggerTimes;
+    private long mLastLongFrameTime = 0;
 
     private LoadStressSimulator() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -50,19 +58,18 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
 
     private static void ensureCanvas() {
         if (sBitmap == null || sCanvas == null) {
-            sBitmap = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
+            int size = LoadConfig.getBitmapSize(LoadType.MEDIUM);
+            sBitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
             sCanvas = new Canvas(sBitmap);
         }
     }
     
     /**
-     * 启动后台任务调度（用于帧间和混合负载）
-     * 注意：这个方法现在只设置loadType，实际任务调度由滚动状态控制
+     * 启动后台任务调度
      */
-    public void startBackgroundTasks(@LoadProfile.LoadType int loadType) {
+    public void startBackgroundTasks(@LoadType.Type int loadType) {
         mCurrentLoadType = loadType;
         mIsRunning = true;
-        // 不再在这里启动任务调度，任务只在滚动时启动
     }
     
     /**
@@ -72,6 +79,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mIsRunning = false;
         mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
+        resetLongFrameState();
     }
     
     /**
@@ -83,13 +91,15 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         if (!mIsScrolling) {
             mIsScrolling = true;
             
-            if (LoadProfile.isBetweenFramesLoad(mCurrentLoadType) || LoadProfile.isMixedLoad(mCurrentLoadType)) {
-                scheduleNextBetweenFrameTask();
-            }
-            
-            if (LoadProfile.isMixedLoad(mCurrentLoadType)) {
+            if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
+                startLongFrameCycle();
                 mChoreographer.postFrameCallback(this);
-                scheduleNextDoFrameTask();
+            } else if (LoadType.isBetweenFramesLoad(mCurrentLoadType) || LoadType.isMixedLoad(mCurrentLoadType)) {
+                scheduleNextBetweenFrameTask();
+                if (LoadType.isMixedLoad(mCurrentLoadType)) {
+                    mChoreographer.postFrameCallback(this);
+                    scheduleNextDoFrameTask();
+                }
             }
         }
     }
@@ -100,20 +110,95 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     public void onScrollStop() {
         mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
+        resetLongFrameState();
+    }
+    
+    private void startLongFrameCycle() {
+        mScrollStartTime = System.currentTimeMillis();
+        mLongFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
+        mLongFrameTriggerTimes = LoadConfig.getLongFrameTriggerTimes(mLongFrameTriggerCount);
+        mCurrentLongFrameIndex = 0;
+        mLastLongFrameTime = 0;
+        Log.d(TAG, "startLongFrameCycle: 计划触发" + mLongFrameTriggerCount + "次超长帧");
+    }
+    
+    private void resetLongFrameState() {
+        mScrollStartTime = 0;
+        mCurrentLongFrameIndex = 0;
+        mLongFrameTriggerTimes = null;
     }
     
     @Override
     public void doFrame(long frameTimeNanos) {
-        // 只有在滚动时才继续帧回调
-        if (mIsRunning && mIsScrolling && LoadProfile.isMixedLoad(mCurrentLoadType)) {
+        if (!mIsRunning || !mIsScrolling) return;
+        
+        if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
+            checkAndExecuteLongFrame();
+            mChoreographer.postFrameCallback(this);
+        } else if (LoadType.isMixedLoad(mCurrentLoadType)) {
             mChoreographer.postFrameCallback(this);
         }
     }
     
-    private void scheduleNextDoFrameTask() {
-        if (!mIsRunning || !mIsScrolling || !LoadProfile.isMixedLoad(mCurrentLoadType)) return;
+    private void checkAndExecuteLongFrame() {
+        if (mCurrentLongFrameIndex >= mLongFrameTriggerCount || mLongFrameTriggerTimes == null) {
+            return;
+        }
         
-        int intervalMs = MIN_TASK_INTERVAL_MS + RANDOM.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - mScrollStartTime;
+        
+        if (elapsedTime >= mLongFrameTriggerTimes[mCurrentLongFrameIndex]) {
+            if (currentTime - mLastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
+                Log.d(TAG, "触发超长帧 #" + (mCurrentLongFrameIndex + 1) + "/" + mLongFrameTriggerCount);
+                
+                Trace.beginSection("CustomScroll_longFrameLoad_" + (mCurrentLongFrameIndex + 1));
+                executeLongFrameLoad();
+                Trace.endSection();
+                
+                mLastLongFrameTime = currentTime;
+                mCurrentLongFrameIndex++;
+            }
+        }
+        
+        if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
+            startLongFrameCycle();
+        }
+    }
+    
+    private void executeLongFrameLoad() {
+        int intensity = LoadConfig.LONG_FRAME_INTENSITY;
+        ensureCanvas();
+        
+        for (int i = 0; i < intensity; i++) {
+            float x = RANDOM.nextFloat() * 400;
+            float y = RANDOM.nextFloat() * 400;
+            
+            PAINT.setColor(Color.argb(
+                    RANDOM.nextInt(256),
+                    RANDOM.nextInt(256),
+                    RANDOM.nextInt(256),
+                    RANDOM.nextInt(256)
+            ));
+            
+            sCanvas.drawCircle(x, y, 10 + RANDOM.nextFloat() * 20, PAINT);
+            
+            double sinValue = Math.sin(x) * Math.cos(y);
+            double sqrtValue = Math.sqrt(x * x + y * y);
+            double logValue = Math.log(i + 1) + Math.log10(i + 1);
+            
+            if (sqrtValue > 300 && logValue > 5) {
+                PAINT.setARGB((int) sqrtValue % 256, (int) logValue * 25 % 256, 
+                               (int) (sinValue * 100) % 256, 255);
+            }
+        }
+    }
+    
+    private void scheduleNextDoFrameTask() {
+        if (!mIsRunning || !mIsScrolling || !LoadType.isMixedLoad(mCurrentLoadType)) return;
+        
+        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
+                RANDOM.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
         
         mHandler.postDelayed(() -> {
             if (!mIsRunning || !mIsScrolling) return;
@@ -128,8 +213,10 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     
     private void scheduleNextBetweenFrameTask() {
         if (!mIsRunning || !mIsScrolling) return;
+        if (!LoadType.isBetweenFramesLoad(mCurrentLoadType) && !LoadType.isMixedLoad(mCurrentLoadType)) return;
         
-        int intervalMs = MIN_TASK_INTERVAL_MS + RANDOM.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
+        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
+                RANDOM.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
         
         mHandler.postDelayed(() -> {
             if (!mIsRunning || !mIsScrolling) return;
@@ -142,22 +229,10 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         }, intervalMs);
     }
     
-    private void executeDoFrameLoad(@LoadProfile.LoadType int loadType) {
-        int intensity;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                intensity = 1000;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                intensity = 2000;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                intensity = 4000;
-                break;
-            default:
-                intensity = 0;
-                return;
-        }
+    private void executeDoFrameLoad(@LoadType.Type int loadType) {
+        // 使用 LoadConfig 获取强度
+        int intensity = LoadConfig.getDoFrameIntensity(convertToLoadType(loadType));
+        if (intensity == 0) return;
         
         double sum = 0;
         for (int i = 0; i < intensity; i++) {
@@ -165,36 +240,22 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         }
     }
     
-    private void executeBetweenFrameLoad(@LoadProfile.LoadType int loadType) {
+    private void executeBetweenFrameLoad(@LoadType.Type int loadType) {
         int intensity;
         boolean isHeavy = false;
         
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-                intensity = 200;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-                intensity = 400;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-                intensity = 800;
-                isHeavy = true;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                intensity = 120;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                intensity = 160;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                intensity = 107;
-                isHeavy = true;
-                break;
-            default:
-                return;
+        // 使用 LoadConfig 获取强度
+        int convertedType = convertToLoadType(loadType);
+        if (LoadType.isBetweenFramesLoad(convertedType)) {
+            intensity = LoadConfig.getBetweenFrameIntensity(convertedType);
+            isHeavy = (convertedType == LoadType.HEAVY_BETWEEN_FRAMES);
+        } else if (LoadType.isMixedLoad(convertedType)) {
+            intensity = LoadConfig.getMixedBetweenFrameIntensity(convertedType);
+            isHeavy = (convertedType == LoadType.HEAVY_MIXED);
+        } else {
+            return;
         }
         
-        // 数学计算
         double sum = 0;
         for (int i = 1; i <= intensity; i++) {
             sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i);
@@ -203,76 +264,103 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             }
         }
         
-        // 简单图形绘制
         ensureCanvas();
-        for (int i = 0; i < intensity / 10; i++) {
+        int drawCount = Math.min(intensity / 10, 100);
+        for (int i = 0; i < drawCount; i++) {
             PAINT.setColor(Color.rgb(RANDOM.nextInt(256), RANDOM.nextInt(256), RANDOM.nextInt(256)));
             sCanvas.drawCircle(RANDOM.nextFloat() * 200, RANDOM.nextFloat() * 200, 5 + RANDOM.nextFloat() * 10, PAINT);
         }
     }
+    
+    /**
+     * 将 LoadProfile 类型转换为 LoadType
+     */
+    private int convertToLoadType(int loadProfileType) {
+        switch (loadProfileType) {
+            case LoadType.MINIMAL: return LoadType.MINIMAL;
+            case LoadType.LIGHT: return LoadType.LIGHT;
+            case LoadType.MEDIUM: return LoadType.MEDIUM;
+            case LoadType.HEAVY: return LoadType.HEAVY;
+            case LoadType.LIGHT_BETWEEN_FRAMES: return LoadType.LIGHT_BETWEEN_FRAMES;
+            case LoadType.MEDIUM_BETWEEN_FRAMES: return LoadType.MEDIUM_BETWEEN_FRAMES;
+            case LoadType.HEAVY_BETWEEN_FRAMES: return LoadType.HEAVY_BETWEEN_FRAMES;
+            case LoadType.LIGHT_MIXED: return LoadType.LIGHT_MIXED;
+            case LoadType.MEDIUM_MIXED: return LoadType.MEDIUM_MIXED;
+            case LoadType.HEAVY_MIXED: return LoadType.HEAVY_MIXED;
+            case LoadType.LONG_FRAME: return LoadType.LONG_FRAME;
+            default: return LoadType.MINIMAL;
+        }
+    }
 
-    public static void runAdapterLoad(@LoadProfile.LoadType int loadType) {
+    public static void runAdapterLoad(@LoadType.Type int loadType) {
         ensureCanvas();
-        int iterations;
+        
+        // 使用 LoadConfig 获取强度
+        int intensity;
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
+            case LoadType.MINIMAL:
+                intensity = 0;
                 break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 800;
+            case LoadType.LIGHT:
+            case LoadType.LIGHT_BETWEEN_FRAMES:
+            case LoadType.LIGHT_MIXED:
+                intensity = LoadConfig.IN_FRAME_LIGHT_INTENSITY;
                 break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 2000;
+            case LoadType.MEDIUM:
+            case LoadType.MEDIUM_BETWEEN_FRAMES:
+            case LoadType.MEDIUM_MIXED:
+                intensity = LoadConfig.IN_FRAME_MEDIUM_INTENSITY;
                 break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
+            case LoadType.HEAVY:
+            case LoadType.HEAVY_BETWEEN_FRAMES:
+            case LoadType.HEAVY_MIXED:
+                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
+                break;
+            case LoadType.LONG_FRAME:
+                // 超长帧负载由 doFrame 回调处理，Adapter 使用 HEAVY 强度
+                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
+                break;
             default:
-                iterations = 5;
+                intensity = 0;
                 break;
         }
         
-        if (iterations == 0) return;
+        if (intensity == 0) return;
         
         Trace.beginSection("FriendCircleAdapter_simulateComputationalLoad");
-        performIterations(iterations, loadType >= LoadProfile.LOAD_TYPE_MEDIUM || 
-                loadType == LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES ||
-                loadType == LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES ||
-                loadType == LoadProfile.LOAD_TYPE_MEDIUM_MIXED ||
-                loadType == LoadProfile.LOAD_TYPE_HEAVY_MIXED);
+        performIterations(intensity, loadType >= LoadType.MEDIUM);
         Trace.endSection();
     }
 
-    public static void runContinuousLoad(@LoadProfile.LoadType int loadType) {
-        int iterations;
+    public static void runContinuousLoad(@LoadType.Type int loadType) {
+        int intensity;
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
+            case LoadType.MINIMAL:
+            case LoadType.LIGHT:
+            case LoadType.LIGHT_BETWEEN_FRAMES:
+            case LoadType.LIGHT_MIXED:
+                intensity = 0;
                 break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 200;
+            case LoadType.MEDIUM:
+            case LoadType.MEDIUM_BETWEEN_FRAMES:
+            case LoadType.MEDIUM_MIXED:
+                intensity = LoadConfig.IN_FRAME_MEDIUM_INTENSITY;
                 break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 500;
+            case LoadType.HEAVY:
+            case LoadType.HEAVY_BETWEEN_FRAMES:
+            case LoadType.HEAVY_MIXED:
+            case LoadType.LONG_FRAME:
+                intensity = LoadConfig.IN_FRAME_HEAVY_INTENSITY;
                 break;
             default:
-                iterations = 0;
+                intensity = 0;
                 break;
         }
-        if (iterations <= 0) {
-            return;
-        }
+        if (intensity <= 0) return;
+        
         ensureCanvas();
         Trace.beginSection("FriendCircleAdapter_continuousLoad");
-        performIterations(iterations, true);
+        performIterations(intensity, true);
         Trace.endSection();
     }
 

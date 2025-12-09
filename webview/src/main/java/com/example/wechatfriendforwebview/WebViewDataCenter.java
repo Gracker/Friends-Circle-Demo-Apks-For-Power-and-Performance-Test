@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+
 /**
  * WebView版朋友圈数据中心
  * 负责生成和管理朋友圈数据
@@ -66,13 +68,13 @@ public class WebViewDataCenter {
         // 根据负载类型确定生成的朋友圈数量
         int count;
         switch (loadType) {
-            case WebViewMainActivity.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 count = 20;  // 轻负载，20条数据
                 break;
-            case WebViewMainActivity.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 count = 50;  // 中负载，50条数据
                 break;
-            case WebViewMainActivity.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 count = 100; // 高负载，100条数据
                 break;
             default:
@@ -98,7 +100,7 @@ public class WebViewDataCenter {
      */
     private String generateFriendCircleJsonData(int count, int loadType) {
         JSONArray friendCircleArray = new JSONArray();
-        Random random = new Random(123); // 使用固定的种子值，确保每次生成的数据顺序一致
+        Random random = new Random(LoadConfig.DATA_GENERATION_SEED); // 使用统一配置的种子值，确保每次生成的数据顺序一致
         
         try {
             // 第一条固定为"朋友圈"头部
@@ -145,13 +147,13 @@ public class WebViewDataCenter {
                 // 根据负载类型调整评论数量
                 int maxComments;
                 switch (loadType) {
-                    case WebViewMainActivity.LOAD_TYPE_LIGHT:
+                    case com.example.loadconfig.LoadType.LIGHT:
                         maxComments = 5;   // 轻负载: 0-4条评论
                         break;
-                    case WebViewMainActivity.LOAD_TYPE_MEDIUM:
+                    case com.example.loadconfig.LoadType.MEDIUM:
                         maxComments = 15;  // 中负载: 0-14条评论
                         break;
-                    case WebViewMainActivity.LOAD_TYPE_HEAVY:
+                    case com.example.loadconfig.LoadType.HEAVY:
                         maxComments = 11;  // 高负载: 0-10条评论
                         break;
                     default:
@@ -184,13 +186,13 @@ public class WebViewDataCenter {
                 // 根据负载类型调整点赞数量
                 int maxPraises;
                 switch (loadType) {
-                    case WebViewMainActivity.LOAD_TYPE_LIGHT:
+                    case com.example.loadconfig.LoadType.LIGHT:
                         maxPraises = 15;   // 轻负载: 0-14个点赞
                         break;
-                    case WebViewMainActivity.LOAD_TYPE_MEDIUM:
+                    case com.example.loadconfig.LoadType.MEDIUM:
                         maxPraises = 35;   // 中负载: 0-34个点赞
                         break;
-                    case WebViewMainActivity.LOAD_TYPE_HEAVY:
+                    case com.example.loadconfig.LoadType.HEAVY:
                         maxPraises = 21;   // 高负载: 0-20个点赞
                         break;
                     default:

@@ -12,6 +12,9 @@ import android.view.View;
 
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 /**
  * Second window view that continuously animates to trigger its own RenderThread drawFrame.
  * This creates the dual-window rendering pattern visible in systrace.
@@ -27,7 +30,7 @@ public class SecondWindowView extends View implements Choreographer.FrameCallbac
     private boolean isAnimating = false;
     private Choreographer choreographer;
     
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
     
     // Simulated list items
@@ -69,7 +72,7 @@ public class SecondWindowView extends View implements Choreographer.FrameCallbac
         choreographer = Choreographer.getInstance();
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
     
@@ -138,7 +141,7 @@ public class SecondWindowView extends View implements Choreographer.FrameCallbac
         
         // Draw title
         canvas.drawText("Window 2 (Overlay)", centerX, 50, textPaint);
-        canvas.drawText(LoadProfile.toLabel(loadType), centerX, 90, textPaint);
+        canvas.drawText(LoadType.toLabel(loadType), centerX, 90, textPaint);
         
         // Draw simulated list items
         float itemHeight = 80;
@@ -164,29 +167,8 @@ public class SecondWindowView extends View implements Choreographer.FrameCallbac
     }
     
     private void executeLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 50;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 250;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 1000;
-                break;
-            default:
-                iterations = 0;
-        }
+        // 使用统一的 LoadConfig 获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

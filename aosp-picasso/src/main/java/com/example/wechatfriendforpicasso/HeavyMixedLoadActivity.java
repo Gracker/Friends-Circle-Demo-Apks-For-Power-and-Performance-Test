@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 // Removed Glide imports
 // Using Picasso
 import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapter;
-import com.example.wechatfriendforpicasso.config.LoadConfig;
+import com.example.loadconfig.LoadConfig;
 
 import java.util.Random;
 
@@ -37,13 +37,13 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     private static final String TAG = "HeavyMixedLoadActivity";
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY;
+    private int mLoadType = com.example.loadconfig.LoadType.HEAVY;
     
     // 高负载混合Task配置 - 使用统一配置中心
     private static final int MIN_TASK_INTERVAL_MS = LoadConfig.MIN_TASK_INTERVAL_MS;
     private static final int MAX_TASK_INTERVAL_MS = LoadConfig.MAX_TASK_INTERVAL_MS;
-    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.HeavyMixedLoad.DOFRAME_TASK_INTENSITY;
-    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.HeavyMixedLoad.BETWEEN_FRAME_TASK_INTENSITY;
+    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.MIXED_DOFRAME_HEAVY_INTENSITY;
+    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.MIXED_BETWEEN_FRAME_HEAVY_INTENSITY;
     
     // 随机数生成器和调度器
     private Choreographer mChoreographer;
@@ -84,7 +84,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         }
         
 
@@ -480,7 +480,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         if (adapter != null) {
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
-        Log.d(TAG, "onResume: " + LoadConfig.getLoadConfigDescription("HeavyMixedLoad"));
+        Log.d(TAG, "onResume: " + LoadConfig.getDescription(com.example.loadconfig.LoadType.HEAVY_MIXED));
         mIsTaskSchedulingEnabled = true;
         mIsScrolling = false;
     }

@@ -26,6 +26,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforvideo.adapters.VideoFriendCircleAdapter;
 import com.example.wechatfriendforvideo.beans.FriendCircleBean;
 
+import com.example.loadconfig.LoadConfig;
+
 import java.util.List;
 import java.util.Random;
 import android.util.Log;
@@ -40,13 +42,13 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     private RecyclerView recyclerView;
     private VideoFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM;
+    private int mLoadType = com.example.loadconfig.LoadType.MEDIUM;
     
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
     private static final int HEAVY_FRAME_INTERVAL = 8;
-    private Random mRandom = new Random();
+    private Random mRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
@@ -69,7 +71,7 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(VideoMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(VideoMainActivity.EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            mLoadType = intent.getIntExtra(VideoMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         }
         
         // Process image name, remove possible file extension
@@ -222,11 +224,11 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
 
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case VideoFriendCircleAdapter.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 return "轻负载";
-            case VideoFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 return "中负载";
-            case VideoFriendCircleAdapter.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";

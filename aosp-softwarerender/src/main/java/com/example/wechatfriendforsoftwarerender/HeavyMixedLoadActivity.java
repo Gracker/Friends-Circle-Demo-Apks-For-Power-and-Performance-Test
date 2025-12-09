@@ -24,7 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforsoftwarerender.adapters.SoftwareRenderFriendCircleAdapter;
-import com.example.wechatfriendforsoftwarerender.config.LoadConfig;
+import com.example.loadconfig.LoadConfig;
 
 import java.util.Random;
 
@@ -38,13 +38,13 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     private RecyclerView recyclerView;
     private SoftwareRenderFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY;
+    private int mLoadType = com.example.loadconfig.LoadType.HEAVY;
     
     // 高负载混合Task配置 - 使用统一配置中心
     private static final int MIN_TASK_INTERVAL_MS = LoadConfig.MIN_TASK_INTERVAL_MS;
     private static final int MAX_TASK_INTERVAL_MS = LoadConfig.MAX_TASK_INTERVAL_MS;
-    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.HeavyMixedLoad.DOFRAME_TASK_INTENSITY;
-    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.HeavyMixedLoad.BETWEEN_FRAME_TASK_INTENSITY;
+    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.MIXED_DOFRAME_HEAVY_INTENSITY;
+    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.MIXED_BETWEEN_FRAME_HEAVY_INTENSITY;
     
     // 随机数生成器和调度器
     private Choreographer mChoreographer;
@@ -85,7 +85,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         }
         
         imageLoader = Glide.with(this).asDrawable().apply(
@@ -489,7 +489,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
             adapter.setFriendCircleBeans(SoftwareRenderDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
 
-        Log.d(TAG, "onResume: " + LoadConfig.getLoadConfigDescription("HeavyMixedLoad"));
+        Log.d(TAG, "onResume: " + LoadConfig.getDescription(com.example.loadconfig.LoadType.HEAVY_MIXED));
         Log.d(TAG, "Task间隔: " + MIN_TASK_INTERVAL_MS + "-" + MAX_TASK_INTERVAL_MS + "ms");
         
         // 恢复Task调度和帧回调

@@ -8,6 +8,7 @@
     <string name="title_in_frame_load">In-Frame Load Test</string>
     <string name="title_between_frame_load">Between-Frame Load Test</string>
     <string name="title_mixed_load">Mixed Load Test</string>
+    <string name="title_long_frame_load">Long Frame Load Test</string>
     <string name="title_select_load">Select Load Level:</string>
     <string name="title_about">About</string>
     
@@ -22,9 +23,10 @@
     <string name="btn_light_mixed">Mixed Light Load</string>
     <string name="btn_medium_mixed">Mixed Medium Load</string>
     <string name="btn_heavy_mixed">Mixed Heavy Load</string>
+    <string name="btn_long_frame">Long Frame Load (HEAVY×10)</string>
     
     <!-- Description -->
-    <string name="description">This app simulates WeChat Moments scrolling using Custom OverScroller to test scroll performance under different computational loads.\n\nThis app provides 10 different load levels:\n• Minimal Load: No additional load\n• In-Frame Loads (3): Execute load during frame rendering\n• Between-Frame Loads (3): Execute load between frames\n• Mixed Loads (3): Execute both in-frame and between-frame loads\n\nBy comparing performance across different modes, developers can identify and resolve performance bottlenecks.</string>
+    <string name="description">This app simulates WeChat Moments scrolling using Custom OverScroller to test scroll performance under different computational loads.\n\nThis app provides 11 different load levels:\n• Minimal Load: No additional load\n• In-Frame Loads (3): Execute load during frame rendering\n• Between-Frame Loads (3): Execute load between frames\n• Mixed Loads (3): Execute both in-frame and between-frame loads\n• Long Frame Load: Random 2-3 super heavy frames per 2s scroll\n\nBy comparing performance across different modes, developers can identify and resolve performance bottlenecks.</string>
     
     <!-- Status messages -->
     <string name="loading_feed">Loading custom scroll list...</string>

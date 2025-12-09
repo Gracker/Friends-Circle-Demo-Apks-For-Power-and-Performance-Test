@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 // Picasso is used instead of Glide
 // Removed Glide imports
 // Using Picasso
+import com.example.loadconfig.LoadConfig;
 import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapter;
 
 import java.util.Random;
@@ -35,19 +36,19 @@ public class MediumLoadBetweenFramesActivity extends AppCompatActivity implement
     private static final String TAG = "MediumLoadBetweenFramesActivity";
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM;
+    private int mLoadType = com.example.loadconfig.LoadType.MEDIUM;
     
     // 用于在帧之间执行负载的成员变量
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mRandom = new Random(12345);
-    private Random mTaskDecisionRandom = new Random(67890);
+    private Random mRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
+    private Random mTaskDecisionRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private boolean mIsBetweenFrameLoadEnabled = true;
     private boolean mIsScrolling = false;
-    private float mTaskExecutionProbability = 0.5f;
+    private float mTaskExecutionProbability = LoadConfig.MEDIUM_TASK_PROBABILITY;
     
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
@@ -68,7 +69,7 @@ public class MediumLoadBetweenFramesActivity extends AppCompatActivity implement
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         }
         
 
@@ -297,13 +298,13 @@ public class MediumLoadBetweenFramesActivity extends AppCompatActivity implement
 
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MINIMAL:
+            case com.example.loadconfig.LoadType.MINIMAL:
                 return "最轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 return "轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 return "中负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";

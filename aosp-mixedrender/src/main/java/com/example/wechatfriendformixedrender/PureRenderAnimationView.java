@@ -13,6 +13,9 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 /**
  * Pure RenderThread animation view using SurfaceView.
  * All rendering happens on a dedicated render thread, not the UI Thread or standard RenderThread.
@@ -30,7 +33,7 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     private Paint textPaint;
     
     private float animationTime = 0f;
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
 
     public PureRenderAnimationView(Context context) {
@@ -60,7 +63,7 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
         textPaint.setTextAlign(Paint.Align.CENTER);
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
 
@@ -178,29 +181,8 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     }
     
     private void executeLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 100;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 500;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 2000;
-                break;
-            default:
-                iterations = 0;
-        }
+        // 使用统一的 LoadConfig 获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

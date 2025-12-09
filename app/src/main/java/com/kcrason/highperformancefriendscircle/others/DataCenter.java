@@ -11,6 +11,7 @@ import com.kcrason.highperformancefriendscircle.beans.OtherInfoBean;
 import com.kcrason.highperformancefriendscircle.beans.PraiseBean;
 import com.kcrason.highperformancefriendscircle.beans.UserBean;
 import com.kcrason.highperformancefriendscircle.utils.SpanUtils;
+import com.example.loadconfig.LoadConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.Random;
 public class DataCenter {
 
     // 使用固定种子的Random实例，确保每次生成的数据一致
-    private static final Random sRandom = new Random(42);
+    private static final Random sRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
     
     // 获取0到max-1之间的随机整数
     private static int getRandomInt(int max) {

@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.loadconfig.LoadConfig;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.wechatfriendforperformance.beans.FriendCircleBean;
 
@@ -40,13 +41,13 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM;
+    private int mLoadType = com.example.loadconfig.LoadType.MEDIUM;
     
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
     private static final int HEAVY_FRAME_INTERVAL = 8;
-    private Random mRandom = new Random();
+    private Random mRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
@@ -69,7 +70,7 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM);
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         }
         
         // Process image name, remove possible file extension
@@ -218,16 +219,8 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     }
 
     private String getLoadTypeString(int loadType) {
-        switch (loadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                return "轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                return "中负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                return "高负载";
-            default:
-                return "未知负载";
-        }
+        // 使用统一的 LoadType.toLabel() 获取负载类型标签
+        return com.example.loadconfig.LoadType.toLabel(loadType);
     }
 
     @Override

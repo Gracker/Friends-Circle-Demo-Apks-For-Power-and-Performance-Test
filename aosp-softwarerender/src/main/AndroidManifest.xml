@@ -81,6 +81,12 @@
             android:name=".HeavyMixedLoadActivity"
             android:hardwareAccelerated="false"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        
+        <!-- 超长帧负载Activity -->
+        <activity
+            android:name=".LongFrameLoadActivity"
+            android:hardwareAccelerated="false"
+            android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
             
         <!-- 图片查看器Activity -->
         <activity 

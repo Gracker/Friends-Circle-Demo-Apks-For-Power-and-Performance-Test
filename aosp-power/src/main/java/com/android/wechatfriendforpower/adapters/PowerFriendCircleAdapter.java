@@ -23,6 +23,7 @@ import com.android.wechatfriendforpower.interfaces.OnPraiseOrCommentClickListene
 import com.android.wechatfriendforpower.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.example.loadconfig.LoadConfig;
 import com.bumptech.glide.request.RequestOptions;
 // 移除StfalconImageViewer相关imports
 
@@ -51,7 +52,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
     private View mHeaderView;
-    private Random mRandom = new Random(0); // 使用固定种子，确保每次运行结果一样
+    private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED); // 使用统一配置的种子，确保每次运行结果一样
 
     public PowerFriendCircleAdapter(Context context, RecyclerView recyclerView) {
         this.mContext = context;

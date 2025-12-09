@@ -24,7 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforvideo.adapters.VideoFriendCircleAdapter;
-import com.example.wechatfriendforvideo.config.LoadConfig;
+import com.example.loadconfig.LoadConfig;
 
 import java.util.Random;
 
@@ -38,13 +38,13 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     private RecyclerView recyclerView;
     private VideoFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = VideoFriendCircleAdapter.LOAD_TYPE_LIGHT;
+    private int mLoadType = com.example.loadconfig.LoadType.LIGHT;
     
     // 轻负载混合Task配置 - 使用统一配置中心
     private static final int MIN_TASK_INTERVAL_MS = LoadConfig.MIN_TASK_INTERVAL_MS;
     private static final int MAX_TASK_INTERVAL_MS = LoadConfig.MAX_TASK_INTERVAL_MS;
-    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.LightMixedLoad.DOFRAME_TASK_INTENSITY;
-    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.LightMixedLoad.BETWEEN_FRAME_TASK_INTENSITY;
+    private static final int DOFRAME_TASK_INTENSITY = LoadConfig.MIXED_DOFRAME_LIGHT_INTENSITY;
+    private static final int BETWEEN_FRAME_TASK_INTENSITY = LoadConfig.MIXED_BETWEEN_FRAME_LIGHT_INTENSITY;
     
     // 随机数生成器和调度器
     private Choreographer mChoreographer;
@@ -83,7 +83,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(VideoMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(VideoMainActivity.EXTRA_LOAD_TYPE, VideoFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            mLoadType = intent.getIntExtra(VideoMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         }
         
         imageLoader = Glide.with(this).asDrawable().apply(
@@ -252,7 +252,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         if (adapter != null) {
             adapter.setFriendCircleBeans(VideoDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
-        Log.d(TAG, "onResume: " + LoadConfig.getLoadConfigDescription("LightMixedLoad"));
+        Log.d(TAG, "onResume: " + LoadConfig.getDescription(com.example.loadconfig.LoadType.LIGHT_MIXED));
         mIsTaskSchedulingEnabled = true;
         mIsScrolling = false;
     }

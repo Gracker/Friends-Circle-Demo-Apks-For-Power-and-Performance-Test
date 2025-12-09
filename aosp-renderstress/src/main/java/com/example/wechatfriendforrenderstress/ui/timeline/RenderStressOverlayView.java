@@ -23,7 +23,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.example.wechatfriendforrenderstress.LoadProfile;
+import com.example.loadconfig.LoadType;
 
 /**
  * 半透明覆盖层：UI 线程只做轻量绘制，而通过 RenderEffect / Shader 在 RenderThread 端制造繁重工作。
@@ -42,7 +42,7 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
 
     private boolean running;
     private float phase;
-    private @LoadProfile.LoadType int currentLoad = LoadProfile.LOAD_TYPE_LIGHT;
+    private @LoadType.Type int currentLoad = LoadType.LIGHT;
     private ValueAnimator legacyAnimator;
 
     public RenderStressOverlayView(Context context) {
@@ -70,8 +70,8 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
         accentPaint.setPathEffect(new ComposePathEffect(new CornerPathEffect(24f), new CornerPathEffect(12f)));
     }
 
-    public void start(@LoadProfile.LoadType int loadType) {
-        if (loadType == LoadProfile.LOAD_TYPE_LIGHT) {
+    public void start(@LoadType.Type int loadType) {
+        if (loadType == LoadType.LIGHT) {
             stop();
             return;
         }
@@ -107,7 +107,7 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
         if (!running) {
             return;
         }
-        phase += currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? 0.035f : 0.08f;
+        phase += currentLoad == LoadType.MEDIUM ? 0.035f : 0.08f;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             applyRenderEffect();
         }
@@ -127,7 +127,7 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
             return;
         }
         Trace.beginSection("RenderStressOverlay_draw");
-        int repeats = currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? MEDIUM_LAYER_REPEATS : HEAVY_LAYER_REPEATS;
+        int repeats = currentLoad == LoadType.MEDIUM ? MEDIUM_LAYER_REPEATS : HEAVY_LAYER_REPEATS;
         for (int layer = 0; layer < repeats; layer++) {
             float layerAlpha = (layer + 1f) / repeats;
             overlayPaint.setShader(new LinearGradient(
@@ -154,8 +154,8 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
 
     @RequiresApi(api = Build.VERSION_CODES.S)
     private void applyRenderEffect() {
-        float baseBlur = currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? 90f : 210f;
-        float oscillation = (float) Math.abs(Math.sin(phase * 3f)) * (currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? 30f : 90f);
+        float baseBlur = currentLoad == LoadType.MEDIUM ? 90f : 210f;
+        float oscillation = (float) Math.abs(Math.sin(phase * 3f)) * (currentLoad == LoadType.MEDIUM ? 30f : 90f);
         float blurRadius = baseBlur + oscillation;
         android.graphics.RenderEffect blurA = android.graphics.RenderEffect.createBlurEffect(
                 blurRadius,
@@ -168,7 +168,7 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
                 Shader.TileMode.CLAMP
         );
         android.graphics.ColorMatrix cm = new android.graphics.ColorMatrix();
-        if (currentLoad == LoadProfile.LOAD_TYPE_MEDIUM) {
+        if (currentLoad == LoadType.MEDIUM) {
             cm.setScale(1.05f, 0.95f, 1.1f, 0.85f);
         } else {
             cm.setRotate(0, 12f);
@@ -189,17 +189,17 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
         setRenderEffect(android.graphics.RenderEffect.createChainEffect(blurB, colorEffect));
     }
 
-    private void ensureLegacyAnimator(@LoadProfile.LoadType int loadType) {
+    private void ensureLegacyAnimator(@LoadType.Type int loadType) {
         if (legacyAnimator != null) {
             legacyAnimator.cancel();
         }
         legacyAnimator = ValueAnimator.ofFloat(0f, 1f);
-        legacyAnimator.setDuration(loadType == LoadProfile.LOAD_TYPE_MEDIUM ? 480 : 280);
+        legacyAnimator.setDuration(loadType == LoadType.MEDIUM ? 480 : 280);
         legacyAnimator.setRepeatMode(ValueAnimator.REVERSE);
         legacyAnimator.setRepeatCount(ValueAnimator.INFINITE);
         legacyAnimator.addUpdateListener(animation -> {
             float value = (float) animation.getAnimatedValue();
-            float radius = loadType == LoadProfile.LOAD_TYPE_MEDIUM ? 28f : 65f;
+            float radius = loadType == LoadType.MEDIUM ? 28f : 65f;
             overlayPaint.setMaskFilter(new BlurMaskFilter(radius + value * radius, BlurMaskFilter.Blur.NORMAL));
             invalidate();
         });
@@ -207,8 +207,8 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
     }
 
     private void drawWaveBand(Canvas canvas, float width, float height, float layerAlpha) {
-        float amplitude = (currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? 0.08f : 0.18f) * height * layerAlpha;
-        float wavelength = currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? width / 2.2f : width / 3.5f;
+        float amplitude = (currentLoad == LoadType.MEDIUM ? 0.08f : 0.18f) * height * layerAlpha;
+        float wavelength = currentLoad == LoadType.MEDIUM ? width / 2.2f : width / 3.5f;
         wavePath.reset();
         wavePath.moveTo(0, height);
         for (int i = 0; i <= 40; i++) {
@@ -224,17 +224,17 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
     }
 
     private void drawAccentArcs(Canvas canvas, float width, float height, float layerAlpha) {
-        if (currentLoad == LoadProfile.LOAD_TYPE_LIGHT) {
+        if (currentLoad == LoadType.LIGHT) {
             return;
         }
-        float radius = Math.min(width, height) * (currentLoad == LoadProfile.LOAD_TYPE_MEDIUM ? 0.25f : 0.42f);
+        float radius = Math.min(width, height) * (currentLoad == LoadType.MEDIUM ? 0.25f : 0.42f);
         float centerX = width / 2f;
         float centerY = height / 2f;
         tempRect.set(centerX - radius, centerY - radius, centerX + radius, centerY + radius);
         accentPaint.setAlpha((int) (70 + 110 * layerAlpha));
         canvas.drawArc(tempRect, phase * 120f, 120f + layerAlpha * 90f, false, accentPaint);
 
-        if (currentLoad == LoadProfile.LOAD_TYPE_HEAVY) {
+        if (currentLoad == LoadType.HEAVY) {
             for (int i = 0; i < 3; i++) {
                 float inset = i * radius * 0.12f;
                 tempRect.inset(inset, inset);

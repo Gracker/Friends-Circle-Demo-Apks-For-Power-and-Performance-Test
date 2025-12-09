@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 
-import com.example.wechatfriendforrenderstress.LoadProfile;
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforrenderstress.beans.FriendCircleBean;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class CustomTimelineView extends ViewGroup {
     private View headerView;
     private int scrollOffset;
     private int contentHeight;
-    private int loadProfile = LoadProfile.LOAD_TYPE_LIGHT;
+    private int loadProfile = LoadType.LIGHT;
 
     private final CustomOverScroller customOverScroller;
     private RenderStressOverlayView renderStressOverlay;
@@ -108,16 +108,16 @@ public class CustomTimelineView extends ViewGroup {
         }
     }
 
-    public void setLoadProfile(@LoadProfile.LoadType int loadProfile) {
+    public void setLoadProfile(@LoadType.Type int loadProfile) {
         this.loadProfile = loadProfile;
-        if (loadProfile == LoadProfile.LOAD_TYPE_LIGHT) {
+        if (loadProfile == LoadType.LIGHT) {
             notifyRenderStressStop();
         }
     }
 
-    public void submitData(List<FriendCircleBean> beans, @LoadProfile.LoadType int loadType) {
+    public void submitData(List<FriendCircleBean> beans, @LoadType.Type int loadType) {
         loadProfile = loadType;
-        if (loadProfile == LoadProfile.LOAD_TYPE_LIGHT) {
+        if (loadProfile == LoadType.LIGHT) {
             notifyRenderStressStop();
         }
         data.clear();
@@ -369,7 +369,7 @@ public class CustomTimelineView extends ViewGroup {
     }
 
     private void notifyRenderStressStart() {
-        if (renderStressOverlay != null && loadProfile != LoadProfile.LOAD_TYPE_LIGHT) {
+        if (renderStressOverlay != null && loadProfile != LoadType.LIGHT) {
             renderStressOverlay.start(loadProfile);
         }
         if (scrollCallback != null) {

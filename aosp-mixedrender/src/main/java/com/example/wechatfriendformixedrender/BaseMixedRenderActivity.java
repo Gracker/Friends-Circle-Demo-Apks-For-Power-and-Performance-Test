@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.loadconfig.LoadType;
+
 /**
  * Base Activity demonstrating mixed rendering:
  * - Top: PureRenderAnimationView (SurfaceView with dedicated render thread)
@@ -40,6 +42,6 @@ public abstract class BaseMixedRenderActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
     
-    protected abstract @LoadProfile.LoadType int getLoadType();
+    protected abstract @LoadType.Type int getLoadType();
 }
 

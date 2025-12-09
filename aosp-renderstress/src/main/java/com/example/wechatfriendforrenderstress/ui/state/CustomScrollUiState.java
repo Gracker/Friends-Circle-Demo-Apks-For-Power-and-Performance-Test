@@ -2,7 +2,7 @@ package com.example.wechatfriendforrenderstress.ui.state;
 
 import androidx.annotation.Nullable;
 
-import com.example.wechatfriendforrenderstress.LoadProfile;
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforrenderstress.beans.FriendCircleBean;
 
 import java.util.Collections;
@@ -33,7 +33,7 @@ public class CustomScrollUiState {
     }
 
     public static CustomScrollUiState idle() {
-        return new CustomScrollUiState(Status.IDLE, LoadProfile.LOAD_TYPE_LIGHT, Collections.emptyList(), null);
+        return new CustomScrollUiState(Status.IDLE, LoadType.LIGHT, Collections.emptyList(), null);
     }
 
     public static CustomScrollUiState loading(int loadType) {

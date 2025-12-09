@@ -8,6 +8,8 @@ import com.android.wechatfriendforpower.beans.OtherInfoBean;
 import com.android.wechatfriendforpower.beans.PraiseBean;
 import com.android.wechatfriendforpower.beans.UserBean;
 
+import com.example.loadconfig.LoadConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,7 +20,7 @@ import java.util.Random;
 public class PowerDataGenerator {
     
     private final Context context;
-    private final Random random = new Random();
+    private final Random random = new Random(LoadConfig.DATA_GENERATION_SEED);
     
     // 示例头像URL
     private final String[] avatarUrls = {

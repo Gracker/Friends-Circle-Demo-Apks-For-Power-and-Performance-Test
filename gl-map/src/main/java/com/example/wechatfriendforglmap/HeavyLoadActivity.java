@@ -1,5 +1,7 @@
 package com.example.wechatfriendforglmap;
-public class HeavyLoadActivity extends BaseGLMapActivity {
-    @Override protected int getLoadType() { return LoadProfile.LOAD_TYPE_HEAVY; }
-}
 
+import com.example.loadconfig.LoadType;
+
+public class HeavyLoadActivity extends BaseGLMapActivity {
+    @Override protected int getLoadType() { return LoadType.HEAVY; }
+}

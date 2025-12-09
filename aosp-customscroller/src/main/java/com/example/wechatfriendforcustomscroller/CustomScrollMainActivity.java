@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.databinding.ActivityPerformanceMainBinding;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -44,6 +45,9 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
         binding.btnLightMixed.setOnClickListener(this);
         binding.btnMediumMixed.setOnClickListener(this);
         binding.btnHeavyMixed.setOnClickListener(this);
+        
+        // Long frame load
+        binding.btnLongFrame.setOnClickListener(this);
     }
 
     @Override
@@ -52,25 +56,27 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
         int id = v.getId();
         
         if (id == binding.btnMinimalLoad.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+            loadType = LoadType.MINIMAL;
         } else if (id == binding.btnLightLoad.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_LIGHT;
+            loadType = LoadType.LIGHT;
         } else if (id == binding.btnMediumLoad.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_MEDIUM;
+            loadType = LoadType.MEDIUM;
         } else if (id == binding.btnHeavyLoad.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_HEAVY;
+            loadType = LoadType.HEAVY;
         } else if (id == binding.btnLightBetweenFrames.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES;
+            loadType = LoadType.LIGHT_BETWEEN_FRAMES;
         } else if (id == binding.btnMediumBetweenFrames.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES;
+            loadType = LoadType.MEDIUM_BETWEEN_FRAMES;
         } else if (id == binding.btnHeavyBetweenFrames.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES;
+            loadType = LoadType.HEAVY_BETWEEN_FRAMES;
         } else if (id == binding.btnLightMixed.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_LIGHT_MIXED;
+            loadType = LoadType.LIGHT_MIXED;
         } else if (id == binding.btnMediumMixed.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_MEDIUM_MIXED;
+            loadType = LoadType.MEDIUM_MIXED;
         } else if (id == binding.btnHeavyMixed.getId()) {
-            loadType = LoadProfile.LOAD_TYPE_HEAVY_MIXED;
+            loadType = LoadType.HEAVY_MIXED;
+        } else if (id == binding.btnLongFrame.getId()) {
+            loadType = LoadType.LONG_FRAME;
         } else {
             Toast.makeText(this, R.string.description, Toast.LENGTH_SHORT).show();
             return;

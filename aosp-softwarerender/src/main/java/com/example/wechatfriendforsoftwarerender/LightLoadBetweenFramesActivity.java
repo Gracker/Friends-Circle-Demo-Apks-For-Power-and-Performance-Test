@@ -24,7 +24,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforsoftwarerender.adapters.SoftwareRenderFriendCircleAdapter;
-import com.example.wechatfriendforsoftwarerender.config.LoadConfig;
+import com.example.loadconfig.LoadConfig;
 
 import java.util.Random;
 
@@ -37,7 +37,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private SoftwareRenderFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT;
+    private int mLoadType = com.example.loadconfig.LoadType.LIGHT;
     
     // 用于在帧之间执行负载的成员变量
     private Choreographer mChoreographer;
@@ -49,7 +49,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
     private Bitmap mBitmap;
     private boolean mIsBetweenFrameLoadEnabled = true;
     private boolean mIsScrolling = false;
-    private float mTaskExecutionProbability = LoadConfig.LightLoadBetweenFrames.TASK_EXECUTION_PROBABILITY;
+    private float mTaskExecutionProbability = LoadConfig.LIGHT_TASK_PROBABILITY;
     
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
@@ -69,7 +69,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         }
         
         imageLoader = Glide.with(this).asDrawable().apply(
@@ -109,8 +109,8 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
      */
     private void initBetweenFrameLoadComponents() {
         // 创建用于绘制的Bitmap和Canvas
-        mBitmap = Bitmap.createBitmap(LoadConfig.LightLoadBetweenFrames.BITMAP_SIZE, 
-                                      LoadConfig.LightLoadBetweenFrames.BITMAP_SIZE, 
+        mBitmap = Bitmap.createBitmap(LoadConfig.LIGHT_BITMAP_SIZE, 
+                                      LoadConfig.LIGHT_BITMAP_SIZE, 
                                       Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
         mPaint.setAntiAlias(true);
@@ -136,7 +136,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         
         // 任务1: 基础数学计算 - 计算小范围数列的数学函数
         double sum = 0.0;
-        for (int i = 1; i <= LoadConfig.LightLoadBetweenFrames.COMPUTATION_LOOP_COUNT; i++) {
+        for (int i = 1; i <= LoadConfig.BETWEEN_FRAME_LIGHT_INTENSITY; i++) {
             double x = i * 0.1;
             sum += Math.sin(x) * Math.cos(x) + Math.sqrt(i) + Math.log(i);
         }
@@ -159,8 +159,8 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         // 任务3: 简单图像处理 - 在小画布上绘制基本图形
         mPaint.setColor(Color.rgb(mRandom.nextInt(256), mRandom.nextInt(256), mRandom.nextInt(256)));
         for (int i = 0; i < 40; i++) {
-            float x = mRandom.nextFloat() * LoadConfig.LightLoadBetweenFrames.BITMAP_SIZE;
-            float y = mRandom.nextFloat() * LoadConfig.LightLoadBetweenFrames.BITMAP_SIZE;
+            float x = mRandom.nextFloat() * LoadConfig.LIGHT_BITMAP_SIZE;
+            float y = mRandom.nextFloat() * LoadConfig.LIGHT_BITMAP_SIZE;
             float radius = 5 + mRandom.nextFloat() * 10;
             mCanvas.drawCircle(x, y, radius, mPaint);
         }
@@ -236,13 +236,13 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
 
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_MINIMAL:
+            case com.example.loadconfig.LoadType.MINIMAL:
                 return "最轻负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 return "轻负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 return "中负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";

@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 import static com.example.wechatfriendforcustomscroller.PerformanceConstants.*;
 
 /**
@@ -37,7 +40,7 @@ public class CustomScrollDataGenerator {
     };
     
     // 使用一个固定种子的随机数生成器，确保生成的数据是可重现的
-    private Random mRandom = new Random(42);
+    private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
     
     private Context mContext;
     
@@ -67,25 +70,25 @@ public class CustomScrollDataGenerator {
     }
     
     public List<FriendCircleBean> getFriendCircleBeans() {
-        return getFriendCircleBeans(LoadProfile.LOAD_TYPE_LIGHT);
+        return getFriendCircleBeans(LoadType.LIGHT);
     }
 
     public List<FriendCircleBean> getFriendCircleBeans(int loadType) {
         String loadTypeStr = "";
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT:
+            case LoadType.LIGHT:
                 if (cachedLightLoadFriendCircleBeans == null) {
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 } else {
                 }
                 return cachedLightLoadFriendCircleBeans;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
+            case LoadType.MEDIUM:
                 if (cachedMediumLoadFriendCircleBeans == null) {
                     cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 } else {
                 }
                 return cachedMediumLoadFriendCircleBeans;
-            case LoadProfile.LOAD_TYPE_HEAVY:
+            case LoadType.HEAVY:
                 if (cachedHeavyLoadFriendCircleBeans == null) {
                     cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
                 } else {
@@ -93,7 +96,7 @@ public class CustomScrollDataGenerator {
                 return cachedHeavyLoadFriendCircleBeans;
             default:
                 if (cachedLightLoadFriendCircleBeans == null) {
-                    cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(LoadProfile.LOAD_TYPE_LIGHT);
+                    cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(LoadType.LIGHT);
                 } else {
                 }
                 return cachedLightLoadFriendCircleBeans;
@@ -132,20 +135,8 @@ public class CustomScrollDataGenerator {
     private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
         
-        // 初始化随机数生成器
-        long randomSeed = 42;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT:
-                randomSeed = 42;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-                randomSeed = 142;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-                randomSeed = 242;
-                break;
-        }
-        
+        // 使用 LoadConfig 统一管理的数据生成种子
+        long randomSeed = LoadConfig.getDataGenerationSeed(loadType);
         mRandom = new Random(randomSeed);
         
         // 确保生成固定数量的朋友圈数据
@@ -190,19 +181,8 @@ public class CustomScrollDataGenerator {
                 friendCircleBean.setImageUrls(imageUrls);
             }
             
-            // Generate comment and praise data for different load types
-            int positionOffset = 0;
-            switch (loadType) {
-                case LoadProfile.LOAD_TYPE_LIGHT:
-                    positionOffset = 0;
-                    break;
-                case LoadProfile.LOAD_TYPE_MEDIUM:
-                    positionOffset = 100;
-                    break;
-                case LoadProfile.LOAD_TYPE_HEAVY:
-                    positionOffset = 200;
-                    break;
-            }
+            // 使用 LoadConfig 统一管理的位置偏移量
+            int positionOffset = LoadConfig.getPositionOffset(loadType);
             
             // Generate praises for this item
             List<PraiseBean> praiseBeans = generatePraiseBeans(i + positionOffset, loadType);
@@ -242,15 +222,15 @@ public class CustomScrollDataGenerator {
         int commentCount = 0;
         
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT:
+            case LoadType.LIGHT:
                 // 轻负载: 0-2条评论
                 commentCount = position % 3;
                 break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
+            case LoadType.MEDIUM:
                 // 中负载: 5-12条评论
                 commentCount = position % 8 + 8;
                 break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
+            case LoadType.HEAVY:
                 // 高负载: 10-24条评论
                 commentCount = position % 15 + 15;
                 break;
@@ -267,14 +247,15 @@ public class CustomScrollDataGenerator {
         }
         
         // 确保随机数生成的可重现性
-        Random random = new Random(position * 100 + loadType * 10);
+        Random random = new Random(position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER 
+                + loadType * LoadConfig.COMMENT_SEED_LOADTYPE_MULTIPLIER);
         
         for (int i = 0; i < commentCount; i++) {
             CommentBean commentBean = new CommentBean(mContext);
             
             // 评论发起人
             UserBean childUserBean = new UserBean();
-            childUserBean.setUserId(String.valueOf(20000 + i + position * 100));
+            childUserBean.setUserId(String.valueOf(LoadConfig.COMMENT_USER_ID_BASE + i + position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER));
             childUserBean.setUserName(randomCommentUserName(i, position));
             childUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
             commentBean.setChildUserBean(childUserBean);
@@ -286,7 +267,7 @@ public class CustomScrollDataGenerator {
                 // 被回复的用户
                 UserBean parentUserBean = new UserBean();
                 int replyToIndex = random.nextInt(i);
-                parentUserBean.setUserId(String.valueOf(20000 + replyToIndex + position * 100));
+                parentUserBean.setUserId(String.valueOf(LoadConfig.COMMENT_USER_ID_BASE + replyToIndex + position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER));
                 parentUserBean.setUserName(randomCommentUserName(replyToIndex, position));
                 parentUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[replyToIndex % AVATAR_RES_NAMES.length]);
                 commentBean.setParentUserBean(parentUserBean);
@@ -318,15 +299,15 @@ public class CustomScrollDataGenerator {
         int praiseCount = 0;
         
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT:
+            case LoadType.LIGHT:
                 // 轻负载: 0-5个点赞
                 praiseCount = position % 6;
                 break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
+            case LoadType.MEDIUM:
                 // 中负载: 5-12个点赞
                 praiseCount = position % 8 + 5;
                 break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
+            case LoadType.HEAVY:
                 // 高负载: 10-20个点赞
                 praiseCount = position % 11 + 10;
                 break;
@@ -343,13 +324,14 @@ public class CustomScrollDataGenerator {
         }
         
         // 确保随机数生成的可重现性
-        Random random = new Random(position * 50 + loadType * 5);
+        Random random = new Random(position * LoadConfig.PRAISE_SEED_POSITION_MULTIPLIER 
+                + loadType * LoadConfig.PRAISE_SEED_LOADTYPE_MULTIPLIER);
         
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
             
             UserBean userBean = new UserBean();
-            userBean.setUserId(String.valueOf(30000 + i + position * 100));
+            userBean.setUserId(String.valueOf(LoadConfig.PRAISE_USER_ID_BASE + i + position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER));
             
             // 使用随机数确定用户名，但保持一致性
             int nameIndex = (position + i) % USER_NAMES.length;
@@ -393,11 +375,11 @@ public class CustomScrollDataGenerator {
     
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case LoadProfile.LOAD_TYPE_LIGHT:
+            case LoadType.LIGHT:
                 return "轻负载";
-            case LoadProfile.LOAD_TYPE_MEDIUM:
+            case LoadType.MEDIUM:
                 return "中负载";
-            case LoadProfile.LOAD_TYPE_HEAVY:
+            case LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";

@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
+
 /**
  * Pure RenderThread List View - all rendering happens on a separate thread.
  * UI Thread only handles touch events and passes scroll commands to render thread.
@@ -61,7 +64,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     private Paint imagePaint;
     
     // Load simulation
-    private int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
     
     // Data
@@ -159,7 +162,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     }
     
     private void generateItems() {
-        Random r = new Random(42);
+        Random r = new Random(LoadConfig.DATA_GENERATION_SEED);
         for (int i = 0; i < ITEM_COUNT; i++) {
             ListItem item = new ListItem();
             item.name = NAMES[r.nextInt(NAMES.length)];
@@ -178,7 +181,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         return Math.max(0, ITEM_COUNT * ITEM_HEIGHT - getHeight());
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
 
@@ -288,7 +291,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         headerTextPaint.setColor(Color.WHITE);
         headerTextPaint.setTextSize(36);
         headerTextPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("Pure RenderThread - " + LoadProfile.toLabel(loadType), width / 2f, 52, headerTextPaint);
+        canvas.drawText("Pure RenderThread - " + LoadType.toLabel(loadType), width / 2f, 52, headerTextPaint);
     }
     
     private void drawItem(Canvas canvas, ListItem item, float x, float y, float width, float height) {
@@ -327,29 +330,8 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     }
     
     private void executeLoad() {
-        int iterations;
-        switch (loadType) {
-            case LoadProfile.LOAD_TYPE_MINIMAL:
-                iterations = 0;
-                break;
-            case LoadProfile.LOAD_TYPE_LIGHT:
-            case LoadProfile.LOAD_TYPE_LIGHT_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_LIGHT_MIXED:
-                iterations = 100;
-                break;
-            case LoadProfile.LOAD_TYPE_MEDIUM:
-            case LoadProfile.LOAD_TYPE_MEDIUM_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_MEDIUM_MIXED:
-                iterations = 500;
-                break;
-            case LoadProfile.LOAD_TYPE_HEAVY:
-            case LoadProfile.LOAD_TYPE_HEAVY_BETWEEN_FRAMES:
-            case LoadProfile.LOAD_TYPE_HEAVY_MIXED:
-                iterations = 2000;
-                break;
-            default:
-                iterations = 0;
-        }
+        // 使用统一的 LoadConfig 获取负载强度
+        int iterations = LoadConfig.getInFrameIntensity(loadType);
         
         if (iterations == 0) return;
         

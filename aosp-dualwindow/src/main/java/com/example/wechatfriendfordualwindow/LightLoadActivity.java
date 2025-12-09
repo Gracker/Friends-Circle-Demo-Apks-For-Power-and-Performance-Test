@@ -1,5 +1,7 @@
 package com.example.wechatfriendfordualwindow;
-public class LightLoadActivity extends BaseDualWindowActivity {
-    @Override protected int getLoadType() { return LoadProfile.LOAD_TYPE_LIGHT; }
-}
 
+import com.example.loadconfig.LoadType;
+
+public class LightLoadActivity extends BaseDualWindowActivity {
+    @Override protected int getLoadType() { return LoadType.LIGHT; }
+}

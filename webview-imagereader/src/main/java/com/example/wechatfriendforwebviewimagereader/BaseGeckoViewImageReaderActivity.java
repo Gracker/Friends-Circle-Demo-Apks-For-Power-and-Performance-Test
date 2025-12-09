@@ -65,7 +65,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geckoview_imagereader);
         
-        loadType = getIntent().getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, GeckoViewMainActivity.LOAD_TYPE_LIGHT);
+        loadType = getIntent().getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         
         initViews();
         initGeckoRuntime();

@@ -7,6 +7,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
+import com.example.loadconfig.LoadType;
+
 /**
  * GLSurfaceView for map rendering with touch support.
  * Supports pan and pinch-to-zoom gestures.
@@ -53,7 +55,7 @@ public class GLMapView extends GLSurfaceView {
         });
     }
     
-    public void setLoadType(@LoadProfile.LoadType int loadType) {
+    public void setLoadType(@LoadType.Type int loadType) {
         renderer.setLoadType(loadType);
     }
 

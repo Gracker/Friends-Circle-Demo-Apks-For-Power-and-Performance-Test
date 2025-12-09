@@ -46,6 +46,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation project(':load-config')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'

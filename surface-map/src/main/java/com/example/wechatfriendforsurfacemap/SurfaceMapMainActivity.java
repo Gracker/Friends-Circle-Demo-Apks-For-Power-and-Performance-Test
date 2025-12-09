@@ -38,6 +38,9 @@ public class SurfaceMapMainActivity extends AppCompatActivity implements View.On
         binding.btnLightMixed.setOnClickListener(this);
         binding.btnMediumMixed.setOnClickListener(this);
         binding.btnHeavyMixed.setOnClickListener(this);
+        
+        // Long frame load
+        binding.btnLongFrame.setOnClickListener(this);
     }
 
     @Override
@@ -65,6 +68,8 @@ public class SurfaceMapMainActivity extends AppCompatActivity implements View.On
             targetActivity = MediumMixedMapActivity.class;
         } else if (id == R.id.btn_heavy_mixed) {
             targetActivity = HeavyMixedMapActivity.class;
+        } else if (id == R.id.btn_long_frame) {
+            targetActivity = LongFrameMapActivity.class;
         }
         
         if (targetActivity != null) {

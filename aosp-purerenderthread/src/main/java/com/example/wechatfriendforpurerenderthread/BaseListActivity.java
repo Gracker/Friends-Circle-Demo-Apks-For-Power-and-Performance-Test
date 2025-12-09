@@ -4,6 +4,8 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loadconfig.LoadType;
+
 /**
  * Base Activity for pure RenderThread list demos.
  */
@@ -20,7 +22,7 @@ public abstract class BaseListActivity extends AppCompatActivity {
         listView.setLoadType(getLoadType());
     }
     
-    protected abstract @LoadProfile.LoadType int getLoadType();
+    protected abstract @LoadType.Type int getLoadType();
 }
 
 

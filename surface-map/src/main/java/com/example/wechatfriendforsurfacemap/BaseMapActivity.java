@@ -8,13 +8,15 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loadconfig.LoadType;
+
 /**
  * Base Activity for map demos with native top/bottom controls.
  */
 public abstract class BaseMapActivity extends AppCompatActivity {
     
     protected MapSurfaceView mapSurfaceView;
-    protected int loadType = LoadProfile.LOAD_TYPE_MINIMAL;
+    protected int loadType = LoadType.MINIMAL;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public abstract class BaseMapActivity extends AppCompatActivity {
         
         // Set up top navigation bar
         TextView titleText = findViewById(R.id.title_text);
-        titleText.setText(LoadProfile.toLabel(loadType));
+        titleText.setText(LoadType.toLabel(loadType));
         
         ImageButton backButton = findViewById(R.id.back_button);
         backButton.setOnClickListener(v -> onBackPressed());
@@ -38,7 +40,7 @@ public abstract class BaseMapActivity extends AppCompatActivity {
         setupBottomControls();
     }
     
-    protected abstract @LoadProfile.LoadType int getLoadType();
+    protected abstract @LoadType.Type int getLoadType();
     
     private void setupBottomControls() {
         findViewById(R.id.btn_zoom_in).setOnClickListener(v -> {

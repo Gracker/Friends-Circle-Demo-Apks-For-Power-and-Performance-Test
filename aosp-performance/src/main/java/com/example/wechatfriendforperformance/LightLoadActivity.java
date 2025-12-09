@@ -35,7 +35,7 @@ public class LightLoadActivity extends AppCompatActivity {
     private PerformanceFriendCircleAdapter adapter;
     private LinearLayout titleBar;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT;
+    private int mLoadType = com.example.loadconfig.LoadType.LIGHT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class LightLoadActivity extends AppCompatActivity {
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT);
+            mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         }
         
         // Process image name, remove possible file extension
@@ -100,16 +100,8 @@ public class LightLoadActivity extends AppCompatActivity {
     }
 
     private String getLoadTypeString(int loadType) {
-        switch (loadType) {
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_LIGHT:
-                return "轻负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_MEDIUM:
-                return "中负载";
-            case PerformanceFriendCircleAdapter.LOAD_TYPE_HEAVY:
-                return "高负载";
-            default:
-                return "未知负载";
-        }
+        // 使用统一的 LoadType.toLabel() 获取负载类型标签
+        return com.example.loadconfig.LoadType.toLabel(loadType);
     }
 
     @Override

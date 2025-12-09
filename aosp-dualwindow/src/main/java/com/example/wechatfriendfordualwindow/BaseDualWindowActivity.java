@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loadconfig.LoadType;
+
 /**
  * Base Activity that creates dual windows for testing.
  * Window 1: Main activity window with scrollable list
@@ -101,7 +103,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity {
         }
     }
     
-    protected abstract @LoadProfile.LoadType int getLoadType();
+    protected abstract @LoadType.Type int getLoadType();
 
     @Override
     protected void onResume() {

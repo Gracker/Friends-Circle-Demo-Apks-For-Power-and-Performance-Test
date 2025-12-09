@@ -26,6 +26,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforsoftwarerender.adapters.SoftwareRenderFriendCircleAdapter;
 import com.example.wechatfriendforsoftwarerender.beans.FriendCircleBean;
 
+import com.example.loadconfig.LoadConfig;
+
 import java.util.List;
 import java.util.Random;
 import android.util.Log;
@@ -40,13 +42,13 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     private RecyclerView recyclerView;
     private SoftwareRenderFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
-    private int mLoadType = SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY;
+    private int mLoadType = com.example.loadconfig.LoadType.HEAVY;
     
     // 用于创建周期性"肥"帧的成员变量
     private Choreographer mChoreographer;
     private int mFrameCount = 0;
     private static final int HEAVY_FRAME_INTERVAL = 6;
-    private Random mRandom = new Random();
+    private Random mRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private Paint mPaint = new Paint();
     private Canvas mCanvas;
     private Bitmap mBitmap;
@@ -69,7 +71,7 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
         // 从Intent中获取负载类型
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE)) {
-            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY);
+            mLoadType = intent.getIntExtra(SoftwareRenderMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         }
         
         // 使用Toast显示当前负载类型
@@ -222,11 +224,11 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
 
     private String getLoadTypeString(int loadType) {
         switch (loadType) {
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_LIGHT:
+            case com.example.loadconfig.LoadType.LIGHT:
                 return "轻负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_MEDIUM:
+            case com.example.loadconfig.LoadType.MEDIUM:
                 return "中负载";
-            case SoftwareRenderFriendCircleAdapter.LOAD_TYPE_HEAVY:
+            case com.example.loadconfig.LoadType.HEAVY:
                 return "高负载";
             default:
                 return "未知负载";
