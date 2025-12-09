@@ -38,44 +38,52 @@ jobs:
     - name: Make Gradle wrapper executable
       run: chmod +x ./gradlew
       
-    - name: Decode Keystore (if available)
-      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-      uses: timheuer/base64-to-file@v1
-      with:
-        fileName: 'release.keystore'
-        encodedString: ${{ secrets.KEYSTORE_BASE64 }}
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+        chmod 600 release.keystore
         
     - name: Build Release APKs
       env:
-        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
+        KEYSTORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
-        CMD="./gradlew :app:assembleRelease :wechatfriendforperformance:assembleRelease :wechatfriendforpower:assembleRelease :wechatfriendforwebview:assembleRelease :wechatfriendforcustomscroller:assembleRelease :wechatfriendforrenderstress:assembleRelease --parallel"
-        if [ -f "release.keystore" ]; then
-          echo "使用提供的签名密钥构建Release版本..."
-          eval "$CMD"
-        else
-          echo "未提供签名密钥，构建无签名Release版本..."
-          eval "$CMD"
-        fi
+        ./gradlew \
+          :app:assembleRelease \
+          :aosp-performance:assembleRelease \
+          :aosp-power:assembleRelease \
+          :aosp-picasso:assembleRelease \
+          :aosp-customscroller:assembleRelease \
+          :aosp-renderstress:assembleRelease \
+          :aosp-softwarerender:assembleRelease \
+          :aosp-douyin:assembleRelease \
+          :aosp-video:assembleRelease \
+          :aosp-ebook:assembleRelease \
+          :aosp-purerenderthread:assembleRelease \
+          :aosp-dualwindow:assembleRelease \
+          :aosp-mixedrender:assembleRelease \
+          :compose:assembleRelease \
+          :webview:assembleRelease \
+          :webview-surface:assembleRelease \
+          :webview-texture:assembleRelease \
+          :webview-imagereader:assembleRelease \
+          :surface-map:assembleRelease \
+          :gl-map:assembleRelease \
+          --parallel
       
     - name: Prepare Release Files
       run: |
         mkdir -p release-files
-        BUILD_TIME=$(date +'%Y%m%d-%H%M%S')
         
         # 复制生成的APK文件
-        find . -name "*-release*.apk" -type f | while read apk; do
+        find . -path "*/build/outputs/apk/release/*.apk" -type f | while read apk; do
           filename=$(basename "$apk")
           module_name=$(echo "$filename" | sed 's/-release.*//g')
           cp "$apk" "release-files/${module_name}-${{ github.event.inputs.version_name }}.apk"
         done
-        
-        # 复制现有的release文件夹中的APK（如果有的话）
-        if [ -d "apk-released" ]; then
-          cp apk-released/*.apk release-files/ 2>/dev/null || true
-        fi
         
         echo "准备发布的文件:"
         ls -la release-files/
@@ -89,35 +97,44 @@ jobs:
           🎉 **正式版本发布**
           
           📱 **版本**: ${{ github.event.inputs.version_name }}
-          📅 **发布时间**: $(date +'%Y-%m-%d %H:%M:%S')
-          🔗 **提交**: $(git rev-parse --short HEAD)
           
           ## 📝 发布说明
           ${{ github.event.inputs.release_notes }}
           
-          ## 📦 包含的应用
+          ## 📦 包含的应用 (20 个模块)
           
-          ### 🚀 主要模块
-          - **HighPerformanceFriendsCircle** - 高性能朋友圈主应用
-          - **WeChatFriendForPerformance** - 性能测试模块
-          - **WeChatFriendForPower** - 功耗测试模块  
-          - **WeChatFriendForWebView** - WebView性能对比模块
-          - **WeChatFriendForCustomScroller** - 自研 Scroller 性能 / 功耗对比
-          - **WeChatFriendForRenderStress** - RenderThread 压测模块
+          ### 🎯 AOSP 模块 (标准 Android UI + RenderThread)
+          - **app** - 主应用模块
+          - **aosp-performance** - 性能测试模块 (10种负载)
+          - **aosp-power** - 功耗测试模块
+          - **aosp-picasso** - Picasso图片加载
+          - **aosp-customscroller** - 自定义Scroller测试模块
+          - **aosp-renderstress** - RenderThread压测模块
+          - **aosp-softwarerender** - 软件渲染测试模块
+          - **aosp-douyin** - 抖音风格视频滑动模块
+          - **aosp-video** - 视频Feed模块
+          - **aosp-ebook** - 电子书阅读器模块
+          - **aosp-purerenderthread** - 纯RenderThread测试模块
+          - **aosp-dualwindow** - 双Window刷新测试模块
+          - **aosp-mixedrender** - 混合渲染测试模块
+          
+          ### 🎨 Compose 模块
+          - **compose** - Jetpack Compose测试模块
+          
+          ### 🌐 WebView 模块
+          - **webview** - WebView测试模块
+          - **webview-surface** - WebView+SurfaceView
+          - **webview-texture** - WebView+TextureView
+          - **webview-imagereader** - WebView+ImageReader
+          
+          ### 🗺️ Surface & GL 模块
+          - **surface-map** - SurfaceView地图测试模块
+          - **gl-map** - OpenGL地图测试模块
           
           ## 🔧 安装说明
           1. 下载对应的APK文件
           2. 在Android设备上启用"允许安装未知来源应用"
           3. 直接安装APK文件
-          
-          ## 📊 性能特性
-          - 高性能列表滑动优化
-          - 多种负载测试模式
-          - 功耗监控和分析
-          - WebView与原生性能对比
-          
-          ## 🐛 问题反馈
-          如果遇到问题，请在GitHub Issues中反馈
           
           ---
           ⭐ 感谢使用！如果觉得有用请给个Star

@@ -50,6 +50,7 @@ The project is organized by implementation type:
 | `aosp-softwarerender` | Software rendering (hardware acceleration disabled) |
 | `aosp-douyin` | Douyin-style video scrolling |
 | `aosp-video` | Video Feed version |
+| `aosp-ebook` | E-Book Reader demo |
 | `aosp-purerenderthread` | Pure RenderThread list scrolling |
 | `aosp-dualwindow` | Dual Window rendering demo |
 | `aosp-mixedrender` | Mixed rendering demo |
@@ -180,6 +181,18 @@ Simulates Douyin's full-screen video scrolling experience:
 - **Smart Switching**: Auto-switch when scrolled past midpoint
 - **Perfect UI Recreation**: Bottom navigation, right-side interaction buttons, bottom-left info area
 - Uses Media3 ExoPlayer for video playback
+
+### 15. E-Book Reader Module (aosp-ebook)
+
+Simulates e-book reader page-turning experience:
+
+- **EPUB Support**: Supports standard EPUB format e-book parsing
+- **Touch Navigation**: Tap left for previous page, tap right for next page, tap center to show menu
+- **Swipe Navigation**: Supports left/right swipe with smooth animation
+- **Reading Menu**: Top and bottom menus (simulated) with contents, brightness, font size, theme, settings
+- **Progress Display**: Page number at bottom, supports progress bar quick jump
+- **Immersive Reading**: Full-screen mode with warm yellow eye-care background
+- Loads "巨婴国" (Giant Baby Nation) e-book by default
 
 ## Performance Optimization Strategies
 

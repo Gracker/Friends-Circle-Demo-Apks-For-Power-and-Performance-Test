@@ -65,6 +65,7 @@ jobs:
         :aosp-softwarerender:assembleRelease
         :aosp-douyin:assembleRelease
         :aosp-video:assembleRelease
+        :aosp-ebook:assembleRelease
         :aosp-purerenderthread:assembleRelease
         :aosp-dualwindow:assembleRelease
         :aosp-mixedrender:assembleRelease
@@ -119,6 +120,10 @@ jobs:
         
         if [ -f "aosp-video/build/outputs/apk/release/aosp-video-release.apk" ]; then
           cp aosp-video/build/outputs/apk/release/aosp-video-release.apk "release-apks/aosp-video-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+        
+        if [ -f "aosp-ebook/build/outputs/apk/release/aosp-ebook-release.apk" ]; then
+          cp aosp-ebook/build/outputs/apk/release/aosp-ebook-release.apk "release-apks/aosp-ebook-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
         if [ -f "aosp-purerenderthread/build/outputs/apk/release/aosp-purerenderthread-release.apk" ]; then
@@ -188,7 +193,7 @@ jobs:
           🔗 **Commit**: ${{ steps.version.outputs.SHORT_SHA }}
           🌿 **Branch**: ${{ steps.version.outputs.BRANCH_NAME }}
           
-          ## 📦 Included APK Files (19 Modules)
+          ## 📦 Included APK Files (20 Modules)
           
           ### 🎯 AOSP Modules (Standard Android UI + RenderThread)
           - **app** - Main Application
@@ -200,6 +205,7 @@ jobs:
           - **aosp-softwarerender** - Software Rendering Testing
           - **aosp-douyin** - Douyin-style Video Scrolling
           - **aosp-video** - Video Feed Testing
+          - **aosp-ebook** - E-Book Reader Demo
           - **aosp-purerenderthread** - Pure RenderThread List
           - **aosp-dualwindow** - Dual Window Rendering
           - **aosp-mixedrender** - Mixed Rendering Demo
