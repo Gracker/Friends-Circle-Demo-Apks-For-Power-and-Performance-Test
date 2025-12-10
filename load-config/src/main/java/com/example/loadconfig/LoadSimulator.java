@@ -61,6 +61,18 @@ public class LoadSimulator {
     // 执行计数器（用于生成确定性的伪随机序列）
     private long mExecutionCounter = 0;
     
+    // doFrame 伪随机帧间隔触发相关
+    private Random mDoFrameIntervalRandom;  // 用于生成帧间隔的随机数生成器
+    private long mDoFrameCounter = 0;       // 当前帧计数
+    private long mNextDoFrameTarget = 0;    // 下一次执行 doFrame 负载的目标帧数
+    private int mCurrentDoFrameLoadLevel = 0;  // 当前 doFrame 负载级别（用于检测变化）
+    
+    // 帧间负载伪随机帧间隔触发相关
+    private Random mBetweenFrameIntervalRandom;  // 用于生成帧间隔的随机数生成器
+    private long mBetweenFrameCounter = 0;       // 当前帧计数
+    private long mNextBetweenFrameTarget = 0;    // 下一次执行帧间负载的目标帧数
+    private int mCurrentBetweenFrameLoadLevel = 0;  // 当前帧间负载级别（用于检测变化）
+    
     /**
      * 创建负载模拟器
      * 使用固定种子初始化所有随机数生成器，确保测试可重现
@@ -72,6 +84,8 @@ public class LoadSimulator {
         // 使用固定种子初始化随机数生成器
         mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
         mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
+        mDoFrameIntervalRandom = new Random(LoadConfig.DOFRAME_INTERVAL_SEED);
+        mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
         
         // 创建用于绘制的 Bitmap 和 Canvas
         mBitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888);
@@ -85,7 +99,15 @@ public class LoadSimulator {
     public void resetRandomState() {
         mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
         mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
+        mDoFrameIntervalRandom = new Random(LoadConfig.DOFRAME_INTERVAL_SEED);
+        mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
         mExecutionCounter = 0;
+        mDoFrameCounter = 0;
+        mNextDoFrameTarget = 0;
+        mCurrentDoFrameLoadLevel = 0;
+        mBetweenFrameCounter = 0;
+        mNextBetweenFrameTarget = 0;
+        mCurrentBetweenFrameLoadLevel = 0;
     }
     
     /**
@@ -132,7 +154,8 @@ public class LoadSimulator {
     
     /**
      * 执行负载（根据负载类型自动选择合适的执行方式）
-     * 用于帧内负载场景，如 onBindViewHolder
+     * 使用伪随机帧间隔触发，确保测试可重现
+     * 
      * @param loadType 负载类型
      * @param traceTag Trace 标签名称
      */
@@ -140,11 +163,31 @@ public class LoadSimulator {
         int intensity = LoadConfig.getInFrameIntensity(loadType);
         if (intensity == 0) return;
         
+        // 获取负载级别
+        int level = LoadType.getLoadLevel(loadType);
+        
+        // 检测负载级别是否变化，如果变化则重新计算目标帧数
+        if (level != mCurrentDoFrameLoadLevel) {
+            mCurrentDoFrameLoadLevel = level;
+            mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
+        }
+        
+        // 增加帧计数
+        mDoFrameCounter++;
+        
+        // 检查是否到达执行时机
+        if (mDoFrameCounter < mNextDoFrameTarget) {
+            return; // 还没到执行时机，跳过本帧
+        }
+        
+        // 计算下一次执行的目标帧数
+        mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
+        
+        // 执行负载
         Trace.beginSection(traceTag);
         mExecutionCounter++;
         
         // 根据负载级别选择执行方式
-        int level = LoadType.getLoadLevel(loadType);
         switch (level) {
             case 1: // Light
                 executeLightLoad(intensity);
@@ -164,7 +207,24 @@ public class LoadSimulator {
     }
     
     /**
+     * 计算下一次 doFrame 负载执行的帧间隔
+     * 使用伪随机数生成器，在最小和最大间隔之间生成随机值
+     * 
+     * @param loadLevel 负载级别 (1=Light, 2=Medium, 3=Heavy)
+     * @return 帧间隔数
+     */
+    private int calculateNextDoFrameInterval(int loadLevel) {
+        int minInterval = LoadConfig.getBetweenFrameMinIntervalByLevel(loadLevel);
+        int maxInterval = LoadConfig.getBetweenFrameMaxIntervalByLevel(loadLevel);
+        
+        // 生成 [minInterval, maxInterval] 范围内的伪随机帧间隔
+        return minInterval + mDoFrameIntervalRandom.nextInt(maxInterval - minInterval + 1);
+    }
+    
+    /**
      * 执行 doFrame 负载（混合负载的 doFrame 部分）
+     * 使用伪随机帧间隔触发，确保测试可重现
+     * 
      * @param loadType 负载类型
      * @param traceTag Trace 标签名称
      */
@@ -172,11 +232,31 @@ public class LoadSimulator {
         int intensity = LoadConfig.getDoFrameIntensity(loadType);
         if (intensity == 0) return;
         
+        // 获取负载级别
+        int level = LoadType.getLoadLevel(loadType);
+        
+        // 检测负载级别是否变化，如果变化则重新计算目标帧数
+        if (level != mCurrentDoFrameLoadLevel) {
+            mCurrentDoFrameLoadLevel = level;
+            mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
+        }
+        
+        // 增加帧计数
+        mDoFrameCounter++;
+        
+        // 检查是否到达执行时机
+        if (mDoFrameCounter < mNextDoFrameTarget) {
+            return; // 还没到执行时机，跳过本帧
+        }
+        
+        // 计算下一次执行的目标帧数
+        mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
+        
+        // 执行负载
         Trace.beginSection(traceTag);
         mExecutionCounter++;
         
         // 根据负载级别选择执行方式
-        int level = LoadType.getLoadLevel(loadType);
         switch (level) {
             case 1: // Light
                 executeLightLoad(intensity);
@@ -197,6 +277,8 @@ public class LoadSimulator {
     
     /**
      * 执行帧间负载（混合负载的帧间部分）
+     * 使用伪随机帧间隔触发，确保测试可重现
+     * 
      * @param loadType 负载类型
      * @param traceTag Trace 标签名称
      */
@@ -204,11 +286,31 @@ public class LoadSimulator {
         int intensity = LoadConfig.getMixedBetweenFrameIntensity(loadType);
         if (intensity == 0) return;
         
+        // 获取负载级别
+        int level = LoadType.getLoadLevel(loadType);
+        
+        // 检测负载级别是否变化，如果变化则重新计算目标帧数
+        if (level != mCurrentBetweenFrameLoadLevel) {
+            mCurrentBetweenFrameLoadLevel = level;
+            mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+        }
+        
+        // 增加帧计数
+        mBetweenFrameCounter++;
+        
+        // 检查是否到达执行时机
+        if (mBetweenFrameCounter < mNextBetweenFrameTarget) {
+            return; // 还没到执行时机，跳过本帧
+        }
+        
+        // 计算下一次执行的目标帧数
+        mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+        
+        // 执行负载
         Trace.beginSection(traceTag);
         mExecutionCounter++;
         
         // 根据负载级别选择执行方式
-        int level = LoadType.getLoadLevel(loadType);
         switch (level) {
             case 1: // Light
                 executeLightLoad(intensity);
@@ -228,7 +330,24 @@ public class LoadSimulator {
     }
     
     /**
+     * 计算下一次帧间负载执行的帧间隔
+     * 使用伪随机数生成器，在最小和最大间隔之间生成随机值
+     * 
+     * @param loadLevel 负载级别 (1=Light, 2=Medium, 3=Heavy)
+     * @return 帧间隔数
+     */
+    private int calculateNextBetweenFrameInterval(int loadLevel) {
+        int minInterval = LoadConfig.getBetweenFrameMinIntervalByLevel(loadLevel);
+        int maxInterval = LoadConfig.getBetweenFrameMaxIntervalByLevel(loadLevel);
+        
+        // 生成 [minInterval, maxInterval] 范围内的伪随机帧间隔
+        return minInterval + mBetweenFrameIntervalRandom.nextInt(maxInterval - minInterval + 1);
+    }
+    
+    /**
      * 执行纯帧间负载（非混合模式）
+     * 使用伪随机帧间隔触发，确保测试可重现
+     * 
      * @param loadType 负载类型
      * @param traceTag Trace 标签名称
      */
@@ -236,11 +355,31 @@ public class LoadSimulator {
         int intensity = LoadConfig.getBetweenFrameIntensity(loadType);
         if (intensity == 0) return;
         
+        // 获取负载级别
+        int level = LoadType.getLoadLevel(loadType);
+        
+        // 检测负载级别是否变化，如果变化则重新计算目标帧数
+        if (level != mCurrentBetweenFrameLoadLevel) {
+            mCurrentBetweenFrameLoadLevel = level;
+            mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+        }
+        
+        // 增加帧计数
+        mBetweenFrameCounter++;
+        
+        // 检查是否到达执行时机
+        if (mBetweenFrameCounter < mNextBetweenFrameTarget) {
+            return; // 还没到执行时机，跳过本帧
+        }
+        
+        // 计算下一次执行的目标帧数
+        mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+        
+        // 执行负载
         Trace.beginSection(traceTag);
         mExecutionCounter++;
         
         // 根据负载级别选择执行方式
-        int level = LoadType.getLoadLevel(loadType);
         switch (level) {
             case 1: // Light
                 executeLightLoad(intensity);

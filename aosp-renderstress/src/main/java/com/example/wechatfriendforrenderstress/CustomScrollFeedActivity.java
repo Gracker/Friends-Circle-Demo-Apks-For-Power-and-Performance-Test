@@ -16,8 +16,6 @@ import com.example.wechatfriendforrenderstress.ui.state.CustomScrollUiState;
 import com.example.wechatfriendforrenderstress.ui.timeline.CustomTimelineView;
 import com.example.wechatfriendforrenderstress.ui.timeline.FriendCircleItemRenderer;
 
-import java.util.Random;
-
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
@@ -44,7 +42,6 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     private LoadSimulator mLoadSimulator;
     private boolean isTaskSchedulingEnabled = false;
     private boolean isScrolling = false;
-    private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     
     // Long frame state
     private long scrollStartTime = 0;
@@ -99,14 +96,9 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
                     isScrolling = true;
                     if (LoadType.isLongFrameLoad(loadType)) {
                         startLongFrameCycle();
-                        choreographer.postFrameCallback(CustomScrollFeedActivity.this);
-                    } else {
-                        scheduleNextBetweenFrameTask();
-                        if (LoadType.isMixedLoad(loadType)) {
-                            choreographer.postFrameCallback(CustomScrollFeedActivity.this);
-                            scheduleNextDoFrameTask();
-                        }
                     }
+                    // 启动帧回调，由 LoadSimulator 统一控制伪随机帧间隔
+                    choreographer.postFrameCallback(CustomScrollFeedActivity.this);
                 }
             }
             
@@ -162,10 +154,16 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         
         if (LoadType.isLongFrameLoad(loadType)) {
             checkAndExecuteLongFrame();
-            choreographer.postFrameCallback(this);
+        } else if (LoadType.isBetweenFramesLoad(loadType)) {
+            // 纯帧间负载：每帧调用，由 LoadSimulator 统一控制伪随机帧间隔
+            mLoadSimulator.executePureBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad");
         } else if (LoadType.isMixedLoad(loadType)) {
-            choreographer.postFrameCallback(this);
+            // 混合负载：每帧调用 doFrame 和 betweenFrame，由 LoadSimulator 统一控制伪随机帧间隔
+            mLoadSimulator.executeDoFrameLoad(loadType, "RenderStress_doFrameLoad");
+            handler.post(() -> mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad"));
         }
+        
+        choreographer.postFrameCallback(this);
     }
     
     private void startLongFrameCycle() {
@@ -201,35 +199,6 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         }
     }
     
-    private void scheduleNextDoFrameTask() {
-        if (!isTaskSchedulingEnabled || !isScrolling || !LoadType.isMixedLoad(loadType)) return;
-        
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled || !isScrolling) return;
-            mLoadSimulator.executeDoFrameLoad(loadType, "RenderStress_doFrameLoad");
-            scheduleNextDoFrameTask();
-        }, intervalMs);
-    }
-    
-    private void scheduleNextBetweenFrameTask() {
-        if (!isTaskSchedulingEnabled || !isScrolling) return;
-        if (!LoadType.isBetweenFramesLoad(loadType) && !LoadType.isMixedLoad(loadType)) return;
-        
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled || !isScrolling) return;
-            if (LoadType.isBetweenFramesLoad(loadType)) {
-                mLoadSimulator.executePureBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad");
-            } else if (LoadType.isMixedLoad(loadType)) {
-                mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad");
-            }
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
-    }
-
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;

@@ -56,9 +56,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     
     // Load simulation
     private int loadType = LoadType.MINIMAL;
-    private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private boolean isBackgroundTaskRunning = false;
     private LoadSimulator mLoadSimulator;
     
     // Long frame state
@@ -152,22 +150,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     
     public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
-        
-        // Start background tasks if needed
-        if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType)
-                || LoadType.isLongFrameLoad(loadType)) {
-            startBackgroundTasks();
-        }
-    }
-    
-    private void startBackgroundTasks() {
-        if (isBackgroundTaskRunning) return;
-        isBackgroundTaskRunning = true;
-        scheduleNextBetweenFrameTask();
     }
     
     private void stopBackgroundTasks() {
-        isBackgroundTaskRunning = false;
         mainHandler.removeCallbacksAndMessages(null);
         resetLongFrameState();
     }
@@ -225,25 +210,12 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         }
     }
     
-    private void scheduleNextBetweenFrameTask() {
-        if (!isBackgroundTaskRunning) return;
-        if (LoadType.isLongFrameLoad(loadType)) return;
-        
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        mainHandler.postDelayed(() -> {
-            if (!isBackgroundTaskRunning) return;
-            
-            Trace.beginSection("MapSurface_betweenFrameLoad");
-            executeBetweenFrameLoad();
-            Trace.endSection();
-            
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
-    }
-    
+    /**
+     * 执行帧间负载（每帧调用，由 LoadSimulator 统一控制伪随机帧间隔）
+     */
     private void executeBetweenFrameLoad() {
         if (mLoadSimulator == null) return;
+        if (LoadType.isLongFrameLoad(loadType)) return;
         
         if (LoadType.isBetweenFramesLoad(loadType)) {
             mLoadSimulator.executePureBetweenFrameLoad(loadType, "MapSurface_betweenFrameLoad");
@@ -302,6 +274,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
+            
+            // 每帧调用帧间负载（由 LoadSimulator 统一控制伪随机帧间隔）
+            executeBetweenFrameLoad();
             
             // Frame rate limiting (~60fps)
             try {
@@ -398,17 +373,10 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     }
     
     private void executeInFrameLoad() {
-        // 使用统一的 LoadConfig 方法获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(loadType);
-        
-        if (iterations == 0) return;
-        
-        Trace.beginSection("MapSurface_inFrameLoad");
-        double sum = 0;
-        for (int i = 0; i < iterations; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+        // 使用统一的负载中心执行负载
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeInFrameLoad(loadType, "MapSurface_doFrameLoad");
         }
-        Trace.endSection();
     }
 }
 

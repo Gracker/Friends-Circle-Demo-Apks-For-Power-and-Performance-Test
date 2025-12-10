@@ -10,18 +10,13 @@ import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * 负载模拟器，支持所有11种负载类型。
- * 使用统一的 LoadConfig 配置负载参数。
+ * 使用统一的 LoadConfig 配置负载参数，帧间隔由 LoadSimulator 统一控制。
  */
 public final class LoadStressSimulator implements Choreographer.FrameCallback {
 
     private static final String TAG = "LoadStressSimulator";
-    
-    // 使用 LoadConfig 中的配置
-    private static final Random RANDOM = new Random(LoadConfig.COMPUTATION_SEED);
     
     // 单例和状态管理
     private static LoadStressSimulator sInstance;
@@ -81,14 +76,9 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             
             if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
                 startLongFrameCycle();
-                mChoreographer.postFrameCallback(this);
-            } else if (LoadType.isBetweenFramesLoad(mCurrentLoadType) || LoadType.isMixedLoad(mCurrentLoadType)) {
-                scheduleNextBetweenFrameTask();
-                if (LoadType.isMixedLoad(mCurrentLoadType)) {
-                    mChoreographer.postFrameCallback(this);
-                    scheduleNextDoFrameTask();
-                }
             }
+            // 启动帧回调，由 LoadSimulator 统一控制伪随机帧间隔
+            mChoreographer.postFrameCallback(this);
         }
     }
     
@@ -98,6 +88,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     public void onScrollStop() {
         mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
+        mChoreographer.removeFrameCallback(this);
         resetLongFrameState();
     }
     
@@ -122,10 +113,25 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         
         if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
             checkAndExecuteLongFrame();
-            mChoreographer.postFrameCallback(this);
+        } else if (LoadType.isBetweenFramesLoad(mCurrentLoadType)) {
+            // 纯帧间负载：每帧调用，由 LoadSimulator 统一控制伪随机帧间隔
+            Trace.beginSection("CustomScroll_betweenFrameLoad");
+            executeBetweenFrameLoad(mCurrentLoadType);
+            Trace.endSection();
         } else if (LoadType.isMixedLoad(mCurrentLoadType)) {
-            mChoreographer.postFrameCallback(this);
+            // 混合负载：每帧调用 doFrame 和 betweenFrame，由 LoadSimulator 统一控制伪随机帧间隔
+            Trace.beginSection("CustomScroll_doFrameLoad");
+            executeDoFrameLoad(mCurrentLoadType);
+            Trace.endSection();
+            
+            mHandler.post(() -> {
+                Trace.beginSection("CustomScroll_betweenFrameLoad");
+                executeBetweenFrameLoad(mCurrentLoadType);
+                Trace.endSection();
+            });
         }
+        
+        mChoreographer.postFrameCallback(this);
     }
     
     private void checkAndExecuteLongFrame() {
@@ -156,41 +162,6 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     
     private void executeLongFrameLoad() {
         mLoadSimulator.executeLongFrameLoad("CustomScroll_longFrameLoad");
-    }
-    
-    private void scheduleNextDoFrameTask() {
-        if (!mIsRunning || !mIsScrolling || !LoadType.isMixedLoad(mCurrentLoadType)) return;
-        
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
-                RANDOM.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        mHandler.postDelayed(() -> {
-            if (!mIsRunning || !mIsScrolling) return;
-            
-            Trace.beginSection("CustomScroll_doFrameLoad");
-            executeDoFrameLoad(mCurrentLoadType);
-            Trace.endSection();
-            
-            scheduleNextDoFrameTask();
-        }, intervalMs);
-    }
-    
-    private void scheduleNextBetweenFrameTask() {
-        if (!mIsRunning || !mIsScrolling) return;
-        if (!LoadType.isBetweenFramesLoad(mCurrentLoadType) && !LoadType.isMixedLoad(mCurrentLoadType)) return;
-        
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
-                RANDOM.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        mHandler.postDelayed(() -> {
-            if (!mIsRunning || !mIsScrolling) return;
-            
-            Trace.beginSection("CustomScroll_betweenFrameLoad");
-            executeBetweenFrameLoad(mCurrentLoadType);
-            Trace.endSection();
-            
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
     }
     
     private void executeDoFrameLoad(@LoadType.Type int loadType) {

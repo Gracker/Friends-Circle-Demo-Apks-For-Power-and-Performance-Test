@@ -13,7 +13,7 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
-import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 /**
@@ -35,6 +35,7 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     private float animationTime = 0f;
     private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
+    private LoadSimulator mLoadSimulator;
 
     public PureRenderAnimationView(Context context) {
         super(context);
@@ -61,6 +62,9 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(28);
         textPaint.setTextAlign(Paint.Align.CENTER);
+        
+        // Initialize load simulator
+        mLoadSimulator = new LoadSimulator();
     }
     
     public void setLoadType(@LoadType.Type int loadType) {
@@ -181,17 +185,20 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     }
     
     private void executeLoad() {
-        // 使用统一的 LoadConfig 获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(loadType);
-        
-        if (iterations == 0) return;
-        
-        Trace.beginSection("PureRenderAnimation_executeLoad");
-        double sum = 0;
-        for (int i = 0; i < iterations; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+        // 使用统一的负载中心执行负载
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeInFrameLoad(loadType, "PureRenderAnimation_doFrameLoad");
         }
-        Trace.endSection();
+    }
+    
+    /**
+     * 释放资源
+     */
+    public void release() {
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
+        }
     }
 }
 

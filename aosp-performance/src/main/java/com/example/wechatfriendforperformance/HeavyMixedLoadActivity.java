@@ -22,8 +22,6 @@ import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * Heavy Mixed Load Activity, combines heavy doFrame load + heavy between-frame load
  * - doFrame负载：在Choreographer的doFrame回调中执行，影响帧渲染
@@ -39,10 +37,9 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = LoadType.HEAVY_MIXED;
     
-    // 随机数生成器和调度器
+    // 调度器
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
     
     // 统一负载模拟器
     private LoadSimulator mLoadSimulator;
@@ -50,12 +47,6 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     // 控制变量
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    private long mBetweenFrameTaskCount = 0;
-    private long mDoFrameTaskCount = 0;
-    private int mFrameCount = 0;
-    private int mBetweenFrameCount = 0;
-    private int mNextBetweenFrameTrigger = 0;
-    private static final int DOFRAME_INTERVAL = 2; // 每2帧执行一次doFrame负载
     
     // 滚动监听器
     private RecyclerView.OnScrollListener mScrollListener;
@@ -114,9 +105,6 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
                 } else {
                     if (!mIsScrolling) {
                         mIsScrolling = true;
-                        mFrameCount = 0;
-                        mBetweenFrameCount = 0;
-                        mNextBetweenFrameTrigger = getNextBetweenFrameInterval();
                         mChoreographer.postFrameCallback(HeavyMixedLoadActivity.this);
                         Log.d(TAG, "列表开始滚动，启动负载任务");
                     }
@@ -128,39 +116,16 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     
     /**
      * Choreographer的doFrame回调
-     * 混合负载：doFrame负载在帧渲染期间执行
+     * 帧间隔由 LoadSimulator 统一控制
      */
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
-            mFrameCount++;
-            mBetweenFrameCount++;
-            
-            // 每N帧执行一次doFrame负载，在帧渲染期间执行
-            if (mFrameCount % DOFRAME_INTERVAL == 0) {
-                mDoFrameTaskCount++;
-                mLoadSimulator.executeDoFrameLoad(mLoadType, "MixedLoad_doFrame");
-            }
-            
-            // 帧间负载：达到伪随机触发帧后，在帧间执行一次
-            if (mBetweenFrameCount >= mNextBetweenFrameTrigger) {
-                mBetweenFrameTaskCount++;
-                mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"));
-                mBetweenFrameCount = 0;
-                mNextBetweenFrameTrigger = getNextBetweenFrameInterval();
-            }
-            
+            // 帧间隔由 LoadSimulator 统一控制
+            mLoadSimulator.executeDoFrameLoad(mLoadType, "MixedLoad_doFrame");
+            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"));
             mChoreographer.postFrameCallback(this);
         }
-    }
-    
-    /**
-     * 获取下一次帧间任务触发的帧间隔（伪随机，使用固定种子确保可重现）
-     */
-    private int getNextBetweenFrameInterval() {
-        int min = LoadConfig.getBetweenFrameMinInterval(mLoadType);
-        int max = LoadConfig.getBetweenFrameMaxInterval(mLoadType);
-        return min + mBetweenFrameIntervalRandom.nextInt(max - min + 1);
     }
 
     @Override
@@ -186,8 +151,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         super.onPause();
         mIsTaskSchedulingEnabled = false;
         mHandler.removeCallbacksAndMessages(null);
-        Log.d(TAG, "onPause: 已暂停Task调度，共执行了 " + mBetweenFrameTaskCount + " 个帧间Task, " + 
-                   mDoFrameTaskCount + " 个doFrame Task");
+        Log.d(TAG, "onPause: 已暂停Task调度");
     }
 
     private void initRecyclerView() {
@@ -229,7 +193,6 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
             mLoadSimulator = null;
         }
         
-        Log.d(TAG, "onDestroy: 资源已清理，总共执行了 " + mBetweenFrameTaskCount + " 个帧间Task, " + 
-                   mDoFrameTaskCount + " 个doFrame Task");
+        Log.d(TAG, "onDestroy: 资源已清理");
     }
 }

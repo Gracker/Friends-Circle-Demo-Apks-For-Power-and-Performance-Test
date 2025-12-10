@@ -18,8 +18,6 @@ import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * Light Mixed Load Activity
  * - doFrame负载：在Choreographer的doFrame回调中执行，影响帧渲染
@@ -34,16 +32,11 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
     
     private LoadSimulator mLoadSimulator;
     
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    private int mFrameCount = 0;
-    private int mBetweenFrameCount = 0;
-    private int mNextBetweenFrameTrigger = 0;
-    private static final int DOFRAME_INTERVAL = 4;
     
     private RecyclerView.OnScrollListener mScrollListener;
 
@@ -80,9 +73,6 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
                     mHandler.removeCallbacksAndMessages(null);
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;
-                    mFrameCount = 0;
-                    mBetweenFrameCount = 0;
-                    mNextBetweenFrameTrigger = getNextBetweenFrameInterval();
                     mChoreographer.postFrameCallback(LightMixedLoadActivity.this);
                 }
             }
@@ -93,25 +83,11 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
-            mFrameCount++;
-            mBetweenFrameCount++;
-            if (mFrameCount % DOFRAME_INTERVAL == 0) {
-                mLoadSimulator.executeDoFrameLoad(mLoadType, "LightMixedLoad_doFrame");
-            }
-            if (mBetweenFrameCount >= mNextBetweenFrameTrigger) {
-                mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "LightMixedLoad_betweenFrame"));
-                mBetweenFrameCount = 0;
-                mNextBetweenFrameTrigger = getNextBetweenFrameInterval();
-            }
+            // 帧间隔由 LoadSimulator 统一控制
+            mLoadSimulator.executeDoFrameLoad(mLoadType, "LightMixedLoad_doFrame");
+            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "LightMixedLoad_betweenFrame"));
             mChoreographer.postFrameCallback(this);
         }
-    }
-    
-    /** 获取下一次帧间任务触发的帧间隔（伪随机，固定种子可重现） */
-    private int getNextBetweenFrameInterval() {
-        int min = LoadConfig.getBetweenFrameMinInterval(mLoadType);
-        int max = LoadConfig.getBetweenFrameMaxInterval(mLoadType);
-        return min + mBetweenFrameIntervalRandom.nextInt(max - min + 1);
     }
 
     @Override

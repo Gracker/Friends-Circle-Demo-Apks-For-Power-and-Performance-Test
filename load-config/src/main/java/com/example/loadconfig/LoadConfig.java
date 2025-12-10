@@ -13,10 +13,10 @@ package com.example.loadconfig;
  * 3. 所有随机均使用固定种子，确保测试可重现性
  * 
  * 负载分级策略：
- * 1. 帧内负载（In-Frame）- 保持原有设计
- *    - 轻负载：150
- *    - 中负载：600
- *    - 高负载：1000
+ * 1. 帧内负载（In-Frame）- 提高25%
+ *    - 轻负载：250
+ *    - 中负载：750
+ *    - 高负载：1250
  * 
  * 2. 混合负载 - doFrame部分
  *    - 轻负载：1000
@@ -83,22 +83,22 @@ public final class LoadConfig {
     // ==================== 帧间负载触发间隔配置（帧数）====================
     
     /** 轻负载帧间隔 - 最小帧数 */
-    public static final int LIGHT_BETWEEN_FRAME_MIN_INTERVAL = 4;
+    public static final int LIGHT_BETWEEN_FRAME_MIN_INTERVAL = 3;
     
     /** 轻负载帧间隔 - 最大帧数 */
-    public static final int LIGHT_BETWEEN_FRAME_MAX_INTERVAL = 6;
+    public static final int LIGHT_BETWEEN_FRAME_MAX_INTERVAL = 5;
     
     /** 中负载帧间隔 - 最小帧数 */
-    public static final int MEDIUM_BETWEEN_FRAME_MIN_INTERVAL = 3;
+    public static final int MEDIUM_BETWEEN_FRAME_MIN_INTERVAL = 2;
     
     /** 中负载帧间隔 - 最大帧数 */
-    public static final int MEDIUM_BETWEEN_FRAME_MAX_INTERVAL = 5;
+    public static final int MEDIUM_BETWEEN_FRAME_MAX_INTERVAL = 4;
     
     /** 重负载帧间隔 - 最小帧数 */
-    public static final int HEAVY_BETWEEN_FRAME_MIN_INTERVAL = 2;
+    public static final int HEAVY_BETWEEN_FRAME_MIN_INTERVAL = 3;
     
     /** 重负载帧间隔 - 最大帧数 */
-    public static final int HEAVY_BETWEEN_FRAME_MAX_INTERVAL = 4;
+    public static final int HEAVY_BETWEEN_FRAME_MAX_INTERVAL = 5;
     
     // ==================== 按负载类型区分的数据生成配置 ====================
     
@@ -142,14 +142,14 @@ public final class LoadConfig {
 
     // ==================== 帧内负载配置 ====================
     
-    /** 帧内轻负载强度 */
-    public static final int IN_FRAME_LIGHT_INTENSITY = 200;
+    /** 帧内轻负载强度 (提高25%) */
+    public static final int IN_FRAME_LIGHT_INTENSITY = 250;
     
-    /** 帧内中负载强度 */
-    public static final int IN_FRAME_MEDIUM_INTENSITY = 600;
+    /** 帧内中负载强度 (提高25%) */
+    public static final int IN_FRAME_MEDIUM_INTENSITY = 750;
     
-    /** 帧内高负载强度 */
-    public static final int IN_FRAME_HEAVY_INTENSITY = 1000;
+    /** 帧内高负载强度 (提高25%) */
+    public static final int IN_FRAME_HEAVY_INTENSITY = 1250;
     
     // ==================== 超长帧负载配置 ====================
     
@@ -177,7 +177,7 @@ public final class LoadConfig {
     public static final int MIXED_DOFRAME_MEDIUM_INTENSITY = 1500;
     
     /** 混合高负载 - doFrame任务强度（2.25倍） */
-    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 2250;
+    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 1500;
     
     // ==================== 帧间负载配置（1.5倍递增）====================
     
@@ -188,7 +188,7 @@ public final class LoadConfig {
     public static final int BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
     
     /** 帧间高负载强度（2.25倍） */
-    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
+    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 1750;
     
     // ==================== 混合负载 - 帧间配置（1.5倍递增）====================
     
@@ -199,7 +199,7 @@ public final class LoadConfig {
     public static final int MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
     
     /** 混合高负载 - 帧间任务强度（2.25倍） */
-    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
+    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 1500;
     
     // ==================== 帧间任务概率配置 ====================
     
@@ -210,18 +210,18 @@ public final class LoadConfig {
     public static final float MEDIUM_TASK_PROBABILITY = 0.8f;
     
     /** 高负载任务执行概率 */
-    public static final float HEAVY_TASK_PROBABILITY = 1.0f;
+    public static final float HEAVY_TASK_PROBABILITY = 0.9f;
     
     // ==================== Bitmap大小配置 ====================
     
     /** 轻负载位图大小 */
-    public static final int LIGHT_BITMAP_SIZE = 200;
+    public static final int LIGHT_BITMAP_SIZE = 250;
     
     /** 中负载位图大小 */
-    public static final int MEDIUM_BITMAP_SIZE = 300;
+    public static final int MEDIUM_BITMAP_SIZE = 400;
     
     /** 高负载位图大小 */
-    public static final int HEAVY_BITMAP_SIZE = 450;
+    public static final int HEAVY_BITMAP_SIZE = 600;
     
     // ==================== 私有构造函数 ====================
     
@@ -452,6 +452,42 @@ public final class LoadConfig {
     public static int getBetweenFrameMaxInterval(@LoadType.Type int loadType) {
         int level = LoadType.getLoadLevel(loadType);
         switch (level) {
+            case 1:
+                return LIGHT_BETWEEN_FRAME_MAX_INTERVAL;
+            case 2:
+                return MEDIUM_BETWEEN_FRAME_MAX_INTERVAL;
+            case 3:
+                return HEAVY_BETWEEN_FRAME_MAX_INTERVAL;
+            default:
+                return LIGHT_BETWEEN_FRAME_MAX_INTERVAL;
+        }
+    }
+    
+    /**
+     * 根据负载级别获取帧间负载的最小触发间隔（帧数）
+     * @param loadLevel 负载级别 (1=Light, 2=Medium, 3=Heavy)
+     * @return 最小帧间隔
+     */
+    public static int getBetweenFrameMinIntervalByLevel(int loadLevel) {
+        switch (loadLevel) {
+            case 1:
+                return LIGHT_BETWEEN_FRAME_MIN_INTERVAL;
+            case 2:
+                return MEDIUM_BETWEEN_FRAME_MIN_INTERVAL;
+            case 3:
+                return HEAVY_BETWEEN_FRAME_MIN_INTERVAL;
+            default:
+                return LIGHT_BETWEEN_FRAME_MIN_INTERVAL;
+        }
+    }
+    
+    /**
+     * 根据负载级别获取帧间负载的最大触发间隔（帧数）
+     * @param loadLevel 负载级别 (1=Light, 2=Medium, 3=Heavy)
+     * @return 最大帧间隔
+     */
+    public static int getBetweenFrameMaxIntervalByLevel(int loadLevel) {
+        switch (loadLevel) {
             case 1:
                 return LIGHT_BETWEEN_FRAME_MAX_INTERVAL;
             case 2:

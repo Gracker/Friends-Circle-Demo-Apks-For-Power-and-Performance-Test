@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 /**
@@ -66,6 +67,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     // Load simulation
     private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
+    private LoadSimulator mLoadSimulator;
     
     // Data
     private final List<ListItem> items = new ArrayList<>();
@@ -159,6 +161,9 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         
         // Generate items
         generateItems();
+        
+        // Initialize load simulator
+        mLoadSimulator = new LoadSimulator();
     }
     
     private void generateItems() {
@@ -330,17 +335,20 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     }
     
     private void executeLoad() {
-        // 使用统一的 LoadConfig 获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(loadType);
-        
-        if (iterations == 0) return;
-        
-        Trace.beginSection("PureRenderThread_executeLoad");
-        double sum = 0;
-        for (int i = 0; i < iterations; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+        // 使用统一的负载中心执行负载
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeInFrameLoad(loadType, "PureRenderThread_doFrameLoad");
         }
-        Trace.endSection();
+    }
+    
+    /**
+     * 释放资源
+     */
+    public void release() {
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
+        }
     }
     
     private static class ListItem {

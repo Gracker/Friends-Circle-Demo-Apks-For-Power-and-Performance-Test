@@ -34,8 +34,6 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
-    private int mFrameCount = 0;
-    private static final int LIGHT_FRAME_INTERVAL = 10; // 轻负载执行间隔比中/高负载更大
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
     
@@ -90,15 +88,12 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     
     /**
      * Choreographer 的 doFrame 回调
-     * 在滚动期间每 N 帧执行一次负载模拟
+     * 帧间隔由 LoadSimulator 统一控制
      */
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
-            mFrameCount++;
-            if (mFrameCount % LIGHT_FRAME_INTERVAL == 0) {
-                mLoadSimulator.executeInFrameLoad(mLoadType, "LightLoad_doFrame");
-            }
+            mLoadSimulator.executeInFrameLoad(mLoadType, "LightLoad_doFrame");
             mChoreographer.postFrameCallback(this);
         }
     }

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Random;
 
-import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
 /**
@@ -23,6 +23,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     
     private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
+    private LoadSimulator mLoadSimulator = new LoadSimulator();
     
     private static final int ITEM_COUNT = 100;
     private static final String[] NAMES = {"Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"};
@@ -74,17 +75,20 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
     
     private void executeLoad() {
-        // 使用统一的 LoadConfig 获取负载强度
-        int iterations = LoadConfig.getInFrameIntensity(loadType);
-        
-        if (iterations == 0) return;
-        
-        Trace.beginSection("MixedRender_UIThread_load");
-        double sum = 0;
-        for (int i = 0; i < iterations; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+        // 使用统一的负载中心执行负载
+        if (mLoadSimulator != null) {
+            mLoadSimulator.executeInFrameLoad(loadType, "MixedRender_UIThread_doFrameLoad");
         }
-        Trace.endSection();
+    }
+    
+    /**
+     * 释放资源
+     */
+    public void release() {
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

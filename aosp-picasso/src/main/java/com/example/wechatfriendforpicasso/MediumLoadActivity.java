@@ -28,8 +28,6 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
-    private int mFrameCount = 0;
-    private static final int FRAME_INTERVAL = 8;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
     
@@ -75,10 +73,8 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
-            mFrameCount++;
-            if (mFrameCount % FRAME_INTERVAL == 0) {
-                mLoadSimulator.executeInFrameLoad(mLoadType, "MediumLoad_doFrame");
-            }
+            // 帧间隔由 LoadSimulator 统一控制
+            mLoadSimulator.executeInFrameLoad(mLoadType, "MediumLoad_doFrame");
             mChoreographer.postFrameCallback(this);
         }
     }

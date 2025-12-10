@@ -18,8 +18,6 @@ import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * Medium Mixed Load Activity
  * - doFrame负载：在Choreographer的doFrame回调中执行，影响帧渲染
@@ -32,19 +30,13 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     private VideoFriendCircleAdapter adapter;
     private int mLoadType = LoadType.MEDIUM_MIXED;
     
-    private static final int MIN_TASK_INTERVAL_MS = LoadConfig.MIN_TASK_INTERVAL_MS;
-    private static final int MAX_TASK_INTERVAL_MS = LoadConfig.MAX_TASK_INTERVAL_MS;
-    
     private Choreographer mChoreographer;
     private Handler mHandler;
-    private Random mTaskIntervalRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
     
     private LoadSimulator mLoadSimulator;
     
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    private int mFrameCount = 0;
-    private static final int DOFRAME_INTERVAL = 3;
     
     private RecyclerView.OnScrollListener mScrollListener;
 
@@ -81,9 +73,7 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
                     mHandler.removeCallbacksAndMessages(null);
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;
-                    mFrameCount = 0;
                     mChoreographer.postFrameCallback(MediumMixedLoadActivity.this);
-                    scheduleNextBetweenFrameTask();
                 }
             }
         };
@@ -93,22 +83,11 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
-            mFrameCount++;
-            if (mFrameCount % DOFRAME_INTERVAL == 0) {
-                mLoadSimulator.executeDoFrameLoad(mLoadType, "MediumMixedLoad_doFrame");
-            }
+            // 帧间隔由 LoadSimulator 统一控制
+            mLoadSimulator.executeDoFrameLoad(mLoadType, "MediumMixedLoad_doFrame");
+            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MediumMixedLoad_betweenFrame"));
             mChoreographer.postFrameCallback(this);
         }
-    }
-    
-    private void scheduleNextBetweenFrameTask() {
-        if (!mIsTaskSchedulingEnabled || !mIsScrolling) return;
-        int intervalMs = MIN_TASK_INTERVAL_MS + mTaskIntervalRandom.nextInt(MAX_TASK_INTERVAL_MS - MIN_TASK_INTERVAL_MS);
-        mHandler.postDelayed(() -> {
-            if (!mIsScrolling) return;
-            mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MediumMixedLoad_betweenFrame");
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
     }
 
     @Override

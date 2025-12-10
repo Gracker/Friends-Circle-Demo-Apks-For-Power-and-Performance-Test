@@ -4,24 +4,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Choreographer;
 
-import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * 混合中负载WebView版朋友圈Activity
- * 使用统一的 LoadSimulator 执行负载
+ * 使用统一的 LoadSimulator 执行负载，帧间隔由 LoadSimulator 统一控制
  */
-public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
+public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivity 
+        implements Choreographer.FrameCallback {
     private static final String TAG = "MediumMixedWV";
     
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = true;
-    private final Random taskIntervalRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
-    private final Random doFrameIntervalRandom = new Random(LoadConfig.DOFRAME_INTERVAL_SEED);
     
     private LoadSimulator mLoadSimulator;
     private int mLoadType = LoadType.MEDIUM_MIXED;
@@ -32,10 +30,10 @@ public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActiv
         setTitle("WebView朋友圈 - 混合中负载");
         
         mLoadSimulator = new LoadSimulator();
+        choreographer = Choreographer.getInstance();
         
-        // 启动任务调度
-        scheduleNextBetweenFrameTask();
-        scheduleNextDoFrameTask();
+        // 启动帧回调，由 LoadSimulator 统一控制伪随机帧间隔
+        choreographer.postFrameCallback(this);
     }
 
     @Override
@@ -43,39 +41,21 @@ public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActiv
         Log.d(TAG, "混合中负载模式 - 已启动任务调度");
     }
     
-    private void scheduleNextBetweenFrameTask() {
+    @Override
+    public void doFrame(long frameTimeNanos) {
         if (!isTaskSchedulingEnabled) return;
         
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
-                         taskIntervalRandom.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
+        // 混合负载：每帧调用 doFrame 和 betweenFrame，由 LoadSimulator 统一控制伪随机帧间隔
+        mLoadSimulator.executeDoFrameLoad(mLoadType, "MediumMixedWV_doFrameLoad");
+        handler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MediumMixedWV_betweenFrameLoad"));
         
-        handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
-            
-            mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MediumMixedWV_betweenFrameLoad");
-            
-            if (webView != null) {
-                String js = "(function() { var s = 0; for(var i = 0; i < 500; i++) { s += Math.sin(i) * Math.cos(i); } return s; })();";
-                webView.evaluateJavascript(js, null);
-            }
-            
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
-    }
-    
-    private void scheduleNextDoFrameTask() {
-        if (!isTaskSchedulingEnabled) return;
+        // 执行JavaScript负载（每帧执行）
+        if (webView != null) {
+            String js = "(function() { var s = 0; for(var i = 0; i < 500; i++) { s += Math.sin(i) * Math.cos(i); } return s; })();";
+            webView.evaluateJavascript(js, null);
+        }
         
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
-                         doFrameIntervalRandom.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
-        handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
-            
-            mLoadSimulator.executeDoFrameLoad(mLoadType, "MediumMixedWV_doFrameLoad");
-            
-            scheduleNextDoFrameTask();
-        }, intervalMs);
+        choreographer.postFrameCallback(this);
     }
     
     @Override
@@ -88,6 +68,9 @@ public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActiv
         super.onPause();
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
+        if (choreographer != null) {
+            choreographer.removeFrameCallback(this);
+        }
     }
     
     @Override
@@ -95,8 +78,7 @@ public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActiv
         super.onResume();
         if (!isTaskSchedulingEnabled) {
             isTaskSchedulingEnabled = true;
-            scheduleNextBetweenFrameTask();
-            scheduleNextDoFrameTask();
+            choreographer.postFrameCallback(this);
         }
     }
     
@@ -104,6 +86,9 @@ public class MediumMixedLoadWebViewActivity extends BaseFriendCircleWebViewActiv
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
+        if (choreographer != null) {
+            choreographer.removeFrameCallback(this);
+        }
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;

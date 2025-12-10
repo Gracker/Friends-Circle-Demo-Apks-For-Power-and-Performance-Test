@@ -28,8 +28,6 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
-    private int mFrameCount = 0;
-    private static final int HEAVY_FRAME_INTERVAL = 6;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
     
@@ -75,10 +73,8 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
-            mFrameCount++;
-            if (mFrameCount % HEAVY_FRAME_INTERVAL == 0) {
-                mLoadSimulator.executeInFrameLoad(mLoadType, "HeavyLoad_doFrame");
-            }
+            // 帧间隔由 LoadSimulator 统一控制
+            mLoadSimulator.executeInFrameLoad(mLoadType, "HeavyLoad_doFrame");
             mChoreographer.postFrameCallback(this);
         }
     }

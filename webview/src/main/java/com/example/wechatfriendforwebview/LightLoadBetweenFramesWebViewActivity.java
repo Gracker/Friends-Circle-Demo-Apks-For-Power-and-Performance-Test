@@ -4,23 +4,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Choreographer;
 
-import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
-import java.util.Random;
-
 /**
  * 帧间轻负载WebView版朋友圈Activity
- * 使用统一的 LoadSimulator 执行负载
+ * 使用统一的 LoadSimulator 执行负载，帧间隔由 LoadSimulator 统一控制
  */
-public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebViewActivity {
+public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebViewActivity 
+        implements Choreographer.FrameCallback {
     private static final String TAG = "LightBetweenFramesWV";
     
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = true;
-    private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
     
     private LoadSimulator mLoadSimulator;
     private int mLoadType = LoadType.LIGHT_BETWEEN_FRAMES;
@@ -31,9 +30,10 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
         setTitle("WebView朋友圈 - 帧间轻负载");
         
         mLoadSimulator = new LoadSimulator();
+        choreographer = Choreographer.getInstance();
         
-        // 启动帧间任务调度
-        scheduleNextBetweenFrameTask();
+        // 启动帧回调，由 LoadSimulator 统一控制伪随机帧间隔
+        choreographer.postFrameCallback(this);
     }
 
     @Override
@@ -41,28 +41,20 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
         Log.d(TAG, "帧间轻负载模式 - 已启动帧间任务调度");
     }
     
-    /**
-     * 调度下一个帧间任务
-     */
-    private void scheduleNextBetweenFrameTask() {
+    @Override
+    public void doFrame(long frameTimeNanos) {
         if (!isTaskSchedulingEnabled) return;
         
-        int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
-                         random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
+        // 每帧调用，由 LoadSimulator 统一控制伪随机帧间隔
+        mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFramesWV_load");
         
-        handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled) return;
-            
-            mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFramesWV_load");
-            
-            // 执行JavaScript轻负载
-            if (webView != null) {
-                String js = "(function() { var s = 0; for(var i = 0; i < 100; i++) { s += Math.sqrt(i); } return s; })();";
-                webView.evaluateJavascript(js, null);
-            }
-            
-            scheduleNextBetweenFrameTask();
-        }, intervalMs);
+        // 执行JavaScript轻负载（每帧执行）
+        if (webView != null) {
+            String js = "(function() { var s = 0; for(var i = 0; i < 100; i++) { s += Math.sqrt(i); } return s; })();";
+            webView.evaluateJavascript(js, null);
+        }
+        
+        choreographer.postFrameCallback(this);
     }
     
     @Override
@@ -76,6 +68,9 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
         super.onPause();
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
+        if (choreographer != null) {
+            choreographer.removeFrameCallback(this);
+        }
     }
     
     @Override
@@ -83,7 +78,7 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
         super.onResume();
         if (!isTaskSchedulingEnabled) {
             isTaskSchedulingEnabled = true;
-            scheduleNextBetweenFrameTask();
+            choreographer.postFrameCallback(this);
         }
     }
     
@@ -91,6 +86,9 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
+        if (choreographer != null) {
+            choreographer.removeFrameCallback(this);
+        }
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
