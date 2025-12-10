@@ -18,6 +18,8 @@ import com.kcrason.highperformancefriendscircle.others.DataCenter;
 import com.kcrason.highperformancefriendscircle.others.FriendsCircleAdapterDivideLine;
 import com.kcrason.highperformancefriendscircle.utils.Utils;
 import com.kcrason.highperformancefriendscircle.widgets.EmojiPanelView;
+import com.kcrason.highperformancefriendscircle.model.AppInfo;
+import android.widget.TextView;
 import java.util.List;
 // 移除StfalconImageViewer相关imports
 import io.reactivex.Single;
@@ -40,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 设置应用信息
+        setupAppInfo();
+
         mEmojiPanelView = findViewById(R.id.emoji_panel_view);
         mEmojiPanelView.initEmojiPanel(DataCenter.emojiDataSources);
         mSwipeRefreshLayout = findViewById(R.id.swpie_refresh_layout);
@@ -110,6 +116,30 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onCommentClick(int position) {
         mEmojiPanelView.showEmojiPanel();
+    }
+
+    private void setupAppInfo() {
+        // 创建应用信息
+        AppInfo appInfo = new AppInfo(
+            "微信朋友圈高性能实现",
+            "原始项目，随机展示的微信朋友圈界面",
+            getPackageName()
+        );
+
+        // 设置应用信息到UI
+        TextView appNameView = findViewById(R.id.tv_app_name);
+        TextView appFeatureView = findViewById(R.id.tv_app_feature);
+        TextView packageNameView = findViewById(R.id.tv_package_name);
+
+        if (appNameView != null) {
+            appNameView.setText(appInfo.getAppName());
+        }
+        if (appFeatureView != null) {
+            appFeatureView.setText(appInfo.getAppFeature());
+        }
+        if (packageNameView != null) {
+            packageNameView.setText(appInfo.getPackageName());
+        }
     }
 
     @Override

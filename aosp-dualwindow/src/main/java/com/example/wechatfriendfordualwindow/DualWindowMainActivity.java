@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,8 +21,10 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_DualWindow_NoActionBar);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setupAppInfo();
         
         // Request overlay permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
@@ -71,6 +74,22 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
         
         if (targetActivity != null) {
             startActivity(new Intent(this, targetActivity));
+        }
+    }
+
+    private void setupAppInfo() {
+        TextView tvAppName = findViewById(R.id.tv_app_name);
+        TextView tvFeature = findViewById(R.id.tv_app_feature);
+        TextView tvPackageName = findViewById(R.id.tv_package_name);
+
+        if (tvAppName != null) {
+            tvAppName.setText(getString(R.string.app_name));
+        }
+        if (tvFeature != null) {
+            tvFeature.setText(getString(R.string.title_main));
+        }
+        if (tvPackageName != null) {
+            tvPackageName.setText(getPackageName());
         }
     }
 }

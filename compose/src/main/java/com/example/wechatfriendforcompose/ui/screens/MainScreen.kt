@@ -9,12 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.wechatfriendforcompose.data.LoadType
 import com.example.wechatfriendforcompose.ui.theme.*
+import com.example.wechatfriendforcompose.R
 
 /**
  * 主界面 - 选择负载类型
@@ -30,18 +33,11 @@ fun MainScreen(
             .fillMaxSize()
             .verticalScroll(scrollState)
             .padding(16.dp)
-            .padding(top = 40.dp),
+            .padding(top = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 标题
-        Text(
-            text = "Compose朋友圈性能测试",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 24.dp)
-        )
+        AppInfoCard()
+        Spacer(modifier = Modifier.height(24.dp))
         
         // 负载选择卡片
         Card(
@@ -192,6 +188,48 @@ fun MainScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
         )
+    }
+}
+
+@Composable
+private fun AppInfoCard() {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(id = R.string.app_name),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.app_feature),
+                fontSize = 14.sp,
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Text(
+                text = context.packageName,
+                fontSize = 12.sp,
+                color = TextHint,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

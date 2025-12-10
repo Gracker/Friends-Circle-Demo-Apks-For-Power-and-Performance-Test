@@ -9,6 +9,7 @@
     <color name="base_666666">#666666</color>
     <color name="base_999999">#999999</color>
     <color name="base_F2F2F2">#F2F2F2</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
 </resources>
-
 

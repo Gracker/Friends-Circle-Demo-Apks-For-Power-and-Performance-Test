@@ -82,6 +82,11 @@
 | `surface-map` | SurfaceView 地图 Demo |
 | `gl-map` | OpenGL ES 2.0 地图 Demo |
 
+## 主页布局统一说明
+- 参考 `aosp-performance`，所有带主页入口的模块统一为 **无 ActionBar**，并在顶部加入应用信息卡片（40dp 顶部留白，避免被状态栏遮挡）。
+- 应用信息模块下方直接衔接各类负载入口，原有负载按钮与卡片布局保持不变。
+- 无主页的模块（如 `aosp-douyin`、`aosp-ebook`）已移除应用信息卡片，保持沉浸式体验。
+
 ## 模块详细说明
 
 ### 1. 原始项目 (app)

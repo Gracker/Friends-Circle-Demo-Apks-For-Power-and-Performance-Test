@@ -22,6 +22,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
 import com.example.wechatfriendfordouyin.view.VerticalVideoScroller;
+import com.example.wechatfriendfordouyin.model.AppInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,9 @@ public class DouyinMainActivity extends AppCompatActivity {
         setupFullScreen();
         
         setContentView(R.layout.activity_douyin_main);
+
+        // 设置应用信息
+        setupAppInfo();
 
         initVideoData();
         initViews();
@@ -398,6 +402,30 @@ public class DouyinMainActivity extends AppCompatActivity {
             this.commentCount = commentCount;
             this.favoriteCount = favoriteCount;
             this.shareCount = shareCount;
+        }
+    }
+
+    private void setupAppInfo() {
+        // 创建应用信息
+        AppInfo appInfo = new AppInfo(
+            "抖音风格视频滑动",
+            "模仿抖音的垂直滑动视频播放，使用ExoPlayer播放本地MP4文件",
+            getPackageName()
+        );
+
+        // 设置应用信息到UI
+        TextView appNameView = findViewById(R.id.tv_app_name);
+        TextView appFeatureView = findViewById(R.id.tv_app_feature);
+        TextView appPackageView = findViewById(R.id.tv_package_name);
+
+        if (appNameView != null) {
+            appNameView.setText(appInfo.getAppName());
+        }
+        if (appFeatureView != null) {
+            appFeatureView.setText(appInfo.getAppFeature());
+        }
+        if (appPackageView != null) {
+            appPackageView.setText(appInfo.getPackageName());
         }
     }
 }

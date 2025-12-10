@@ -6,6 +6,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,6 +42,7 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
         // 应用无ActionBar的主题
         setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         setContentView(R.layout.activity_webview_main);
+        setupAppInfo();
         
         Log.d(TAG, "初始化WebView朋友圈测试主界面");
         
@@ -164,6 +166,22 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
             intent.putExtra(EXTRA_LOAD_TYPE, loadType);
             startActivity(intent);
             Trace.endSection();
+        }
+    }
+
+    private void setupAppInfo() {
+        TextView tvAppName = findViewById(R.id.tv_app_name);
+        TextView tvFeature = findViewById(R.id.tv_app_feature);
+        TextView tvPackageName = findViewById(R.id.tv_package_name);
+
+        if (tvAppName != null) {
+            tvAppName.setText(getString(R.string.app_name));
+        }
+        if (tvFeature != null) {
+            tvFeature.setText(getString(R.string.app_name));
+        }
+        if (tvPackageName != null) {
+            tvPackageName.setText(getPackageName());
         }
     }
 }

@@ -12,18 +12,15 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="24dp">
 
-        <TextView
+        <!-- 应用信息 -->
+        <include
+            android:id="@+id/app_info_layout"
+            layout="@layout/include_app_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/title_main"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/base_333333"
-            android:gravity="center"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="24dp" />
             
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wechatfriendforebook.parser.EpubParser;
 import com.example.wechatfriendforebook.parser.PageSplitter;
 import com.example.wechatfriendforebook.view.PageView;
+import com.example.wechatfriendforebook.model.AppInfo;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,7 +82,10 @@ public class EBookReaderActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         
         setContentView(R.layout.activity_ebook_reader);
-        
+
+        // 设置应用信息
+        setupAppInfo();
+
         initViews();
         setupListeners();
         loadBook();
@@ -371,6 +375,30 @@ public class EBookReaderActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    private void setupAppInfo() {
+        // 创建应用信息
+        AppInfo appInfo = new AppInfo(
+            "电子书阅读器",
+            "高性能电子书阅读器，支持EPUB格式，实现分页和手势操作",
+            getPackageName()
+        );
+
+        // 设置应用信息到UI
+        TextView appNameView = findViewById(R.id.tv_app_name);
+        TextView appFeatureView = findViewById(R.id.tv_app_feature);
+        TextView appPackageView = findViewById(R.id.tv_package_name);
+
+        if (appNameView != null) {
+            appNameView.setText(appInfo.getAppName());
+        }
+        if (appFeatureView != null) {
+            appFeatureView.setText(appInfo.getAppFeature());
+        }
+        if (appPackageView != null) {
+            appPackageView.setText(appInfo.getPackageName());
         }
     }
 }

@@ -6,6 +6,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import android.app.Activity;
 
@@ -42,8 +43,10 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("GeckoViewMainActivity_onCreate");
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         
         setContentView(R.layout.activity_geckoview_main);
+        setupAppInfo();
         
         Log.d(TAG, "初始化GeckoView SurfaceTexture版朋友圈测试主界面");
         
@@ -54,6 +57,22 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
         setClickListeners();
         
         Trace.endSection();
+    }
+
+    private void setupAppInfo() {
+        TextView tvAppName = findViewById(R.id.tv_app_name);
+        TextView tvFeature = findViewById(R.id.tv_app_feature);
+        TextView tvPackageName = findViewById(R.id.tv_package_name);
+
+        if (tvAppName != null) {
+            tvAppName.setText(getString(R.string.app_name));
+        }
+        if (tvFeature != null) {
+            tvFeature.setText(getString(R.string.app_name));
+        }
+        if (tvPackageName != null) {
+            tvPackageName.setText(getPackageName());
+        }
     }
     
     /**

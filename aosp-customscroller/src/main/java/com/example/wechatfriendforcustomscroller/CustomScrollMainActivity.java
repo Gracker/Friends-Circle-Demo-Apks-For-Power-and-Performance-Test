@@ -3,6 +3,7 @@ package com.example.wechatfriendforcustomscroller;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.databinding.ActivityPerformanceMainBinding;
+import com.example.wechatfriendforcustomscroller.model.AppInfo;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -25,9 +27,13 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         binding = ActivityPerformanceMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        
+
+        // 设置应用信息
+        setupAppInfo();
+
         // Minimal load
         binding.btnMinimalLoad.setOnClickListener(this);
         
@@ -85,5 +91,29 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
         Intent intent = new Intent(this, CustomScrollFeedActivity.class);
         intent.putExtra(CustomScrollFeedActivity.EXTRA_LOAD_TYPE, loadType);
         startActivity(intent);
+    }
+
+    private void setupAppInfo() {
+        // 创建应用信息
+        AppInfo appInfo = new AppInfo(
+            "朋友圈自定义滚动版本",
+            "自研CustomOverScroller + CustomTimelineView",
+            getPackageName()
+        );
+
+        // 设置应用信息到UI
+        TextView appNameView = findViewById(R.id.tv_app_name);
+        TextView appFeatureView = findViewById(R.id.tv_app_feature);
+        TextView packageNameView = findViewById(R.id.tv_package_name);
+
+        if (appNameView != null) {
+            appNameView.setText(appInfo.getAppName());
+        }
+        if (appFeatureView != null) {
+            appFeatureView.setText(appInfo.getAppFeature());
+        }
+        if (packageNameView != null) {
+            packageNameView.setText(appInfo.getPackageName());
+        }
     }
 }

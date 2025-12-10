@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:padding="16dp"
+    android:elevation="2dp">
+
+    <!-- 应用名称 -->
+    <TextView
+        android:id="@+id/tv_app_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        tools:text="应用名称" />
+
+    <!-- 应用特征 -->
+    <TextView
+        android:id="@+id/tv_app_feature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/base_666666"
+        android:gravity="center"
+        android:layout_marginBottom="8dp"
+        android:lineSpacingExtra="2dp"
+        tools:text="应用特征描述" />
+
+    <!-- 包名 -->
+    <TextView
+        android:id="@+id/tv_package_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/base_999999"
+        android:gravity="center"
+        android:fontFamily="monospace"
+        tools:text="com.example.app" />
+
+</LinearLayout>

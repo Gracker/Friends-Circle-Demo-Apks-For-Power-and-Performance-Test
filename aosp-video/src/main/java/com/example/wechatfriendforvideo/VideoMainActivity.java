@@ -6,6 +6,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,6 +48,7 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
         // Apply theme without ActionBar
         setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         setContentView(R.layout.activity_performance_main);
+        setupAppInfo();
         
         // 验证负载配置的科学性
         validateLoadConfiguration();
@@ -330,6 +332,22 @@ public class VideoMainActivity extends AppCompatActivity implements View.OnClick
             intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
             startActivity(intent);
             Trace.endSection();
+        }
+    }
+    
+    private void setupAppInfo() {
+        TextView tvAppName = findViewById(R.id.tv_app_name);
+        TextView tvFeature = findViewById(R.id.tv_app_feature);
+        TextView tvPackageName = findViewById(R.id.tv_package_name);
+
+        if (tvAppName != null) {
+            tvAppName.setText(getString(R.string.app_name));
+        }
+        if (tvFeature != null) {
+            tvFeature.setText(getString(R.string.title_main));
+        }
+        if (tvPackageName != null) {
+            tvPackageName.setText(getPackageName());
         }
     }
     

@@ -6,10 +6,12 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapter;
+import com.example.wechatfriendforpicasso.model.AppInfo;
 import com.example.loadconfig.LoadConfig;
 
 /**
@@ -47,7 +49,10 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
         // Apply theme without ActionBar
         setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
         setContentView(R.layout.activity_performance_main);
-        
+
+        // 设置应用信息
+        setupAppInfo();
+
         // 验证负载配置的科学性
         validateLoadConfiguration();
         
@@ -359,6 +364,30 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
                   
         } else {
             Log.e("LoadConfig", "❌ 负载配置验证失败！请检查LoadConfig中的数值设置");
+        }
+    }
+
+    private void setupAppInfo() {
+        // 创建应用信息
+        AppInfo appInfo = new AppInfo(
+            "朋友圈Picasso版本",
+            "使用 Picasso 图片加载库",
+            getPackageName()
+        );
+
+        // 设置应用信息到UI
+        TextView appNameView = findViewById(R.id.tv_app_name);
+        TextView appFeatureView = findViewById(R.id.tv_app_feature);
+        TextView packageNameView = findViewById(R.id.tv_package_name);
+
+        if (appNameView != null) {
+            appNameView.setText(appInfo.getAppName());
+        }
+        if (appFeatureView != null) {
+            appFeatureView.setText(appInfo.getAppFeature());
+        }
+        if (packageNameView != null) {
+            packageNameView.setText(appInfo.getPackageName());
         }
     }
 } 

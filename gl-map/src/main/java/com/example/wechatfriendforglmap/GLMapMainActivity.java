@@ -3,6 +3,7 @@ package com.example.wechatfriendforglmap;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,8 +16,10 @@ public class GLMapMainActivity extends AppCompatActivity implements View.OnClick
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_GLMap_NoActionBar);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setupAppInfo();
         
         binding.btnMinimalLoad.setOnClickListener(this);
         binding.btnLightLoad.setOnClickListener(this);
@@ -50,6 +53,22 @@ public class GLMapMainActivity extends AppCompatActivity implements View.OnClick
         
         if (targetActivity != null) {
             startActivity(new Intent(this, targetActivity));
+        }
+    }
+
+    private void setupAppInfo() {
+        TextView tvAppName = findViewById(R.id.tv_app_name);
+        TextView tvFeature = findViewById(R.id.tv_app_feature);
+        TextView tvPackageName = findViewById(R.id.tv_package_name);
+
+        if (tvAppName != null) {
+            tvAppName.setText(getString(R.string.app_name));
+        }
+        if (tvFeature != null) {
+            tvFeature.setText(getString(R.string.title_main));
+        }
+        if (tvPackageName != null) {
+            tvPackageName.setText(getPackageName());
         }
     }
 }
