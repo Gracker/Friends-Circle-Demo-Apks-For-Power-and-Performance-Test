@@ -14,6 +14,11 @@ import java.util.Random;
  * 集中管理所有负载模拟逻辑，避免在各个模块中重复代码。
  * 所有模块共享相同的负载实现，确保测试结果的一致性。
  * 
+ * 设计原则：
+ * 1. 伪随机性：所有随机数使用固定种子，确保每次测试结果可重现
+ * 2. 防编译器优化：使用 volatile 变量、数据依赖链、黑洞消费等技术
+ * 3. 基于120fps：所有时间相关参数基于8.33ms/帧设计
+ * 
  * 支持的负载类型：
  * - MINIMAL: 不执行任何负载
  * - LIGHT/MEDIUM/HEAVY: 帧内负载（在 onBindViewHolder 等位置执行）
@@ -35,29 +40,52 @@ public class LoadSimulator {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     
-    // 随机数生成器
+    // 伪随机数生成器（使用固定种子确保可重现）
     private Random mComputationRandom;
+    private Random mStringRandom;  // 用于字符串生成的独立随机数生成器
     
     // 用于存储计算结果，防止编译器优化
+    // volatile 关键字确保每次读写都直接访问内存，防止寄存器缓存优化
     private volatile double mComputationResult = 0.0;
     private volatile int mImageProcessingResult = 0;
     private volatile long mDataProcessingResult = 0L;
     private volatile double mComplexMathResult = 0.0;
     
+    // 黑洞变量：用于消费计算结果，防止死代码消除
+    // 这些变量的存在确保编译器不会优化掉"无用"的计算
+    private static volatile long sBlackHole = 0L;
+    
     // Bitmap 大小
     private static final int BITMAP_SIZE = 600;
     
+    // 执行计数器（用于生成确定性的伪随机序列）
+    private long mExecutionCounter = 0;
+    
     /**
      * 创建负载模拟器
+     * 使用固定种子初始化所有随机数生成器，确保测试可重现
      */
     public LoadSimulator() {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
+        
+        // 使用固定种子初始化随机数生成器
         mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
+        mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
         
         // 创建用于绘制的 Bitmap 和 Canvas
         mBitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
+    }
+    
+    /**
+     * 重置随机数生成器到初始状态
+     * 在需要确保测试从相同状态开始时调用
+     */
+    public void resetRandomState() {
+        mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
+        mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
+        mExecutionCounter = 0;
     }
     
     /**
@@ -70,6 +98,34 @@ public class LoadSimulator {
             mBitmap = null;
         }
         mCanvas = null;
+    }
+    
+    // ==================== 防编译器优化的工具方法 ====================
+    
+    /**
+     * 消费计算结果到黑洞变量
+     * 防止编译器因"结果未使用"而优化掉计算过程
+     */
+    private void consumeToBlackHole(double value) {
+        sBlackHole ^= Double.doubleToLongBits(value);
+    }
+    
+    private void consumeToBlackHole(long value) {
+        sBlackHole ^= value;
+    }
+    
+    private void consumeToBlackHole(int value) {
+        sBlackHole ^= value;
+    }
+    
+    /**
+     * 创建数据依赖链
+     * 确保循环的每次迭代都依赖于前一次的结果，防止循环被并行化或展开优化
+     */
+    private double createDependencyChain(double previousValue, int iteration) {
+        // 使用复杂的数学运算创建不可预测的依赖
+        return Math.sin(previousValue + iteration) * Math.cos(previousValue * 0.1) + 
+               Math.sqrt(Math.abs(previousValue) + 1);
     }
     
     // ==================== 统一入口方法 ====================
@@ -85,6 +141,7 @@ public class LoadSimulator {
         if (intensity == 0) return;
         
         Trace.beginSection(traceTag);
+        mExecutionCounter++;
         
         // 根据负载级别选择执行方式
         int level = LoadType.getLoadLevel(loadType);
@@ -116,6 +173,7 @@ public class LoadSimulator {
         if (intensity == 0) return;
         
         Trace.beginSection(traceTag);
+        mExecutionCounter++;
         
         // 根据负载级别选择执行方式
         int level = LoadType.getLoadLevel(loadType);
@@ -147,6 +205,7 @@ public class LoadSimulator {
         if (intensity == 0) return;
         
         Trace.beginSection(traceTag);
+        mExecutionCounter++;
         
         // 根据负载级别选择执行方式
         int level = LoadType.getLoadLevel(loadType);
@@ -178,6 +237,7 @@ public class LoadSimulator {
         if (intensity == 0) return;
         
         Trace.beginSection(traceTag);
+        mExecutionCounter++;
         
         // 根据负载级别选择执行方式
         int level = LoadType.getLoadLevel(loadType);
@@ -207,6 +267,7 @@ public class LoadSimulator {
         int intensity = LoadConfig.getLongFrameIntensity();
         
         Trace.beginSection(traceTag);
+        mExecutionCounter++;
         executeHeavyLoad(intensity);
         Trace.endSection();
     }
@@ -215,14 +276,18 @@ public class LoadSimulator {
     
     /**
      * 执行简单负载 - 最基础的计算
+     * 使用数据依赖链防止循环优化
      * @param intensity 负载强度
      */
     private void executeSimpleLoad(int intensity) {
-        double sum = 0;
+        double sum = mExecutionCounter; // 使用执行计数器作为初始值，增加不可预测性
         for (int i = 0; i < intensity; i++) {
-            sum += Math.sin(i * 0.1) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
+            // 创建数据依赖链：每次迭代依赖前一次结果
+            sum = createDependencyChain(sum, i);
+            sum += Math.sin(i * 0.1 + sum * 0.001) * Math.cos(i * 0.1) + Math.sqrt(i + 1);
         }
         mComputationResult = sum;
+        consumeToBlackHole(sum);
     }
     
     /**
@@ -230,15 +295,18 @@ public class LoadSimulator {
      * @param intensity 负载强度
      */
     private void executeLightLoad(int intensity) {
-        // 任务1: 基础数学计算
-        double sum = 0.0;
+        // 任务1: 基础数学计算（带依赖链）
+        double sum = mExecutionCounter;
         for (int i = 1; i <= intensity; i++) {
             double x = i * 0.05;
-            sum += Math.sin(x) * Math.cos(x) + Math.sqrt(i + 1);
+            // 依赖链：使用前一次结果
+            sum = createDependencyChain(sum, i);
+            sum += Math.sin(x + sum * 0.0001) * Math.cos(x) + Math.sqrt(i + 1);
             sum += Math.log(i + 1) + Math.exp(-x * 0.1);
         }
         
         // 任务2: 简单图像处理
+        int pixelSum = 0;
         if (mCanvas != null) {
             mPaint.setColor(Color.rgb(
                 mComputationRandom.nextInt(256), 
@@ -251,6 +319,7 @@ public class LoadSimulator {
                 float y = mComputationRandom.nextFloat() * BITMAP_SIZE;
                 float radius = 5 + mComputationRandom.nextFloat() * 10;
                 mCanvas.drawCircle(x, y, radius, mPaint);
+                pixelSum += (int)(x + y + radius); // 收集结果防止优化
             }
         }
         
@@ -266,6 +335,12 @@ public class LoadSimulator {
         // 存储结果防止编译器优化
         mComputationResult = sum;
         mDataProcessingResult = dataArray.length > 0 ? dataArray[0] : 0;
+        mImageProcessingResult = pixelSum;
+        
+        // 消费所有结果到黑洞
+        consumeToBlackHole(sum);
+        consumeToBlackHole(pixelSum);
+        consumeToBlackHole(mDataProcessingResult);
     }
     
     /**
@@ -273,13 +348,15 @@ public class LoadSimulator {
      * @param intensity 负载强度
      */
     private void executeMediumLoad(int intensity) {
-        // 任务1: 复杂数学计算
-        double sum = 0.0;
+        // 任务1: 复杂数学计算（带强依赖链）
+        double sum = mExecutionCounter;
         for (int i = 1; i <= intensity; i++) {
             double x = i * 0.03;
-            sum += Math.sin(x * Math.PI) * Math.cos(x * Math.PI / 2) + 
+            // 强依赖链
+            sum = createDependencyChain(sum, i);
+            sum += Math.sin(x * Math.PI + sum * 0.00001) * Math.cos(x * Math.PI / 2) + 
                    Math.pow(x, 2.0) + Math.log(i + 1) * Math.exp(-x * 0.08);
-            sum += Math.atan2(Math.sin(x), Math.cos(x)) + Math.tanh(x * 0.03);
+            sum += Math.atan2(Math.sin(x + sum * 0.00001), Math.cos(x)) + Math.tanh(x * 0.03);
         }
         
         // 任务2: 3x3矩阵运算
@@ -303,6 +380,7 @@ public class LoadSimulator {
         }
         
         // 任务3: 图像处理
+        int pixelSum = 0;
         if (mCanvas != null) {
             mPaint.setColor(Color.rgb(
                 mComputationRandom.nextInt(256), 
@@ -322,6 +400,7 @@ public class LoadSimulator {
                 if (i % 2 == 0) {
                     mCanvas.drawRect(x - radius, y - radius, x + radius, y + radius, mPaint);
                 }
+                pixelSum += (int)(x + y + radius);
             }
         }
         
@@ -345,18 +424,25 @@ public class LoadSimulator {
             }
         }
         
-        // 任务5: 字符串处理
+        // 任务5: 字符串处理（使用伪随机替代System.nanoTime）
         StringBuilder sb = new StringBuilder();
         int stringCount = intensity / 4;
         for (int i = 0; i < stringCount; i++) {
-            sb.append("MediumTask_").append(i).append("_").append(mComputationRandom.nextInt(500)).append("_");
+            // 使用固定种子的随机数替代System.nanoTime()
+            sb.append("MediumTask_").append(i).append("_")
+              .append(mStringRandom.nextInt(500)).append("_");
         }
         String processedString = sb.toString().toUpperCase();
         
         // 存储结果防止编译器优化
         mComputationResult = sum + result[0][0] + result[1][1] + result[2][2];
-        mImageProcessingResult = processedString.length();
+        mImageProcessingResult = processedString.length() + pixelSum;
         mDataProcessingResult = searchCount + sortedArray[0];
+        
+        // 消费所有结果到黑洞
+        consumeToBlackHole(mComputationResult);
+        consumeToBlackHole(mImageProcessingResult);
+        consumeToBlackHole(mDataProcessingResult);
     }
     
     /**
@@ -364,19 +450,21 @@ public class LoadSimulator {
      * @param intensity 负载强度
      */
     private void executeHeavyLoad(int intensity) {
-        // 任务1: 高复杂度数学计算
-        double sum = 0.0;
+        // 任务1: 高复杂度数学计算（带强依赖链防止并行优化）
+        double sum = mExecutionCounter;
         for (int i = 1; i <= intensity * 2; i++) {
             double x = i * 0.02;
+            // 强依赖链：每次迭代必须等待前一次完成
+            sum = createDependencyChain(sum, i);
             // 复杂的三角函数和指数函数计算
-            sum += Math.sin(x * Math.PI) * Math.cos(x * Math.PI / 2) + 
+            sum += Math.sin(x * Math.PI + sum * 0.000001) * Math.cos(x * Math.PI / 2) + 
                    Math.pow(x, 2.5) + Math.log(i + 1) * Math.exp(-x * 0.05);
             // 双曲函数和反三角函数
-            sum += Math.atan2(Math.sin(x), Math.cos(x)) + 
+            sum += Math.atan2(Math.sin(x + sum * 0.000001), Math.cos(x)) + 
                    Math.sinh(x * 0.01) + Math.cosh(x * 0.01) + 
                    Math.tanh(x * 0.02);
             // 贝塞尔函数近似和伽马函数近似
-            sum += approximateBesselJ0(x) + logGammaApproximation(x + 1);
+            sum += approximateBesselJ0(x + sum * 0.000001) + logGammaApproximation(x + 1);
         }
         
         // 任务2: 大型矩阵运算 - 5x5矩阵乘法
@@ -405,6 +493,7 @@ public class LoadSimulator {
         double determinant = calculateDeterminant5x5(matrixA);
         
         // 任务3: 高密度图像处理
+        int pixelSum = 0;
         if (mCanvas != null) {
             mPaint.setColor(Color.rgb(
                 mComputationRandom.nextInt(256), 
@@ -436,6 +525,8 @@ public class LoadSimulator {
                     mCanvas.drawOval(x - radius, y - radius * 1.5f, x + radius, y + radius * 1.5f, mPaint);
                     mCanvas.drawArc(x - radius, y - radius, x + radius, y + radius, 0, 270, false, mPaint);
                 }
+                
+                pixelSum += (int)(x + y + radius);
             }
         }
         
@@ -466,12 +557,16 @@ public class LoadSimulator {
         int fibResult = fibonacci(30);
         long factorialResult = factorial(15);
         
-        // 任务6: 高级字符串处理
+        // 任务6: 高级字符串处理（使用伪随机替代System.nanoTime）
         StringBuilder sb = new StringBuilder();
         int stringCount = intensity;
         for (int i = 0; i < stringCount; i++) {
-            sb.append("LoadTask_").append(i).append("_").append(mComputationRandom.nextInt(1000))
-              .append("_Complex_").append(System.nanoTime() % 1000).append("_");
+            // 使用固定种子的随机数生成器替代 System.nanoTime()
+            // 确保每次执行产生相同的字符串序列
+            sb.append("LoadTask_").append(i).append("_")
+              .append(mStringRandom.nextInt(1000))
+              .append("_Complex_")
+              .append(mStringRandom.nextInt(1000)).append("_");
         }
         String processedString = sb.toString().toUpperCase().replace("_", "-");
         String[] parts = processedString.split("-");
@@ -482,11 +577,17 @@ public class LoadSimulator {
         
         // 存储结果防止编译器优化
         mComputationResult = sum + result[0][0] + result[2][2] + result[4][4];
-        mImageProcessingResult = processedString.length() + parts.length + reConstructed.length();
+        mImageProcessingResult = processedString.length() + parts.length + reConstructed.length() + pixelSum;
         mDataProcessingResult = searchCount + sortedArray[0] + sortedArray[sortedArray.length - 1];
         mComplexMathResult = determinant + fibResult + factorialResult;
         
-        // 验证计算结果，确保不被优化掉
+        // 消费所有结果到黑洞，确保编译器不会优化掉任何计算
+        consumeToBlackHole(mComputationResult);
+        consumeToBlackHole(mImageProcessingResult);
+        consumeToBlackHole(mDataProcessingResult);
+        consumeToBlackHole(mComplexMathResult);
+        
+        // 验证计算结果，使用结果影响后续状态（增强防优化）
         if (Math.abs(mComputationResult) > 0 && mImageProcessingResult > 0 && 
             mDataProcessingResult >= 0 && Math.abs(mComplexMathResult) > 0) {
             mPaint.setAlpha((int)(Math.abs(mComputationResult + mComplexMathResult) % 255) + 1);
@@ -498,6 +599,7 @@ public class LoadSimulator {
     
     /**
      * 贝塞尔函数J0近似
+     * 使用Chebyshev多项式近似，确保计算复杂度
      */
     private double approximateBesselJ0(double x) {
         if (Math.abs(x) < 8.0) {
@@ -513,7 +615,7 @@ public class LoadSimulator {
     }
     
     /**
-     * 伽马函数对数近似
+     * 伽马函数对数近似（Stirling近似）
      */
     private double logGammaApproximation(double x) {
         return (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) +
@@ -521,7 +623,7 @@ public class LoadSimulator {
     }
     
     /**
-     * 计算5x5矩阵行列式
+     * 计算5x5矩阵行列式（使用余子式展开，确保计算复杂度）
      */
     private double calculateDeterminant5x5(double[][] matrix) {
         double det = 0;
@@ -554,6 +656,7 @@ public class LoadSimulator {
     
     /**
      * 归并排序
+     * 使用递归实现，确保算法复杂度不被优化
      */
     private int[] mergeSort(int[] arr) {
         if (arr.length <= 1) return arr;
@@ -591,6 +694,7 @@ public class LoadSimulator {
     
     /**
      * 堆排序
+     * 原地排序，确保内存访问模式不可预测
      */
     private void heapSort(int[] arr) {
         int n = arr.length;
@@ -640,7 +744,7 @@ public class LoadSimulator {
     // ==================== 算法工具方法 ====================
     
     /**
-     * 斐波那契数计算
+     * 斐波那契数计算（使用动态规划，避免递归优化）
      */
     private int fibonacci(int n) {
         if (n <= 1) return n;
@@ -665,7 +769,7 @@ public class LoadSimulator {
         return result;
     }
     
-    // ==================== Getter 方法（用于日志输出）====================
+    // ==================== Getter 方法（用于日志输出和验证）====================
     
     public double getComputationResult() {
         return mComputationResult;
@@ -681,5 +785,21 @@ public class LoadSimulator {
     
     public double getComplexMathResult() {
         return mComplexMathResult;
+    }
+    
+    /**
+     * 获取黑洞值（用于验证计算确实执行）
+     * @return 黑洞累积值
+     */
+    public static long getBlackHoleValue() {
+        return sBlackHole;
+    }
+    
+    /**
+     * 获取执行计数器（用于验证执行次数）
+     * @return 执行计数
+     */
+    public long getExecutionCounter() {
+        return mExecutionCounter;
     }
 }

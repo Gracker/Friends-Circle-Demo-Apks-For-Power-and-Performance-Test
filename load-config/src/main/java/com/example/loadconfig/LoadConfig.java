@@ -6,41 +6,58 @@ package com.example.loadconfig;
  * 集中管理所有模块的负载参数，便于调试和优化。
  * 
  * 设计原理：
- * 1. 基于Android 60fps渲染管线（每帧16.67ms）
- * 2. doFrame负载：几何级数增长（1000→2000→4000）
- * 3. 帧间负载：反比例衰减，平衡整体负载
- * 4. 任务间隔：1-5帧（16-83ms），确保测试可重现性
+ * 1. 基于Android 120fps渲染管线（每帧8.33ms）
+ * 2. 负载递增策略：1.5倍递增（轻 → 中 → 重）
+ *    - 科学依据：Weber-Fechner定律表明人眼感知呈对数关系
+ *    - 1.5倍递增在感知上有明显差异，同时不会跨度太大
+ * 3. 所有随机均使用固定种子，确保测试可重现性
  * 
  * 负载分级策略：
- * 1. doFrame负载（混合负载）- 几何级数增长
+ * 1. 帧内负载（In-Frame）- 保持原有设计
+ *    - 轻负载：150
+ *    - 中负载：600
+ *    - 高负载：1000
+ * 
+ * 2. 混合负载 - doFrame部分
  *    - 轻负载：1000
- *    - 中负载：2000 (2x)
- *    - 高负载：4000 (2x)
+ *    - 中负载：1500 (1.5x)
+ *    - 高负载：2250 (1.5x)
  * 
- * 2. 帧间负载 - 递增设计
+ * 3. 帧间负载（Between-Frame）
  *    - 轻负载：1000
- *    - 中负载：2000 (2x)
- *    - 高负载：4000 (2x)
+ *    - 中负载：1500 (1.5x)
+ *    - 高负载：2250 (1.5x)
  * 
- * 3. 混合负载总和趋势 - 递增
- *    - 轻负载总和：2500 (1000 + 1500)
- *    - 中负载总和：5000 (2000 + 3000)
- *    - 高负载总和：9000 (4000 + 5000)
+ * 4. 混合负载 - 帧间部分
+ *    - 轻负载：1000
+ *    - 中负载：1500 (1.5x)
+ *    - 高负载：2250 (1.5x)
  * 
- * 科学依据：
- * - Weber-Fechner定律：人眼感知呈对数关系，doFrame采用几何级数
- * - 直觉一致性：高负载类型的各部分都应该是高负载
- * - Android渲染管线：基于60fps (16.67ms/帧) 设计任务间隔
+ * 5. 混合负载总和趋势
+ *    - 轻负载总和：2000 (1000 + 1000)
+ *    - 中负载总和：3000 (1500 + 1500)
+ *    - 高负载总和：4500 (2250 + 2250)
  */
 public final class LoadConfig {
 
+    // ==================== 帧率基准配置 ====================
+    
+    /** 目标帧率 (fps) */
+    public static final int TARGET_FPS = 120;
+    
+    /** 单帧时长 (ms) - 120fps = 8.33ms/frame */
+    public static final double FRAME_DURATION_MS = 1000.0 / TARGET_FPS;  // 8.33ms
+    
+    /** 负载递增倍数 */
+    public static final double LOAD_INCREMENT_MULTIPLIER = 1.5;
+
     // ==================== 任务调度配置 ====================
     
-    /** 最小任务执行间隔（1帧 = 16ms） */
-    public static final int MIN_TASK_INTERVAL_MS = 16;
+    /** 最小任务执行间隔（1帧 @ 120fps = 8ms） */
+    public static final int MIN_TASK_INTERVAL_MS = 8;
     
-    /** 最大任务执行间隔（5帧 = 83ms） */
-    public static final int MAX_TASK_INTERVAL_MS = 83;
+    /** 最大任务执行间隔（5帧 @ 120fps = 42ms） */
+    public static final int MAX_TASK_INTERVAL_MS = 42;
     
     /** 任务间隔随机种子（确保测试可重现） */
     public static final long TASK_INTERVAL_SEED = 12345L;
@@ -60,7 +77,10 @@ public final class LoadConfig {
     /** 帧间负载随机种子（确保伪随机可重现） */
     public static final long BETWEEN_FRAME_INTERVAL_SEED = 88888L;
     
-    // ==================== 帧间负载触发间隔配置（帧数） ====================
+    /** 字符串生成随机种子（替代System.nanoTime()确保可重现） */
+    public static final long STRING_GENERATION_SEED = 99999L;
+    
+    // ==================== 帧间负载触发间隔配置（帧数）====================
     
     /** 轻负载帧间隔 - 最小帧数 */
     public static final int LIGHT_BETWEEN_FRAME_MIN_INTERVAL = 4;
@@ -123,18 +143,18 @@ public final class LoadConfig {
     // ==================== 帧内负载配置 ====================
     
     /** 帧内轻负载强度 */
-    public static final int IN_FRAME_LIGHT_INTENSITY = 150;
+    public static final int IN_FRAME_LIGHT_INTENSITY = 200;
     
-    /** 帧内中负载强度（翻倍以产生明显效果） */
+    /** 帧内中负载强度 */
     public static final int IN_FRAME_MEDIUM_INTENSITY = 600;
     
     /** 帧内高负载强度 */
-    public static final int IN_FRAME_HEAVY_INTENSITY = 500;
+    public static final int IN_FRAME_HEAVY_INTENSITY = 1000;
     
     // ==================== 超长帧负载配置 ====================
     
-    /** 超长帧负载强度（HEAVY的20倍） */
-    public static final int LONG_FRAME_INTENSITY = 10000;
+    /** 超长帧负载强度（HEAVY的20倍，用于模拟极端卡顿） */
+    public static final int LONG_FRAME_INTENSITY = 4500;
     
     /** 超长帧在滑动周期内的最小触发次数 */
     public static final int LONG_FRAME_MIN_TRIGGERS = 2;
@@ -148,48 +168,48 @@ public final class LoadConfig {
     /** 超长帧最小触发间隔（毫秒），避免连续触发 */
     public static final int LONG_FRAME_MIN_INTERVAL_MS = 300;
     
-    // ==================== 混合负载 - doFrame配置 ====================
+    // ==================== 混合负载 - doFrame配置（1.5倍递增）====================
     
-    /** 混合轻负载 - doFrame任务强度 */
+    /** 混合轻负载 - doFrame任务强度基准值 */
     public static final int MIXED_DOFRAME_LIGHT_INTENSITY = 1000;
     
-    /** 混合中负载 - doFrame任务强度 */
-    public static final int MIXED_DOFRAME_MEDIUM_INTENSITY = 2000;
+    /** 混合中负载 - doFrame任务强度（1.5倍） */
+    public static final int MIXED_DOFRAME_MEDIUM_INTENSITY = 1500;
     
-    /** 混合高负载 - doFrame任务强度 */
-    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 4000;
+    /** 混合高负载 - doFrame任务强度（2.25倍） */
+    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 2250;
     
-    // ==================== 帧间负载配置 ====================
+    // ==================== 帧间负载配置（1.5倍递增）====================
     
-    /** 帧间轻负载强度 */
+    /** 帧间轻负载强度基准值 */
     public static final int BETWEEN_FRAME_LIGHT_INTENSITY = 1000;
     
-    /** 帧间中负载强度 */
-    public static final int BETWEEN_FRAME_MEDIUM_INTENSITY = 2000;
+    /** 帧间中负载强度（1.5倍） */
+    public static final int BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
     
-    /** 帧间高负载强度 */
-    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 4000;
+    /** 帧间高负载强度（2.25倍） */
+    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
     
-    // ==================== 混合负载 - 帧间配置 ====================
+    // ==================== 混合负载 - 帧间配置（1.5倍递增）====================
     
-    /** 混合轻负载 - 帧间任务强度 */
-    public static final int MIXED_BETWEEN_FRAME_LIGHT_INTENSITY = 1500;
+    /** 混合轻负载 - 帧间任务强度基准值 */
+    public static final int MIXED_BETWEEN_FRAME_LIGHT_INTENSITY = 1000;
     
-    /** 混合中负载 - 帧间任务强度 */
-    public static final int MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY = 3000;
+    /** 混合中负载 - 帧间任务强度（1.5倍） */
+    public static final int MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
     
-    /** 混合高负载 - 帧间任务强度 */
-    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 5000;
+    /** 混合高负载 - 帧间任务强度（2.25倍） */
+    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
     
     // ==================== 帧间任务概率配置 ====================
     
-    /** 轻负载任务执行概率 - 提高概率确保负载生效 */
-    public static final float LIGHT_TASK_PROBABILITY = 0.6f;
+    /** 轻负载任务执行概率 */
+    public static final float LIGHT_TASK_PROBABILITY = 0.7f;
     
-    /** 中负载任务执行概率 - 提高概率确保负载生效 */
+    /** 中负载任务执行概率 */
     public static final float MEDIUM_TASK_PROBABILITY = 0.8f;
     
-    /** 高负载任务执行概率 - 提高概率确保负载生效 */
+    /** 高负载任务执行概率 */
     public static final float HEAVY_TASK_PROBABILITY = 1.0f;
     
     // ==================== Bitmap大小配置 ====================
@@ -198,10 +218,10 @@ public final class LoadConfig {
     public static final int LIGHT_BITMAP_SIZE = 200;
     
     /** 中负载位图大小 */
-    public static final int MEDIUM_BITMAP_SIZE = 400;
+    public static final int MEDIUM_BITMAP_SIZE = 300;
     
     /** 高负载位图大小 */
-    public static final int HEAVY_BITMAP_SIZE = 600;
+    public static final int HEAVY_BITMAP_SIZE = 450;
     
     // ==================== 私有构造函数 ====================
     
@@ -236,7 +256,7 @@ public final class LoadConfig {
     
     /**
      * 获取超长帧负载强度
-     * @return 超长帧负载强度（HEAVY的10倍）
+     * @return 超长帧负载强度（HEAVY的20倍）
      */
     public static int getLongFrameIntensity() {
         return LONG_FRAME_INTENSITY;
@@ -502,20 +522,23 @@ public final class LoadConfig {
                 return String.format("帧间轻负载 - 强度:%d, 概率:%.0f%%", 
                         BETWEEN_FRAME_LIGHT_INTENSITY, LIGHT_TASK_PROBABILITY * 100);
             case LoadType.MEDIUM_BETWEEN_FRAMES:
-                return String.format("帧间中负载 - 强度:%d, 概率:%.0f%%", 
+                return String.format("帧间中负载 - 强度:%d (1.5x), 概率:%.0f%%", 
                         BETWEEN_FRAME_MEDIUM_INTENSITY, MEDIUM_TASK_PROBABILITY * 100);
             case LoadType.HEAVY_BETWEEN_FRAMES:
-                return String.format("帧间高负载 - 强度:%d, 概率:%.0f%%", 
+                return String.format("帧间高负载 - 强度:%d (2.25x), 概率:%.0f%%", 
                         BETWEEN_FRAME_HEAVY_INTENSITY, HEAVY_TASK_PROBABILITY * 100);
             case LoadType.LIGHT_MIXED:
-                return String.format("混合轻负载 - doFrame:%d, 帧间:%d", 
-                        MIXED_DOFRAME_LIGHT_INTENSITY, MIXED_BETWEEN_FRAME_LIGHT_INTENSITY);
+                return String.format("混合轻负载 - doFrame:%d, 帧间:%d (总和:%d)", 
+                        MIXED_DOFRAME_LIGHT_INTENSITY, MIXED_BETWEEN_FRAME_LIGHT_INTENSITY,
+                        MIXED_DOFRAME_LIGHT_INTENSITY + MIXED_BETWEEN_FRAME_LIGHT_INTENSITY);
             case LoadType.MEDIUM_MIXED:
-                return String.format("混合中负载 - doFrame:%d, 帧间:%d", 
-                        MIXED_DOFRAME_MEDIUM_INTENSITY, MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY);
+                return String.format("混合中负载 - doFrame:%d, 帧间:%d (总和:%d, 1.5x)", 
+                        MIXED_DOFRAME_MEDIUM_INTENSITY, MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY,
+                        MIXED_DOFRAME_MEDIUM_INTENSITY + MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY);
             case LoadType.HEAVY_MIXED:
-                return String.format("混合高负载 - doFrame:%d, 帧间:%d", 
-                        MIXED_DOFRAME_HEAVY_INTENSITY, MIXED_BETWEEN_FRAME_HEAVY_INTENSITY);
+                return String.format("混合高负载 - doFrame:%d, 帧间:%d (总和:%d, 2.25x)", 
+                        MIXED_DOFRAME_HEAVY_INTENSITY, MIXED_BETWEEN_FRAME_HEAVY_INTENSITY,
+                        MIXED_DOFRAME_HEAVY_INTENSITY + MIXED_BETWEEN_FRAME_HEAVY_INTENSITY);
             case LoadType.LONG_FRAME:
                 return String.format("超长帧负载 - 强度:%d (HEAVY×20), 每%dms内触发%d-%d次", 
                         LONG_FRAME_INTENSITY, LONG_FRAME_SCROLL_PERIOD_MS,
@@ -527,23 +550,33 @@ public final class LoadConfig {
     
     /**
      * 验证负载配置的科学性
+     * - 帧间负载、混合负载采用1.5倍递增
+     * - 帧内负载保持原有设计（递增但不强制1.5倍）
      * @return 验证结果
      */
     public static boolean validateConfig() {
-        // 验证doFrame负载呈几何级数增长（1000 -> 2000 -> 4000）
+        // 允许的误差范围（由于取整）
+        double tolerance = 0.1;
+        
+        // 验证帧内负载递增（不强制1.5倍）
+        boolean inFrameValid = 
+                (IN_FRAME_MEDIUM_INTENSITY > IN_FRAME_LIGHT_INTENSITY) &&
+                (IN_FRAME_HEAVY_INTENSITY > IN_FRAME_MEDIUM_INTENSITY);
+        
+        // 验证doFrame负载呈1.5倍递增
         boolean doFrameValid = 
-                (MIXED_DOFRAME_MEDIUM_INTENSITY == MIXED_DOFRAME_LIGHT_INTENSITY * 2) &&
-                (MIXED_DOFRAME_HEAVY_INTENSITY == MIXED_DOFRAME_MEDIUM_INTENSITY * 2);
+                isApproximatelyEqual(MIXED_DOFRAME_MEDIUM_INTENSITY, MIXED_DOFRAME_LIGHT_INTENSITY * 1.5, tolerance) &&
+                isApproximatelyEqual(MIXED_DOFRAME_HEAVY_INTENSITY, MIXED_DOFRAME_MEDIUM_INTENSITY * 1.5, tolerance);
         
-        // 验证帧间负载递增（1000 -> 2000 -> 4000）
+        // 验证帧间负载呈1.5倍递增
         boolean betweenFrameValid = 
-                (BETWEEN_FRAME_MEDIUM_INTENSITY == BETWEEN_FRAME_LIGHT_INTENSITY * 2) &&
-                (BETWEEN_FRAME_HEAVY_INTENSITY == BETWEEN_FRAME_MEDIUM_INTENSITY * 2);
+                isApproximatelyEqual(BETWEEN_FRAME_MEDIUM_INTENSITY, BETWEEN_FRAME_LIGHT_INTENSITY * 1.5, tolerance) &&
+                isApproximatelyEqual(BETWEEN_FRAME_HEAVY_INTENSITY, BETWEEN_FRAME_MEDIUM_INTENSITY * 1.5, tolerance);
         
-        // 验证混合负载的帧间部分也递增
+        // 验证混合负载的帧间部分也呈1.5倍递增
         boolean mixedBetweenFrameValid = 
-                (MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY > MIXED_BETWEEN_FRAME_LIGHT_INTENSITY) &&
-                (MIXED_BETWEEN_FRAME_HEAVY_INTENSITY > MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY);
+                isApproximatelyEqual(MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY, MIXED_BETWEEN_FRAME_LIGHT_INTENSITY * 1.5, tolerance) &&
+                isApproximatelyEqual(MIXED_BETWEEN_FRAME_HEAVY_INTENSITY, MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY * 1.5, tolerance);
         
         // 验证混合负载总体趋势递增
         int totalLight = MIXED_DOFRAME_LIGHT_INTENSITY + MIXED_BETWEEN_FRAME_LIGHT_INTENSITY;
@@ -551,7 +584,48 @@ public final class LoadConfig {
         int totalHeavy = MIXED_DOFRAME_HEAVY_INTENSITY + MIXED_BETWEEN_FRAME_HEAVY_INTENSITY;
         boolean totalValid = (totalMedium > totalLight) && (totalHeavy > totalMedium);
         
-        return doFrameValid && betweenFrameValid && mixedBetweenFrameValid && totalValid;
+        // 验证Bitmap大小也呈1.5倍递增
+        boolean bitmapValid = 
+                isApproximatelyEqual(MEDIUM_BITMAP_SIZE, LIGHT_BITMAP_SIZE * 1.5, tolerance) &&
+                isApproximatelyEqual(HEAVY_BITMAP_SIZE, MEDIUM_BITMAP_SIZE * 1.5, tolerance);
+        
+        return inFrameValid && doFrameValid && betweenFrameValid && 
+               mixedBetweenFrameValid && totalValid && bitmapValid;
+    }
+    
+    /**
+     * 检查两个值是否在容差范围内近似相等
+     */
+    private static boolean isApproximatelyEqual(double actual, double expected, double tolerance) {
+        return Math.abs(actual - expected) / expected <= tolerance;
+    }
+    
+    /**
+     * 获取配置摘要信息（用于调试）
+     * @return 配置摘要字符串
+     */
+    public static String getConfigSummary() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== LoadConfig Summary (120fps) ===\n");
+        sb.append(String.format("Target FPS: %d (%.2fms/frame)\n", TARGET_FPS, FRAME_DURATION_MS));
+        sb.append(String.format("Task Interval: %d-%dms\n", MIN_TASK_INTERVAL_MS, MAX_TASK_INTERVAL_MS));
+        sb.append("\n--- In-Frame Load ---\n");
+        sb.append(String.format("  Light:  %d\n", IN_FRAME_LIGHT_INTENSITY));
+        sb.append(String.format("  Medium: %d\n", IN_FRAME_MEDIUM_INTENSITY));
+        sb.append(String.format("  Heavy:  %d\n", IN_FRAME_HEAVY_INTENSITY));
+        sb.append("\n--- Mixed doFrame Load ---\n");
+        sb.append(String.format("  Light:  %d (base)\n", MIXED_DOFRAME_LIGHT_INTENSITY));
+        sb.append(String.format("  Medium: %d (1.5x)\n", MIXED_DOFRAME_MEDIUM_INTENSITY));
+        sb.append(String.format("  Heavy:  %d (2.25x)\n", MIXED_DOFRAME_HEAVY_INTENSITY));
+        sb.append("\n--- Between-Frame Load ---\n");
+        sb.append(String.format("  Light:  %d (base)\n", BETWEEN_FRAME_LIGHT_INTENSITY));
+        sb.append(String.format("  Medium: %d (1.5x)\n", BETWEEN_FRAME_MEDIUM_INTENSITY));
+        sb.append(String.format("  Heavy:  %d (2.25x)\n", BETWEEN_FRAME_HEAVY_INTENSITY));
+        sb.append("\n--- Mixed Total Load ---\n");
+        sb.append(String.format("  Light:  %d\n", MIXED_DOFRAME_LIGHT_INTENSITY + MIXED_BETWEEN_FRAME_LIGHT_INTENSITY));
+        sb.append(String.format("  Medium: %d\n", MIXED_DOFRAME_MEDIUM_INTENSITY + MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY));
+        sb.append(String.format("  Heavy:  %d\n", MIXED_DOFRAME_HEAVY_INTENSITY + MIXED_BETWEEN_FRAME_HEAVY_INTENSITY));
+        sb.append("\nConfig Valid: ").append(validateConfig());
+        return sb.toString();
     }
 }
-
