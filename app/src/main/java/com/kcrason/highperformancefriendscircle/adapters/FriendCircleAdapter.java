@@ -93,11 +93,14 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
     @Override
     public BaseFriendCircleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == Constants.FriendCircleType.FRIEND_CIRCLE_TYPE_ONLY_WORD) {
-            return new OnlyWordViewHolder(mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_only_word, parent, false));
+            return new OnlyWordViewHolder(
+                    mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_only_word, parent, false));
         } else if (viewType == Constants.FriendCircleType.FRIEND_CIRCLE_TYPE_WORD_AND_URL) {
-            return new WordAndUrlViewHolder(mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_word_and_url, parent, false));
+            return new WordAndUrlViewHolder(
+                    mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_word_and_url, parent, false));
         } else if (viewType == Constants.FriendCircleType.FRIEND_CIRCLE_TYPE_WORD_AND_IMAGES) {
-            return new WordAndImagesViewHolder(mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_word_and_images, parent, false));
+            return new WordAndImagesViewHolder(
+                    mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_word_and_images, parent, false));
         }
         return null;
     }
@@ -111,16 +114,16 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
                 OnlyWordViewHolder onlyWordViewHolder = (OnlyWordViewHolder) holder;
             } else if (holder instanceof WordAndUrlViewHolder) {
                 WordAndUrlViewHolder wordAndUrlViewHolder = (WordAndUrlViewHolder) holder;
-                wordAndUrlViewHolder.layoutUrl.setOnClickListener(v -> 
-                    Log.d(TAG, "You Click Layout Url"));
+                wordAndUrlViewHolder.layoutUrl.setOnClickListener(v -> Log.d(TAG, "You Click Layout Url"));
             } else if (holder instanceof WordAndImagesViewHolder) {
                 WordAndImagesViewHolder wordAndImagesViewHolder = (WordAndImagesViewHolder) holder;
                 wordAndImagesViewHolder.nineGridView.setOnImageClickListener((clickPosition, view) -> {
-                    if (friendCircleBean.getImageUrls() != null && clickPosition < friendCircleBean.getImageUrls().size()) {
+                    if (friendCircleBean.getImageUrls() != null
+                            && clickPosition < friendCircleBean.getImageUrls().size()) {
                         // 简单的图片点击处理，显示Toast
-                        android.widget.Toast.makeText(mContext, 
-                            "点击了第" + (clickPosition + 1) + "张图片", 
-                            android.widget.Toast.LENGTH_SHORT).show();
+                        android.widget.Toast.makeText(mContext,
+                                "点击了第" + (clickPosition + 1) + "张图片",
+                                android.widget.Toast.LENGTH_SHORT).show();
                     }
                 });
                 wordAndImagesViewHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, mRequestOptions,
@@ -128,7 +131,6 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             }
         }
     }
-
 
     private void makeUserBaseData(BaseFriendCircleViewHolder holder, FriendCircleBean friendCircleBean, int position) {
         holder.txtContent.setText(friendCircleBean.getContentSpan());
@@ -151,12 +153,12 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             holder.txtUserName.setText(userBean.getUserName());
             String avatarUrl = userBean.getUserAvatarUrl();
             int resourceId = mContext.getResources().getIdentifier(
-                avatarUrl, "drawable", mContext.getPackageName());
+                    avatarUrl, "drawable", mContext.getPackageName());
             if (resourceId != 0) {
                 Glide.with(mContext).load(resourceId)
-                    .apply(mRequestOptions.override(mAvatarSize, mAvatarSize))
-                    .transition(mDrawableTransitionOptions)
-                    .into(holder.imgAvatar);
+                        .apply(mRequestOptions.override(mAvatarSize, mAvatarSize))
+                        .transition(mDrawableTransitionOptions)
+                        .into(holder.imgAvatar);
             }
         }
 
@@ -206,8 +208,7 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             }
         });
 
-        holder.txtLocation.setOnClickListener(v -> 
-            Log.d(TAG, "You Click Location"));
+        holder.txtLocation.setOnClickListener(v -> Log.d(TAG, "You Click Location"));
     }
 
     private void setContentShowState(BaseFriendCircleViewHolder holder, FriendCircleBean friendCircleBean) {
@@ -248,7 +249,6 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         return mFriendCircleBeans == null ? 0 : mFriendCircleBeans.size();
     }
 
-
     @Override
     public void onItemClickCopy(int position) {
         Log.d(TAG, "已复制");
@@ -262,7 +262,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             TimerUtils.timerTranslation(() -> {
                 if (mFriendCircleBeans != null && position < mFriendCircleBeans.size()) {
                     mFriendCircleBeans.get(position).setTranslationState(TranslationState.END);
-                    notifyTargetItemView(position, TranslationState.END, mFriendCircleBeans.get(position).getContentSpan());
+                    notifyTargetItemView(position, TranslationState.END,
+                            mFriendCircleBeans.get(position).getContentSpan());
                 }
             });
         }
@@ -276,9 +277,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         }
     }
 
-
     private void updateTargetItemContent(int position, BaseFriendCircleViewHolder baseFriendCircleViewHolder,
-                                         TranslationState translationState, SpannableStringBuilder translationResult, boolean isStartAnimation) {
+            TranslationState translationState, SpannableStringBuilder translationResult, boolean isStartAnimation) {
         if (translationState == TranslationState.START) {
             baseFriendCircleViewHolder.layoutTranslation.setVisibility(View.GONE);
         } else if (translationState == TranslationState.CENTER) {
@@ -303,8 +303,8 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         }
     }
 
-
-    private void notifyTargetItemView(int position, TranslationState translationState, SpannableStringBuilder translationResult) {
+    private void notifyTargetItemView(int position, TranslationState translationState,
+            SpannableStringBuilder translationResult) {
         View childView = mLayoutManager.findViewByPosition(position);
         if (childView != null) {
             RecyclerView.ViewHolder viewHolder = mRecyclerView.getChildViewHolder(childView);
@@ -316,12 +316,10 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         }
     }
 
-
     @Override
     public void onItemClickCollection(int position) {
         Log.d(TAG, "已收藏");
     }
-
 
     static class WordAndImagesViewHolder extends BaseFriendCircleViewHolder {
 
@@ -332,7 +330,6 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             nineGridView = itemView.findViewById(R.id.nine_grid_view);
         }
     }
-
 
     static class WordAndUrlViewHolder extends BaseFriendCircleViewHolder {
 

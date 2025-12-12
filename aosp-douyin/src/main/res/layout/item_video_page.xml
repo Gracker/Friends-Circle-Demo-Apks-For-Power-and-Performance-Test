@@ -5,14 +5,19 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 视频播放器容器 -->
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/player_view"
+    <!-- 模糊背景视频（放大填满整个屏幕） -->
+    <TextureView
+        android:id="@+id/texture_view_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:use_controller="false"
-        app:resize_mode="zoom"
-        app:surface_type="surface_view" />
+        android:alpha="0.6" />
+
+    <!-- 前景视频（保持原始宽高比，居中显示） -->
+    <TextureView
+        android:id="@+id/texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <!-- 加载指示器 -->
     <ProgressBar

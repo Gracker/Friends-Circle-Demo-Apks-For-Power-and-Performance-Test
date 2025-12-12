@@ -38,12 +38,14 @@ public class VerticalVideoScroller extends ViewGroup {
 
     // 滚动相关
     private final VideoOverScroller mScroller;
-    private int mScrollOffset = 0;  // 当前滚动偏移量
-    private int mCurrentPage = 0;   // 当前页面索引
-    private int mPageHeight = 0;    // 单页高度（等于View高度）
+    private int mScrollOffset = 0; // 当前滚动偏移量
+    private int mCurrentPage = 0; // 当前页面索引
+    private int mPageHeight = 0; // 单页高度（等于View高度）
 
     // 页面切换监听
     private OnPageChangeListener mPageChangeListener;
+    // 滚动监听
+    private OnScrollListener mScrollListener;
 
     // 视频数据
     private final List<VideoItem> mVideoItems = new ArrayList<>();
@@ -109,6 +111,13 @@ public class VerticalVideoScroller extends ViewGroup {
     }
 
     /**
+     * 设置滚动监听器
+     */
+    public void setOnScrollListener(OnScrollListener listener) {
+        mScrollListener = listener;
+    }
+
+    /**
      * 获取当前页面索引
      */
     public int getCurrentPage() {
@@ -130,7 +139,7 @@ public class VerticalVideoScroller extends ViewGroup {
             mAdapter.bindView(child, i);
             addView(child);
         }
-        
+
         mScrollOffset = 0;
         mCurrentPage = 0;
         requestLayout();
@@ -231,11 +240,11 @@ public class VerticalVideoScroller extends ViewGroup {
                 }
                 float y = event.getY(index);
                 float dy = mLastMotionY - y;
-                
+
                 if (!mIsBeingDragged && Math.abs(dy) > mTouchSlop) {
                     mIsBeingDragged = true;
                 }
-                
+
                 if (mIsBeingDragged) {
                     scrollByInternal((int) dy);
                     mLastMotionY = y;
@@ -280,7 +289,7 @@ public class VerticalVideoScroller extends ViewGroup {
         // 1. 滑动距离超过一半页面高度
         // 2. 或者滑动速度足够快（速度方向与位移方向一致）
         boolean shouldSwitch = false;
-        
+
         if (Math.abs(deltaFromPage) > mPageHeight / 2) {
             // 滑动超过一半
             shouldSwitch = true;
@@ -314,11 +323,11 @@ public class VerticalVideoScroller extends ViewGroup {
     private void smoothScrollToPage(int page, int velocity) {
         int targetOffset = page * mPageHeight;
         int dy = targetOffset - mScrollOffset;
-        
+
         // 记录是否需要通知页面变化
         mTargetPage = page;
         mNeedNotifyPageChange = (page != mCurrentPage);
-        
+
         if (dy == 0) {
             // 没有滚动距离，直接通知
             if (mNeedNotifyPageChange) {
@@ -338,11 +347,11 @@ public class VerticalVideoScroller extends ViewGroup {
      */
     private void scrollByInternal(int deltaY) {
         int newOffset = mScrollOffset + deltaY;
-        
+
         // 限制滚动范围
         int maxScroll = Math.max(0, (getChildCount() - 1) * mPageHeight);
         newOffset = Math.max(0, Math.min(newOffset, maxScroll));
-        
+
         scrollToOffset(newOffset);
     }
 
@@ -353,6 +362,9 @@ public class VerticalVideoScroller extends ViewGroup {
         if (mScrollOffset != offset) {
             mScrollOffset = offset;
             requestLayout();
+            if (mScrollListener != null) {
+                mScrollListener.onScrollChanged(offset);
+            }
         }
     }
 
@@ -425,8 +437,17 @@ public class VerticalVideoScroller extends ViewGroup {
      */
     public interface VideoPageAdapter {
         int getItemCount();
+
         View createView(ViewGroup parent, int position);
+
         void bindView(View view, int position);
+    }
+
+    /**
+     * 滚动监听器接口
+     */
+    public interface OnScrollListener {
+        void onScrollChanged(int scrollY);
     }
 
     /**
@@ -441,8 +462,8 @@ public class VerticalVideoScroller extends ViewGroup {
         public int favoriteCount;
         public int shareCount;
 
-        public VideoItem(String videoPath, String author, String description, 
-                        int likeCount, int commentCount, int favoriteCount, int shareCount) {
+        public VideoItem(String videoPath, String author, String description,
+                int likeCount, int commentCount, int favoriteCount, int shareCount) {
             this.videoPath = videoPath;
             this.author = author;
             this.description = description;
@@ -453,4 +474,3 @@ public class VerticalVideoScroller extends ViewGroup {
         }
     }
 }
-
