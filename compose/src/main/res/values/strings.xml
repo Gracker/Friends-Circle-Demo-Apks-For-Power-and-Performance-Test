@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Compose-List</string>
-    <string name="app_feature">Compose 朋友圈性能测试，声明式 UI + Kotlin，便于对比不同负载下的滑动性能。</string>
+    <string name="app_feature">Compose Friends Circle Performance Test with declarative UI + Kotlin for comparing scroll performance under different loads.</string>
 </resources>
+
 
 

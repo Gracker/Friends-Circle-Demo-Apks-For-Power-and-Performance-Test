@@ -25,5 +25,12 @@
     <string name="btn_zoom_in">+</string>
     <string name="btn_zoom_out">-</string>
     <string name="btn_locate">◎</string>
+    <string name="gl_map_title">GL Map Demo</string>
+    <string name="back">Back</string>
+    <string name="search">Search</string>
+    <string name="zoom_in">Zoom In</string>
+    <string name="zoom_out">Zoom Out</string>
+    <string name="current_location">Location</string>
+    <string name="layers">Layers</string>
 </resources>
 

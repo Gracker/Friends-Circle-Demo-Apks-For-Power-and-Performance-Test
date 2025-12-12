@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GL地图</string>
+    <string name="title_main">OpenGL地图渲染测试</string>
+    <string name="title_minimal_load">最小负载</string>
+    <string name="title_in_frame_load">帧内负载测试</string>
+    <string name="title_between_frame_load">帧间负载测试</string>
+    <string name="title_mixed_load">混合负载测试</string>
+    <string name="title_long_frame_load">长帧负载测试</string>
+    <string name="title_about">关于</string>
+    <string name="btn_minimal_load">最小负载</string>
+    <string name="btn_light_load">帧内轻负载</string>
+    <string name="btn_medium_load">帧内中负载</string>
+    <string name="btn_heavy_load">帧内重负载</string>
+    <string name="btn_light_between_frames">帧间轻负载</string>
+    <string name="btn_medium_between_frames">帧间中负载</string>
+    <string name="btn_heavy_between_frames">帧间重负载</string>
+    <string name="btn_light_mixed">混合轻负载</string>
+    <string name="btn_medium_mixed">混合中负载</string>
+    <string name="btn_heavy_mixed">混合重负载</string>
+    <string name="btn_long_frame">长帧负载（HEAVY×10）</string>
+    <string name="description">本应用演示OpenGL ES 2.0地图渲染，类似Google地图或高德地图。\n\n功能特点：\n• GLSurfaceView实现硬件加速渲染\n• 支持平移和双指缩放手势\n• 地图网格、道路、建筑和标记\n• 原生UI覆盖层（搜索栏、控制按钮）\n\n支持11种负载类型，包括长帧负载用于性能测试。</string>
+    <string name="copyright">© 2025 GL地图性能测试应用</string>
+    <string name="search_hint">搜索位置...</string>
+    <string name="btn_zoom_in">+</string>
+    <string name="btn_zoom_out">-</string>
+    <string name="btn_locate">◎</string>
+    <string name="gl_map_title">GL地图演示</string>
+    <string name="back">返回</string>
+    <string name="search">搜索</string>
+    <string name="zoom_in">放大</string>
+    <string name="zoom_out">缩小</string>
+    <string name="current_location">定位</string>
+    <string name="layers">图层</string>
+</resources>

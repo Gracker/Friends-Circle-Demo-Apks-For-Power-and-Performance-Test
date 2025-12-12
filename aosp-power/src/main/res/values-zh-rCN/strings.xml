@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">功耗测试</string>
+    <string name="title_main">功耗测试</string>
+    <string name="description">本应用测量朋友圈滑动场景下的功耗情况。</string>
+</resources>

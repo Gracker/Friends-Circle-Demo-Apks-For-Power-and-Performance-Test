@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WebView列表</string>
+
+    <!-- Load section titles -->
+    <string name="title_minimal_load">最小负载</string>
+    <string name="title_in_frame_load">帧内负载测试</string>
+    <string name="title_between_frame_load">帧间负载测试</string>
+    <string name="title_mixed_load">混合负载测试</string>
+    <string name="title_about">关于</string>
+</resources>

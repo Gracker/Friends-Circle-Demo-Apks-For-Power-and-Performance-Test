@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">纯渲染线程</string>
+    <string name="title_main">纯RenderThread列表测试</string>
+
+    <string name="title_minimal_load">最小负载</string>
+    <string name="title_in_frame_load">帧内负载测试</string>
+    <string name="title_between_frame_load">帧间负载测试</string>
+    <string name="title_mixed_load">混合负载测试</string>
+    <string name="title_long_frame_load">长帧负载测试</string>
+    <string name="title_about">关于</string>
+
+    <string name="btn_minimal_load">最小负载</string>
+    <string name="btn_light_load">帧内轻负载</string>
+    <string name="btn_medium_load">帧内中负载</string>
+    <string name="btn_heavy_load">帧内重负载</string>
+    <string name="btn_light_between_frames">帧间轻负载</string>
+    <string name="btn_medium_between_frames">帧间中负载</string>
+    <string name="btn_heavy_between_frames">帧间重负载</string>
+    <string name="btn_light_mixed">混合轻负载</string>
+    <string name="btn_medium_mixed">混合中负载</string>
+    <string name="btn_heavy_mixed">混合重负载</string>
+    <string name="btn_long_frame">长帧负载（HEAVY×10）</string>
+
+    <string name="description">本应用演示完全在独立RenderThread上渲染的列表，使UI线程免于渲染工作。\n\n主要特点：\n• SurfaceView提供独立渲染表面\n• 专用渲染线程处理所有绘制\n• UI线程只处理触摸事件\n• 模拟微信朋友圈风格列表\n\n提供11种不同负载级别，包括长帧负载用于性能测试。</string>
+
+    <string name="copyright">© 2025 纯渲染线程性能测试应用</string>
+</resources>

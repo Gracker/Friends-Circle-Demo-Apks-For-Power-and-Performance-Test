@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">软件渲染列表</string>
+    <string name="title_main">软件渲染滑动性能测试</string>
+    <string name="title_select_load">请选择要测试的负载级别：</string>
+    <string name="btn_light_load">轻负载测试</string>
+    <string name="btn_medium_load">中负载测试</string>
+    <string name="btn_heavy_load">重负载测试</string>
+    <string name="description">本应用使用软件渲染模式（禁用硬件加速），模拟微信朋友圈的滑动场景。\n\n⚠️ 软件渲染特点：\n• 只使用UI Thread进行渲染\n• 没有RenderThread\n• 适合测试CPU密集型场景\n\n通过三种不同的负载模式，可以直观对比软件渲染与硬件渲染的性能差异：\n\n轻负载：每帧计算量小\n中等负载：每帧计算量中等\n高负载：每帧计算量大</string>
+    <string name="performance_test">软件渲染测试</string>
+    <string name="performance_test_loading">正在加载软件渲染测试数据...</string>
+    <string name="back">返回</string>
+    <string name="light_load_test">轻负载测试</string>
+    <string name="medium_load_test">中负载测试</string>
+    <string name="heavy_load_test">重负载测试</string>
+</resources>

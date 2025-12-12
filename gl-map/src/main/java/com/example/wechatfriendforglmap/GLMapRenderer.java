@@ -57,17 +57,23 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     // Geometry buffers
     private FloatBuffer gridVertices;
     private FloatBuffer roadVertices;
+    private FloatBuffer mainRoadVertices;
+    private FloatBuffer subwayVertices;
     private FloatBuffer buildingVertices;
     private FloatBuffer markerVertices;
     private FloatBuffer waterVertices;
     private FloatBuffer parkVertices;
+    private FloatBuffer riverVertices;
 
     private int gridVertexCount;
     private int roadVertexCount;
+    private int mainRoadVertexCount;
+    private int subwayVertexCount;
     private int buildingVertexCount;
     private int markerVertexCount;
     private int waterVertexCount;
     private int parkVertexCount;
+    private int riverVertexCount;
 
     private final Random random = new Random(LoadConfig.COMPUTATION_SEED);
 
@@ -220,12 +226,15 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
         // Draw map layers (Order matters for "painter's algorithm")
-        drawWater(); // Bottom layer
-        drawParks();
-        drawGrid();
-        drawRoads();
-        drawBuildings();
-        drawMarkers(); // Top layer
+        drawRivers(); // Rivers on bottom
+        drawWater(); // Lakes
+        drawParks(); // Parks/green areas
+        drawGrid(); // Street grid
+        drawSubway(); // Subway lines
+        drawMainRoads(); // Highways
+        drawRoads(); // Local roads
+        drawBuildings(); // Buildings
+        drawMarkers(); // POI markers on top
 
         // Execute load
         executeLoad();
@@ -238,49 +247,69 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
 
         float range = 100f; // Map size range (-50 to 50)
 
-        // 1. Generate Water Bodies (Lakes)
-        int waterCount = 50;
-        float[] waterCoords = new float[waterCount * 6 * 3]; // 2 triangles per quad * 3 vertices * 3 coords
+        // 1. Generate Rivers (long flowing water bodies) - 5 rivers
+        int riverCount = 5;
+        int riverSegmentCount = 200;
+        float[] riverCoords = new float[riverCount * riverSegmentCount * 6]; // Lines
+        int riverIdx = 0;
+        for (int river = 0; river < riverCount; river++) {
+            float riverX = -50f;
+            float riverY = r.nextFloat() * 80f - 40f;
+            for (int i = 0; i < riverSegmentCount; i++) {
+                float nextX = riverX + 0.5f;
+                float nextY = riverY + (r.nextFloat() - 0.5f) * 2f;
+                riverCoords[riverIdx++] = riverX;
+                riverCoords[riverIdx++] = riverY;
+                riverCoords[riverIdx++] = 0f;
+                riverCoords[riverIdx++] = nextX;
+                riverCoords[riverIdx++] = nextY;
+                riverCoords[riverIdx++] = 0f;
+                riverX = nextX;
+                riverY = nextY;
+            }
+        }
+        riverVertexCount = riverCount * riverSegmentCount * 2;
+        riverVertices = createFloatBuffer(riverCoords, riverCoords.length);
+
+        // 2. Generate Water Bodies (Lakes) - larger and more diverse
+        int waterCount = 400;
+        float[] waterCoords = new float[waterCount * 6 * 3];
         for (int i = 0; i < waterCount; i++) {
             float x = (r.nextFloat() - 0.5f) * range;
             float y = (r.nextFloat() - 0.5f) * range;
-            float w = 0.5f + r.nextFloat() * 4.0f;
-            float h = 0.3f + r.nextFloat() * 3.0f;
+            float w = 1.0f + r.nextFloat() * 6.0f;
+            float h = 0.8f + r.nextFloat() * 4.0f;
             addQuadToBuffer(waterCoords, i * 18, x, y, w, h);
         }
         waterVertexCount = waterCount * 6;
         waterVertices = createFloatBuffer(waterCoords, waterCoords.length);
 
-        // 2. Generate Parks
-        int parkCount = 80;
+        // 3. Generate Parks - more and varied
+        int parkCount = 750;
         float[] parkCoords = new float[parkCount * 6 * 3];
         for (int i = 0; i < parkCount; i++) {
             float x = (r.nextFloat() - 0.5f) * range;
             float y = (r.nextFloat() - 0.5f) * range;
-            float w = 0.3f + r.nextFloat() * 2.5f;
-            float h = 0.3f + r.nextFloat() * 2.5f;
+            float w = 0.5f + r.nextFloat() * 4.0f;
+            float h = 0.5f + r.nextFloat() * 4.0f;
             addQuadToBuffer(parkCoords, i * 18, x, y, w, h);
         }
         parkVertexCount = parkCount * 6;
         parkVertices = createFloatBuffer(parkCoords, parkCoords.length);
 
-        // 3. Generate Grid
+        // 4. Generate Grid (street blocks)
         int gridSize = 200;
-        float[] gridCoords = new float[gridSize * 4 * 3 * 2]; // lines * 2 points * 3 coords * 2 directions
+        float[] gridCoords = new float[gridSize * 4 * 3 * 2];
         int idx = 0;
-
         for (int i = -gridSize / 2; i <= gridSize / 2; i++) {
-            float pos = i * 0.5f; // Grid spacing
+            float pos = i * 0.5f;
             float limit = gridSize / 2 * 0.5f;
-
-            // Vertical lines
             gridCoords[idx++] = pos;
             gridCoords[idx++] = -limit;
             gridCoords[idx++] = 0f;
             gridCoords[idx++] = pos;
             gridCoords[idx++] = limit;
             gridCoords[idx++] = 0f;
-            // Horizontal lines
             gridCoords[idx++] = -limit;
             gridCoords[idx++] = pos;
             gridCoords[idx++] = 0f;
@@ -291,38 +320,100 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
         gridVertexCount = idx / 3;
         gridVertices = createFloatBuffer(gridCoords, idx);
 
-        // 4. Generate Roads
-        int roadCount = 300;
+        // 5. Generate Main Roads (Highways) - thick, long roads
+        int mainRoadCount = 150;
+        float[] mainRoadCoords = new float[mainRoadCount * 6];
+        for (int i = 0; i < mainRoadCount; i++) {
+            boolean horizontal = r.nextBoolean();
+            float startX, startY, endX, endY;
+            if (horizontal) {
+                startX = -50f;
+                endX = 50f;
+                startY = endY = (r.nextFloat() - 0.5f) * range;
+            } else {
+                startY = -50f;
+                endY = 50f;
+                startX = endX = (r.nextFloat() - 0.5f) * range;
+            }
+            mainRoadCoords[i * 6] = startX;
+            mainRoadCoords[i * 6 + 1] = startY;
+            mainRoadCoords[i * 6 + 2] = 0f;
+            mainRoadCoords[i * 6 + 3] = endX;
+            mainRoadCoords[i * 6 + 4] = endY;
+            mainRoadCoords[i * 6 + 5] = 0f;
+        }
+        mainRoadVertexCount = mainRoadCount * 2;
+        mainRoadVertices = createFloatBuffer(mainRoadCoords, mainRoadCoords.length);
+
+        // 6. Generate Local Roads - shorter, thinner
+        int roadCount = 3000;
         float[] roadCoords = new float[roadCount * 6];
         for (int i = 0; i < roadCount; i++) {
             float x = (r.nextFloat() - 0.5f) * range;
             float y = (r.nextFloat() - 0.5f) * range;
-            float dx = (r.nextFloat() - 0.5f) * 10f;
-            float dy = (r.nextFloat() - 0.5f) * 10f;
-            roadCoords[i * 6] = x;
-            roadCoords[i * 6 + 1] = y;
-            roadCoords[i * 6 + 2] = 0f;
-            roadCoords[i * 6 + 3] = x + dx;
-            roadCoords[i * 6 + 4] = y + dy;
-            roadCoords[i * 6 + 5] = 0f;
+            boolean horizontal = r.nextBoolean();
+            float len = 2f + r.nextFloat() * 8f;
+            if (horizontal) {
+                roadCoords[i * 6] = x;
+                roadCoords[i * 6 + 1] = y;
+                roadCoords[i * 6 + 2] = 0f;
+                roadCoords[i * 6 + 3] = x + len;
+                roadCoords[i * 6 + 4] = y;
+                roadCoords[i * 6 + 5] = 0f;
+            } else {
+                roadCoords[i * 6] = x;
+                roadCoords[i * 6 + 1] = y;
+                roadCoords[i * 6 + 2] = 0f;
+                roadCoords[i * 6 + 3] = x;
+                roadCoords[i * 6 + 4] = y + len;
+                roadCoords[i * 6 + 5] = 0f;
+            }
         }
         roadVertexCount = roadCount * 2;
         roadVertices = createFloatBuffer(roadCoords, roadCoords.length);
 
-        // 5. Generate Buildings (as quads)
-        int buildingCount = 500;
-        float[] buildingCoords = new float[buildingCount * 18]; // 6 vertices per quad (2 triangles)
+        // 7. Generate Subway Lines
+        int subwayLineCount = 40;
+        int segmentsPerLine = 50;
+        float[] subwayCoords = new float[subwayLineCount * segmentsPerLine * 6];
+        idx = 0;
+        for (int line = 0; line < subwayLineCount; line++) {
+            float sx = (r.nextFloat() - 0.5f) * range;
+            float sy = (r.nextFloat() - 0.5f) * range;
+            float angle = r.nextFloat() * (float) Math.PI * 2;
+            for (int seg = 0; seg < segmentsPerLine; seg++) {
+                float nextX = sx + (float) Math.cos(angle) * 2f;
+                float nextY = sy + (float) Math.sin(angle) * 2f;
+                angle += (r.nextFloat() - 0.5f) * 0.3f; // Slight curve
+                subwayCoords[idx++] = sx;
+                subwayCoords[idx++] = sy;
+                subwayCoords[idx++] = 0f;
+                subwayCoords[idx++] = nextX;
+                subwayCoords[idx++] = nextY;
+                subwayCoords[idx++] = 0f;
+                sx = nextX;
+                sy = nextY;
+            }
+        }
+        subwayVertexCount = idx / 3;
+        subwayVertices = createFloatBuffer(subwayCoords, idx);
+
+        // 8. Generate Buildings - more variety in size and density
+        int buildingCount = 6000;
+        float[] buildingCoords = new float[buildingCount * 18];
         for (int i = 0; i < buildingCount; i++) {
             float x = (r.nextFloat() - 0.5f) * range;
             float y = (r.nextFloat() - 0.5f) * range;
-            float size = 0.2f + r.nextFloat() * 0.5f;
-            addQuadToBuffer(buildingCoords, i * 18, x, y, size, size);
+            // Varied building sizes: small apartments to large complexes
+            float size = 0.15f + r.nextFloat() * 0.8f;
+            float sizeY = size * (0.7f + r.nextFloat() * 0.6f);
+            addQuadToBuffer(buildingCoords, i * 18, x, y, size, sizeY);
         }
         buildingVertexCount = buildingCount * 6;
         buildingVertices = createFloatBuffer(buildingCoords, buildingCoords.length);
 
-        // 6. Generate Markers
-        int markerCount = 100;
+        // 9. Generate Markers (POIs) - more markers
+        int markerCount = 1000;
         float[] markerCoords = new float[markerCount * 3];
         for (int i = 0; i < markerCount; i++) {
             markerCoords[i * 3] = (r.nextFloat() - 0.5f) * range;
@@ -363,6 +454,45 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
         fb.put(coords, 0, count);
         fb.position(0);
         return fb;
+    }
+
+    private void drawRivers() {
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniform4f(colorHandle, 0.3f, 0.6f, 0.9f, 1.0f); // River blue
+
+        GLES20.glEnableVertexAttribArray(positionHandle);
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, riverVertices);
+
+        GLES20.glLineWidth(12f);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, riverVertexCount);
+
+        GLES20.glDisableVertexAttribArray(positionHandle);
+    }
+
+    private void drawMainRoads() {
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniform4f(colorHandle, 1.0f, 0.7f, 0.3f, 1.0f); // Orange highways
+
+        GLES20.glEnableVertexAttribArray(positionHandle);
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, mainRoadVertices);
+
+        GLES20.glLineWidth(16f);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, mainRoadVertexCount);
+
+        GLES20.glDisableVertexAttribArray(positionHandle);
+    }
+
+    private void drawSubway() {
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniform4f(colorHandle, 0.8f, 0.2f, 0.5f, 0.8f); // Magenta subway
+
+        GLES20.glEnableVertexAttribArray(positionHandle);
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, subwayVertices);
+
+        GLES20.glLineWidth(6f);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 0, subwayVertexCount);
+
+        GLES20.glDisableVertexAttribArray(positionHandle);
     }
 
     private void drawWater() {

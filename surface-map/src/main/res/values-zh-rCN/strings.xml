@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Surface地图</string>
+    <string name="title_main">SurfaceView地图性能测试</string>
+
+    <!-- Load section titles -->
+    <string name="title_minimal_load">最小负载</string>
+    <string name="title_in_frame_load">帧内负载测试</string>
+    <string name="title_between_frame_load">帧间负载测试</string>
+    <string name="title_mixed_load">混合负载测试</string>
+    <string name="title_long_frame_load">长帧负载测试</string>
+    <string name="title_about">关于</string>
+
+    <!-- Button labels -->
+    <string name="btn_minimal_load">最小负载</string>
+    <string name="btn_light_load">帧内轻负载</string>
+    <string name="btn_medium_load">帧内中负载</string>
+    <string name="btn_heavy_load">帧内重负载</string>
+    <string name="btn_light_between_frames">帧间轻负载</string>
+    <string name="btn_medium_between_frames">帧间中负载</string>
+    <string name="btn_heavy_between_frames">帧间重负载</string>
+    <string name="btn_light_mixed">混合轻负载</string>
+    <string name="btn_medium_mixed">混合中负载</string>
+    <string name="btn_heavy_mixed">混合重负载</string>
+    <string name="btn_long_frame">长帧负载（HEAVY×10）</string>
+
+    <!-- Description -->
+    <string name="description">本应用使用SurfaceView模拟地图风格界面（类似高德地图）。主视图是在SurfaceView上渲染的可滚动网格，顶部导航栏和底部控制面板使用原生Android视图。\n\n提供11种不同负载级别：\n• 最小负载：无额外负载\n• 帧内负载（3种）：在SurfaceView渲染期间执行负载\n• 帧间负载（3种）：在帧间执行负载\n• 混合负载（3种）：结合帧内和帧间负载\n• 长帧负载：每2秒随机2-3个超重帧（10倍HEAVY）</string>
+
+    <!-- Map UI -->
+    <string name="search_hint">搜索位置...</string>
+    <string name="current_location">当前位置</string>
+    <string name="zoom_in">放大</string>
+    <string name="zoom_out">缩小</string>
+    <string name="navigate">导航</string>
+    <string name="layers">图层</string>
+
+    <!-- Copyright -->
+    <string name="copyright">© 2025 Surface地图性能测试应用</string>
+</resources>

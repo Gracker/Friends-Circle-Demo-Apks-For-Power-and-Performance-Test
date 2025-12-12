@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">原始朋友圈</string>
+    <string name="translating">翻译中</string>
+    <string name="translated">已翻译</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">抖音Demo</string>
+    <string name="tab_home">首页</string>
+    <string name="tab_friends">朋友</string>
+    <string name="tab_add">+</string>
+    <string name="tab_message">消息</string>
+    <string name="tab_me">我</string>
+    <string name="like">点赞</string>
+    <string name="comment">评论</string>
+    <string name="favorite">收藏</string>
+    <string name="share">分享</string>
+    <string name="follow">关注</string>
+    <string name="recommend">推荐</string>
+    <string name="attention">关注</string>
+    <string name="hot">热点</string>
+    <string name="live">直播</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">双窗口渲染</string>
+    <string name="title_main">双窗口渲染测试</string>
+    <string name="title_minimal_load">最小负载</string>
+    <string name="title_in_frame_load">帧内负载测试</string>
+    <string name="title_between_frame_load">帧间负载测试</string>
+    <string name="title_mixed_load">混合负载测试</string>
+    <string name="title_long_frame_load">长帧负载测试</string>
+    <string name="title_about">关于</string>
+    <string name="btn_minimal_load">最小负载</string>
+    <string name="btn_light_load">帧内轻负载</string>
+    <string name="btn_medium_load">帧内中负载</string>
+    <string name="btn_heavy_load">帧内重负载</string>
+    <string name="btn_light_between_frames">帧间轻负载</string>
+    <string name="btn_medium_between_frames">帧间中负载</string>
+    <string name="btn_heavy_between_frames">帧间重负载</string>
+    <string name="btn_light_mixed">混合轻负载</string>
+    <string name="btn_medium_mixed">混合中负载</string>
+    <string name="btn_heavy_mixed">混合重负载</string>
+    <string name="btn_long_frame">长帧负载（HEAVY×10）</string>
+    <string name="description">本应用演示双窗口渲染，两个窗口同时进行渲染。\n\n在 systrace 中你会看到：\n• 每个 vsync 有2个 doFrame 回调\n• 每个 vsync 有2个 RenderThread drawFrame\n\n窗口1：主滚动朋友圈列表（与 aosp-performance 相同）\n窗口2：持续动画的覆盖层\n\n支持11种负载类型，包括长帧负载用于性能测试。</string>
+    <string name="copyright">© 2025 双窗口性能测试应用</string>
+
+    <!-- Performance test strings -->
+    <string name="performance_test">性能测试</string>
+    <string name="performance_test_loading">正在加载朋友圈数据...</string>
+    <string name="back">返回</string>
+</resources>

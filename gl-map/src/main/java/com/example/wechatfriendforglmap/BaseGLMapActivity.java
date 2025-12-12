@@ -1,6 +1,8 @@
 package com.example.wechatfriendforglmap;
 
 import android.os.Bundle;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,9 +23,37 @@ public abstract class BaseGLMapActivity extends AppCompatActivity {
 
         glMapView = findViewById(R.id.gl_map_view);
         glMapView.setLoadType(getLoadType());
+
+        // Set up top navigation bar
+        TextView titleText = findViewById(R.id.title_text);
+        titleText.setText(LoadType.toLabel(getLoadType()));
+
+        ImageButton backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // Set up bottom controls
+        setupBottomControls();
     }
 
     protected abstract @LoadType.Type int getLoadType();
+
+    private void setupBottomControls() {
+        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> {
+            // Zoom in functionality (placeholder)
+        });
+
+        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> {
+            // Zoom out functionality (placeholder)
+        });
+
+        findViewById(R.id.btn_location).setOnClickListener(v -> {
+            // Current location functionality (placeholder)
+        });
+
+        findViewById(R.id.btn_layers).setOnClickListener(v -> {
+            // Layers functionality (placeholder)
+        });
+    }
 
     @Override
     protected void onResume() {
@@ -37,4 +67,3 @@ public abstract class BaseGLMapActivity extends AppCompatActivity {
         glMapView.onPause();
     }
 }
-
