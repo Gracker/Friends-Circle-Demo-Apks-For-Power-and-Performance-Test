@@ -12,7 +12,7 @@
     合成路径需要经过 App 的 UI Thread + RenderThread
     类似淘宝天猫页面的渲染方式
     -->
-    
+
     <!-- TextureView 用于 GeckoView 渲染 -->
     <TextureView
         android:id="@+id/texture_view"

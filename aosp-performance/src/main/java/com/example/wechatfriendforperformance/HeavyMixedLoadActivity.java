@@ -36,18 +36,18 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     private PerformanceFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = LoadType.HEAVY_MIXED;
-    
+
     // 调度器
     private Choreographer mChoreographer;
     private Handler mHandler;
-    
+
     // 统一负载模拟器
     private LoadSimulator mLoadSimulator;
-    
+
     // 控制变量
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     // 滚动监听器
     private RecyclerView.OnScrollListener mScrollListener;
 
@@ -55,7 +55,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heavy_mixed_load);
-        
+
         // 设置状态栏透明
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
@@ -66,7 +66,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
             mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, LoadType.HEAVY_MIXED);
         }
-        
+
         imageLoader = Glide.with(this).asDrawable().apply(
                 new RequestOptions().centerCrop()
         );
@@ -74,20 +74,20 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         // 初始化负载模拟器
         mLoadSimulator = new LoadSimulator();
-        
+
         // 注册Choreographer帧回调
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        
+
         // 初始化滚动监听器
         initScrollListener();
-        
+
         Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
     }
-    
+
     /**
      * 初始化滚动监听器
      * 只有在列表滚动时才执行帧间负载和doFrame负载
@@ -97,7 +97,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                
+
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mIsScrolling = false;
                     mHandler.removeCallbacksAndMessages(null);
@@ -113,7 +113,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     /**
      * Choreographer的doFrame回调
      * 帧间隔由 LoadSimulator 统一控制
@@ -131,21 +131,21 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // 清空缓存，确保使用正确的负载类型
         PerformanceDataCenter.getInstance().clearCachedData();
-        
+
         // 确保数据已根据正确的负载类型生成
         if (adapter != null) {
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
 
         Log.d(TAG, "onResume: " + LoadConfig.getDescription(mLoadType));
-        
+
         mIsTaskSchedulingEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -156,7 +156,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
 
     private void initRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
+
         if (adapter == null) {
             adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
             View headerView = getLayoutInflater().inflate(R.layout.include_title_bar_view, recyclerView, false);
@@ -171,28 +171,28 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
-        
+
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
         }
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        
+
         mIsTaskSchedulingEnabled = false;
         mIsScrolling = false;
         mHandler.removeCallbacksAndMessages(null);
-        
+
         // 释放负载模拟器资源
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
-        
+
         Log.d(TAG, "onDestroy: 资源已清理");
     }
 }

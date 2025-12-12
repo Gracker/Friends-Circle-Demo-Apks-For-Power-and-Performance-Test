@@ -29,27 +29,27 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
         setContentView(R.layout.activity_power_main);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        
+
         // 设置布局管理器
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        
+
         // 创建适配器
         mFriendCircleAdapter = new PowerFriendCircleAdapter(this, recyclerView);
-        
+
         // 添加顶部视图
         View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, recyclerView, false);
         mFriendCircleAdapter.setHeaderView(headerView);
-        
+
         recyclerView.setAdapter(mFriendCircleAdapter);
-        
+
         // 加载数据
         loadData();
-        
+
         // 预加载图片
         preloadImages();
     }
-    
+
     /**
      * 加载朋友圈数据
      */
@@ -57,7 +57,7 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
         List<FriendCircleBean> friendCircleBeans = PowerDataCenter.makeFriendCircleBeans(this);
         mFriendCircleAdapter.setFriendCircleBeans(friendCircleBeans);
     }
-    
+
     /**
      * 预加载图片
      */
@@ -71,7 +71,7 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
                      .preload();
             }
         }
-        
+
         // 预加载头像
         for (String avatarUrl : PowerDataCenter.AVATAR_URLS) {
             int resourceId = getResources().getIdentifier(
@@ -82,13 +82,13 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
                      .preload();
             }
         }
-        
+
         // 预加载固定资源
         int mainAvatarId = getResources().getIdentifier("main_avatar", "drawable", getPackageName());
         if (mainAvatarId != 0) {
             Glide.with(this).load(mainAvatarId).preload();
         }
-        
+
         int mainBgId = getResources().getIdentifier("main_bg", "drawable", getPackageName());
         if (mainBgId != 0) {
             Glide.with(this).load(mainBgId).preload();

@@ -8,7 +8,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
+
     <!-- 基础颜色 -->
     <color name="base_FFFFFF">#FFFFFF</color>
     <color name="base_000000">#000000</color>
@@ -20,13 +20,13 @@
     <color name="base_666666">#666666</color>
     <color name="base_999999">#999999</color>
     <color name="base_333333">#333333</color>
-    
+
     <!-- 功能颜色 -->
     <color name="praise_item_text">#576B95</color>
     <color name="default_background">#1E88E5</color>
     <color name="background_gray">#F2F2F2</color>
     <color name="transparent">#00000000</color>
-    
+
     <!-- MTK标志性颜色 -->
     <color name="mtk_yellow">#FFCC00</color>
     <color name="mtk_yellow_dark">#E6B800</color>
@@ -44,7 +44,7 @@
     <color name="secondary_text">#757575</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
-    
+
     <!-- 高级配色方案 -->
     <color name="primary_blue">#1A73E8</color> <!-- Google蓝 -->
     <color name="accent_teal">#009688</color> <!-- 清新绿 -->

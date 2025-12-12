@@ -96,7 +96,7 @@ public class CommentBean {
         if (commentContentSpan != null) {
             return;
         }
-        
+
         // 确保 Context 不为空
         if (mContext == null) {
             // 没有 Context 无法创建带颜色的span
@@ -104,26 +104,26 @@ public class CommentBean {
                     TextUtils.isEmpty(childUserName) ? "用户" : childUserName);
             return;
         }
-        
+
         // 获取评论人用户名
         if (TextUtils.isEmpty(childUserName) && childUserBean != null) {
             childUserName = childUserBean.getUserName();
         }
-        
+
         if (TextUtils.isEmpty(childUserName)) {
             childUserName = "用户";
         }
-        
+
         // 获取被评论人用户名
         if (TextUtils.isEmpty(parentUserName) && parentUserBean != null) {
             parentUserName = parentUserBean.getUserName();
         }
-        
+
         // 获取评论内容
         if (TextUtils.isEmpty(commentContent)) {
             commentContent = content;
         }
-        
+
         // 构建评论文本
         if (TextUtils.isEmpty(parentUserName)) {
             // 普通评论

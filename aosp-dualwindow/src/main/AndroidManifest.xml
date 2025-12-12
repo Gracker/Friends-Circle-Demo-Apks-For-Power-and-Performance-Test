@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DualWindow">
-        
+
         <activity
             android:name=".DualWindowMainActivity"
             android:exported="true">
@@ -20,7 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <activity android:name=".MinimalLoadActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
         <activity android:name=".LightLoadActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
         <activity android:name=".MediumLoadActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
@@ -32,7 +32,7 @@
         <activity android:name=".MediumMixedActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
         <activity android:name=".HeavyMixedActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
         <activity android:name=".LongFrameActivity" android:exported="true" android:theme="@style/Theme.DualWindow.NoActionBar" />
-            
+
     </application>
 
 </manifest>

@@ -14,7 +14,7 @@ enum class LoadType(val displayName: String) {
     LIGHT_MIXED("轻负载 (混合)"),
     MEDIUM_MIXED("中负载 (混合)"),
     HEAVY_MIXED("高负载 (混合)");
-    
+
     /**
      * 获取基础负载类型（用于数据生成）
      */

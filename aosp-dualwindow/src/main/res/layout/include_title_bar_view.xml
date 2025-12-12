@@ -53,7 +53,7 @@
         android:layout_height="31dp"
         android:layout_alignParentBottom="true"
         android:background="@color/base_FFFFFF" />
-    
+
     <!-- 用户头像 - 一半在背景图内一半在背景图外 -->
     <ImageView
         android:id="@+id/img_user_avatar"
@@ -65,7 +65,7 @@
         android:layout_marginBottom="-32dp"
         android:scaleType="centerCrop"
         android:elevation="3dp" />
-        
+
     <!-- 用户昵称放到头像左侧 -->
     <TextView
         android:id="@+id/tv_user_name"

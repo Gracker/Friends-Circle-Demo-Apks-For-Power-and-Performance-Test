@@ -58,7 +58,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
         } else {
             imageView = (ImageView) itemView;
         }
-        
+
         String url = mImageUrls.get(position);
         int resourceId = mContext.getResources().getIdentifier(
             url, "drawable", mContext.getPackageName());
@@ -69,7 +69,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                 .transition(mDrawableTransitionOptions)
                 .into(imageView);
         }
-        
+
         return imageView;
     }
 } 

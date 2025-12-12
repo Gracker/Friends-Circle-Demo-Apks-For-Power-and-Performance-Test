@@ -24,7 +24,7 @@ public class WebViewConstants {
             "local6.jpeg", "local7.jpeg", "local8.jpeg", "local9.jpeg", "local10.jpeg",
             "local11.jpeg"
     };
-    
+
     /**
      * 测试数据的用户名数组
      */
@@ -52,7 +52,7 @@ public class WebViewConstants {
             "Kindness善良", "Liberty自由", "Memories记忆", "Nebula星云", "Observe观察",
             "Paradise天堂", "Quietude寂静", "Rainbow彩虹", "Serenity宁静", "Twilight暮光"
     };
-    
+
     /**
      * 测试数据的位置数组
      */
@@ -80,7 +80,7 @@ public class WebViewConstants {
             "海南-贵德国家地质公园", "果洛-星空帐篷", "玉树-结古寺", "海西-茶卡盐湖", "兰州-黄河铁桥",
             "嘉峪关-嘉峪关城楼", "金昌-金川公园", "白银-白银区", "天水-麦积山", "武威-雷台"
     };
-    
+
     /**
      * 测试数据的发布时间数组
      */
@@ -106,7 +106,7 @@ public class WebViewConstants {
             "三个月零1天前", "三个月零2天前", "三个月零3天前", "三个月零4天前", "三个月零5天前",
             "三个月零6天前", "三个月零1周前", "三个月零2周前", "三个月零3周前", "半年前"
     };
-    
+
     /**
      * 测试数据的来源数组
      */
@@ -133,7 +133,7 @@ public class WebViewConstants {
             "来自联想拯救者", "来自Mac", "来自iPhone", "来自华为手机", "来自小米手机",
             "来自OPPO手机", "来自vivo手机", "来自Android手机", "来自iOS设备", "来自平板设备"
     };
-    
+
     /**
      * 测试数据的内容数组
      */
@@ -163,7 +163,7 @@ public class WebViewConstants {
             "今天参加了一场演讲比赛，虽然没有获奖，但克服了紧张情绪，完整地表达了自己的观点，对我来说已经是一种突破。#成长记录#",
             "最近迷上了拍摄延时摄影，记录城市的日出日落，光影变化，感受时间流动的魅力。#摄影日记#"
     };
-    
+
     /**
      * 测试数据的评论数组
      */

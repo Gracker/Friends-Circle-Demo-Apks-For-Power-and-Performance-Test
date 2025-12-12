@@ -36,22 +36,22 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
     private PerformanceFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = LoadType.LIGHT_MIXED;
-    
+
     private Choreographer mChoreographer;
     private Handler mHandler;
-    
+
     private LoadSimulator mLoadSimulator;
-    
+
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_light_mixed_load);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -60,21 +60,21 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         if (intent != null && intent.hasExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE)) {
             mLoadType = intent.getIntExtra(PerformanceMainActivity.EXTRA_LOAD_TYPE, LoadType.LIGHT_MIXED);
         }
-        
+
         imageLoader = Glide.with(this).asDrawable().apply(new RequestOptions().centerCrop());
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
-        
+
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        
+
         initScrollListener();
         Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -90,7 +90,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     /**
      * Choreographer的doFrame回调
      * 帧间隔由 LoadSimulator 统一控制
@@ -116,7 +116,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         mIsTaskSchedulingEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

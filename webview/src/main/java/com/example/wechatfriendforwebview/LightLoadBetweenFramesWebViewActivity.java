@@ -16,11 +16,11 @@ import com.example.loadconfig.LoadType;
 public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebViewActivity 
         implements Choreographer.FrameCallback {
     private static final String TAG = "LightBetweenFramesWV";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
     private boolean isTaskSchedulingEnabled = true;
-    
+
     private LoadSimulator mLoadSimulator;
     private int mLoadType = LoadType.LIGHT_BETWEEN_FRAMES;
 
@@ -28,10 +28,10 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("WebView朋友圈 - 帧间轻负载");
-        
+
         mLoadSimulator = new LoadSimulator();
         choreographer = Choreographer.getInstance();
-        
+
         // 启动帧回调，由 LoadSimulator 统一控制伪随机帧间隔
         choreographer.postFrameCallback(this);
     }
@@ -40,29 +40,29 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
     protected void performLoadTask() {
         Log.d(TAG, "帧间轻负载模式 - 已启动帧间任务调度");
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (!isTaskSchedulingEnabled) return;
-        
+
         // 每帧调用，由 LoadSimulator 统一控制伪随机帧间隔
         mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFramesWV_load");
-        
+
         // 执行JavaScript轻负载（每帧执行）
         if (webView != null) {
             String js = "(function() { var s = 0; for(var i = 0; i < 100; i++) { s += Math.sqrt(i); } return s; })();";
             webView.evaluateJavascript(js, null);
         }
-        
+
         choreographer.postFrameCallback(this);
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         // 帧间模式：fling时执行轻量负载
         mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFramesWV_fling");
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -72,7 +72,7 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
             choreographer.removeFrameCallback(this);
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -81,7 +81,7 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
             choreographer.postFrameCallback(this);
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;

@@ -14,7 +14,7 @@ import com.example.wechatfriendforcompose.data.LoadType
 object Routes {
     const val MAIN = "main"
     const val FRIEND_CIRCLE = "friend_circle/{loadType}"
-    
+
     fun friendCircle(loadType: LoadType) = "friend_circle/${loadType.name}"
 }
 
@@ -40,7 +40,7 @@ fun ComposeNavigation(
         "heavy_mixed" -> Routes.friendCircle(LoadType.HEAVY_MIXED)
         else -> Routes.MAIN
     }
-    
+
     NavHost(
         navController = navController,
         startDestination = actualStartDestination
@@ -52,7 +52,7 @@ fun ComposeNavigation(
                 }
             )
         }
-        
+
         composable(Routes.FRIEND_CIRCLE) { backStackEntry ->
             val loadTypeName = backStackEntry.arguments?.getString("loadType") ?: LoadType.LIGHT.name
             val loadType = LoadType.valueOf(loadTypeName)

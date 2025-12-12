@@ -12,7 +12,7 @@ import android.util.Log;
  */
 public class LightLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
     private static final String TAG = "LightLoadGeckoView";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -27,7 +27,7 @@ public class LightLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
     protected void performLoadTask() {
         Log.d(TAG, "轻负载模式 - 仅在滚动时执行负载");
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         // 轻微阻塞主线程
@@ -36,7 +36,7 @@ public class LightLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
         } catch (InterruptedException e) {
             Log.e(TAG, "executeFlingLoad阻塞被中断", e);
         }
-        
+
         // 轻负载：简单的计算
         long startTime = System.currentTimeMillis();
         double result = 0;

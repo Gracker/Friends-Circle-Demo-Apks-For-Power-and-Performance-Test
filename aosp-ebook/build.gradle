@@ -24,7 +24,7 @@ android {
             keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
         }
     }
-    
+
     buildTypes {
         release {
             minifyEnabled false
@@ -49,10 +49,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime:2.7.0'
-    
+
     // JSoup for HTML parsing (EPUB content is HTML)
     implementation 'org.jsoup:jsoup:1.17.2'
-    
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'

@@ -22,7 +22,7 @@ fun NineGridImages(
     modifier: Modifier = Modifier
 ) {
     if (images.isEmpty()) return
-    
+
     val itemCount = images.size.coerceAtMost(9)
     val columns = when {
         itemCount == 1 -> 1
@@ -30,7 +30,7 @@ fun NineGridImages(
         else -> 3
     }
     val rows = (itemCount + columns - 1) / columns
-    
+
     Column(modifier = modifier) {
         for (row in 0 until rows) {
             Row(
@@ -42,13 +42,13 @@ fun NineGridImages(
                     if (index < itemCount) {
                         val imageName = images[index]
                         val resourceId = getDrawableId(context, imageName)
-                        
+
                         val painter = rememberAsyncImagePainter(
                             ImageRequest.Builder(context)
                                 .data(resourceId)
                                 .build()
                         )
-                        
+
                         Image(
                             painter = painter,
                             contentDescription = "图片$index",
@@ -64,7 +64,7 @@ fun NineGridImages(
                     }
                 }
             }
-            
+
             if (row < rows - 1) {
                 Spacer(modifier = Modifier.height(6.dp))
             }
@@ -78,13 +78,13 @@ fun NineGridImages(
 private fun getDrawableId(context: Context, name: String): Int {
     // 先尝试直接获取
     var resourceId = context.resources.getIdentifier(name, "drawable", context.packageName)
-    
+
     // 如果找不到，尝试使用local系列图片
     if (resourceId == 0) {
         val localName = "local${(name.hashCode().and(0x7FFFFFFF) % 11) + 1}"
         resourceId = context.resources.getIdentifier(localName, "drawable", context.packageName)
     }
-    
+
     return resourceId
 }
 

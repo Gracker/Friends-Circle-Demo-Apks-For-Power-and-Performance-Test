@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HighPerformanceFriendsCircle">
-        
+
         <activity
             android:name=".CustomScrollMainActivity"
             android:exported="true">
@@ -18,12 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <activity 
             android:name=".CustomScrollFeedActivity"
             android:exported="false"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
     </application>
 
 </manifest>

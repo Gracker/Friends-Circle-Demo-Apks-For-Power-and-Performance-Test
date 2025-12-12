@@ -12,7 +12,7 @@ import android.util.Log;
  */
 public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     private static final String TAG = "LightLoadWebView";
-    
+
     // 处理器实例
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -33,13 +33,13 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         // 不执行任何负载，仅记录日志
         Log.d(TAG, "低负载模式 - 仅在滚动时执行负载");
     }
-    
+
     /**
      * 执行轻量级监控，不添加额外负载
      */
     private void executeLightMonitoring() {
         Trace.beginSection("LightLoadWebView_executeLightMonitoring");
-        
+
         if (webView != null) {
             webView.post(() -> {
                 // 初始化轻负载JavaScript
@@ -64,7 +64,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                         "  lastScrollY = window.scrollY;" +
                         "});";
                 webView.evaluateJavascript(initLightLoadJs, null);
-                
+
                 // 设置周期性执行的轻负载任务
                 String setupLightLoadJs = "javascript:" +
                         "function performLightCalculation() {" +
@@ -242,14 +242,14 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                         "" +
                         "// 启动轻负载任务" +
                         "requestAnimationFrame(performLightCalculation);";
-                
+
                 webView.evaluateJavascript(setupLightLoadJs, null);
             });
         }
-        
+
         Trace.endSection();
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -258,7 +258,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: lightLoadEnabled = false;", null);
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -267,7 +267,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: lightLoadEnabled = true; requestAnimationFrame(performLightCalculation);", null);
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         // 停止监控
@@ -288,7 +288,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         } catch (InterruptedException e) {
             Log.e(TAG, "executeFlingLoad阻塞被中断", e);
         }
-        
+
         // 执行同步JavaScript
         final String testJs = "\"测试成功\"";
         webView.evaluateJavascript(testJs, value -> {
@@ -367,7 +367,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                     "  \n" +
                     "  return '耗时:' + (endTime - startTime).toFixed(2) + 'ms';\n" +
                     "})();";
-                
+
                 webView.evaluateJavascript(loadJs, loadResult -> {
                     // 不输出Toast，只记录日志
                     Log.d(TAG, "低负载JavaScript结果: " + loadResult);

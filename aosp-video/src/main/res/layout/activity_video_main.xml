@@ -24,7 +24,7 @@
             android:gravity="center"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="32dp" />
-            
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -183,19 +183,19 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp">
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -204,7 +204,7 @@
                     android:textStyle="bold"
                     android:textColor="@color/base_333333"
                     android:layout_marginBottom="8dp" />
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -214,7 +214,7 @@
                     android:lineSpacingExtra="6dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -22,11 +22,11 @@ public class HeavyLoadGeckoViewActivity extends BaseGeckoViewSurfaceActivity {
     protected void performLoadTask() {
         Log.d(TAG, "重负载模式");
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         try { Thread.sleep(3); } catch (InterruptedException e) {}
-        
+
         long startTime = System.currentTimeMillis();
         double result = 0;
         double[] data = new double[50000];

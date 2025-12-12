@@ -48,7 +48,7 @@
                 android:textSize="16sp"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
-            
+
         <!-- 帧内负载 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -96,7 +96,7 @@
                 android:textSize="16sp"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
-        
+
         <!-- 帧间负载 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -144,7 +144,7 @@
                 android:textSize="16sp"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
-        
+
         <!-- 混合负载 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -192,7 +192,7 @@
                 android:textSize="16sp"
                 android:textColor="#FFFFFF" />
         </LinearLayout>
-        
+
         <!-- 应用简介 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -200,7 +200,7 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:background="@drawable/card_background">
-            
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -209,7 +209,7 @@
                 android:textStyle="bold"
                 android:textColor="#333333"
                 android:layout_marginBottom="8dp" />
-            
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -218,7 +218,7 @@
                 android:textColor="#666666"
                 android:lineSpacingExtra="6dp" />
         </LinearLayout>
-        
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

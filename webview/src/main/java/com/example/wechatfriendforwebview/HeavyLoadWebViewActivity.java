@@ -12,7 +12,7 @@ import android.util.Log;
  */
 public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     private static final String TAG = "HeavyLoadWebView";
-    
+
     // 处理器实例
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -33,7 +33,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         // 不执行任何负载，仅记录日志
         Log.d(TAG, "重负载模式 - 仅在滚动时执行负载");
     }
-    
+
     /**
      * 在fling过程中执行负载
      */
@@ -45,7 +45,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         } catch (InterruptedException e) {
             Log.e(TAG, "executeFlingLoad阻塞被中断", e);
         }
-        
+
         // 执行同步JavaScript
         final String testJs = "\"测试成功\"";
         webView.evaluateJavascript(testJs, value -> {
@@ -120,16 +120,16 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                     "  \n" +
                     "  return '耗时:' + (endTime - startTime).toFixed(2) + 'ms';\n" +
                     "})();";
-                
+
                 webView.evaluateJavascript(loadJs, loadResult -> {
                     // 不输出Toast，只记录日志
                     Log.d(TAG, "重负载JavaScript结果: " + loadResult);
                 });
             }
         });
-        
+
     }
-    
+
     /**
      * 执行实际的fling重负载
      */
@@ -147,20 +147,20 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                 "  Android.showToast('重负载:' + elapsed.toFixed(0) + 'ms');" +
                 "} catch(e) {}" +
                 "elapsed.toFixed(2)";
-        
+
         webView.evaluateJavascript(simpleFlingJs, value -> {
             Log.d(TAG, "重负载JavaScript返回值: " + value);
         });
-        
+
         Log.d(TAG, "已触发简化版重负载JavaScript");
     }
-    
+
     /**
      * 执行重负载JavaScript任务
      */
     private void executeHeavyJavaScriptLoad() {
         Trace.beginSection("HeavyLoadWebView_executeHeavyJavaScriptLoad");
-        
+
         if (webView != null) {
             webView.post(() -> {
                 // 初始化重负载JavaScript
@@ -203,7 +203,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                         "  lastScrollY = window.scrollY;" +
                         "});";
                 webView.evaluateJavascript(initHeavyLoadJs, null);
-                
+
                 // 设置周期性执行的重负载任务
                 String setupHeavyLoadJs = "javascript:" +
                         "function performHeavyCalculation() {" +
@@ -647,14 +647,14 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                         "" +
                         "// 启动性能监测任务（不执行负载，只在滚动时执行负载）" +
                         "requestAnimationFrame(performHeavyCalculation);";
-                
+
                 webView.evaluateJavascript(setupHeavyLoadJs, null);
             });
         }
-        
+
         Trace.endSection();
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -663,7 +663,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: heavyLoadEnabled = false;", null);
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -672,7 +672,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: heavyLoadEnabled = true; requestAnimationFrame(performHeavyCalculation);", null);
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         // 停止JavaScript负载任务

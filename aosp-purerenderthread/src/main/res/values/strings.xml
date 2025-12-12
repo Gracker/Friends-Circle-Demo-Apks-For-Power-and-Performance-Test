@@ -2,14 +2,14 @@
 <resources>
     <string name="app_name">PureRenderThread</string>
     <string name="title_main">Pure RenderThread List Test</string>
-    
+
     <string name="title_minimal_load">Minimal Load</string>
     <string name="title_in_frame_load">In-Frame Load Test</string>
     <string name="title_between_frame_load">Between-Frame Load Test</string>
     <string name="title_mixed_load">Mixed Load Test</string>
     <string name="title_long_frame_load">Long Frame Load Test</string>
     <string name="title_about">About</string>
-    
+
     <string name="btn_minimal_load">Minimal Load</string>
     <string name="btn_light_load">In-Frame Light Load</string>
     <string name="btn_medium_load">In-Frame Medium Load</string>
@@ -21,9 +21,9 @@
     <string name="btn_medium_mixed">Mixed Medium Load</string>
     <string name="btn_heavy_mixed">Mixed Heavy Load</string>
     <string name="btn_long_frame">Long Frame Load (HEAVY×10)</string>
-    
+
     <string name="description">This app demonstrates a list rendered entirely on a separate RenderThread, keeping the UI Thread free from rendering work.\n\nKey Features:\n• SurfaceView provides separate rendering surface\n• Dedicated render thread handles all drawing\n• UI Thread only processes touch events\n• Simulates WeChat Moments-style list\n\nThis app provides 11 different load levels including Long Frame Load for performance testing.</string>
-    
+
     <string name="copyright">© 2025 PureRenderThread Performance Test App</string>
 </resources>
 

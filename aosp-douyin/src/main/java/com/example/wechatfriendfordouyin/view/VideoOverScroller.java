@@ -13,13 +13,13 @@ public class VideoOverScroller {
     // 滑动时间范围
     private static final int MIN_SCROLL_DURATION = 200;  // 最小滑动时间 200ms
     private static final int MAX_SCROLL_DURATION = 600;  // 最大滑动时间 600ms
-    
+
     // 速度阈值
     private static final int MIN_VELOCITY = 500;   // 最小速度阈值
     private static final int MAX_VELOCITY = 8000;  // 最大速度阈值
 
     private final DecelerateInterpolator mInterpolator;
-    
+
     private int mStartY;
     private int mFinalY;
     private int mCurrY;
@@ -43,7 +43,7 @@ public class VideoOverScroller {
         mFinalY = startY + dy;
         mCurrY = startY;
         mStartTime = AnimationUtils.currentAnimationTimeMillis();
-        
+
         // 根据速度计算滑动时间
         mDuration = calculateDuration(Math.abs(velocityY));
     }
@@ -60,11 +60,11 @@ public class VideoOverScroller {
         if (velocity >= MAX_VELOCITY) {
             return MIN_SCROLL_DURATION;
         }
-        
+
         // 线性插值：速度越快时间越短
         float ratio = (float) (velocity - MIN_VELOCITY) / (MAX_VELOCITY - MIN_VELOCITY);
         int duration = (int) (MAX_SCROLL_DURATION - ratio * (MAX_SCROLL_DURATION - MIN_SCROLL_DURATION));
-        
+
         return Math.max(MIN_SCROLL_DURATION, Math.min(MAX_SCROLL_DURATION, duration));
     }
 
@@ -90,7 +90,7 @@ public class VideoOverScroller {
         }
 
         final int timePassed = (int) (AnimationUtils.currentAnimationTimeMillis() - mStartTime);
-        
+
         if (timePassed >= mDuration) {
             mCurrY = mFinalY;
             mFinished = true;
@@ -100,9 +100,9 @@ public class VideoOverScroller {
         // 使用减速插值器计算当前位置
         float t = (float) timePassed / mDuration;
         float interpolatedT = mInterpolator.getInterpolation(t);
-        
+
         mCurrY = mStartY + Math.round((mFinalY - mStartY) * interpolatedT);
-        
+
         return true;
     }
 

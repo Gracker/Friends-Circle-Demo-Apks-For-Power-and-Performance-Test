@@ -34,13 +34,13 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
     public NineImageAdapter(Context context, List<String> imageUrls) {
         this.mContext = context;
         this.mImageUrls = imageUrls;
-        
+
         // 计算图片大小 - 屏幕宽度减去边距，然后除以3
         int screenWidth = getScreenWidth(context);
         // 54dp是左侧头像的宽度和边距，每张图片间隔4dp
         mImageSize = (screenWidth - dpToPx(context, 54) - dpToPx(context, 4) * 2) / 3;
     }
-    
+
     /**
      * 获取图片数据
      * @return 图片URL列表
@@ -71,16 +71,16 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
         } else {
             imageView = (ImageView) convertView;
         }
-        
+
         // 尝试加载图片
         try {
             String url = mImageUrls.get(position);
             boolean imageLoaded = false;
-            
+
             // 1. 首先尝试直接使用URL作为资源名称
             int resourceId = mContext.getResources().getIdentifier(
                     url, "drawable", mContext.getPackageName());
-            
+
             if (resourceId != 0) {
                 Picasso.get()
                     .load(resourceId)
@@ -89,15 +89,15 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                     .into(imageView);
                 imageLoaded = true;
             }
-            
+
             // 2. 如果未加载成功，尝试使用local系列图片
             if (!imageLoaded) {
                 int localImgIndex = (position % 11) + 1; // 使用1-11的范围
                 String localResource = "local" + localImgIndex;
-                
+
                 resourceId = mContext.getResources().getIdentifier(
                         localResource, "drawable", mContext.getPackageName());
-                
+
                 if (resourceId != 0) {
                     Picasso.get()
                         .load(resourceId)
@@ -107,15 +107,15 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                     imageLoaded = true;
                 }
             }
-            
+
             // 3. 如果仍未加载成功，尝试使用avatar系列图片
             if (!imageLoaded) {
                 int avatarImgIndex = (position % 11) + 1; // 使用1-11的范围
                 String avatarResource = "avatar" + avatarImgIndex;
-                
+
                 resourceId = mContext.getResources().getIdentifier(
                         avatarResource, "drawable", mContext.getPackageName());
-                
+
                 if (resourceId != 0) {
                     Picasso.get()
                         .load(resourceId)
@@ -125,7 +125,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                     imageLoaded = true;
                 }
             }
-            
+
             // 4. 如果所有尝试都失败，设置默认颜色
             if (!imageLoaded) {
                 imageView.setBackgroundColor(Color.LTGRAY);
@@ -134,10 +134,10 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             e.printStackTrace();
             imageView.setBackgroundColor(Color.LTGRAY);
         }
-        
+
         return imageView;
     }
-    
+
     /**
      * 获取屏幕宽度
      */
@@ -146,7 +146,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
         DisplayMetrics displayMetrics = resources.getDisplayMetrics();
         return displayMetrics.widthPixels;
     }
-    
+
     /**
      * dp转px
      */

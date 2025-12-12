@@ -25,19 +25,19 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private int mLoadType = LoadType.MEDIUM;
-    
+
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medium_load);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -49,12 +49,12 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -69,7 +69,7 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
@@ -90,7 +90,7 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         mIsEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

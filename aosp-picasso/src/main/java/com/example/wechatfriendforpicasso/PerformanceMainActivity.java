@@ -23,12 +23,12 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     private Button btnLightLoadBetweenFrames, btnMediumLoadBetweenFrames, btnHeavyLoadBetweenFrames;
     private Button btnLightMixedLoad, btnMediumMixedLoad, btnHeavyMixedLoad;
     private Button btnLongFrameLoad;
-    
+
     // 定义常量，用于Intent传递负载类型
     public static final String EXTRA_LOAD_TYPE = "load_type";
     // 定义常量，用于命令行直接启动不同Activity
     public static final String EXTRA_ACTIVITY_TYPE = "activity_type";
-    
+
     // Activity类型常量
     public static final String ACTIVITY_TYPE_MINIMAL = "minimal";
     public static final String ACTIVITY_TYPE_LIGHT = "light";
@@ -55,7 +55,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
 
         // 验证负载配置的科学性
         validateLoadConfiguration();
-        
+
         // Initialize buttons
         btnMinimalLoad = findViewById(R.id.btn_minimal_load);
         btnLightLoad = findViewById(R.id.btn_light_load);
@@ -68,7 +68,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
         btnMediumMixedLoad = findViewById(R.id.btn_medium_mixed_load);
         btnHeavyMixedLoad = findViewById(R.id.btn_heavy_mixed_load);
         btnLongFrameLoad = findViewById(R.id.btn_long_frame_load);
-        
+
         // Set click listeners
         btnMinimalLoad.setOnClickListener(this);
         btnLightLoad.setOnClickListener(this);
@@ -81,10 +81,10 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
         btnMediumMixedLoad.setOnClickListener(this);
         btnHeavyMixedLoad.setOnClickListener(this);
         btnLongFrameLoad.setOnClickListener(this);
-        
+
         // 检查是否通过命令行直接启动特定Activity
         checkForDirectActivityLaunch();
-        
+
         Trace.endSection();
     }
 
@@ -111,7 +111,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             if (activityType != null) {
                 // 清除缓存数据
                 PerformanceDataCenter.getInstance().clearCachedData();
-                
+
                 switch (activityType) {
                     case ACTIVITY_TYPE_MINIMAL:
                         startMinimalLoadActivity();
@@ -153,77 +153,77 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             }
         }
     }
-    
+
     private void startMinimalLoadActivity() {
         Intent intent = new Intent(this, MinimalLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MINIMAL);
         startActivity(intent);
         finish(); // 关闭主Activity，避免返回时显示
     }
-    
+
     private void startLightLoadActivity() {
         Intent intent = new Intent(this, LightLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
         startActivity(intent);
         finish();
     }
-    
+
     private void startMediumLoadActivity() {
         Intent intent = new Intent(this, MediumLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM);
         startActivity(intent);
         finish();
     }
-    
+
     private void startHeavyLoadActivity() {
         Intent intent = new Intent(this, HeavyLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY);
         startActivity(intent);
         finish();
     }
-    
+
     private void startLightLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, LightLoadBetweenFramesActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
-    
+
     private void startMediumLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, MediumLoadBetweenFramesActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
-    
+
     private void startHeavyLoadBetweenFramesActivity() {
         Intent intent = new Intent(this, HeavyLoadBetweenFramesActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES);
         startActivity(intent);
         finish();
     }
-    
+
     private void startLightMixedLoadActivity() {
         Intent intent = new Intent(this, LightMixedLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT_MIXED);
         startActivity(intent);
         finish();
     }
-    
+
     private void startMediumMixedLoadActivity() {
         Intent intent = new Intent(this, MediumMixedLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MEDIUM_MIXED);
         startActivity(intent);
         finish();
     }
-    
+
     private void startHeavyMixedLoadActivity() {
         Intent intent = new Intent(this, HeavyMixedLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.HEAVY_MIXED);
         startActivity(intent);
         finish();
     }
-    
+
     private void startLongFrameLoadActivity() {
         Intent intent = new Intent(this, LongFrameLoadActivity.class);
         intent.putExtra(EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LONG_FRAME);
@@ -243,10 +243,10 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        
+
         // 先清除所有缓存的数据，确保每次都重新生成
         PerformanceDataCenter.getInstance().clearCachedData();
-        
+
         if (id == R.id.btn_minimal_load) {
             Trace.beginSection("PerformanceMainActivity_startMinimalLoad");
             // Start MinimalLoad Activity
@@ -337,23 +337,23 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Trace.endSection();
         }
     }
-    
+
     /**
      * 验证负载配置的科学性和一致性
      */
     private void validateLoadConfiguration() {
         Log.d("LoadConfig", "开始验证负载配置...");
-        
+
         boolean isValid = LoadConfig.validateConfig();
         if (isValid) {
             Log.d("LoadConfig", "✅ 负载配置验证通过");
-            
+
             // 输出配置详情
             Log.d("LoadConfig", "📊 混合负载配置详情:");
             Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.LIGHT_MIXED));
             Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.MEDIUM_MIXED));
             Log.d("LoadConfig", "  " + LoadConfig.getDescription(com.example.loadconfig.LoadType.HEAVY_MIXED));
-            
+
             // 输出任务间隔配置
             Log.d("LoadConfig", "📋 任务调度配置:");
             Log.d("LoadConfig", "  任务间隔: " + LoadConfig.MIN_TASK_INTERVAL_MS + "-" + 
@@ -361,7 +361,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             Log.d("LoadConfig", "  随机种子: Task=" + LoadConfig.TASK_INTERVAL_SEED + 
                   ", DoFrame=" + LoadConfig.DOFRAME_INTERVAL_SEED + 
                   ", Computation=" + LoadConfig.COMPUTATION_SEED);
-                  
+
         } else {
             Log.e("LoadConfig", "❌ 负载配置验证失败！请检查LoadConfig中的数值设置");
         }

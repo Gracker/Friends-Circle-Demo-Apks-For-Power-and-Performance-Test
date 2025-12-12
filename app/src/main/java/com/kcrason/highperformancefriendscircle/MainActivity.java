@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new FriendsCircleAdapterDivideLine());
         mFriendCircleAdapter = new FriendCircleAdapter(this, recyclerView);

@@ -19,7 +19,7 @@ android {
             keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
         }
     }
-    
+
     buildTypes {
         release {
             minifyEnabled false

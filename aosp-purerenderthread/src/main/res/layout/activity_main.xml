@@ -49,7 +49,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-            
+
         <!-- In-Frame -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -95,7 +95,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <!-- Between-Frame -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -141,7 +141,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <!-- Mixed -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -187,7 +187,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <!-- Long Frame Load -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -217,7 +217,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <!-- About -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -246,7 +246,7 @@
                     android:lineSpacingExtra="6dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

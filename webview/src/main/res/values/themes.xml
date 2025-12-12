@@ -13,7 +13,7 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
-    
+
     <!-- 无ActionBar的主题样式 -->
     <style name="Theme.HighPerformanceFriendsCircle.NoActionBar">
         <item name="windowActionBar">false</item>

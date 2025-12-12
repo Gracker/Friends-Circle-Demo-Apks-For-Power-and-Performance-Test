@@ -28,7 +28,7 @@
             android:orientation="vertical"
             android:padding="0dp"
             android:layout_marginTop="0dp">
-            
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -187,7 +187,7 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <!-- Long Frame Load Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -195,13 +195,13 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp">
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -221,19 +221,19 @@
                     app:cornerRadius="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-        
+
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp">
-            
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -242,7 +242,7 @@
                     android:textStyle="bold"
                     android:textColor="@color/base_333333"
                     android:layout_marginBottom="8dp" />
-                
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

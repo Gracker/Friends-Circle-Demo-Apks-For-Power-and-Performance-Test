@@ -35,53 +35,53 @@ import java.util.List;
  * - 2 RenderThread drawFrame per vsync
  */
 public abstract class BaseDualWindowActivity extends AppCompatActivity implements Choreographer.FrameCallback {
-    
+
     protected RecyclerView recyclerView;
     protected DualWindowFriendCircleAdapter adapter;
     protected SecondWindowView secondWindowView;
     protected WindowManager windowManager;
     protected boolean isSecondWindowAdded = false;
     protected int mLoadType;
-    
+
     // Choreographer 回调相关
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
     private int mFrameCount = 0;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dual_window);
-        
+
         // 设置状态栏透明
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        
+
         // 获取负载类型
         mLoadType = getLoadType();
-        
+
         // 初始化负载模拟器和 Choreographer
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
-        
+
         // Setup main window view with RecyclerView (friend circle list)
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         // 初始化滚动监听器，用于控制主窗口负载
         initScrollListener();
-        
+
         // Create second window view
         secondWindowView = new SecondWindowView(this);
         secondWindowView.setLoadType(mLoadType);
-        
+
         // Check overlay permission and add second window
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (Settings.canDrawOverlays(this)) {
@@ -93,7 +93,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
             addSecondWindow();
         }
     }
-    
+
     /**
      * 初始化滚动监听器
      * 控制主窗口的负载执行和第二窗口的动画
@@ -103,7 +103,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                
+
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mIsScrolling = false;
                     if (isSecondWindowAdded) {
@@ -124,7 +124,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     /**
      * Choreographer 的 doFrame 回调
      * 在滚动期间执行主窗口的负载模拟
@@ -141,7 +141,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
             mChoreographer.postFrameCallback(this);
         }
     }
-    
+
     /**
      * 获取帧间隔，根据负载类型决定执行频率
      */
@@ -157,26 +157,26 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
                 return 6;
         }
     }
-    
+
     private void initRecyclerView() {
         // 设置布局管理器
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
+
         // 创建适配器
         adapter = new DualWindowFriendCircleAdapter(this, recyclerView, mLoadType);
-        
+
         // 添加header view
         View headerView = LayoutInflater.from(this).inflate(R.layout.include_title_bar_view, recyclerView, false);
         adapter.setHeaderView(headerView);
-        
+
         recyclerView.setAdapter(adapter);
-        
+
         // 设置数据
         List<FriendCircleBean> friendCircleBeans = DualWindowDataCenter.getInstance()
                 .generateDataForLoadType(this, mLoadType);
         adapter.setFriendCircleBeans(friendCircleBeans);
     }
-    
+
     private void addSecondWindow() {
         int type;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -184,7 +184,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
         } else {
             type = WindowManager.LayoutParams.TYPE_PHONE;
         }
-        
+
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 400,
                 600,
@@ -193,11 +193,11 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT
         );
-        
+
         params.gravity = Gravity.TOP | Gravity.END;
         params.x = 20;
         params.y = 100;
-        
+
         try {
             windowManager.addView(secondWindowView, params);
             isSecondWindowAdded = true;
@@ -206,7 +206,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
             Toast.makeText(this, "Failed to add second window: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     protected abstract @LoadType.Type int getLoadType();
 
     @Override
@@ -214,14 +214,14 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
         super.onResume();
         // 清空缓存，确保使用正确的负载类型
         DualWindowDataCenter.getInstance().clearCachedData();
-        
+
         // 刷新数据
         if (adapter != null) {
             List<FriendCircleBean> friendCircleBeans = DualWindowDataCenter.getInstance()
                     .generateDataForLoadType(this, mLoadType);
             adapter.setFriendCircleBeans(friendCircleBeans);
         }
-        
+
         mIsEnabled = true;
         mIsScrolling = false;
     }
@@ -241,7 +241,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
-        
+
         // 移除第二窗口
         if (isSecondWindowAdded && secondWindowView != null) {
             secondWindowView.stopAnimation();
@@ -251,21 +251,21 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
                 // View might already be removed
             }
         }
-        
+
         // 清理适配器资源
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
         }
-        
+
         // 释放负载模拟器资源
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
-        
+
         recyclerView.setAdapter(null);
         adapter = null;
-        
+
         super.onDestroy();
     }
 }

@@ -22,11 +22,11 @@ public class MediumLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
     protected void performLoadTask() {
         Log.d(TAG, "中负载模式");
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         try { Thread.sleep(2); } catch (InterruptedException e) {}
-        
+
         long startTime = System.currentTimeMillis();
         double result = 0;
         for (int i = 0; i < 15000; i++) {

@@ -5,7 +5,7 @@ package com.example.wechatfriendforwebviewimagereader;
  * 包含用户名、内容、评论等模拟数据
  */
 public class GeckoViewConstants {
-    
+
     // 用户名列表
     public static final String[] USER_NAMES = {
             "张三", "李四", "王五", "赵六", "孙七",
@@ -13,7 +13,7 @@ public class GeckoViewConstants {
             "林小明", "王大伟", "刘芳芳", "张晓华", "李建国",
             "杨美丽", "黄志强", "周婷婷", "吴明辉", "郑小龙"
     };
-    
+
     // 朋友圈内容列表
     public static final String[] CONTENTS = {
             "今天天气真好，适合出去走走！",
@@ -37,7 +37,7 @@ public class GeckoViewConstants {
             "今天的晚霞太美了，值得记录！",
             "新的一周，继续加油！"
     };
-    
+
     // 评论内容列表
     public static final String[] COMMENT_CONTENTS = {
             "太棒了！",
@@ -56,21 +56,21 @@ public class GeckoViewConstants {
             "太美了吧！",
             "心动了！"
     };
-    
+
     // 发布时间列表
     public static final String[] TIMES = {
             "刚刚", "1分钟前", "5分钟前", "10分钟前", "30分钟前",
             "1小时前", "2小时前", "3小时前", "5小时前", "昨天",
             "前天", "3天前", "一周前"
     };
-    
+
     // 位置列表
     public static final String[] LOCATIONS = {
             "北京市", "上海市", "广州市", "深圳市", "杭州市",
             "成都市", "武汉市", "南京市", "西安市", "重庆市",
             "苏州市", "天津市", "青岛市", "厦门市", "大连市"
     };
-    
+
     // 来源列表
     public static final String[] SOURCES = {
             "iPhone 15 Pro Max",

@@ -17,7 +17,7 @@ import com.example.loadconfig.LoadType;
 public final class LoadStressSimulator implements Choreographer.FrameCallback {
 
     private static final String TAG = "LoadStressSimulator";
-    
+
     // 单例和状态管理
     private static LoadStressSimulator sInstance;
     private final Handler mHandler;
@@ -26,7 +26,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     private boolean mIsRunning = false;
     private boolean mIsScrolling = false;
     private int mCurrentLoadType = LoadType.LIGHT;
-    
+
     // 超长帧相关
     private long mScrollStartTime = 0;
     private int mLongFrameTriggerCount = 0;
@@ -39,14 +39,14 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mChoreographer = Choreographer.getInstance();
         mLoadSimulator = new LoadSimulator();
     }
-    
+
     public static synchronized LoadStressSimulator getInstance() {
         if (sInstance == null) {
             sInstance = new LoadStressSimulator();
         }
         return sInstance;
     }
-    
+
     /**
      * 启动后台任务调度
      */
@@ -54,7 +54,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mCurrentLoadType = loadType;
         mIsRunning = true;
     }
-    
+
     /**
      * 停止后台任务调度
      */
@@ -64,16 +64,16 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mHandler.removeCallbacksAndMessages(null);
         resetLongFrameState();
     }
-    
+
     /**
      * 通知列表开始滚动，启动负载任务
      */
     public void onScrollStart() {
         if (!mIsRunning) return;
-        
+
         if (!mIsScrolling) {
             mIsScrolling = true;
-            
+
             if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
                 startLongFrameCycle();
             }
@@ -81,7 +81,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             mChoreographer.postFrameCallback(this);
         }
     }
-    
+
     /**
      * 通知列表停止滚动，停止负载任务
      */
@@ -91,7 +91,7 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mChoreographer.removeFrameCallback(this);
         resetLongFrameState();
     }
-    
+
     private void startLongFrameCycle() {
         mScrollStartTime = System.currentTimeMillis();
         mLongFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
@@ -100,17 +100,17 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
         mLastLongFrameTime = 0;
         Log.d(TAG, "startLongFrameCycle: 计划触发" + mLongFrameTriggerCount + "次超长帧");
     }
-    
+
     private void resetLongFrameState() {
         mScrollStartTime = 0;
         mCurrentLongFrameIndex = 0;
         mLongFrameTriggerTimes = null;
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (!mIsRunning || !mIsScrolling) return;
-        
+
         if (LoadType.isLongFrameLoad(mCurrentLoadType)) {
             checkAndExecuteLongFrame();
         } else if (LoadType.isBetweenFramesLoad(mCurrentLoadType)) {
@@ -123,51 +123,51 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             Trace.beginSection("CustomScroll_doFrameLoad");
             executeDoFrameLoad(mCurrentLoadType);
             Trace.endSection();
-            
+
             mHandler.post(() -> {
                 Trace.beginSection("CustomScroll_betweenFrameLoad");
                 executeBetweenFrameLoad(mCurrentLoadType);
                 Trace.endSection();
             });
         }
-        
+
         mChoreographer.postFrameCallback(this);
     }
-    
+
     private void checkAndExecuteLongFrame() {
         if (mCurrentLongFrameIndex >= mLongFrameTriggerCount || mLongFrameTriggerTimes == null) {
             return;
         }
-        
+
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - mScrollStartTime;
-        
+
         if (elapsedTime >= mLongFrameTriggerTimes[mCurrentLongFrameIndex]) {
             if (currentTime - mLastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
                 Log.d(TAG, "触发超长帧 #" + (mCurrentLongFrameIndex + 1) + "/" + mLongFrameTriggerCount);
-                
+
                 Trace.beginSection("CustomScroll_longFrameLoad_" + (mCurrentLongFrameIndex + 1));
                 executeLongFrameLoad();
                 Trace.endSection();
-                
+
                 mLastLongFrameTime = currentTime;
                 mCurrentLongFrameIndex++;
             }
         }
-        
+
         if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
             startLongFrameCycle();
         }
     }
-    
+
     private void executeLongFrameLoad() {
         mLoadSimulator.executeLongFrameLoad("CustomScroll_longFrameLoad");
     }
-    
+
     private void executeDoFrameLoad(@LoadType.Type int loadType) {
         mLoadSimulator.executeDoFrameLoad(loadType, "CustomScroll_doFrameLoad");
     }
-    
+
     private void executeBetweenFrameLoad(@LoadType.Type int loadType) {
         if (LoadType.isBetweenFramesLoad(loadType)) {
             mLoadSimulator.executePureBetweenFrameLoad(loadType, "CustomScroll_betweenFrameLoad");
@@ -175,16 +175,16 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             mLoadSimulator.executeBetweenFrameLoad(loadType, "CustomScroll_betweenFrameLoad");
         }
     }
-    
+
     private static LoadSimulator sStaticLoadSimulator;
-    
+
     private static LoadSimulator getStaticLoadSimulator() {
         if (sStaticLoadSimulator == null) {
             sStaticLoadSimulator = new LoadSimulator();
         }
         return sStaticLoadSimulator;
     }
-    
+
     public static void runAdapterLoad(@LoadType.Type int loadType) {
         getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_bindLoad");
     }

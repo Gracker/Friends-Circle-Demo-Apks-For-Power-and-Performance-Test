@@ -40,9 +40,9 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
     public static final int TYPE_HEADER = 0;
     public static final int TYPE_NORMAL = 1;
-    
+
     private static final String TAG = "PowerFriendCircleAdapter";
-    
+
     private Context mContext;
     private List<FriendCircleBean> mFriendCircleBeans;
     private RequestOptions mRequestOptions;
@@ -74,7 +74,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         setupHeaderView();
         notifyItemInserted(0);
     }
-    
+
     private void setupHeaderView() {
         if (mHeaderView != null) {
             // 设置固定的背景图片 main_bg.jpg
@@ -89,7 +89,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                          .into(imgCover);
                 }
             }
-            
+
             // 设置固定的头像 main_avatar.jpg，使用大圆角变换
             ImageView imgUserAvatar = mHeaderView.findViewById(R.id.img_user_avatar);
             if (imgUserAvatar != null) {
@@ -99,20 +99,20 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     RequestOptions options = new RequestOptions()
                         .centerCrop()
                         .transform(new com.bumptech.glide.load.resource.bitmap.RoundedCorners(24)); // 更大的圆角
-                    
+
                     Glide.with(mContext)
                          .load(avatarResourceId)
                          .apply(options)
                          .into(imgUserAvatar);
                 }
             }
-            
+
             // 设置用户昵称固定为Gracker
             TextView txtUserNickname = mHeaderView.findViewById(R.id.txt_user_nickname);
             if (txtUserNickname != null) {
                 txtUserNickname.setText("Gracker");
             }
-            
+
             // 设置返回按钮点击事件
             ImageView imgBack = mHeaderView.findViewById(R.id.img_back);
             if (imgBack != null && mContext instanceof android.app.Activity) {
@@ -150,12 +150,12 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             // 头部视图不需要额外绑定数据
             return;
         }
-        
+
         if (holder instanceof FriendCircleViewHolder && mFriendCircleBeans != null) {
             int dataPosition = mHeaderView != null ? position - 1 : position;
             if (dataPosition < mFriendCircleBeans.size()) {
                 FriendCircleViewHolder circleHolder = (FriendCircleViewHolder) holder;
-                
+
                 // 为第一个正常的列表项添加额外的顶部边距
                 if (position == 1 && mHeaderView != null) {
                     circleHolder.itemView.setPadding(
@@ -172,12 +172,12 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         circleHolder.itemView.getPaddingBottom()
                     );
                 }
-                
+
                 FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
-                
+
                 // 设置内容
                 circleHolder.txtContent.setText(friendCircleBean.getContent());
-                
+
                 // 设置用户信息
                 UserBean userBean = friendCircleBean.getUserBean();
                 if (userBean != null) {
@@ -190,7 +190,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         RequestOptions avatarOptions = new RequestOptions()
                             .override(mAvatarSize, mAvatarSize)
                             .transform(new com.bumptech.glide.load.resource.bitmap.RoundedCorners(12));
-                            
+
                         Glide.with(mContext)
                             .load(resourceId)
                             .apply(avatarOptions)
@@ -198,41 +198,41 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                             .into(circleHolder.imgAvatar);
                     }
                 }
-                
+
                 // 设置其他信息
                 OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
                 if (otherInfoBean != null) {
                     circleHolder.txtTime.setText(otherInfoBean.getTime());
                     circleHolder.txtSource.setText(otherInfoBean.getSource());
                 }
-                
+
                 // 设置位置信息 - 根据位置循环显示
                 int locationIndex = dataPosition % PowerConstants.LOCATIONS.length;
                 circleHolder.txtLocation.setText(PowerConstants.LOCATIONS[locationIndex]);
-                
+
                 // 设置九宫格图片
                 List<String> imageUrls = friendCircleBean.getImageUrls();
                 if (imageUrls != null && !imageUrls.isEmpty()) {
                     circleHolder.nineGridView.setVisibility(View.VISIBLE);
                     circleHolder.nineGridView.setAdapter(new NineImageAdapter(mContext, mRequestOptions, 
                             mDrawableTransitionOptions, imageUrls));
-                    
+
                     // 移除图片点击事件
                     circleHolder.nineGridView.setOnItemClickListener(null);
                 } else {
                     circleHolder.nineGridView.setVisibility(View.GONE);
                 }
-                
+
                 // 设置点赞和评论区域
                 if (friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty() || 
                     friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
                     circleHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
-                    
+
                     // 设置点赞内容
                     if (friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty()) {
                         circleHolder.txtPraise.setVisibility(View.VISIBLE);
                         circleHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
-                        
+
                         // 如果有评论，显示分割线
                         if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
                             circleHolder.viewLine.setVisibility(View.VISIBLE);
@@ -243,12 +243,12 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         circleHolder.txtPraise.setVisibility(View.GONE);
                         circleHolder.viewLine.setVisibility(View.GONE);
                     }
-                    
+
                     // 设置评论内容
                     if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
                         circleHolder.commentLayout.setVisibility(View.VISIBLE);
                         circleHolder.commentLayout.removeAllViews();
-                        
+
                         // 显示所有评论
                         for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
                             TextView textView = new TextView(mContext);
@@ -292,7 +292,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onItemClickHideTranslation(int position) {
         // 简化处理，不实现翻译功能
     }
-    
+
     /**
      * 头部ViewHolder
      */
@@ -356,7 +356,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
          * @param position 位置
          */
         void onPraiseClick(FriendCircleBean friendCircleBean, int position);
-        
+
         /**
          * 评论点击事件
          * @param friendCircleBean 朋友圈数据

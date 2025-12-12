@@ -26,19 +26,19 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private int mLoadType = LoadType.LIGHT;
-    
+
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_light_load);
-        
+
         // 设置状态栏透明
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
@@ -53,13 +53,13 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
         // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         // 初始化负载模拟器和 Choreographer
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
         initScrollListener();
     }
-    
+
     /**
      * 初始化滚动监听器
      * 只有在列表滚动时才执行帧内负载
@@ -78,7 +78,7 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     /**
      * Choreographer 的 doFrame 回调
      * 帧间隔由 LoadSimulator 统一控制
@@ -95,10 +95,10 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // 清空缓存，确保使用正确的负载类型
         PerformanceDataCenter.getInstance().clearCachedData();
-        
+
         // 确保数据已根据正确的负载类型生成
         if (adapter != null) {
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
@@ -108,7 +108,7 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
         mIsEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -117,7 +117,7 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
 
     private void initRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
+
         if (adapter == null) {
             adapter = new PerformanceFriendCircleAdapter(this, recyclerView, mLoadType);
             View headerView = getLayoutInflater().inflate(R.layout.include_title_bar_view, recyclerView, false);
@@ -130,18 +130,18 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
-        
+
         if (adapter != null) {
             adapter.stopContinuousLoadSimulation();
         }
         recyclerView.setAdapter(null);
         adapter = null;
         mIsEnabled = false;
-        
+
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;

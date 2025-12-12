@@ -18,42 +18,42 @@ import java.lang.annotation.RetentionPolicy;
 public final class LoadType {
 
     // ==================== 负载类型常量 ====================
-    
+
     /** 最轻负载 - 不添加任何额外负载 */
     public static final int MINIMAL = 0;
-    
+
     /** 帧内轻负载 - 每帧内执行轻量计算 */
     public static final int LIGHT = 1;
-    
+
     /** 帧内中负载 - 每帧内执行中等计算 */
     public static final int MEDIUM = 2;
-    
+
     /** 帧内高负载 - 每帧内执行密集计算 */
     public static final int HEAVY = 3;
-    
+
     /** 帧间轻负载 - 帧与帧之间执行轻量任务 */
     public static final int LIGHT_BETWEEN_FRAMES = 4;
-    
+
     /** 帧间中负载 - 帧与帧之间执行中等任务 */
     public static final int MEDIUM_BETWEEN_FRAMES = 5;
-    
+
     /** 帧间高负载 - 帧与帧之间执行密集任务 */
     public static final int HEAVY_BETWEEN_FRAMES = 6;
-    
+
     /** 混合轻负载 - 同时执行帧内和帧间轻量负载 */
     public static final int LIGHT_MIXED = 7;
-    
+
     /** 混合中负载 - 同时执行帧内和帧间中等负载 */
     public static final int MEDIUM_MIXED = 8;
-    
+
     /** 混合高负载 - 同时执行帧内和帧间密集负载 */
     public static final int HEAVY_MIXED = 9;
-    
+
     /** 超长帧负载 - 滑动过程中随机出现2-3次超长帧，强度是HEAVY的10倍 */
     public static final int LONG_FRAME = 10;
 
     // ==================== 类型注解 ====================
-    
+
     @IntDef({
             MINIMAL,
             LIGHT, MEDIUM, HEAVY,
@@ -65,13 +65,13 @@ public final class LoadType {
     public @interface Type {}
 
     // ==================== 私有构造函数 ====================
-    
+
     private LoadType() {
         throw new UnsupportedOperationException("LoadType is a utility class and cannot be instantiated");
     }
 
     // ==================== 工具方法 ====================
-    
+
     /**
      * 获取负载类型的显示标签（中文）
      * @param loadType 负载类型
@@ -105,7 +105,7 @@ public final class LoadType {
                 return "未知负载";
         }
     }
-    
+
     /**
      * 获取负载类型的显示标签（英文）
      * @param loadType 负载类型
@@ -139,7 +139,7 @@ public final class LoadType {
                 return "Unknown Load";
         }
     }
-    
+
     /**
      * 判断是否为超长帧负载类型
      * @param loadType 负载类型
@@ -148,7 +148,7 @@ public final class LoadType {
     public static boolean isLongFrameLoad(@Type int loadType) {
         return loadType == LONG_FRAME;
     }
-    
+
     /**
      * 判断是否为帧间负载类型
      * @param loadType 负载类型
@@ -159,7 +159,7 @@ public final class LoadType {
                 || loadType == MEDIUM_BETWEEN_FRAMES 
                 || loadType == HEAVY_BETWEEN_FRAMES;
     }
-    
+
     /**
      * 判断是否为混合负载类型
      * @param loadType 负载类型
@@ -170,7 +170,7 @@ public final class LoadType {
                 || loadType == MEDIUM_MIXED 
                 || loadType == HEAVY_MIXED;
     }
-    
+
     /**
      * 判断是否为帧内负载类型（包括最轻负载）
      * @param loadType 负载类型
@@ -182,7 +182,7 @@ public final class LoadType {
                 || loadType == MEDIUM 
                 || loadType == HEAVY;
     }
-    
+
     /**
      * 判断是否需要执行帧间任务（帧间负载或混合负载）
      * @param loadType 负载类型
@@ -191,7 +191,7 @@ public final class LoadType {
     public static boolean needsBetweenFrameTask(@Type int loadType) {
         return isBetweenFramesLoad(loadType) || isMixedLoad(loadType);
     }
-    
+
     /**
      * 判断是否需要执行doFrame任务（混合负载）
      * @param loadType 负载类型
@@ -200,7 +200,7 @@ public final class LoadType {
     public static boolean needsDoFrameTask(@Type int loadType) {
         return isMixedLoad(loadType);
     }
-    
+
     /**
      * 获取负载级别（轻/中/重/超长帧）
      * @param loadType 负载类型

@@ -33,13 +33,13 @@ public class CustomTimelineView extends ViewGroup {
     private final CustomOverScroller customOverScroller;
     private RenderStressOverlayView renderStressOverlay;
     private ScrollCallback scrollCallback;
-    
+
     // Interface for scroll state callbacks
     public interface ScrollCallback {
         void onScrollStart();
         void onScrollStop();
     }
-    
+
     private final Runnable flingRunnable = new Runnable() {
         @Override
         public void run() {
@@ -87,7 +87,7 @@ public class CustomTimelineView extends ViewGroup {
     public void setRenderStressOverlay(RenderStressOverlayView overlayView) {
         this.renderStressOverlay = overlayView;
     }
-    
+
     public void setScrollCallback(ScrollCallback callback) {
         this.scrollCallback = callback;
     }

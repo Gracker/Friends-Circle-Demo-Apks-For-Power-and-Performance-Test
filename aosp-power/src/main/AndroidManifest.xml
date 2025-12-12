@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.HighPerformanceFriendsCircle">
-        
+
         <activity
             android:name=".PowerMainActivity"
             android:exported="true">
@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        
+
         <!-- 图片查看器Activity -->
         <activity 
             android:name=".ImageViewerActivity"

@@ -12,41 +12,41 @@ import org.mozilla.geckoview.GeckoRuntimeSettings;
  */
 public class GeckoViewApplication extends Application {
     private static final String TAG = "GeckoViewApp";
-    
+
     private static GeckoRuntime sGeckoRuntime;
-    
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "GeckoView SurfaceView 版朋友圈应用启动");
     }
-    
+
     /**
      * 获取 GeckoRuntime 实例（懒加载）
      */
     public static synchronized GeckoRuntime getGeckoRuntime(Application app) {
         if (sGeckoRuntime == null) {
             Log.d(TAG, "创建 GeckoRuntime 实例");
-            
+
             GeckoRuntimeSettings.Builder settingsBuilder = new GeckoRuntimeSettings.Builder();
-            
+
             // 启用远程调试
             settingsBuilder.remoteDebuggingEnabled(true);
-            
+
             // 启用 JavaScript
             settingsBuilder.javaScriptEnabled(true);
-            
+
             // 启用 Web 字体
             settingsBuilder.webFontsEnabled(true);
-            
+
             // 创建 GeckoRuntime
             sGeckoRuntime = GeckoRuntime.create(app, settingsBuilder.build());
-            
+
             Log.d(TAG, "GeckoRuntime 创建成功");
         }
         return sGeckoRuntime;
     }
-    
+
     public GeckoRuntime getGeckoRuntime() {
         return getGeckoRuntime(this);
     }

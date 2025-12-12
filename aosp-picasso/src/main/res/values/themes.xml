@@ -19,14 +19,14 @@
         <!-- Material button styles -->
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
     </style>
-    
+
     <!-- 无ActionBar的主题，用于朋友圈Activity -->
     <style name="Theme.HighPerformanceFriendsCircle.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
-    
+
     <!-- 自定义按钮样式 -->
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
         <item name="android:textAppearance">?attr/textAppearanceButton</item>

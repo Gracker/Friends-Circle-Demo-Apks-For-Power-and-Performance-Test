@@ -17,11 +17,11 @@ import java.util.Random;
  */
 public class HeavyLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebViewActivity {
     private static final String TAG = "HeavyBetweenFramesWV";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isTaskSchedulingEnabled = true;
     private final Random random = new Random(LoadConfig.TASK_INTERVAL_SEED);
-    
+
     private LoadSimulator mLoadSimulator;
     private int mLoadType = LoadType.HEAVY_BETWEEN_FRAMES;
 
@@ -29,9 +29,9 @@ public class HeavyLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("WebView朋友圈 - 帧间重负载");
-        
+
         mLoadSimulator = new LoadSimulator();
-        
+
         // 启动帧间任务调度
         scheduleNextBetweenFrameTask();
     }
@@ -40,43 +40,43 @@ public class HeavyLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
     protected void performLoadTask() {
         Log.d(TAG, "帧间重负载模式 - 已启动帧间任务调度");
     }
-    
+
     /**
      * 调度下一个帧间任务
      */
     private void scheduleNextBetweenFrameTask() {
         if (!isTaskSchedulingEnabled) return;
-        
+
         int intervalMs = LoadConfig.MIN_TASK_INTERVAL_MS + 
                          random.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
-        
+
         handler.postDelayed(() -> {
             if (!isTaskSchedulingEnabled) return;
-            
+
             mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "HeavyBetweenFramesWV_load");
-            
+
             // 执行JavaScript重负载
             if (webView != null) {
                 String js = "(function() { var s = 0; for(var i = 0; i < 1000; i++) { s += Math.pow(Math.sin(i), 2) + Math.pow(Math.cos(i), 2); } return s; })();";
                 webView.evaluateJavascript(js, null);
             }
-            
+
             scheduleNextBetweenFrameTask();
         }, intervalMs);
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "HeavyBetweenFramesWV_fling");
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
         isTaskSchedulingEnabled = false;
         handler.removeCallbacksAndMessages(null);
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -85,7 +85,7 @@ public class HeavyLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
             scheduleNextBetweenFrameTask();
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;

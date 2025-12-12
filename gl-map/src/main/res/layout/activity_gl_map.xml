@@ -17,20 +17,20 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="8dp">
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
             android:gravity="center_vertical">
-            
+
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_search"
                 android:tint="@color/base_666666" />
-            
+
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
                 android:background="@null"
                 android:hint="@string/search_hint"
                 android:textSize="16sp" />
-            
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -50,7 +50,7 @@
         android:layout_gravity="end|center_vertical"
         android:layout_marginEnd="16dp"
         android:orientation="vertical">
-        
+
         <androidx.cardview.widget.CardView
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -65,7 +65,7 @@
                 android:textSize="24sp"
                 android:textColor="@color/base_333333" />
         </androidx.cardview.widget.CardView>
-        
+
         <androidx.cardview.widget.CardView
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -80,7 +80,7 @@
                 android:textSize="24sp"
                 android:textColor="@color/base_333333" />
         </androidx.cardview.widget.CardView>
-        
+
         <androidx.cardview.widget.CardView
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -94,7 +94,7 @@
                 android:textSize="20sp"
                 android:textColor="@color/primary_indigo" />
         </androidx.cardview.widget.CardView>
-        
+
     </LinearLayout>
 
     <!-- Bottom Info Panel (Native UI Overlay) -->
@@ -105,13 +105,13 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="8dp">
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/base_333333" />
-            
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -127,7 +127,7 @@
                 android:text="Drag to pan • Pinch to zoom"
                 android:textSize="14sp"
                 android:textColor="@color/base_666666" />
-            
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

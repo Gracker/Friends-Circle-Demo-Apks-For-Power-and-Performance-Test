@@ -35,14 +35,14 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
     private CustomScrollViewModel viewModel;
     private FriendCircleItemRenderer itemRenderer;
     private int loadType = LoadType.LIGHT;
-    
+
     // Background task management
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Choreographer choreographer;
     private LoadSimulator mLoadSimulator;
     private boolean isTaskSchedulingEnabled = false;
     private boolean isScrolling = false;
-    
+
     // Long frame state
     private long scrollStartTime = 0;
     private int longFrameTriggerCount = 0;
@@ -75,10 +75,10 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         if (savedInstanceState == null) {
             viewModel.loadFeed(loadType);
         }
-        
+
         // Initialize LoadSimulator and choreographer
         mLoadSimulator = new LoadSimulator();
-        
+
         if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType) 
                 || LoadType.isLongFrameLoad(loadType)) {
             choreographer = Choreographer.getInstance();
@@ -86,7 +86,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             setupScrollListener();
         }
     }
-    
+
     private void setupScrollListener() {
         CustomTimelineView timelineView = binding.customTimelineView;
         timelineView.setScrollCallback(new CustomTimelineView.ScrollCallback() {
@@ -101,7 +101,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
                     choreographer.postFrameCallback(CustomScrollFeedActivity.this);
                 }
             }
-            
+
             @Override
             public void onScrollStop() {
                 isScrolling = false;
@@ -147,11 +147,11 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             binding.txtState.setText(message);
         }
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (!isTaskSchedulingEnabled || !isScrolling) return;
-        
+
         if (LoadType.isLongFrameLoad(loadType)) {
             checkAndExecuteLongFrame();
         } else if (LoadType.isBetweenFramesLoad(loadType)) {
@@ -162,10 +162,10 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
             mLoadSimulator.executeDoFrameLoad(loadType, "RenderStress_doFrameLoad");
             handler.post(() -> mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad"));
         }
-        
+
         choreographer.postFrameCallback(this);
     }
-    
+
     private void startLongFrameCycle() {
         scrollStartTime = System.currentTimeMillis();
         longFrameTriggerCount = LoadConfig.getLongFrameTriggerCount();
@@ -173,19 +173,19 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         currentLongFrameIndex = 0;
         lastLongFrameTime = 0;
     }
-    
+
     private void resetLongFrameState() {
         scrollStartTime = 0;
         currentLongFrameIndex = 0;
         longFrameTriggerTimes = null;
     }
-    
+
     private void checkAndExecuteLongFrame() {
         if (currentLongFrameIndex >= longFrameTriggerCount || longFrameTriggerTimes == null) return;
-        
+
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - scrollStartTime;
-        
+
         if (elapsedTime >= longFrameTriggerTimes[currentLongFrameIndex]) {
             if (currentTime - lastLongFrameTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
                 mLoadSimulator.executeLongFrameLoad("RenderStress_longFrameLoad_" + (currentLongFrameIndex + 1));
@@ -193,12 +193,12 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
                 currentLongFrameIndex++;
             }
         }
-        
+
         if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
             startLongFrameCycle();
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         isTaskSchedulingEnabled = false;

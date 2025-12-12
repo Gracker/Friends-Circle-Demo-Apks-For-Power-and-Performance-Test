@@ -23,7 +23,7 @@ public class MinimalLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
     protected void performLoadTask() {
         Log.d(TAG, "最轻负载模式 - 不执行任何负载");
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         // 最轻负载：不执行任何负载

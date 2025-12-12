@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">SurfaceMap</string>
     <string name="title_main">SurfaceView Map Performance Test</string>
-    
+
     <!-- Load section titles -->
     <string name="title_minimal_load">Minimal Load</string>
     <string name="title_in_frame_load">In-Frame Load Test</string>
@@ -10,7 +10,7 @@
     <string name="title_mixed_load">Mixed Load Test</string>
     <string name="title_long_frame_load">Long Frame Load Test</string>
     <string name="title_about">About</string>
-    
+
     <!-- Button labels -->
     <string name="btn_minimal_load">Minimal Load</string>
     <string name="btn_light_load">In-Frame Light Load</string>
@@ -23,10 +23,10 @@
     <string name="btn_medium_mixed">Mixed Medium Load</string>
     <string name="btn_heavy_mixed">Mixed Heavy Load</string>
     <string name="btn_long_frame">Long Frame Load (HEAVY×10)</string>
-    
+
     <!-- Description -->
     <string name="description">This app simulates a map-style interface using SurfaceView (similar to Amap/Gaode Maps). The main view is a scrollable grid rendered on SurfaceView, with native Android views for top navigation bar and bottom control panel.\n\nThis app provides 11 different load levels:\n• Minimal Load: No additional load\n• In-Frame Loads (3): Execute load during SurfaceView rendering\n• Between-Frame Loads (3): Execute load between frames\n• Mixed Loads (3): Combined in-frame and between-frame loads\n• Long Frame Load: Random 2-3 super heavy frames (10x HEAVY) per 2s</string>
-    
+
     <!-- Map UI -->
     <string name="search_hint">Search location...</string>
     <string name="current_location">Current Location</string>
@@ -34,7 +34,7 @@
     <string name="zoom_out">Zoom Out</string>
     <string name="navigate">Navigate</string>
     <string name="layers">Layers</string>
-    
+
     <!-- Copyright -->
     <string name="copyright">© 2025 SurfaceMap Performance Test App</string>
 </resources>

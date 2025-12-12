@@ -11,7 +11,7 @@ import android.util.Log;
  */
 public class HeavyMixedLoadGeckoViewActivity extends BaseGeckoViewSurfaceActivity {
     private static final String TAG = "HeavyMixedGecko";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isRunning = false;
 
@@ -28,13 +28,13 @@ public class HeavyMixedLoadGeckoViewActivity extends BaseGeckoViewSurfaceActivit
         Log.d(TAG, "混合高负载模式 - 等待滚动时启动");
         isRunning = true;
     }
-    
+
     @Override
     protected void handleFling(float velocityX, float velocityY) {
         super.handleFling(velocityX, velocityY);
         startBetweenFramesLoad();
     }
-    
+
     private void startBetweenFramesLoad() {
         handler.postDelayed(new Runnable() {
             @Override
@@ -49,7 +49,7 @@ public class HeavyMixedLoadGeckoViewActivity extends BaseGeckoViewSurfaceActivit
             }
         }, 16);
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         try { Thread.sleep(3); } catch (InterruptedException e) {}
@@ -61,19 +61,19 @@ public class HeavyMixedLoadGeckoViewActivity extends BaseGeckoViewSurfaceActivit
         }
         Log.d(TAG, "混合高负载计算完成");
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
         isRunning = false;
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
         isRunning = true;
     }
-    
+
     @Override
     protected void onDestroy() {
         isRunning = false;

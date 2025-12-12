@@ -29,26 +29,26 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private int mLoadType = LoadType.LONG_FRAME;
-    
+
     private Choreographer mChoreographer;
     private Handler mHandler;
     private LoadSimulator mLoadSimulator;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private long mScrollStartTime = 0;
     private int mTriggerCount = 0;
     private int mCurrentTriggerIndex = 0;
     private long[] mTriggerTimes;
     private long mLastTriggerTime = 0;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heavy_load);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -60,13 +60,13 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -83,7 +83,7 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     private void startNewScrollCycle() {
         mScrollStartTime = System.currentTimeMillis();
         mTriggerCount = LoadConfig.getLongFrameTriggerCount();
@@ -91,12 +91,12 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
         mCurrentTriggerIndex = 0;
         mLastTriggerTime = 0;
     }
-    
+
     private void resetScrollCycle() {
         mScrollStartTime = 0;
         mCurrentTriggerIndex = 0;
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
@@ -104,13 +104,13 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
             mChoreographer.postFrameCallback(this);
         }
     }
-    
+
     private void checkAndExecuteLongFrame() {
         if (mCurrentTriggerIndex >= mTriggerCount || mTriggerTimes == null) return;
-        
+
         long currentTime = System.currentTimeMillis();
         long elapsedTime = currentTime - mScrollStartTime;
-        
+
         if (elapsedTime >= mTriggerTimes[mCurrentTriggerIndex]) {
             if (currentTime - mLastTriggerTime >= LoadConfig.LONG_FRAME_MIN_INTERVAL_MS) {
                 Log.d(TAG, "触发超长帧 #" + (mCurrentTriggerIndex + 1) + "/" + mTriggerCount);
@@ -119,7 +119,7 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
                 mCurrentTriggerIndex++;
             }
         }
-        
+
         if (elapsedTime >= LoadConfig.LONG_FRAME_SCROLL_PERIOD_MS) {
             startNewScrollCycle();
         }
@@ -135,7 +135,7 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
         mIsEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

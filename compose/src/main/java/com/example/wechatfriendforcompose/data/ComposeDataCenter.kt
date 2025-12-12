@@ -6,13 +6,13 @@ import kotlin.random.Random
  * Compose版数据中心，生成固定的测试数据
  */
 object ComposeDataCenter {
-    
+
     private const val FRIEND_CIRCLE_COUNT = 100
-    
+
     private var cachedLightData: List<FriendCircleBean>? = null
     private var cachedMediumData: List<FriendCircleBean>? = null
     private var cachedHeavyData: List<FriendCircleBean>? = null
-    
+
     /**
      * 清除缓存数据
      */
@@ -21,7 +21,7 @@ object ComposeDataCenter {
         cachedMediumData = null
         cachedHeavyData = null
     }
-    
+
     /**
      * 获取朋友圈数据
      */
@@ -38,7 +38,7 @@ object ComposeDataCenter {
             }
         }
     }
-    
+
     /**
      * 生成朋友圈数据
      */
@@ -48,23 +48,23 @@ object ComposeDataCenter {
             BaseLoadType.MEDIUM -> 142L
             BaseLoadType.HEAVY -> 242L
         }
-        
+
         val random = Random(seed)
         val positionOffset = when (baseLoadType) {
             BaseLoadType.MINIMAL, BaseLoadType.LIGHT -> 0
             BaseLoadType.MEDIUM -> 100
             BaseLoadType.HEAVY -> 200
         }
-        
+
         return (0 until FRIEND_CIRCLE_COUNT).map { i ->
             val user = UserBean(
                 userId = (10000 + i).toString(),
                 userName = ComposeConstants.USER_NAMES[i % ComposeConstants.USER_NAMES.size],
                 avatarUrl = ComposeConstants.AVATAR_RES_NAMES[i % ComposeConstants.AVATAR_RES_NAMES.size]
             )
-            
+
             val content = ComposeConstants.CONTENTS[i % ComposeConstants.CONTENTS.size]
-            
+
             // 图片列表（奇数位置有图片）
             val images = if (i % 2 != 0) {
                 val count = (i % 9) + 1
@@ -74,20 +74,20 @@ object ComposeDataCenter {
             } else {
                 emptyList()
             }
-            
+
             // 生成点赞
             val praises = generatePraises(i + positionOffset, baseLoadType, random)
-            
+
             // 生成评论
             val comments = generateComments(i + positionOffset, baseLoadType, random)
-            
+
             // 其他信息
             val otherInfo = OtherInfoBean(
                 time = ComposeConstants.TIMES[i % ComposeConstants.TIMES.size],
                 source = if (i % 4 == 0) ComposeConstants.SOURCES[i % ComposeConstants.SOURCES.size] else null,
                 location = if (i % 3 == 0) ComposeConstants.LOCATIONS[i % ComposeConstants.LOCATIONS.size] else null
             )
-            
+
             FriendCircleBean(
                 id = i,
                 user = user,
@@ -99,7 +99,7 @@ object ComposeDataCenter {
             )
         }
     }
-    
+
     /**
      * 生成点赞数据
      */
@@ -109,7 +109,7 @@ object ComposeDataCenter {
             BaseLoadType.MEDIUM -> position % 8 + 5
             BaseLoadType.HEAVY -> position % 11 + 10
         }
-        
+
         return (0 until count).map { i ->
             val nameIndex = (position + i) % ComposeConstants.USER_NAMES.size
             PraiseBean(
@@ -121,7 +121,7 @@ object ComposeDataCenter {
             )
         }
     }
-    
+
     /**
      * 生成评论数据
      */
@@ -131,16 +131,16 @@ object ComposeDataCenter {
             BaseLoadType.MEDIUM -> position % 8 + 8
             BaseLoadType.HEAVY -> position % 15 + 15
         }
-        
+
         val commentRandom = Random(position * 100L + baseLoadType.ordinal * 10)
-        
+
         return (0 until count).map { i ->
             val childUser = UserBean(
                 userId = (20000 + i + position * 100).toString(),
                 userName = ComposeConstants.USER_NAMES[(position + i + 20) % ComposeConstants.USER_NAMES.size],
                 avatarUrl = ComposeConstants.AVATAR_RES_NAMES[i % ComposeConstants.AVATAR_RES_NAMES.size]
             )
-            
+
             val isReply = commentRandom.nextInt(10) < 3 && i > 0
             val parentUser = if (isReply) {
                 val replyToIndex = commentRandom.nextInt(i)
@@ -150,7 +150,7 @@ object ComposeDataCenter {
                     avatarUrl = ComposeConstants.AVATAR_RES_NAMES[replyToIndex % ComposeConstants.AVATAR_RES_NAMES.size]
                 )
             } else null
-            
+
             CommentBean(
                 childUser = childUser,
                 parentUser = parentUser,

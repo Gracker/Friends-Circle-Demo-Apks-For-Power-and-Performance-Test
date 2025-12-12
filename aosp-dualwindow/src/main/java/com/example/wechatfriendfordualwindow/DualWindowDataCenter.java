@@ -28,27 +28,27 @@ public class DualWindowDataCenter {
     private List<FriendCircleBean> cachedLightLoadFriendCircleBeans;
     private List<FriendCircleBean> cachedMediumLoadFriendCircleBeans;
     private List<FriendCircleBean> cachedHeavyLoadFriendCircleBeans;
-    
+
     // Fixed avatar resource name array
     private static final String[] AVATAR_RES_NAMES = {
             "avatar1", "avatar2", "avatar3", "avatar4", "avatar5",
             "avatar6", "avatar7", "avatar8", "avatar9", "avatar10",
             "avatar11"
     };
-    
+
     // 使用一个固定种子的随机数生成器，确保生成的数据是可重现的
     private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
-    
+
     private Context mContext;
-    
+
     private DualWindowDataCenter() {
         // Initialization operations, if needed
     }
-    
+
     public static DualWindowDataCenter getInstance() {
         return instance;
     }
-    
+
     /**
      * 设置Context，用于生成富文本
      * @param context 上下文
@@ -56,7 +56,7 @@ public class DualWindowDataCenter {
     public void setContext(Context context) {
         this.mContext = context;
     }
-    
+
     /**
      * 清除缓存的数据，确保下次获取数据时重新生成
      */
@@ -65,7 +65,7 @@ public class DualWindowDataCenter {
         cachedMediumLoadFriendCircleBeans = null;
         cachedHeavyLoadFriendCircleBeans = null;
     }
-    
+
     public List<FriendCircleBean> getFriendCircleBeans() {
         return getFriendCircleBeans(com.example.loadconfig.LoadType.LIGHT);
     }
@@ -94,84 +94,84 @@ public class DualWindowDataCenter {
                 return cachedLightLoadFriendCircleBeans;
         }
     }
-    
+
     /**
      * 生成朋友圈数据
      */
     private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
         List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
-        
+
         // 使用 LoadConfig 统一管理的数据生成种子
         long randomSeed = LoadConfig.getDataGenerationSeed(loadType);
         mRandom = new Random(randomSeed);
-        
+
         // 确保生成固定数量的朋友圈数据
         for (int i = 0; i < FRIEND_CIRCLE_COUNT; i++) {
             FriendCircleBean friendCircleBean = new FriendCircleBean();
-            
+
             // User information
             UserBean userBean = new UserBean();
             userBean.setUserName(randomUserNickname(i));
             userBean.setUserId(String.valueOf(10000 + i));
-            
+
             // 获取头像资源ID
             String avatarResName = AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length];
             userBean.setUserAvatarUrl(avatarResName);
-            
+
             friendCircleBean.setUserBean(userBean);
-            
+
             // Content and other info
             String content = getRandomContent(i);
             friendCircleBean.setContent(content);
-            
+
             // Set publish time
             OtherInfoBean otherInfoBean = new OtherInfoBean();
             otherInfoBean.setTime(getRandomPublishTime(i));
-            
+
             // Set post source if position is appropriate
             if (i % 4 == 0) {
                 otherInfoBean.setSource(getRandomSource(i));
             }
-            
+
             // Set location if position is appropriate
             if (i % 3 == 0) {
                 otherInfoBean.setLocation(getRandomLocation(i));
             }
-            
+
             friendCircleBean.setOtherInfoBean(otherInfoBean);
-            
+
             // Add images if position is appropriate
             if (i % 2 != 0) {
                 List<String> imageUrls = new ArrayList<>();
                 generateImageUrls(imageUrls, i);
                 friendCircleBean.setImageUrls(imageUrls);
             }
-            
+
             // 使用 LoadConfig 统一管理的位置偏移量
             int positionOffset = LoadConfig.getPositionOffset(loadType);
-            
+
             // Generate praises for this item
             List<PraiseBean> praiseBeans = generatePraiseBeans(i + positionOffset, loadType);
             friendCircleBean.setPraiseBeans(praiseBeans);
-            
+
             // Generate comments for this item
             List<CommentBean> commentBeans = generateCommentBeans(i + positionOffset, loadType);
             friendCircleBean.setCommentBeans(commentBeans);
-            
+
             // Add to list
             friendCircleBeans.add(friendCircleBean);
         }
-        
+
         return friendCircleBeans;
     }
-    
+
     private void generateImageUrls(List<String> imageUrls, int position) {
         if (imageUrls == null) {
             return;
         }
-        
+
         int count = Math.min(9, (position % 9) + 1);
-        
+
         for (int i = 0; i < count; i++) {
             // Position based deterministic image url
             int imageNumber = (position + i) % 20 + 1;
@@ -179,14 +179,14 @@ public class DualWindowDataCenter {
             imageUrls.add(imageName);
         }
     }
-    
+
     /**
      * 根据负载类型生成评论数据
      */
     private List<CommentBean> generateCommentBeans(int position, int loadType) {
         // 根据不同的负载类型，生成不同数量的评论
         int commentCount = 0;
-        
+
         switch (loadType) {
             case com.example.loadconfig.LoadType.LIGHT:
                 // 轻负载: 0-2条评论
@@ -205,30 +205,30 @@ public class DualWindowDataCenter {
                 commentCount = position % 3;
                 break;
         }
-        
+
         List<CommentBean> commentBeans = new ArrayList<>();
-        
+
         if (commentCount <= 0) {
             return commentBeans;
         }
-        
+
         // 确保随机数生成的可重现性
         Random random = new Random(position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER 
                 + loadType * LoadConfig.COMMENT_SEED_LOADTYPE_MULTIPLIER);
-        
+
         for (int i = 0; i < commentCount; i++) {
             CommentBean commentBean = new CommentBean(mContext);
-            
+
             // 评论发起人
             UserBean childUserBean = new UserBean();
             childUserBean.setUserId(String.valueOf(LoadConfig.COMMENT_USER_ID_BASE + i + position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER));
             childUserBean.setUserName(randomCommentUserName(i, position));
             childUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
             commentBean.setChildUserBean(childUserBean);
-            
+
             // 是否是回复别人的评论
             boolean isReply = random.nextInt(10) < 3; // 30%的概率是回复他人
-            
+
             if (isReply && i > 0) {
                 // 被回复的用户
                 UserBean parentUserBean = new UserBean();
@@ -238,32 +238,32 @@ public class DualWindowDataCenter {
                 parentUserBean.setUserAvatarUrl(AVATAR_RES_NAMES[replyToIndex % AVATAR_RES_NAMES.length]);
                 commentBean.setParentUserBean(parentUserBean);
             }
-            
+
             // 评论内容
             String commentContent = DualWindowConstants.COMMENT_CONTENTS[
                     (position + i) % DualWindowConstants.COMMENT_CONTENTS.length];
             commentBean.setContent(commentContent);
-            
+
             // 构建评论文本
             if (mContext != null) {
                 commentBean.build(mContext);
             } else {
                 commentBean.build(); // 兼容没有Context的情况
             }
-            
+
             commentBeans.add(commentBean);
         }
-        
+
         return commentBeans;
     }
-    
+
     /**
      * 根据负载类型生成点赞数据
      */
     private List<PraiseBean> generatePraiseBeans(int position, int loadType) {
         // 根据不同的负载类型，生成不同数量的点赞
         int praiseCount = 0;
-        
+
         switch (loadType) {
             case com.example.loadconfig.LoadType.LIGHT:
                 // 轻负载: 0-5个点赞
@@ -282,23 +282,23 @@ public class DualWindowDataCenter {
                 praiseCount = position % 6;
                 break;
         }
-        
+
         List<PraiseBean> praiseBeans = new ArrayList<>();
-        
+
         if (praiseCount <= 0) {
             return praiseBeans;
         }
-        
+
         // 确保随机数生成的可重现性
         Random random = new Random(position * LoadConfig.PRAISE_SEED_POSITION_MULTIPLIER 
                 + loadType * LoadConfig.PRAISE_SEED_LOADTYPE_MULTIPLIER);
-        
+
         for (int i = 0; i < praiseCount; i++) {
             PraiseBean praiseBean = new PraiseBean();
-            
+
             UserBean userBean = new UserBean();
             userBean.setUserId(String.valueOf(LoadConfig.PRAISE_USER_ID_BASE + i + position * LoadConfig.COMMENT_SEED_POSITION_MULTIPLIER));
-            
+
             // 使用随机数确定用户名，但保持一致性
             int nameIndex = (position + i) % USER_NAMES.length;
             if (random.nextBoolean()) {
@@ -306,16 +306,16 @@ public class DualWindowDataCenter {
                 nameIndex = random.nextInt(USER_NAMES.length);
             }
             userBean.setUserName(USER_NAMES[nameIndex]);
-            
+
             userBean.setUserAvatarUrl(AVATAR_RES_NAMES[i % AVATAR_RES_NAMES.length]);
-            
+
             praiseBean.setUserBean(userBean);
             praiseBeans.add(praiseBean);
         }
-        
+
         return praiseBeans;
     }
-    
+
     /**
      * 直接生成指定负载类型的数据，不使用缓存
      */
@@ -323,7 +323,7 @@ public class DualWindowDataCenter {
         // 生成数据并返回
         return generateFriendCircleBeans(loadType);
     }
-    
+
     /**
      * 直接生成指定负载类型的数据，不使用缓存，并传入Context
      */
@@ -331,14 +331,14 @@ public class DualWindowDataCenter {
         setContext(context);
         return generateDataForLoadType(loadType);
     }
-    
+
     /**
      * 生成随机用户昵称
      */
     private String randomUserNickname(int position) {
         return USER_NAMES[position % USER_NAMES.length];
     }
-    
+
     /**
      * 生成随机评论用户名，确保每次生成的结果一致
      */
@@ -346,28 +346,28 @@ public class DualWindowDataCenter {
         // 使用固定的公式生成名称索引，确保结果可重现
         return USER_NAMES[(position + index + 20) % USER_NAMES.length];
     }
-    
+
     /**
      * 获取随机内容
      */
     private String getRandomContent(int position) {
         return CONTENTS[position % CONTENTS.length];
     }
-    
+
     /**
      * 获取随机发布时间
      */
     private String getRandomPublishTime(int position) {
         return TIMES[position % TIMES.length];
     }
-    
+
     /**
      * 获取随机来源
      */
     private String getRandomSource(int position) {
         return SOURCES[position % SOURCES.length];
     }
-    
+
     /**
      * 获取随机位置
      */

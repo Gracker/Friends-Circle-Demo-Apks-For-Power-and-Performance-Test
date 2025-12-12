@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">HWUI-Picasso</string>
     <string name="title_main">Friends Circle Scroll Performance Test (Picasso)</string>
-    
+
     <!-- Load section titles -->
     <string name="title_minimal_load">Minimal Load</string>
     <string name="title_in_frame_load">In-Frame Load Test</string>
@@ -10,7 +10,7 @@
     <string name="title_mixed_load">Mixed Load Test</string>
     <string name="title_select_load">Select Load Level:</string>
     <string name="title_about">About</string>
-    
+
     <!-- Button labels -->
     <string name="btn_minimal_load">Minimal Load</string>
     <string name="btn_light_load">In-Frame Light Load</string>
@@ -22,10 +22,10 @@
     <string name="btn_light_mixed">Mixed Light Load</string>
     <string name="btn_medium_mixed">Mixed Medium Load</string>
     <string name="btn_heavy_mixed">Mixed Heavy Load</string>
-    
+
     <!-- Description -->
     <string name="description">This app simulates WeChat Moments scrolling to test scroll performance under different computational loads.\n\nThis version uses Picasso for image loading instead of Glide.\n\nThis app provides 10 different load levels:\n• Minimal Load: No additional load\n• In-Frame Loads (3): Execute load during frame rendering\n• Between-Frame Loads (3): Execute load between frames\n• Mixed Loads (3): Execute both in-frame and between-frame loads\n\nBy comparing performance across different modes, developers can identify and resolve performance bottlenecks.</string>
-    
+
     <!-- Status messages -->
     <string name="performance_test">Performance Test</string>
     <string name="performance_test_loading">Loading Performance Test Data...</string>
@@ -33,7 +33,7 @@
     <string name="light_load_test">Light Load Test</string>
     <string name="medium_load_test">Medium Load Test</string>
     <string name="heavy_load_test">Heavy Load Test</string>
-    
+
     <!-- Copyright -->
     <string name="copyright">© 2025 Friends Circle Performance Test App (Picasso)</string>
 </resources>

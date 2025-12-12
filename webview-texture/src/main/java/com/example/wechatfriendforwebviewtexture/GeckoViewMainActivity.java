@@ -33,10 +33,10 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
     private Button btnLightMixed;
     private Button btnMediumMixed;
     private Button btnHeavyMixed;
-    
+
     // 定义常量，用于Intent传递负载类型
     public static final String EXTRA_LOAD_TYPE = "load_type";
-    
+
     // 负载类型使用统一的 LoadType 常量，不再本地定义
 
     @Override
@@ -44,18 +44,18 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
         Trace.beginSection("GeckoViewMainActivity_onCreate");
         super.onCreate(savedInstanceState);
         setTheme(R.style.Theme_HighPerformanceFriendsCircle_NoActionBar);
-        
+
         setContentView(R.layout.activity_geckoview_main);
         setupAppInfo();
-        
+
         Log.d(TAG, "初始化GeckoView SurfaceTexture版朋友圈测试主界面");
-        
+
         // 初始化按钮
         initViews();
-        
+
         // 设置点击监听器
         setClickListeners();
-        
+
         Trace.endSection();
     }
 
@@ -74,13 +74,13 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
             tvPackageName.setText(getPackageName());
         }
     }
-    
+
     /**
      * 初始化界面控件
      */
     private void initViews() {
         Trace.beginSection("GeckoViewMainActivity_initViews");
-        
+
         btnMinimalLoad = findViewById(R.id.btn_minimal_load);
         btnLightLoad = findViewById(R.id.btn_light_load);
         btnMediumLoad = findViewById(R.id.btn_medium_load);
@@ -91,16 +91,16 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
         btnLightMixed = findViewById(R.id.btn_light_mixed);
         btnMediumMixed = findViewById(R.id.btn_medium_mixed);
         btnHeavyMixed = findViewById(R.id.btn_heavy_mixed);
-        
+
         Trace.endSection();
     }
-    
+
     /**
      * 设置点击监听器
      */
     private void setClickListeners() {
         Trace.beginSection("GeckoViewMainActivity_setClickListeners");
-        
+
         btnMinimalLoad.setOnClickListener(this);
         btnLightLoad.setOnClickListener(this);
         btnMediumLoad.setOnClickListener(this);
@@ -111,7 +111,7 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
         btnLightMixed.setOnClickListener(this);
         btnMediumMixed.setOnClickListener(this);
         btnHeavyMixed.setOnClickListener(this);
-        
+
         Trace.endSection();
     }
 
@@ -119,25 +119,25 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
     protected void onResume() {
         Trace.beginSection("GeckoViewMainActivity_onResume");
         super.onResume();
-        
+
         // 确保数据中心的缓存被清空
         GeckoViewDataCenter.getInstance().clearCachedData();
         Log.d(TAG, "数据缓存已清除");
-        
+
         Trace.endSection();
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        
+
         // 先清除所有缓存的数据，确保每次都重新生成
         GeckoViewDataCenter.getInstance().clearCachedData();
-        
+
         Intent intent = null;
         int loadType = com.example.loadconfig.LoadType.LIGHT;
         String loadName = "";
-        
+
         if (id == R.id.btn_minimal_load) {
             intent = new Intent(this, MinimalLoadGeckoViewActivity.class);
             loadType = com.example.loadconfig.LoadType.MINIMAL;
@@ -179,7 +179,7 @@ public class GeckoViewMainActivity extends Activity implements View.OnClickListe
             loadType = com.example.loadconfig.LoadType.HEAVY_MIXED;
             loadName = "混合高负载";
         }
-        
+
         if (intent != null) {
             Trace.beginSection("GeckoViewMainActivity_start" + loadName);
             Log.d(TAG, "启动" + loadName + "GeckoView SurfaceTexture版朋友圈");

@@ -16,14 +16,14 @@ import com.example.wechatfriendforcompose.ui.theme.ComposeTheme
  * Compose版朋友圈性能测试主Activity
  */
 class MainActivity : ComponentActivity() {
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // 检查是否通过Intent直接启动特定负载
         val activityType = intent?.getStringExtra("activity_type")
-        
+
         setContent {
             ComposeTheme {
                 Surface(

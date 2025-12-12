@@ -26,7 +26,7 @@ public class DataCenter {
 
     // 使用固定种子的Random实例，确保每次生成的数据一致
     private static final Random sRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
-    
+
     // 获取0到max-1之间的随机整数
     private static int getRandomInt(int max) {
         return sRandom.nextInt(max);

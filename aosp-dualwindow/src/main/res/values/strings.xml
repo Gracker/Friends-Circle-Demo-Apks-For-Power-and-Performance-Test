@@ -21,7 +21,7 @@
     <string name="btn_long_frame">Long Frame Load (HEAVY×10)</string>
     <string name="description">This app demonstrates dual-window rendering where two windows render simultaneously.\n\nIn systrace you will see:\n• 2 doFrame callbacks per vsync\n• 2 RenderThread drawFrame per vsync\n\nWindow 1: Main scrollable friend circle list (same as aosp-performance)\nWindow 2: Overlay with continuous animation\n\nSupports 11 load types including Long Frame Load for performance testing.</string>
     <string name="copyright">© 2025 DualWindow Performance Test App</string>
-    
+
     <!-- Performance test strings -->
     <string name="performance_test">Performance Test</string>
     <string name="performance_test_loading">Loading Friend Circle Data...</string>

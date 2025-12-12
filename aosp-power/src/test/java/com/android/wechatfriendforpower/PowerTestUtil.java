@@ -71,7 +71,7 @@ public class PowerTestUtil {
             childUser.setUserName("评论用户" + i);
             childUser.setUserAvatarUrl("avatar" + (i % 10 + 1));
             commentBean.setChildUserBean(childUser);
-            
+
             // 如果是回复，设置被回复人信息
             if (i % 2 == 1) {
                 UserBean parentUser = new UserBean();
@@ -80,7 +80,7 @@ public class PowerTestUtil {
                 parentUser.setUserAvatarUrl("avatar" + ((i - 1) % 10 + 1));
                 commentBean.setParentUserBean(parentUser);
             }
-            
+
             commentBean.setContent("这是第" + i + "条测试评论");
             commentBeans.add(commentBean);
         }
@@ -122,7 +122,7 @@ public class PowerTestUtil {
         friendCircleBean.setOtherInfoBean(createTestOtherInfoBean());
         return friendCircleBean;
     }
-    
+
     /**
      * 创建多个测试用FriendCircleBean列表
      */

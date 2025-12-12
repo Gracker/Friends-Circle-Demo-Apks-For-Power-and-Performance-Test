@@ -11,7 +11,7 @@ import android.util.Log;
  */
 public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivity {
     private static final String TAG = "LightMixedGecko";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isRunning = false;
 
@@ -28,13 +28,13 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
         Log.d(TAG, "混合轻负载模式 - 等待滚动时启动");
         isRunning = true;
     }
-    
+
     @Override
     protected void handleFling(float velocityX, float velocityY) {
         super.handleFling(velocityX, velocityY);
         startBetweenFramesLoad();
     }
-    
+
     private void startBetweenFramesLoad() {
         handler.postDelayed(new Runnable() {
             @Override
@@ -49,7 +49,7 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
             }
         }, 16);
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         try { Thread.sleep(1); } catch (InterruptedException e) {}
@@ -58,19 +58,19 @@ public class LightMixedLoadGeckoViewActivity extends BaseGeckoViewTextureActivit
             result += Math.sqrt(i) * Math.cos(i);
         }
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
         isRunning = false;
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
         isRunning = true;
     }
-    
+
     @Override
     protected void onDestroy() {
         isRunning = false;

@@ -29,22 +29,22 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
     private RecyclerView recyclerView;
     private SoftwareRenderFriendCircleAdapter adapter;
     private int mLoadType = LoadType.HEAVY_MIXED;
-    
+
     private Choreographer mChoreographer;
     private Handler mHandler;
-    
+
     private LoadSimulator mLoadSimulator;
-    
+
     private boolean mIsTaskSchedulingEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heavy_mixed_load);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -56,14 +56,14 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        
+
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -79,7 +79,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
@@ -101,7 +101,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         mIsTaskSchedulingEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

@@ -31,19 +31,19 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     private PerformanceFriendCircleAdapter adapter;
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = LoadType.HEAVY;
-    
+
     private Choreographer mChoreographer;
     private LoadSimulator mLoadSimulator;
     private boolean mIsEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heavy_load);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -57,12 +57,12 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
         mChoreographer = Choreographer.getInstance();
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -77,7 +77,7 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsEnabled && mIsScrolling) {
@@ -97,7 +97,7 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
         mIsEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

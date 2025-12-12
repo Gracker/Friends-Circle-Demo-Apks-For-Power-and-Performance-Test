@@ -4,7 +4,7 @@ package com.example.wechatfriendforcompose.data
  * Compose版性能测试常量
  */
 object ComposeConstants {
-    
+
     /**
      * 头像资源名列表
      */
@@ -13,7 +13,7 @@ object ComposeConstants {
         "avatar6", "avatar7", "avatar8", "avatar9", "avatar10",
         "avatar11"
     )
-    
+
     /**
      * 用户名列表
      */
@@ -39,7 +39,7 @@ object ComposeConstants {
         "Forever¥永恒", "Gardenia栀子", "Harmony和谐", "Illusion幻象", "Journey旅程",
         "Kindness善良", "Liberty自由", "Memories记忆", "Nebula星云", "Observe观察"
     )
-    
+
     /**
      * 位置列表
      */
@@ -49,7 +49,7 @@ object ComposeConstants {
         "天津-小白楼", "长沙-橘子洲", "沈阳-太原街", "青岛-栈桥", "济南-泉城广场",
         "郑州-二七广场", "苏州-金鸡湖", "厦门-鼓浪屿", "大连-星海广场", "福州-三坊七巷"
     )
-    
+
     /**
      * 时间列表
      */
@@ -58,7 +58,7 @@ object ComposeConstants {
         "2小时前", "昨天", "前天", "3天前", "一周前",
         "15分钟前", "45分钟前", "3小时前", "4小时前", "5小时前"
     )
-    
+
     /**
      * 来源列表
      */
@@ -66,7 +66,7 @@ object ComposeConstants {
         "微信", "来自iPhone 14 Pro", "来自小米13", "来自HUAWEI P60", "来自OPPO Find X6",
         "来自vivo X100", "来自Android", "朋友圈", "手机发布", "平板发布"
     )
-    
+
     /**
      * 内容列表
      */
@@ -84,7 +84,7 @@ object ComposeConstants {
         "最近开始学习瑜伽，虽然一开始很不适应，但坚持一个月后明显感觉身体更灵活了。#健康生活#",
         "今天带孩子去动物园，看到他对各种动物充满好奇，眼睛里闪烁着兴奋的光芒。#亲子时光#"
     )
-    
+
     /**
      * 评论列表
      */

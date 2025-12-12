@@ -8,7 +8,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SurfaceMap">
-        
+
         <activity
             android:name=".SurfaceMapMainActivity"
             android:exported="true">
@@ -17,13 +17,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <!-- Minimal Load -->
         <activity
             android:name=".MinimalLoadMapActivity"
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
-            
+
         <!-- In-Frame Loads -->
         <activity
             android:name=".LightLoadMapActivity"
@@ -37,7 +37,7 @@
             android:name=".HeavyLoadMapActivity"
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
-            
+
         <!-- Between-Frame Loads -->
         <activity
             android:name=".LightBetweenFramesMapActivity"
@@ -51,7 +51,7 @@
             android:name=".HeavyBetweenFramesMapActivity"
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
-            
+
         <!-- Mixed Loads -->
         <activity
             android:name=".LightMixedMapActivity"
@@ -65,13 +65,13 @@
             android:name=".HeavyMixedMapActivity"
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
-            
+
         <!-- Long Frame Load -->
         <activity
             android:name=".LongFrameMapActivity"
             android:exported="true"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
-            
+
     </application>
 
 </manifest>

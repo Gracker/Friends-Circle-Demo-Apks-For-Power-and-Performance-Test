@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HighPerformanceFriendsCircle">
-        
+
         <!-- 主Activity，用于选择不同负载级别 -->
         <activity
             android:name=".VideoMainActivity"
@@ -19,62 +19,62 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
+
         <!-- 最轻负载Activity -->
         <activity
             android:name=".MinimalLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        
+
         <!-- 轻负载Activity（帧内）-->
         <activity
             android:name=".LightLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 中等负载Activity（帧内）-->
         <activity
             android:name=".MediumLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 高负载Activity（帧内）-->
         <activity
             android:name=".HeavyLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        
+
         <!-- 帧间轻负载Activity -->
         <activity
             android:name=".LightLoadBetweenFramesActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 帧间中等负载Activity -->
         <activity
             android:name=".MediumLoadBetweenFramesActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 帧间高负载Activity -->
         <activity
             android:name=".HeavyLoadBetweenFramesActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        
+
         <!-- 轻混合负载Activity -->
         <activity
             android:name=".LightMixedLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 中混合负载Activity -->
         <activity
             android:name=".MediumMixedLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
         <!-- 高混合负载Activity -->
         <activity
             android:name=".HeavyMixedLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        
+
         <!-- 超长帧负载Activity -->
         <activity
             android:name=".LongFrameLoadActivity"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-            
+
     </application>
 
 </manifest>

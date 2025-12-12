@@ -11,7 +11,7 @@ import android.util.Log;
  */
 public class MediumLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewTextureActivity {
     private static final String TAG = "MediumBetweenFramesGecko";
-    
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isRunning = false;
 
@@ -28,13 +28,13 @@ public class MediumLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewTextu
         Log.d(TAG, "帧间中负载模式 - 等待滚动时启动");
         isRunning = true;
     }
-    
+
     @Override
     protected void handleFling(float velocityX, float velocityY) {
         super.handleFling(velocityX, velocityY);
         startBetweenFramesLoad();
     }
-    
+
     private void startBetweenFramesLoad() {
         handler.postDelayed(new Runnable() {
             @Override
@@ -49,24 +49,24 @@ public class MediumLoadBetweenFramesGeckoViewActivity extends BaseGeckoViewTextu
             }
         }, 16);
     }
-    
+
     @Override
     protected void executeFlingLoad() {
         try { Thread.sleep(2); } catch (InterruptedException e) {}
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
         isRunning = false;
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
         isRunning = true;
     }
-    
+
     @Override
     protected void onDestroy() {
         isRunning = false;

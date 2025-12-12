@@ -34,24 +34,24 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private VideoFriendCircleAdapter adapter;
     private int mLoadType = LoadType.LIGHT_BETWEEN_FRAMES;
-    
+
     private Choreographer mChoreographer;
     private Handler mHandler;
     private Random mTaskDecisionRandom = new Random(LoadConfig.COMPUTATION_SEED);
     private float mTaskExecutionProbability = LoadConfig.LIGHT_TASK_PROBABILITY;
-    
+
     private LoadSimulator mLoadSimulator;
-    
+
     private boolean mIsBetweenFrameLoadEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_light_load_between_frames);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -63,15 +63,15 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
-        
+
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        
+
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -86,7 +86,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsBetweenFrameLoadEnabled && mIsScrolling) {
@@ -111,7 +111,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         mIsBetweenFrameLoadEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

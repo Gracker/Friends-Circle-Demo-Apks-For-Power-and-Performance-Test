@@ -35,7 +35,7 @@ public class Constants {
             "local8",
             "local9",
             "local10",
-            
+
             "local11",
             "local1",
             "local2",
@@ -46,7 +46,7 @@ public class Constants {
             "local7",
             "local8",
             "local9",
-            
+
             "local10",
             "local11",
             "local1",
@@ -57,7 +57,7 @@ public class Constants {
             "local6",
             "local7",
             "local8",
-            
+
             "local9",
             "local10",
             "local11",
@@ -68,7 +68,7 @@ public class Constants {
             "local5",
             "local6",
             "local7",
-            
+
             "local8",
             "local9",
             "local10",

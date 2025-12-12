@@ -28,27 +28,27 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     private RecyclerView recyclerView;
     private PerformanceFriendCircleAdapter adapter;
     private int mLoadType = LoadType.HEAVY_BETWEEN_FRAMES;
-    
+
     private Choreographer mChoreographer;
     private Handler mHandler;
-    
+
     private LoadSimulator mLoadSimulator;
-    
+
     private boolean mIsBetweenFrameLoadEnabled = true;
     private boolean mIsScrolling = false;
-    
+
     // 帧间隔配置：使用统一配置（重 2-4 帧）
     private Random mFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
     private int mFrameCount = 0;
     private int mNextTriggerFrame = 0;
-    
+
     private RecyclerView.OnScrollListener mScrollListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heavy_load_between_frames);
-        
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
@@ -60,15 +60,15 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
 
         recyclerView = findViewById(R.id.recycler_view);
         initRecyclerView();
-        
+
         mLoadSimulator = new LoadSimulator();
-        
+
         mChoreographer = Choreographer.getInstance();
         mHandler = new Handler(Looper.getMainLooper());
-        
+
         initScrollListener();
     }
-    
+
     private void initScrollListener() {
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
@@ -85,14 +85,14 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         };
         recyclerView.addOnScrollListener(mScrollListener);
     }
-    
+
     /** 获取下一次触发的帧间隔（伪随机，固定种子可重现） */
     private int getNextFrameInterval() {
         int min = LoadConfig.getBetweenFrameMinInterval(mLoadType);
         int max = LoadConfig.getBetweenFrameMaxInterval(mLoadType);
         return min + mFrameIntervalRandom.nextInt(max - min + 1);
     }
-    
+
     @Override
     public void doFrame(long frameTimeNanos) {
         if (mIsBetweenFrameLoadEnabled && mIsScrolling) {
@@ -116,7 +116,7 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         mIsBetweenFrameLoadEnabled = true;
         mIsScrolling = false;
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();

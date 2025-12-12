@@ -38,68 +38,68 @@ import org.mozilla.geckoview.GeckoSessionSettings;
  */
 public abstract class BaseGeckoViewImageReaderActivity extends Activity {
     private static final String TAG = "GeckoViewImageReader";
-    
+
     protected GeckoRuntime geckoRuntime;
     protected GeckoSession geckoSession;
     protected GeckoDisplay geckoDisplay;
-    
+
     protected TextureView textureView;
     protected ProgressBar progressBar;
     protected int loadType;
-    
+
     protected GestureDetector gestureDetector;
-    
+
     protected boolean isFling = false;
     protected int flingFrameCount = 0;
     protected final int MAX_FLING_FRAMES = 200;
-    
+
     private Surface surface;
-    
+
     // 用于模拟 ImageReader 开销的计数器
     private int frameCount = 0;
-    
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("BaseGeckoViewImageReader_onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geckoview_imagereader);
-        
+
         loadType = getIntent().getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
-        
+
         initViews();
         initGeckoRuntime();
         setupTextureView();
         initGestureDetector();
-        
+
         Trace.endSection();
     }
-    
+
     private void initViews() {
         textureView = findViewById(R.id.texture_view);
         progressBar = findViewById(R.id.progress_bar);
     }
-    
+
     private void initGeckoRuntime() {
         geckoRuntime = GeckoViewApplication.getGeckoRuntime((GeckoViewApplication) getApplication());
         Log.d(TAG, "GeckoRuntime 已获取");
     }
-    
+
     private void setupTextureView() {
         Trace.beginSection("BaseGeckoViewImageReader_setupTextureView");
-        
+
         GeckoSessionSettings.Builder settingsBuilder = new GeckoSessionSettings.Builder();
         settingsBuilder.usePrivateMode(false);
         settingsBuilder.userAgentMode(GeckoSessionSettings.USER_AGENT_MODE_MOBILE);
-        
+
         geckoSession = new GeckoSession(settingsBuilder.build());
-        
+
         geckoSession.setProgressDelegate(new GeckoSession.ProgressDelegate() {
             @Override
             public void onPageStart(@NonNull GeckoSession session, @NonNull String url) {
                 runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
             }
-            
+
             @Override
             public void onPageStop(@NonNull GeckoSession session, boolean success) {
                 runOnUiThread(() -> {
@@ -107,30 +107,30 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                     loadFriendCircleData();
                 });
             }
-            
+
             @Override
             public void onProgressChange(@NonNull GeckoSession session, int progress) {
                 runOnUiThread(() -> progressBar.setProgress(progress));
             }
         });
-        
+
         geckoSession.setContentDelegate(new GeckoSession.ContentDelegate() {
             @Override
             public void onTitleChange(@NonNull GeckoSession session, @Nullable String title) {
                 Log.d(TAG, "标题变更: " + title);
             }
         });
-        
+
         geckoSession.open(geckoRuntime);
         geckoDisplay = geckoSession.acquireDisplay();
-        
+
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
                 Log.d(TAG, "SurfaceTexture 可用: " + width + "x" + height);
-                
+
                 surface = new Surface(surfaceTexture);
-                
+
                 if (geckoDisplay != null) {
                     geckoDisplay.surfaceChanged(
                         new GeckoDisplay.SurfaceInfo.Builder(surface)
@@ -140,7 +140,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                     loadFriendCircleHtml();
                 }
             }
-            
+
             @Override
             public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture, int width, int height) {
                 if (geckoDisplay != null && surface != null) {
@@ -151,7 +151,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                     );
                 }
             }
-            
+
             @Override
             public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
                 if (geckoDisplay != null) {
@@ -163,7 +163,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                 }
                 return true;
             }
-            
+
             @Override
             public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
                 // 模拟 ImageReader 的开销：每帧获取 Bitmap
@@ -171,11 +171,11 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                 simulateImageReaderOverhead();
             }
         });
-        
+
         setupTouchListener();
         Trace.endSection();
     }
-    
+
     /**
      * 模拟 ImageReader 的额外开销
      * 通过 getBitmap() 获取当前帧的位图数据
@@ -183,7 +183,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
      */
     private void simulateImageReaderOverhead() {
         frameCount++;
-        
+
         // 每帧都模拟 ImageReader 的 acquireLatestImage 操作
         Trace.beginSection("ImageReader_acquireLatestImage_simulation");
         try {
@@ -194,12 +194,12 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                 // 这里不需要实际显示，只是产生开销
                 int width = bitmap.getWidth();
                 int height = bitmap.getHeight();
-                
+
                 // 每 100 帧记录一次日志
                 if (frameCount % 100 == 0) {
                     Log.d(TAG, "ImageReader 模拟: 已处理 " + frameCount + " 帧, 尺寸: " + width + "x" + height);
                 }
-                
+
                 // 回收 Bitmap 释放内存
                 bitmap.recycle();
             }
@@ -209,14 +209,14 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             Trace.endSection();
         }
     }
-    
+
     private void initGestureDetector() {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
                 return true;
             }
-            
+
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 isFling = true;
@@ -224,7 +224,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                 handleFling(velocityX, velocityY);
                 return true;
             }
-            
+
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 if (Math.abs(distanceY) > 10) {
@@ -234,13 +234,13 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             }
         });
     }
-    
+
     protected void handleFling(float velocityX, float velocityY) {
         final long startTime = SystemClock.elapsedRealtime();
         isFling = true;
         flingFrameCount = 0;
         executeFlingLoad();
-        
+
         Handler handler = new Handler(Looper.getMainLooper());
         Runnable flingRunnable = new Runnable() {
             @Override
@@ -256,13 +256,13 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
         };
         handler.postDelayed(flingRunnable, 16);
     }
-    
+
     protected abstract void executeFlingLoad();
-    
+
     private void loadFriendCircleHtml() {
         geckoSession.loadUri("resource://android/assets/friend_circle.html");
     }
-    
+
     protected void loadFriendCircleData() {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             try {
@@ -277,9 +277,9 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             }
         }, 100);
     }
-    
+
     protected abstract void performLoadTask();
-    
+
     private void setupTouchListener() {
         if (textureView != null) {
             textureView.setOnTouchListener((v, event) -> {
@@ -291,13 +291,13 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             });
         }
     }
-    
+
     @Override
     public void onBackPressed() {
         // 直接关闭 Activity 返回主界面
         finish();
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -305,7 +305,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             geckoSession.setActive(false);
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -313,7 +313,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
             geckoSession.setActive(true);
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         if (geckoDisplay != null) {

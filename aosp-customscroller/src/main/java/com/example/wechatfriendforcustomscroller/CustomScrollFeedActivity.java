@@ -55,7 +55,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             viewModel.loadFeed(loadType);
         }
-        
+
         // Start background tasks for between-frame, mixed, and long-frame loads
         if (LoadType.isBetweenFramesLoad(loadType) || LoadType.isMixedLoad(loadType) 
                 || LoadType.isLongFrameLoad(loadType)) {

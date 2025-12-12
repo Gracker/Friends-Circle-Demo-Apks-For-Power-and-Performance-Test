@@ -23,15 +23,15 @@ import com.example.loadconfig.LoadType;
  */
 public class PureRenderAnimationView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     private static final String TAG = "PureRenderAnimation";
-    
+
     private Thread renderThread;
     private volatile boolean isRunning = false;
     private SurfaceHolder holder;
-    
+
     private Paint wavePaint;
     private Paint circlePaint;
     private Paint textPaint;
-    
+
     private float animationTime = 0f;
     private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
@@ -50,23 +50,23 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     private void init() {
         holder = getHolder();
         holder.addCallback(this);
-        
+
         wavePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         wavePaint.setColor(Color.parseColor("#E91E63"));
         wavePaint.setStyle(Paint.Style.STROKE);
         wavePaint.setStrokeWidth(4);
-        
+
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        
+
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(28);
         textPaint.setTextAlign(Paint.Align.CENTER);
-        
+
         // Initialize load simulator
         mLoadSimulator = new LoadSimulator();
     }
-    
+
     public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
     }
@@ -95,10 +95,10 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     @Override
     public void run() {
         Log.i(TAG, "Pure render animation thread started");
-        
+
         while (isRunning) {
             long frameStart = System.nanoTime();
-            
+
             Canvas canvas = null;
             try {
                 canvas = holder.lockCanvas();
@@ -118,13 +118,13 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
                     }
                 }
             }
-            
+
             // Execute load on render thread
             executeLoad();
-            
+
             // Update animation time
             animationTime += 0.03f;
-            
+
             // Frame rate limiting (~60fps)
             long frameTime = System.nanoTime() - frameStart;
             long sleepTime = (16_666_666 - frameTime) / 1_000_000;
@@ -136,36 +136,36 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
                 }
             }
         }
-        
+
         Log.i(TAG, "Pure render animation thread stopped");
     }
-    
+
     private void drawAnimation(Canvas canvas) {
         int width = getWidth();
         int height = getHeight();
-        
+
         // Background gradient simulation
         canvas.drawColor(Color.parseColor("#1A237E"));
-        
+
         // Draw animated wave patterns
         for (int i = 0; i < 5; i++) {
             float phase = animationTime + i * 0.5f;
             int alpha = 100 + i * 30;
             wavePaint.setAlpha(alpha);
-            
+
             Path path = new Path();
             path.moveTo(0, height / 2f);
-            
+
             for (int x = 0; x <= width; x += 10) {
                 float y = height / 2f + 
                           (float) Math.sin((x * 0.02f) + phase) * 30 +
                           (float) Math.sin((x * 0.01f) + phase * 0.7f) * 20;
                 path.lineTo(x, y);
             }
-            
+
             canvas.drawPath(path, wavePaint);
         }
-        
+
         // Draw animated circles
         int circleCount = 8;
         for (int i = 0; i < circleCount; i++) {
@@ -173,24 +173,24 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
             float radius = 80 + 20 * (float) Math.sin(animationTime * 2 + i);
             float x = width / 2f + (float) Math.cos(angle) * 100;
             float y = height / 2f + (float) Math.sin(angle) * 50;
-            
+
             int hue = (int) ((animationTime * 50 + i * 45) % 360);
             circlePaint.setColor(Color.HSVToColor(150, new float[]{hue, 0.7f, 0.9f}));
-            
+
             canvas.drawCircle(x, y, radius / 4, circlePaint);
         }
-        
+
         // Draw label
         canvas.drawText("Pure RenderThread Animation", width / 2f, height - 20, textPaint);
     }
-    
+
     private void executeLoad() {
         // 使用统一的负载中心执行负载
         if (mLoadSimulator != null) {
             mLoadSimulator.executeInFrameLoad(loadType, "PureRenderAnimation_doFrameLoad");
         }
     }
-    
+
     /**
      * 释放资源
      */

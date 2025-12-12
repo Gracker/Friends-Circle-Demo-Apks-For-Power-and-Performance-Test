@@ -25,14 +25,14 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setupAppInfo();
-        
+
         // Request overlay permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, OVERLAY_PERMISSION_CODE);
         }
-        
+
         binding.btnMinimalLoad.setOnClickListener(this);
         binding.btnLightLoad.setOnClickListener(this);
         binding.btnMediumLoad.setOnClickListener(this);
@@ -56,10 +56,10 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
             startActivityForResult(intent, OVERLAY_PERMISSION_CODE);
             return;
         }
-        
+
         Class<?> targetActivity = null;
         int id = v.getId();
-        
+
         if (id == R.id.btn_minimal_load) targetActivity = MinimalLoadActivity.class;
         else if (id == R.id.btn_light_load) targetActivity = LightLoadActivity.class;
         else if (id == R.id.btn_medium_load) targetActivity = MediumLoadActivity.class;
@@ -71,7 +71,7 @@ public class DualWindowMainActivity extends AppCompatActivity implements View.On
         else if (id == R.id.btn_medium_mixed) targetActivity = MediumMixedActivity.class;
         else if (id == R.id.btn_heavy_mixed) targetActivity = HeavyMixedActivity.class;
         else if (id == R.id.btn_long_frame) targetActivity = LongFrameActivity.class;
-        
+
         if (targetActivity != null) {
             startActivity(new Intent(this, targetActivity));
         }

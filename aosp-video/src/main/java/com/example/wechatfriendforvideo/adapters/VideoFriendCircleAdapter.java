@@ -70,7 +70,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
     private static final int TYPE_VIDEO = 2;  // 新增：视频类型
-    
+
     private Context mContext;
     private List<FriendCircleBean> mFriendCircleBeans;
     private RequestOptions mRequestOptions;
@@ -83,20 +83,20 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private View mHeaderView;
     private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED); // Using fixed seed to ensure consistent results for each run
     private int mLoadType; // Load type
-    
+
     // 统一负载模拟器
     private LoadSimulator mLoadSimulator;
-    
+
     // String to identify current load type
     private String mLoadTypeString;
-    
+
     // Variables for continuous frame load simulation
     private boolean mIsScrolling = false;
     private Runnable mFrameLoadRunnable;
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
     private LayoutInflater mLayoutInflater;
-    
+
     // 新增：视频播放器管理
     private Map<Integer, ExoPlayer> mPlayerMap = new HashMap<>();
     private int mCurrentPlayingPosition = -1;
@@ -106,19 +106,19 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         this.mRecyclerView = recyclerView;
         this.mLayoutInflater = LayoutInflater.from(context);
-        
+
         // 使用RoundedCorners替代CircleCrop，增大圆角半径为30dp
         this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(30));
-        
+
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
-        
+
         // 使用统一的 LoadType.toLabel() 获取负载类型字符串
         mLoadTypeString = "视频-" + LoadType.toLabel(loadType);
-        
+
         // 初始化负载模拟器
         mLoadSimulator = new LoadSimulator();
-        
+
         // 初始化连续加载模拟
         mFrameLoadRunnable = new Runnable() {
             @Override
@@ -129,18 +129,18 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
             }
         };
-        
+
         // 新增：设置视频滚动监听器
         setupVideoScrollListener();
     }
-    
+
     // 新增：视频滚动监听器
     private void setupVideoScrollListener() {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                
+
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mIsScrolling = false;
                     checkAndPlayVisibleVideo();
@@ -151,25 +151,25 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         });
     }
-    
+
     // 新增：检查并播放可见的视频
     private void checkAndPlayVisibleVideo() {
         if (mLayoutManager == null || mFriendCircleBeans == null) {
             return;
         }
-        
+
         int firstVisible = mLayoutManager.findFirstVisibleItemPosition();
         int lastVisible = mLayoutManager.findLastVisibleItemPosition();
-        
+
         int videoToPlay = -1;
         float maxVisibleRatio = 0;
-        
+
         for (int i = firstVisible; i <= lastVisible; i++) {
             int dataPosition = getDataPosition(i);
             if (dataPosition < 0 || dataPosition >= mFriendCircleBeans.size()) {
                 continue;
             }
-            
+
             FriendCircleBean bean = mFriendCircleBeans.get(dataPosition);
             if (bean.isVideoType()) {
                 View itemView = mLayoutManager.findViewByPosition(i);
@@ -182,7 +182,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
             }
         }
-        
+
         if (videoToPlay != -1 && videoToPlay != mCurrentPlayingPosition) {
             if (mCurrentPlayingPosition != -1) {
                 pauseVideoAt(mCurrentPlayingPosition);
@@ -197,7 +197,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }
     }
-    
+
     private float getVisibleRatio(View view) {
         Rect rect = new Rect();
         view.getLocalVisibleRect(rect);
@@ -205,17 +205,17 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         int totalHeight = view.getHeight();
         return totalHeight > 0 ? (float) visibleHeight / totalHeight : 0;
     }
-    
+
     private void pauseInvisibleVideos() {
         if (mLayoutManager == null) return;
-        
+
         int firstVisible = mLayoutManager.findFirstVisibleItemPosition();
         int lastVisible = mLayoutManager.findLastVisibleItemPosition();
-        
+
         for (Map.Entry<Integer, ExoPlayer> entry : mPlayerMap.entrySet()) {
             int position = entry.getKey();
             ExoPlayer player = entry.getValue();
-            
+
             if (position < firstVisible || position > lastVisible) {
                 if (player != null && player.isPlaying()) {
                     player.pause();
@@ -233,15 +233,15 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }
     }
-    
+
     private void playVideoAt(int adapterPosition) {
         View itemView = mLayoutManager.findViewByPosition(adapterPosition);
         if (itemView == null) return;
-        
+
         PlayerView playerView = itemView.findViewById(R.id.player_view);
         ImageView playIcon = itemView.findViewById(R.id.img_play_icon);
         if (playerView == null) return;
-        
+
         ExoPlayer player = mPlayerMap.get(adapterPosition);
         if (player != null && player.getPlaybackState() == Player.STATE_READY) {
             player.play();
@@ -250,7 +250,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }
     }
-    
+
     private void pauseVideoAt(int adapterPosition) {
         ExoPlayer player = mPlayerMap.get(adapterPosition);
         if (player != null && player.isPlaying()) {
@@ -258,17 +258,17 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             updatePlayIcon(adapterPosition, true);
         }
     }
-    
+
     private void updatePlayIcon(int adapterPosition, boolean showPlayIcon) {
         View itemView = mLayoutManager.findViewByPosition(adapterPosition);
         if (itemView == null) return;
-        
+
         ImageView playIcon = itemView.findViewById(R.id.img_play_icon);
         if (playIcon != null) {
             playIcon.setVisibility(showPlayIcon ? View.VISIBLE : View.GONE);
         }
     }
-    
+
     private int getDataPosition(int adapterPosition) {
         return mHeaderView != null ? adapterPosition - 1 : adapterPosition;
     }
@@ -280,12 +280,12 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         setupHeaderView();
         notifyItemInserted(0);
     }
-    
+
     private void setupHeaderView() {
         if (mHeaderView == null) {
             return;
         }
-        
+
         // 设置背景图片
         ImageView imgCover = mHeaderView.findViewById(R.id.img_cover);
         if (imgCover != null) {
@@ -293,7 +293,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 // 优先尝试加载main_bg
                 int coverResourceId = mContext.getResources().getIdentifier(
                     "main_bg", "drawable", mContext.getPackageName());
-                
+
                 if (coverResourceId != 0) {
                     Glide.with(mContext)
                         .load(coverResourceId)
@@ -306,7 +306,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         String localName = "local" + i;
                         int localId = mContext.getResources().getIdentifier(
                             localName, "drawable", mContext.getPackageName());
-                        
+
                         if (localId != 0) {
                             Glide.with(mContext)
                                 .load(localId)
@@ -316,7 +316,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                             break;
                         }
                     }
-                    
+
                     // 如果仍然没有加载到图片，使用默认背景
                     if (!bgLoaded) {
                         imgCover.setImageResource(R.drawable.default_background);
@@ -327,7 +327,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 imgCover.setImageResource(R.drawable.default_background);
             }
         }
-        
+
         // 设置头像 - 使用圆角头像
         ImageView imgUserAvatar = mHeaderView.findViewById(R.id.img_user_avatar);
         if (imgUserAvatar != null) {
@@ -335,7 +335,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 // 先尝试加载固定的main_avatar头像
                 int avatarResourceId = mContext.getResources().getIdentifier(
                     "main_avatar", "drawable", mContext.getPackageName());
-                
+
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                         .load(avatarResourceId)
@@ -349,7 +349,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         String avatarName = "avatar" + i;
                         int avatarId = mContext.getResources().getIdentifier(
                             avatarName, "drawable", mContext.getPackageName());
-                        
+
                         if (avatarId != 0) {
                             Glide.with(mContext)
                                 .load(avatarId)
@@ -359,7 +359,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                             avatarLoaded = true;
                         }
                     }
-                    
+
                     // 如果上面都加载失败，则使用默认头像
                     if (!avatarLoaded) {
                         Glide.with(mContext)
@@ -378,13 +378,13 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     .into(imgUserAvatar);
             }
         }
-        
+
         // 设置用户名 - 显示当前负载类型
         TextView tvUserName = mHeaderView.findViewById(R.id.tv_user_name);
         if (tvUserName != null) {
             tvUserName.setText(mLoadTypeString);
         }
-        
+
         // 设置返回按钮点击事件
         ImageView imgBack = mHeaderView.findViewById(R.id.img_back);
         if (imgBack != null) {
@@ -401,7 +401,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         if (position == 0 && mHeaderView != null) {
             return TYPE_HEADER;
         }
-        
+
         // 判断是否为视频类型
         int dataPosition = getDataPosition(position);
         if (dataPosition >= 0 && mFriendCircleBeans != null && dataPosition < mFriendCircleBeans.size()) {
@@ -410,7 +410,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 return TYPE_VIDEO;
             }
         }
-        
+
         return TYPE_NORMAL;
     }
 
@@ -420,13 +420,13 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         if (viewType == TYPE_HEADER && mHeaderView != null) {
             return new HeaderViewHolder(mHeaderView);
         }
-        
+
         // 新增：视频类型
         if (viewType == TYPE_VIDEO) {
             View itemView = mLayoutInflater.inflate(R.layout.item_friend_circle_video, parent, false);
             return new VideoViewHolder(itemView);
         }
-        
+
         View itemView = mLayoutInflater.inflate(R.layout.item_friend_circle_image, parent, false);
         return new FriendCircleViewHolder(itemView);
     }
@@ -436,41 +436,41 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         if (getItemViewType(position) == TYPE_HEADER) {
             return;
         }
-        
+
         // 实际数据位置需要减去header
         int dataPosition = getDataPosition(position);
         if (dataPosition < 0 || dataPosition >= mFriendCircleBeans.size()) {
             return;
         }
-        
+
         FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
         if (friendCircleBean == null) {
             return;
         }
-        
+
         // 新增：处理视频类型
         if (holder instanceof VideoViewHolder) {
             bindVideoViewHolder((VideoViewHolder) holder, friendCircleBean, position);
             mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
             return;
         }
-        
+
         FriendCircleViewHolder viewHolder = (FriendCircleViewHolder) holder;
-        
+
         // 设置用户信息
         if (friendCircleBean.getUserBean() != null) {
             UserBean userBean = friendCircleBean.getUserBean();
-            
+
             // 设置用户名
             viewHolder.txtUserName.setText(userBean.getUserName());
-            
+
             // 设置用户头像
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
                 // 首先尝试直接加载原始URL
                 int avatarResourceId = mContext.getResources().getIdentifier(
                         avatarUrl, "drawable", mContext.getPackageName());
-                
+
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                             .load(avatarResourceId)
@@ -481,10 +481,10 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     // 尝试加载avatar系列头像
                     int avatarIndex = dataPosition % 11 + 1; // 使用1-11范围
                     String avatarResource = "avatar" + avatarIndex;
-                    
+
                     int avatarSeriesId = mContext.getResources().getIdentifier(
                             avatarResource, "drawable", mContext.getPackageName());
-                    
+
                     if (avatarSeriesId != 0) {
                         Glide.with(mContext)
                                 .load(avatarSeriesId)
@@ -509,7 +509,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         .into(viewHolder.imgAvatar);
             }
         }
-        
+
         // 设置内容
         if (!TextUtils.isEmpty(friendCircleBean.getContent())) {
             viewHolder.txtContent.setText(friendCircleBean.getContent());
@@ -517,7 +517,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         } else {
             viewHolder.txtContent.setVisibility(View.GONE);
         }
-        
+
         // 设置图片
         if (friendCircleBean.getImageUrls() != null && !friendCircleBean.getImageUrls().isEmpty()) {
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
@@ -525,14 +525,14 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         } else {
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
-        
+
         // 设置点赞和评论区域的可见性
         boolean hasPraise = friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty();
         boolean hasComment = friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty();
-        
+
         if (hasPraise || hasComment) {
             viewHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
-            
+
             // 设置点赞信息
             if (hasPraise) {
                 // 如果点赞文本为空，重新生成
@@ -541,23 +541,23 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                             mContext, friendCircleBean.getPraiseBeans());
                     friendCircleBean.setPraiseSpan(praiseSpan);
                 }
-                
+
                 viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
                 viewHolder.layoutPraise.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.layoutPraise.setVisibility(View.GONE);
             }
-            
+
             // 设置评论信息
             if (hasComment) {
                 viewHolder.recyclerViewComment.removeAllViews();
-                
+
                 for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
                     // 如果评论文本为空，重新生成
                     if (commentBean.getCommentContentSpan() == null) {
                         commentBean.build();
                     }
-                    
+
                     TextView textView = new TextView(mContext);
                     textView.setLayoutParams(new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT, 
@@ -566,26 +566,26 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     textView.setTextSize(14);
                     textView.setText(commentBean.getCommentContentSpan());
                     textView.setPadding(16, 8, 16, 8);
-                    
+
                     // 直接添加到ViewGroup中
                     viewHolder.recyclerViewComment.addView(textView);
                 }
-                
+
                 viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.recyclerViewComment.setVisibility(View.GONE);
             }
-            
+
             // 设置分隔线
             viewHolder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
             viewHolder.layoutPraiseComment.setVisibility(View.GONE);
         }
-        
+
         // 设置其他信息
         if (friendCircleBean.getOtherInfoBean() != null) {
             OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
-            
+
             // 设置发布时间
             if (!TextUtils.isEmpty(otherInfoBean.getTime())) {
                 viewHolder.txtTime.setText(otherInfoBean.getTime());
@@ -593,7 +593,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             } else {
                 viewHolder.txtTime.setVisibility(View.GONE);
             }
-            
+
             // 设置发布来源
             if (!TextUtils.isEmpty(otherInfoBean.getSource())) {
                 viewHolder.txtSource.setText(otherInfoBean.getSource());
@@ -601,7 +601,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             } else {
                 viewHolder.txtSource.setVisibility(View.GONE);
             }
-            
+
             // 设置位置信息
             if (!TextUtils.isEmpty(otherInfoBean.getLocation())) {
                 viewHolder.txtLocation.setText(otherInfoBean.getLocation());
@@ -614,14 +614,14 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             viewHolder.txtSource.setVisibility(View.GONE);
             viewHolder.txtLocation.setVisibility(View.GONE);
         }
-        
+
         // 设置操作按钮点击事件
         viewHolder.imgComment.setOnClickListener(v -> {
             if (mOnPraiseOrCommentClickListener != null) {
                 mOnPraiseOrCommentClickListener.onCommentClick(v, dataPosition);
             }
         });
-        
+
         // 模拟计算负载
         mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
     }
@@ -635,11 +635,11 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             mFrameLoadRunnable = null;
         }
     }
-    
+
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
-        
+
         if (holder instanceof VideoViewHolder) {
             int position = holder.getAdapterPosition();
             ExoPlayer player = mPlayerMap.get(position);
@@ -647,26 +647,26 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 player.release();
                 mPlayerMap.remove(position);
             }
-            
+
             if (position == mCurrentPlayingPosition) {
                 mCurrentPlayingPosition = -1;
             }
         }
     }
-    
+
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         stopContinuousLoadSimulation();
         releaseAllPlayers();
-        
+
         // 释放负载模拟器资源
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
     }
-    
+
     // 新增：释放所有视频播放器
     public void releaseAllPlayers() {
         for (ExoPlayer player : mPlayerMap.values()) {
@@ -677,7 +677,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         mPlayerMap.clear();
         mCurrentPlayingPosition = -1;
     }
-    
+
     // 新增：暂停所有视频
     public void pauseAllVideos() {
         for (Map.Entry<Integer, ExoPlayer> entry : mPlayerMap.entrySet()) {
@@ -704,22 +704,22 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onItemClickPopupMenu(int position, int itemId) {
         // No implementation needed
     }
-    
+
     // ========== 新增：视频绑定方法 ==========
-    
+
     private void bindVideoViewHolder(VideoViewHolder holder, FriendCircleBean bean, int adapterPosition) {
         int dataPosition = getDataPosition(adapterPosition);
-        
+
         // 设置用户信息
         if (bean.getUserBean() != null) {
             UserBean userBean = bean.getUserBean();
             holder.txtUserName.setText(userBean.getUserName());
-            
+
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
                 int avatarResourceId = mContext.getResources().getIdentifier(
                         avatarUrl, "drawable", mContext.getPackageName());
-                
+
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                             .load(avatarResourceId)
@@ -731,7 +731,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     String avatarResource = "avatar" + avatarIndex;
                     int avatarSeriesId = mContext.getResources().getIdentifier(
                             avatarResource, "drawable", mContext.getPackageName());
-                    
+
                     if (avatarSeriesId != 0) {
                         Glide.with(mContext)
                                 .load(avatarSeriesId)
@@ -755,7 +755,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         .into(holder.imgAvatar);
             }
         }
-        
+
         // 设置内容
         if (!TextUtils.isEmpty(bean.getContent())) {
             holder.txtContent.setText(bean.getContent());
@@ -763,17 +763,17 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         } else {
             holder.txtContent.setVisibility(View.GONE);
         }
-        
+
         // 设置视频播放器
         setupVideoPlayer(holder, bean, adapterPosition);
-        
+
         // 设置点赞和评论
         boolean hasPraise = bean.getPraiseBeans() != null && !bean.getPraiseBeans().isEmpty();
         boolean hasComment = bean.getCommentBeans() != null && !bean.getCommentBeans().isEmpty();
-        
+
         if (hasPraise || hasComment) {
             holder.layoutPraiseComment.setVisibility(View.VISIBLE);
-            
+
             if (hasPraise) {
                 if (bean.getPraiseSpan() == null) {
                     SpannableStringBuilder praiseSpan = VideoSpanUtils.makePraiseSpan(
@@ -785,14 +785,14 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             } else {
                 holder.layoutPraise.setVisibility(View.GONE);
             }
-            
+
             if (hasComment) {
                 holder.recyclerViewComment.removeAllViews();
                 for (CommentBean commentBean : bean.getCommentBeans()) {
                     if (commentBean.getCommentContentSpan() == null) {
                         commentBean.build();
                     }
-                    
+
                     TextView textView = new TextView(mContext);
                     textView.setLayoutParams(new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -807,30 +807,30 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             } else {
                 holder.recyclerViewComment.setVisibility(View.GONE);
             }
-            
+
             holder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
             holder.layoutPraiseComment.setVisibility(View.GONE);
         }
-        
+
         // 设置其他信息
         if (bean.getOtherInfoBean() != null) {
             OtherInfoBean otherInfoBean = bean.getOtherInfoBean();
-            
+
             if (!TextUtils.isEmpty(otherInfoBean.getTime())) {
                 holder.txtTime.setText(otherInfoBean.getTime());
                 holder.txtTime.setVisibility(View.VISIBLE);
             } else {
                 holder.txtTime.setVisibility(View.GONE);
             }
-            
+
             if (!TextUtils.isEmpty(otherInfoBean.getSource())) {
                 holder.txtSource.setText(otherInfoBean.getSource());
                 holder.txtSource.setVisibility(View.VISIBLE);
             } else {
                 holder.txtSource.setVisibility(View.GONE);
             }
-            
+
             if (!TextUtils.isEmpty(otherInfoBean.getLocation())) {
                 holder.txtLocation.setText(otherInfoBean.getLocation());
                 holder.txtLocation.setVisibility(View.VISIBLE);
@@ -843,7 +843,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             holder.txtLocation.setVisibility(View.GONE);
         }
     }
-    
+
     private void setupVideoPlayer(VideoViewHolder holder, FriendCircleBean bean, int adapterPosition) {
         // 释放旧的播放器
         ExoPlayer oldPlayer = mPlayerMap.get(adapterPosition);
@@ -851,15 +851,15 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             oldPlayer.release();
             mPlayerMap.remove(adapterPosition);
         }
-        
+
         // 创建新的播放器
         ExoPlayer player = new ExoPlayer.Builder(mContext).build();
         player.setVolume(0f); // 静音播放
         player.setRepeatMode(Player.REPEAT_MODE_ALL);
-        
+
         holder.playerView.setPlayer(player);
         holder.playerView.setUseController(false);
-        
+
         // 准备视频
         int videoResId = bean.getVideoResId();
         if (videoResId != 0) {
@@ -868,7 +868,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             player.setMediaItem(mediaItem);
             player.prepare();
         }
-        
+
         // 添加播放状态监听
         player.addListener(new Player.Listener() {
             @Override
@@ -881,9 +881,9 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
             }
         });
-        
+
         mPlayerMap.put(adapterPosition, player);
-        
+
         // 设置点击事件
         holder.videoContainer.setOnClickListener(v -> {
             ExoPlayer p = mPlayerMap.get(adapterPosition);
@@ -897,10 +897,10 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 }
             }
         });
-        
+
         holder.imgPlayIcon.setVisibility(View.VISIBLE);
     }
-    
+
     /**
      * dp转px
      */
@@ -953,7 +953,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             imgComment = itemView.findViewById(R.id.img_comment);
         }
     }
-    
+
     /**
      * 视频ViewHolder - 新增
      */
@@ -973,7 +973,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         LinearLayout recyclerViewComment;
         View viewLine;
         ImageView imgComment;
-        
+
         VideoViewHolder(View itemView) {
             super(itemView);
             imgAvatar = itemView.findViewById(R.id.img_avatar);
@@ -993,41 +993,41 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             imgComment = itemView.findViewById(R.id.img_comment);
         }
     }
-    
+
     /**
      * 评论适配器
      */
     private static class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
-        
+
         private Context mContext;
         private List<CommentBean> mCommentBeans;
-        
+
         CommentAdapter(Context context, List<CommentBean> commentBeans) {
             this.mContext = context;
             this.mCommentBeans = commentBeans != null ? commentBeans : new ArrayList<>();
         }
-        
+
         @NonNull
         @Override
         public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_comment, parent, false);
             return new CommentViewHolder(itemView);
         }
-        
+
         @Override
         public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
             CommentBean commentBean = mCommentBeans.get(position);
             holder.tvComment.setText(commentBean.getCommentContentSpan());
         }
-        
+
         @Override
         public int getItemCount() {
             return mCommentBeans.size();
         }
-        
+
         static class CommentViewHolder extends RecyclerView.ViewHolder {
             TextView tvComment;
-            
+
             CommentViewHolder(View itemView) {
                 super(itemView);
                 tvComment = itemView.findViewById(R.id.tv_comment);

@@ -52,7 +52,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
-    
+
     private Context mContext;
     private List<FriendCircleBean> mFriendCircleBeans;
     private RequestOptions mRequestOptions;
@@ -65,13 +65,13 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
     private View mHeaderView;
     private Random mRandom = new Random(LoadConfig.DATA_GENERATION_SEED); // Using fixed seed to ensure consistent results for each run
     private int mLoadType; // Load type
-    
+
     // 统一负载模拟器
     private LoadSimulator mLoadSimulator;
-    
+
     // String to identify current load type
     private String mLoadTypeString;
-    
+
     // Variables for continuous frame load simulation
     private boolean mIsScrolling = false;
     private Runnable mFrameLoadRunnable;
@@ -84,19 +84,19 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         this.mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
         this.mRecyclerView = recyclerView;
         this.mLayoutInflater = LayoutInflater.from(context);
-        
+
         // 使用RoundedCorners替代CircleCrop，增大圆角半径为30dp
         this.mRequestOptions = new RequestOptions().transform(new RoundedCorners(30));
-        
+
         this.mDrawableTransitionOptions = DrawableTransitionOptions.withCrossFade();
         this.mLoadType = loadType;
-        
+
         // 设置负载类型字符串
         mLoadTypeString = LoadType.toLabel(loadType);
-        
+
         // 初始化负载模拟器
         mLoadSimulator = new LoadSimulator();
-        
+
         // 初始化连续加载模拟
         mFrameLoadRunnable = new Runnable() {
             @Override
@@ -116,12 +116,12 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         setupHeaderView();
         notifyItemInserted(0);
     }
-    
+
     private void setupHeaderView() {
         if (mHeaderView == null) {
             return;
         }
-        
+
         // 设置背景图片
         ImageView imgCover = mHeaderView.findViewById(R.id.img_cover);
         if (imgCover != null) {
@@ -129,7 +129,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                 // 优先尝试加载main_bg
                 int coverResourceId = mContext.getResources().getIdentifier(
                     "main_bg", "drawable", mContext.getPackageName());
-                
+
                 if (coverResourceId != 0) {
                     Glide.with(mContext)
                         .load(coverResourceId)
@@ -142,7 +142,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                         String localName = "local" + i;
                         int localId = mContext.getResources().getIdentifier(
                             localName, "drawable", mContext.getPackageName());
-                        
+
                         if (localId != 0) {
                             Glide.with(mContext)
                                 .load(localId)
@@ -152,7 +152,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                             break;
                         }
                     }
-                    
+
                     // 如果仍然没有加载到图片，使用默认背景
                     if (!bgLoaded) {
                         imgCover.setImageResource(R.drawable.default_background);
@@ -163,7 +163,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                 imgCover.setImageResource(R.drawable.default_background);
             }
         }
-        
+
         // 设置头像 - 使用圆角头像
         ImageView imgUserAvatar = mHeaderView.findViewById(R.id.img_user_avatar);
         if (imgUserAvatar != null) {
@@ -171,7 +171,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                 // 先尝试加载固定的main_avatar头像
                 int avatarResourceId = mContext.getResources().getIdentifier(
                     "main_avatar", "drawable", mContext.getPackageName());
-                
+
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                         .load(avatarResourceId)
@@ -185,7 +185,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                         String avatarName = "avatar" + i;
                         int avatarId = mContext.getResources().getIdentifier(
                             avatarName, "drawable", mContext.getPackageName());
-                        
+
                         if (avatarId != 0) {
                             Glide.with(mContext)
                                 .load(avatarId)
@@ -195,7 +195,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                             avatarLoaded = true;
                         }
                     }
-                    
+
                     // 如果上面都加载失败，则使用默认头像
                     if (!avatarLoaded) {
                         Glide.with(mContext)
@@ -214,13 +214,13 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                     .into(imgUserAvatar);
             }
         }
-        
+
         // 设置用户名 - 显示当前负载类型
         TextView tvUserName = mHeaderView.findViewById(R.id.tv_user_name);
         if (tvUserName != null) {
             tvUserName.setText(mLoadTypeString);
         }
-        
+
         // 设置返回按钮点击事件
         ImageView imgBack = mHeaderView.findViewById(R.id.img_back);
         if (imgBack != null) {
@@ -246,7 +246,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         if (viewType == TYPE_HEADER && mHeaderView != null) {
             return new HeaderViewHolder(mHeaderView);
         }
-        
+
         View itemView = mLayoutInflater.inflate(R.layout.item_friend_circle, parent, false);
         return new FriendCircleViewHolder(itemView);
     }
@@ -256,34 +256,34 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         if (getItemViewType(position) == TYPE_HEADER) {
             return;
         }
-        
+
         // 实际数据位置需要减去header
         int dataPosition = position - (mHeaderView != null ? 1 : 0);
         if (dataPosition < 0 || dataPosition >= mFriendCircleBeans.size()) {
             return;
         }
-        
+
         FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
         if (friendCircleBean == null) {
             return;
         }
-        
+
         FriendCircleViewHolder viewHolder = (FriendCircleViewHolder) holder;
-        
+
         // 设置用户信息
         if (friendCircleBean.getUserBean() != null) {
             UserBean userBean = friendCircleBean.getUserBean();
-            
+
             // 设置用户名
             viewHolder.txtUserName.setText(userBean.getUserName());
-            
+
             // 设置用户头像
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
                 // 首先尝试直接加载原始URL
                 int avatarResourceId = mContext.getResources().getIdentifier(
                         avatarUrl, "drawable", mContext.getPackageName());
-                
+
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
                             .load(avatarResourceId)
@@ -294,10 +294,10 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                     // 尝试加载avatar系列头像
                     int avatarIndex = dataPosition % 11 + 1; // 使用1-11范围
                     String avatarResource = "avatar" + avatarIndex;
-                    
+
                     int avatarSeriesId = mContext.getResources().getIdentifier(
                             avatarResource, "drawable", mContext.getPackageName());
-                    
+
                     if (avatarSeriesId != 0) {
                         Glide.with(mContext)
                                 .load(avatarSeriesId)
@@ -322,7 +322,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                         .into(viewHolder.imgAvatar);
             }
         }
-        
+
         // 设置内容
         if (!TextUtils.isEmpty(friendCircleBean.getContent())) {
             viewHolder.txtContent.setText(friendCircleBean.getContent());
@@ -330,7 +330,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         } else {
             viewHolder.txtContent.setVisibility(View.GONE);
         }
-        
+
         // 设置图片
         if (friendCircleBean.getImageUrls() != null && !friendCircleBean.getImageUrls().isEmpty()) {
             viewHolder.nineGridView.setVisibility(View.VISIBLE);
@@ -338,14 +338,14 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
         } else {
             viewHolder.nineGridView.setVisibility(View.GONE);
         }
-        
+
         // 设置点赞和评论区域的可见性
         boolean hasPraise = friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty();
         boolean hasComment = friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty();
-        
+
         if (hasPraise || hasComment) {
             viewHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
-            
+
             // 设置点赞信息
             if (hasPraise) {
                 // 如果点赞文本为空，重新生成
@@ -354,23 +354,23 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                             mContext, friendCircleBean.getPraiseBeans());
                     friendCircleBean.setPraiseSpan(praiseSpan);
                 }
-                
+
                 viewHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
                 viewHolder.layoutPraise.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.layoutPraise.setVisibility(View.GONE);
             }
-            
+
             // 设置评论信息
             if (hasComment) {
                 viewHolder.recyclerViewComment.removeAllViews();
-                
+
                 for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
                     // 如果评论文本为空，重新生成
                     if (commentBean.getCommentContentSpan() == null) {
                         commentBean.build();
                     }
-                    
+
                     TextView textView = new TextView(mContext);
                     textView.setLayoutParams(new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT, 
@@ -379,26 +379,26 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
                     textView.setTextSize(14);
                     textView.setText(commentBean.getCommentContentSpan());
                     textView.setPadding(16, 8, 16, 8);
-                    
+
                     // 直接添加到ViewGroup中
                     viewHolder.recyclerViewComment.addView(textView);
                 }
-                
+
                 viewHolder.recyclerViewComment.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.recyclerViewComment.setVisibility(View.GONE);
             }
-            
+
             // 设置分隔线
             viewHolder.viewLine.setVisibility(hasPraise && hasComment ? View.VISIBLE : View.GONE);
         } else {
             viewHolder.layoutPraiseComment.setVisibility(View.GONE);
         }
-        
+
         // 设置其他信息
         if (friendCircleBean.getOtherInfoBean() != null) {
             OtherInfoBean otherInfoBean = friendCircleBean.getOtherInfoBean();
-            
+
             // 设置发布时间
             if (!TextUtils.isEmpty(otherInfoBean.getTime())) {
                 viewHolder.txtTime.setText(otherInfoBean.getTime());
@@ -406,7 +406,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
             } else {
                 viewHolder.txtTime.setVisibility(View.GONE);
             }
-            
+
             // 设置发布来源
             if (!TextUtils.isEmpty(otherInfoBean.getSource())) {
                 viewHolder.txtSource.setText(otherInfoBean.getSource());
@@ -414,7 +414,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
             } else {
                 viewHolder.txtSource.setVisibility(View.GONE);
             }
-            
+
             // 设置位置信息
             if (!TextUtils.isEmpty(otherInfoBean.getLocation())) {
                 viewHolder.txtLocation.setText(otherInfoBean.getLocation());
@@ -427,14 +427,14 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
             viewHolder.txtSource.setVisibility(View.GONE);
             viewHolder.txtLocation.setVisibility(View.GONE);
         }
-        
+
         // 设置操作按钮点击事件
         viewHolder.imgComment.setOnClickListener(v -> {
             if (mOnPraiseOrCommentClickListener != null) {
                 mOnPraiseOrCommentClickListener.onCommentClick(v, dataPosition);
             }
         });
-        
+
         // 模拟计算负载
         mLoadSimulator.executeInFrameLoad(mLoadType, "SoftwareRenderAdapter_bindLoad");
     }
@@ -448,12 +448,12 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
             mFrameLoadRunnable = null;
         }
     }
-    
+
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         stopContinuousLoadSimulation();
-        
+
         // 释放负载模拟器资源
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
@@ -476,7 +476,7 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
     public void onItemClickPopupMenu(int position, int itemId) {
         // No implementation needed
     }
-    
+
     /**
      * dp转px
      */
@@ -529,41 +529,41 @@ public class SoftwareRenderFriendCircleAdapter extends RecyclerView.Adapter<Recy
             imgComment = itemView.findViewById(R.id.img_comment);
         }
     }
-    
+
     /**
      * 评论适配器
      */
     private static class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
-        
+
         private Context mContext;
         private List<CommentBean> mCommentBeans;
-        
+
         CommentAdapter(Context context, List<CommentBean> commentBeans) {
             this.mContext = context;
             this.mCommentBeans = commentBeans != null ? commentBeans : new ArrayList<>();
         }
-        
+
         @NonNull
         @Override
         public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_comment, parent, false);
             return new CommentViewHolder(itemView);
         }
-        
+
         @Override
         public void onBindViewHolder(@NonNull CommentViewHolder holder, int position) {
             CommentBean commentBean = mCommentBeans.get(position);
             holder.tvComment.setText(commentBean.getCommentContentSpan());
         }
-        
+
         @Override
         public int getItemCount() {
             return mCommentBeans.size();
         }
-        
+
         static class CommentViewHolder extends RecyclerView.ViewHolder {
             TextView tvComment;
-            
+
             CommentViewHolder(View itemView) {
                 super(itemView);
                 tvComment = itemView.findViewById(R.id.tv_comment);

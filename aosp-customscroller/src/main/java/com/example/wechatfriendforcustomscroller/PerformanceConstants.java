@@ -24,7 +24,7 @@ public class PerformanceConstants {
             "test_img_6", "test_img_7", "test_img_8", "test_img_9", "test_img_10",
             "test_img_11", "test_img_12"
     };
-    
+
     /**
      * Array of usernames for test data
      */
@@ -52,7 +52,7 @@ public class PerformanceConstants {
             "Kindness善良", "Liberty自由", "Memories记忆", "Nebula星云", "Observe观察",
             "Paradise天堂", "Quietude寂静", "Rainbow彩虹", "Serenity宁静", "Twilight暮光"
     };
-    
+
     /**
      * Array of locations for test data
      */
@@ -80,7 +80,7 @@ public class PerformanceConstants {
             "海南-贵德国家地质公园", "果洛-星空帐篷", "玉树-结古寺", "海西-茶卡盐湖", "兰州-黄河铁桥",
             "嘉峪关-嘉峪关城楼", "金昌-金川公园", "白银-白银区", "天水-麦积山", "武威-雷台"
     };
-    
+
     /**
      * Array of post times for test data
      */
@@ -106,7 +106,7 @@ public class PerformanceConstants {
             "三个月零1天前", "三个月零2天前", "三个月零3天前", "三个月零4天前", "三个月零5天前",
             "三个月零6天前", "三个月零1周前", "三个月零2周前", "三个月零3周前", "半年前"
     };
-    
+
     /**
      * Array of sources for test data
      */
@@ -133,7 +133,7 @@ public class PerformanceConstants {
             "来自联想拯救者", "来自Mac", "来自iPhone", "来自华为手机", "来自小米手机",
             "来自OPPO手机", "来自vivo手机", "来自Android手机", "来自iOS设备", "来自平板设备"
     };
-    
+
     /**
      * Array of content for test data
      */
@@ -163,7 +163,7 @@ public class PerformanceConstants {
             "今天参加了一场演讲比赛，虽然没有获奖，但克服了紧张情绪，完整地表达了自己的观点，对我来说已经是一种突破。#成长记录#",
             "最近迷上了拍摄延时摄影，记录城市的日出日落，光影变化，感受时间流动的魅力。#摄影日记#"
     };
-    
+
     /**
      * Array of comments for test data
      */
@@ -243,7 +243,7 @@ public class PerformanceConstants {
             "这个地方我去过，但没你拍得这么美。",
             "看了你的分享，我也想尝试一下这个爱好。"
     };
-    
+
     /**
      * Friend circle view type constants
      */
@@ -253,14 +253,14 @@ public class PerformanceConstants {
         public static final int FRIEND_CIRCLE_TYPE_TEXT_ONLY = 1;
         public static final int FRIEND_CIRCLE_TYPE_SHARE = 2;
     }
-    
+
     /**
      * Comment type constants
      */
     // Comment type constants
     public static final int COMMENT_TYPE_SINGLE = 0;
     public static final int COMMENT_TYPE_REPLY = 1;
-    
+
     /**
      * Translation status constants
      */

@@ -34,7 +34,7 @@ public class MinimalLoadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_minimal_load);
-        
+
         // 设置状态栏透明
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(
@@ -45,7 +45,7 @@ public class MinimalLoadActivity extends AppCompatActivity {
         if (intent != null && intent.hasExtra(VideoMainActivity.EXTRA_LOAD_TYPE)) {
             mLoadType = intent.getIntExtra(VideoMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.MINIMAL);
         }
-        
+
         // Process image name, remove possible file extension
         imageLoader = Glide.with(this).asDrawable().apply(
                 new RequestOptions().centerCrop()
@@ -59,10 +59,10 @@ public class MinimalLoadActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // 清空缓存，确保使用正确的负载类型
         VideoDataCenter.getInstance().clearCachedData();
-        
+
         // 确保数据已根据正确的负载类型生成
         if (adapter != null) {
             // 刷新数据，确保显示正确的点赞和评论数量
@@ -76,7 +76,7 @@ public class MinimalLoadActivity extends AppCompatActivity {
     private void initRecyclerView() {
         // 设置布局管理器
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
+
         // 创建适配器
         if (adapter == null) {
             adapter = new VideoFriendCircleAdapter(this, recyclerView, mLoadType);

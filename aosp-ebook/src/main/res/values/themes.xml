@@ -6,7 +6,7 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
     </style>
-    
+
     <!-- 全屏主题 -->
     <style name="Theme.EBookReader.Fullscreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>

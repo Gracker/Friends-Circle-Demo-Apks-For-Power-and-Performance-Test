@@ -12,13 +12,13 @@ public class WebViewApplication extends Application {
     public void onCreate() {
         Trace.beginSection("WebViewApplication_onCreate");
         super.onCreate();
-        
+
         // 清除缓存数据
         WebViewDataCenter.getInstance().clearCachedData();
-        
+
         // 预初始化数据中心实例
         WebViewDataCenter.getInstance();
-        
+
         Trace.endSection();
     }
 } 

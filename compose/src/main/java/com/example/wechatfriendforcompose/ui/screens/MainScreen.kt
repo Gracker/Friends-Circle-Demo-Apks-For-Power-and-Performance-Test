@@ -27,7 +27,7 @@ fun MainScreen(
     onNavigateToFriendCircle: (LoadType) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,7 +38,7 @@ fun MainScreen(
     ) {
         AppInfoCard()
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         // 负载选择卡片
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -56,36 +56,36 @@ fun MainScreen(
                     color = TextPrimary,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 LoadButton(
                     text = "最轻负载 (Minimal)",
                     color = Color(0xFF4CAF50),
                     onClick = { onNavigateToFriendCircle(LoadType.MINIMAL) }
                 )
-                
+
                 LoadButton(
                     text = "轻负载 (帧内)",
                     color = PrimaryBlue,
                     onClick = { onNavigateToFriendCircle(LoadType.LIGHT) }
                 )
-                
+
                 LoadButton(
                     text = "中负载 (帧内)",
                     color = AccentTeal,
                     onClick = { onNavigateToFriendCircle(LoadType.MEDIUM) }
                 )
-                
+
                 LoadButton(
                     text = "高负载 (帧内)",
                     color = DeepPurple,
                     onClick = { onNavigateToFriendCircle(LoadType.HEAVY) }
                 )
-                
+
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 16.dp),
                     color = Divider
                 )
-                
+
                 // 帧间负载
                 Text(
                     text = "帧间负载 (Between Frame Load)",
@@ -94,30 +94,30 @@ fun MainScreen(
                     color = TextPrimary,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 LoadButton(
                     text = "轻负载 (帧间)",
                     color = LightBlue,
                     onClick = { onNavigateToFriendCircle(LoadType.LIGHT_BETWEEN_FRAMES) }
                 )
-                
+
                 LoadButton(
                     text = "中负载 (帧间)",
                     color = LightCyan,
                     onClick = { onNavigateToFriendCircle(LoadType.MEDIUM_BETWEEN_FRAMES) }
                 )
-                
+
                 LoadButton(
                     text = "高负载 (帧间)",
                     color = Indigo,
                     onClick = { onNavigateToFriendCircle(LoadType.HEAVY_BETWEEN_FRAMES) }
                 )
-                
+
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 16.dp),
                     color = Divider
                 )
-                
+
                 // 混合负载
                 Text(
                     text = "混合负载 (帧内 + 帧间)",
@@ -126,19 +126,19 @@ fun MainScreen(
                     color = TextPrimary,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 LoadButton(
                     text = "轻负载 (混合)",
                     color = Orange,
                     onClick = { onNavigateToFriendCircle(LoadType.LIGHT_MIXED) }
                 )
-                
+
                 LoadButton(
                     text = "中负载 (混合)",
                     color = DeepOrange,
                     onClick = { onNavigateToFriendCircle(LoadType.MEDIUM_MIXED) }
                 )
-                
+
                 LoadButton(
                     text = "高负载 (混合)",
                     color = LightRed,
@@ -146,9 +146,9 @@ fun MainScreen(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // 说明卡片
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -165,7 +165,7 @@ fun MainScreen(
                     color = TextPrimary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                
+
                 Text(
                     text = "本应用使用Jetpack Compose开发，模拟微信朋友圈的滑动场景，用于测试不同计算负载下的滑动性能表现。\n\n" +
                            "✨ Compose特点：\n" +
@@ -179,7 +179,7 @@ fun MainScreen(
                 )
             }
         }
-        
+
         // 版权信息
         Text(
             text = "© 2025 Compose朋友圈性能测试应用",

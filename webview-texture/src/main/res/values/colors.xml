@@ -7,18 +7,18 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
+
     <!-- 基础颜色 -->
     <color name="base_F2F2F2">#F2F2F2</color>
     <color name="base_333333">#333333</color>
     <color name="base_666666">#666666</color>
     <color name="base_999999">#999999</color>
-    
+
     <!-- 主题颜色 -->
     <color name="primary_blue">#2196F3</color>
     <color name="accent_teal">#009688</color>
     <color name="deep_purple">#673AB7</color>
-    
+
     <!-- 图标颜色 -->
     <color name="ic_launcher_background">#4CAF50</color>
 </resources>

@@ -36,22 +36,22 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
 
         // Minimal load
         binding.btnMinimalLoad.setOnClickListener(this);
-        
+
         // In-frame loads
         binding.btnLightLoad.setOnClickListener(this);
         binding.btnMediumLoad.setOnClickListener(this);
         binding.btnHeavyLoad.setOnClickListener(this);
-        
+
         // Between-frame loads
         binding.btnLightBetweenFrames.setOnClickListener(this);
         binding.btnMediumBetweenFrames.setOnClickListener(this);
         binding.btnHeavyBetweenFrames.setOnClickListener(this);
-        
+
         // Mixed loads
         binding.btnLightMixed.setOnClickListener(this);
         binding.btnMediumMixed.setOnClickListener(this);
         binding.btnHeavyMixed.setOnClickListener(this);
-        
+
         // Long frame load
         binding.btnLongFrame.setOnClickListener(this);
     }
@@ -60,7 +60,7 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
     public void onClick(View v) {
         int loadType;
         int id = v.getId();
-        
+
         if (id == binding.btnMinimalLoad.getId()) {
             loadType = LoadType.MINIMAL;
         } else if (id == binding.btnLightLoad.getId()) {
@@ -87,7 +87,7 @@ public class CustomScrollMainActivity extends AppCompatActivity implements View.
             Toast.makeText(this, R.string.description, Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         Intent intent = new Intent(this, CustomScrollFeedActivity.class);
         intent.putExtra(CustomScrollFeedActivity.EXTRA_LOAD_TYPE, loadType);
         startActivity(intent);

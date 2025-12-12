@@ -26,7 +26,7 @@ public class MinimalLoadWebViewActivity extends BaseFriendCircleWebViewActivity 
     protected void performLoadTask() {
         Log.d(TAG, "最轻负载模式 - 不执行任何额外负载");
     }
-    
+
     /**
      * 在fling过程中执行负载 - 最轻负载不执行任何负载
      */

@@ -12,7 +12,7 @@ import android.util.Log;
  */
 public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     private static final String TAG = "MediumLoadWebView";
-    
+
     // 处理器实例
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -33,7 +33,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         // 不执行任何负载，仅记录日志
         Log.d(TAG, "中负载模式 - 仅在滚动时执行负载");
     }
-    
+
     /**
      * 在fling过程中执行负载
      */
@@ -45,7 +45,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         } catch (InterruptedException e) {
             Log.e(TAG, "executeFlingLoad阻塞被中断", e);
         }
-        
+
         // 执行同步JavaScript
         final String testJs = "\"测试成功\"";
         webView.evaluateJavascript(testJs, value -> {
@@ -124,7 +124,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                     "  \n" +
                     "  return '耗时:' + (endTime - startTime).toFixed(2) + 'ms';\n" +
                     "})();";
-                
+
                 webView.evaluateJavascript(loadJs, loadResult -> {
                     // 不输出Toast，只记录日志
                     Log.d(TAG, "中负载JavaScript结果: " + loadResult);
@@ -133,7 +133,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         });
 
     }
-    
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -142,7 +142,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: mediumLoadEnabled = false;", null);
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -151,7 +151,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             webView.evaluateJavascript("javascript: mediumLoadEnabled = true; requestAnimationFrame(performMediumCalculation);", null);
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         // 停止JavaScript负载任务

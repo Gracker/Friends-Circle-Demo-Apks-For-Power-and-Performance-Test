@@ -17,7 +17,7 @@ import com.example.loadconfig.LoadType;
  * In systrace you will see both rendering patterns simultaneously.
  */
 public abstract class BaseMixedRenderActivity extends AppCompatActivity {
-    
+
     protected PureRenderAnimationView animationView;
     protected RecyclerView recyclerView;
     protected ListAdapter adapter;
@@ -26,22 +26,22 @@ public abstract class BaseMixedRenderActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mixed_render);
-        
+
         int loadType = getLoadType();
-        
+
         // Setup pure render animation view
         animationView = findViewById(R.id.animation_view);
         animationView.setLoadType(loadType);
-        
+
         // Setup RecyclerView with standard rendering
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        
+
         adapter = new ListAdapter();
         adapter.setLoadType(loadType);
         recyclerView.setAdapter(adapter);
     }
-    
+
     protected abstract @LoadType.Type int getLoadType();
 }
 

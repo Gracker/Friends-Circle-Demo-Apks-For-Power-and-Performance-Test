@@ -15,7 +15,7 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
-    
+
     <style name="PraiseOrCommentAnimationStyle">
         <item name="android:windowEnterAnimation">@anim/anim_praise_or_comment_in</item>
         <item name="android:windowExitAnimation">@anim/anim_praise_or_comment_out</item>
