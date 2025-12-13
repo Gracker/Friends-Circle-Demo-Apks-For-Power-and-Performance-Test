@@ -72,14 +72,18 @@ jobs:
           :webview-imagereader:assembleRelease \
           :surface-map:assembleRelease \
           :gl-map:assembleRelease \
+          :launch-aosp:assembleRelease \
+          :launch-compose:assembleRelease \
+          :launch-webview:assembleRelease \
+          :launch-gl:assembleRelease \
           --parallel
       
     - name: Prepare Release Files
       run: |
         mkdir -p release-files
         
-        # 复制生成的APK文件
-        find . -path "*/build/outputs/apk/release/*.apk" -type f | while read apk; do
+        # 复制生成的APK文件 (支持普通模块和Flavor模块)
+        find . \( -path "*/build/outputs/apk/release/*.apk" -o -path "*/build/outputs/apk/*/release/*.apk" \) -type f | while read apk; do
           filename=$(basename "$apk")
           module_name=$(echo "$filename" | sed 's/-release.*//g')
           cp "$apk" "release-files/${module_name}-${{ github.event.inputs.version_name }}.apk"
@@ -130,6 +134,12 @@ jobs:
           ### 🗺️ Surface & GL 模块
           - **surface-map** - SurfaceView地图测试模块
           - **gl-map** - OpenGL地图测试模块
+          
+          ### 🚀 启动性能测试模块
+          - **launch-aosp** - 标准 View 体系 (轻/中/重负载)
+          - **launch-compose** - Jetpack Compose (轻/中/重负载)
+          - **launch-webview** - WebView 混合开发 (轻/中/重负载)
+          - **launch-gl** - OpenGL ES (轻/中/重负载)
           
           ## 🔧 安装说明
           1. 下载对应的APK文件

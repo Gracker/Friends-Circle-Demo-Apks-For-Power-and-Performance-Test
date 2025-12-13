@@ -76,6 +76,10 @@ jobs:
         :webview-imagereader:assembleRelease
         :surface-map:assembleRelease
         :gl-map:assembleRelease
+        :launch-aosp:assembleRelease
+        :launch-compose:assembleRelease
+        :launch-webview:assembleRelease
+        :launch-gl:assembleRelease
         --parallel
       
     - name: Rename APK files with version info
@@ -169,6 +173,15 @@ jobs:
           cp gl-map/build/outputs/apk/release/gl-map-release.apk "release-apks/gl-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
         
+        # Launch Modules (Flavored)
+        for module in launch-aosp launch-compose launch-webview launch-gl; do
+          for flavor in light medium heavy; do
+            if [ -f "$module/build/outputs/apk/$flavor/release/$module-$flavor-release.apk" ]; then
+               cp "$module/build/outputs/apk/$flavor/release/$module-$flavor-release.apk" "release-apks/$module-$flavor-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+            fi
+          done
+        done
+        
         # List all generated files
         echo "Generated APK files:"
         ls -la release-apks/
@@ -222,6 +235,12 @@ jobs:
           ### 🗺️ Surface & GL Modules
           - **surface-map** - SurfaceView Map Demo
           - **gl-map** - OpenGL ES Map Demo
+          
+          ### 🚀 Launch Performance Modules
+          - **launch-aosp** - Standard View System (Light/Medium/Heavy)
+          - **launch-compose** - Jetpack Compose (Light/Medium/Heavy)
+          - **launch-webview** - WebView Hybrid (Light/Medium/Heavy)
+          - **launch-gl** - OpenGL ES (Light/Medium/Heavy)
           
           ## 📝 Notes
           - ✅ Release version, signed with production key
