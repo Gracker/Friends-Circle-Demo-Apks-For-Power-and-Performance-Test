@@ -18,7 +18,7 @@ This project is a performance testing platform based on WeChat Friend Circle UI,
 
 ## Load Types
 
-All test modules support 10 load types covering different performance testing scenarios:
+All test modules support 11 load types covering different performance testing scenarios:
 
 | Type | Load Name | Description |
 |------|-----------|-------------|
@@ -42,7 +42,7 @@ The project is organized by implementation type:
 | Module Directory | Description |
 |-----------------|-------------|
 | `app` | Original project with random Friend Circle display |
-| `aosp-performance` | Performance testing with 10 load types |
+| `aosp-performance` | Performance testing with 11 load types |
 | `aosp-power` | Power consumption testing with fixed content |
 | `aosp-picasso` | Using Picasso image loading library |
 | `aosp-customscroller` | Custom CustomOverScroller + CustomTimelineView |
@@ -89,7 +89,7 @@ The original high-performance WeChat Friend Circle implementation, from the fork
 
 ### 2. Performance Testing Module (aosp-performance)
 
-Specifically designed to test and compare scrolling performance under different loads. Supports 10 load modes with Trace points at key code locations for performance analysis using tools like Perfetto.
+Specifically designed to test and compare scrolling performance under different loads. Supports 11 load modes with Trace points at key code locations for performance analysis using tools like Perfetto.
 
 ### 3. Power Consumption Testing Module (aosp-power)
 
@@ -97,19 +97,19 @@ Single Activity design with fixed environment and content for precise power cons
 
 ### 4. WebView Testing Module (webview)
 
-Implements the Friend Circle interface using WebView to test performance differences between WebView and native implementation. Supports 10 load levels with JavaScript-Java interaction and dynamic loading of up to 200 items.
+Implements the Friend Circle interface using WebView to test performance differences between WebView and native implementation. Supports 11 load levels with JavaScript-Java interaction and dynamic loading of up to 200 items.
 
 ### 5. Custom Scroller Module (aosp-customscroller)
 
 - Replaces RecyclerView/ListView with custom `CustomTimelineView` + `CustomOverScroller`
 - Built with Hilt + MVVM + Room data pipeline
-- Supports 10 load types for evaluating OEM optimizations
+- Supports 11 load types for evaluating OEM optimizations
 
 ### 6. RenderThread Stress Module (aosp-renderstress)
 
 - Based on custom scroller architecture with `CustomOverScroller`
 - `RenderStressOverlayView` applies blur/shader chains during scrolling
-- Supports 10 load types for GPU/vsync analysis
+- Supports 11 load types for GPU/vsync analysis
 
 ### 7. Software Rendering Module (aosp-softwarerender)
 
@@ -117,7 +117,7 @@ Software rendering mode implementation (hardware acceleration disabled):
 
 - **Hardware Acceleration Disabled**: Configured via `android:hardwareAccelerated="false"`
 - **UI Thread Only**: No RenderThread, all rendering on main thread
-- Supports 10 load types for CPU-intensive testing
+- Supports 11 load types for CPU-intensive testing
 
 ### 8. Compose Module (compose)
 
@@ -126,7 +126,7 @@ Jetpack Compose implementation:
 - **Declarative UI**: Built with Kotlin + Compose
 - **LazyColumn**: Replaces RecyclerView
 - **Coil Image Loading**: Compose-friendly image loading
-- Supports 10 load types for framework performance comparison
+- Supports 11 load types for framework performance comparison
 
 ### 9. SurfaceView Map Module (surface-map)
 
@@ -135,7 +135,7 @@ Amap-style map demo application:
 - **SurfaceView Map**: Renders map grid on separate thread using SurfaceView
 - **Native Control Overlay**: Top navigation bar and bottom control panel use native Views
 - **Scroll Gesture Support**: Supports drag and fling scrolling
-- Supports 10 load types for testing SurfaceView + native View mixed scenarios
+- Supports 11 load types for testing SurfaceView + native View mixed scenarios
 
 ### 10. Pure RenderThread Module (aosp-purerenderthread)
 
@@ -144,7 +144,7 @@ Pure RenderThread list scrolling implementation:
 - **Zero UI Thread Rendering**: Main thread only handles touch events, no drawing
 - **Dedicated Render Thread**: All drawing operations on separate rendering thread
 - **SurfaceView Implementation**: Utilizes SurfaceView's independent Surface
-- Supports 10 load types for validating pure render thread performance
+- Supports 11 load types for validating pure render thread performance
 
 ### 11. Dual Window Module (aosp-dualwindow)
 
@@ -154,7 +154,7 @@ Dual window rendering demonstration:
 - **Dual doFrame Callbacks**: 2 doFrame per vsync in systrace
 - **Dual RenderThread**: 2 RenderThread drawFrame per vsync
 - **Overlay Permission Required**: Uses WindowManager for second window
-- Supports 10 load types for testing multi-window scenarios
+- Supports 11 load types for testing multi-window scenarios
 
 ### 12. Mixed Rendering Module (aosp-mixedrender)
 
@@ -163,7 +163,7 @@ Mixed rendering combining two pipelines:
 - **Pure RenderThread Animation**: SurfaceView with dedicated render thread (top)
 - **Standard UI+RenderThread**: RecyclerView with normal View hierarchy (bottom)
 - **Simulates Video Overlay**: Like video player overlay on scrollable list
-- Supports 10 load types for analyzing mixed rendering performance
+- Supports 11 load types for analyzing mixed rendering performance
 
 ### 13. OpenGL Map Module (gl-map)
 
@@ -173,7 +173,7 @@ OpenGL ES 2.0 map rendering demo:
 - **Map Features**: Grid, roads, buildings, and markers
 - **Gesture Support**: Pan and pinch-to-zoom
 - **Native UI Overlays**: Search bar and control buttons
-- Supports 10 load types for GPU-intensive testing
+- Supports 11 load types for GPU-intensive testing
 
 ### 14. Douyin-style Video Module (aosp-douyin)
 
@@ -204,13 +204,13 @@ A suite of demos specifically designed to test App startup performance across di
 
 **Key Features:**
 - **Interleaved Loading**: Simulates fragmented CPU, IO, Binder, and Memory operations on the main thread.
+- **Domain-Specific High-Fidelity Loads**:
+    - **AOSP**: Simulates View Inflation (Reflection/Recursion) stress.
+    - **Compose**: Simulates complex List generation, filtering/sorting (ViewModel logic), and State Snapshot (Recomposition) stress.
+    - **WebView**: Simulates DOM Thrashing (Layout Reflows), huge JSON parsing, and heavy JS business logic execution.
+    - **OpenGL**: Simulates Shader Compilation (Multi-material), Level Data IO reading, Game Logic Init (Physics/AI), and Texture upload stress.
 - **Lifecycle Awareness**: Loads are distributed across `Application.onCreate`, `Activity.onCreate`, `onStart` (Blocking wait), and `onResume` stages.
 - **Async Network Simulation**: Uses Coroutines to simulate network latency with jitter and progressive data fetching.
-- **Architecture Specific Stress**:
-    - **AOSP**: Simulates View Inflation (Reflection/Recursion) stress.
-    - **Compose**: Simulates State Snapshot (Recomposition) stress.
-    - **WebView**: Simulates DOM Thrashing (Layout Reflows) and huge JSON parsing stress.
-    - **OpenGL**: Simulates GL State Thrashing (Context switching) and Texture upload stress.
 - **Multi-dimensional Load**: Provides Light, Medium, and Heavy flavors, corresponding to different startup time targets (100ms - 3s+).
 
 ## Performance Optimization Strategies
@@ -228,7 +228,7 @@ In Android, to avoid list stuttering, optimize from the following aspects:
 
 1. Run the `app` module to view the original high-performance Friend Circle implementation
 2. Run the `aosp-performance` module for performance testing:
-   - Select any of the 10 load levels
+   - Select any of the 11 load levels
    - Use Perfetto or other performance analysis tools
    - Analyze Trace results for optimization
 3. Run the `aosp-power` module to test power consumption

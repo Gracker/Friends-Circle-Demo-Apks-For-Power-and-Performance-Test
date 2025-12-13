@@ -109,7 +109,7 @@ jobs:
           
           ### 🎯 AOSP 模块 (标准 Android UI + RenderThread)
           - **app** - 主应用模块
-          - **aosp-performance** - 性能测试模块 (10种负载)
+          - **aosp-performance** - 性能测试模块 (11种负载)
           - **aosp-power** - 功耗测试模块
           - **aosp-picasso** - Picasso图片加载
           - **aosp-customscroller** - 自定义Scroller测试模块

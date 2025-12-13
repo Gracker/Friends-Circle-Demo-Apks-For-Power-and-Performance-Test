@@ -52,7 +52,7 @@
 | 模块目录 | 说明 |
 |---------|------|
 | `app` | 原始项目，随机展示的微信朋友圈界面 |
-| `aosp-performance` | 性能测试版本，支持10种负载类型 |
+| `aosp-performance` | 性能测试版本，支持11种负载类型 |
 | `aosp-power` | 电量测试版本，固定内容用于精确功耗测试 |
 | `aosp-picasso` | 使用 Picasso 图片加载库 |
 | `aosp-customscroller` | 自研 CustomOverScroller + CustomTimelineView |
@@ -104,7 +104,7 @@
 
 ### 2. 性能测试模块 (aosp-performance)
 
-专门设计用于测试和比较不同负载下的滑动性能表现。支持10种负载模式，在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
+专门设计用于测试和比较不同负载下的滑动性能表现。支持11种负载模式，在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
 
 ### 3. 功耗测试模块 (aosp-power)
 
@@ -112,19 +112,19 @@
 
 ### 4. WebView测试模块 (webview)
 
-使用WebView实现朋友圈界面，用于测试WebView与原生实现在性能方面的差异。支持10种负载级别，实现了JavaScript与Java交互，支持动态加载最多200条朋友圈数据。
+使用WebView实现朋友圈界面，用于测试WebView与原生实现在性能方面的差异。支持11种负载级别，实现了JavaScript与Java交互，支持动态加载最多200条朋友圈数据。
 
 ### 5. 自定义Scroller测试模块 (aosp-customscroller)
 
 - 完全保留 AOSP UI，但移除了 RecyclerView/ListView，采用自研的 `CustomTimelineView` + `CustomOverScroller`
 - 通过 Hilt + MVVM + Room 构建数据流，启动即缓存 100 条固定数据
-- 支持10种负载类型，便于验证厂商对 `OverScroller` 的自定义优化差异
+- 支持11种负载类型，便于验证厂商对 `OverScroller` 的自定义优化差异
 
 ### 6. RenderThread压测模块 (aosp-renderstress)
 
 - 代码骨架与自定义 Scroller 模块一致，同样依赖 `CustomOverScroller`
 - 借助 `RenderStressOverlayView` 在滑动事件触发时应用高阶模糊 / Shader 链
-- 支持10种负载类型，模拟"UI 线程快、RenderThread 过载"的真实现象
+- 支持11种负载类型，模拟"UI 线程快、RenderThread 过载"的真实现象
 
 ### 7. 软件渲染测试模块 (aosp-softwarerender)
 
@@ -132,7 +132,7 @@
 
 - **禁用硬件加速**：通过 `android:hardwareAccelerated="false"` 配置
 - **只有UI Thread**：没有RenderThread，所有绑制操作在主线程完成
-- 支持10种负载类型，适合测试CPU密集型场景
+- 支持11种负载类型，适合测试CPU密集型场景
 
 ### 8. Compose测试模块 (compose)
 
@@ -141,7 +141,7 @@
 - **声明式UI**：使用Kotlin + Compose声明式UI框架
 - **LazyColumn**：替代RecyclerView的列表组件
 - **Coil图片加载**：Compose友好的图片加载库
-- 支持10种负载类型，方便对比框架性能差异
+- 支持11种负载类型，方便对比框架性能差异
 
 ### 9. SurfaceView地图测试模块 (surface-map)
 
@@ -150,7 +150,7 @@
 - **SurfaceView地图**：使用SurfaceView在独立线程渲染地图网格
 - **原生控件叠加**：顶部导航栏和底部控制面板使用原生View
 - **滚动手势支持**：支持拖拽和惯性滚动
-- 支持10种负载类型，测试SurfaceView与原生View混合场景
+- 支持11种负载类型，测试SurfaceView与原生View混合场景
 
 ### 10. 纯RenderThread测试模块 (aosp-purerenderthread)
 
@@ -159,7 +159,7 @@
 - **UI Thread零渲染**：主线程只处理触摸事件，不参与任何绘制
 - **独立渲染线程**：所有绘制操作在专门的渲染线程完成
 - **SurfaceView实现**：利用SurfaceView的独立Surface
-- 支持10种负载类型，验证纯渲染线程方案的性能表现
+- 支持11种负载类型，验证纯渲染线程方案的性能表现
 
 ### 11. 双Window测试模块 (aosp-dualwindow)
 
@@ -169,7 +169,7 @@
 - **双doFrame回调**：systrace中每帧有2个doFrame
 - **双RenderThread**：每帧有2个RenderThread的drawFrame
 - **需要悬浮窗权限**：使用WindowManager添加第二个Window
-- 支持10种负载类型，测试多Window场景的性能表现
+- 支持11种负载类型，测试多Window场景的性能表现
 
 ### 12. 混合渲染测试模块 (aosp-mixedrender)
 
@@ -178,7 +178,7 @@
 - **纯RenderThread动画**：顶部SurfaceView使用独立渲染线程
 - **标准UI+RenderThread**：底部RecyclerView使用正常View层级
 - **模拟视频覆盖场景**：类似视频播放器叠加在可滑动列表上
-- 支持10种负载类型，分析混合渲染的性能特征
+- 支持11种负载类型，分析混合渲染的性能特征
 
 ### 13. OpenGL地图测试模块 (gl-map)
 
@@ -188,7 +188,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **地图元素**：网格、道路、建筑物、标记点
 - **手势支持**：拖拽平移和捏合缩放
 - **原生UI叠加**：搜索栏和控制按钮
-- 支持10种负载类型，GPU密集型场景测试
+- 支持11种负载类型，GPU密集型场景测试
 
 ### 14. 抖音风格视频滑动模块 (aosp-douyin)
 
@@ -219,13 +219,13 @@ OpenGL ES 2.0地图渲染Demo：
 
 **核心特性：**
 - **交错负载模拟 (Interleaved Loading)**: 模拟主线程上碎片化的 CPU、IO、Binder 和 Memory 操作。
+- **领域特定高保真负载**:
+    - **AOSP**: 模拟 View Inflation (反射/递归) 压力。
+    - **Compose**: 模拟复杂 List 数据生成、筛选排序 (ViewModel 逻辑) 及 State Snapshot (重组) 压力。
+    - **WebView**: 模拟 DOM Thrashing (布局回流)、大 JSON 解析及复杂 JS 业务逻辑计算压力。
+    - **OpenGL**: 模拟 Shader 编译 (多材质)、关卡数据 IO 读取、游戏逻辑初始化 (物理/AI) 及 Texture 上传压力。
 - **生命周期感知**: 负载分散在 `Application.onCreate`, `Activity.onCreate`, `onStart` (阻塞等待), `onResume` 等阶段。
 - **异步网络模拟**: 使用协程模拟带抖动的网络延迟和渐进式数据加载。
-- **架构特定压力**:
-    - **AOSP**: 模拟 View Inflation (反射/递归) 压力。
-    - **Compose**: 模拟 State Snapshot (重组) 压力。
-    - **WebView**: 模拟 DOM Thrashing (布局回流) 和大 JSON 解析压力。
-    - **OpenGL**: 模拟 GL State Thrashing (状态切换) 和纹理上传压力。
 - **多维度负载**: 提供 Light (轻度), Medium (中度), Heavy (重度) 三种 Flavor，分别对应不同的启动耗时目标 (100ms - 3s+)。
 
 ## 性能优化策略
@@ -243,7 +243,7 @@ OpenGL ES 2.0地图渲染Demo：
 
 1. 运行 `app` 模块查看原始的高性能朋友圈实现
 2. 运行 `aosp-performance` 模块进行性能测试：
-   - 选择10种负载级别中的任意一种
+   - 选择11种负载级别中的任意一种
    - 使用 Perfetto 或其他性能分析工具收集数据
    - 分析 Trace 结果进行性能优化
 3. 运行 `aosp-power` 模块测试功耗表现
@@ -282,19 +282,19 @@ OpenGL ES 2.0地图渲染Demo：
 
 **AOSP 模块：**
 - **app** - 主应用模块
-- **aosp-performance** - 性能测试模块 (10种负载)
+- **aosp-performance** - 性能测试模块 (11种负载)
 - **aosp-power** - 功耗测试模块  
 - **aosp-picasso** - Picasso图片加载
-- **aosp-customscroller** - 自定义Scroller测试模块 (10种负载)
-- **aosp-renderstress** - RenderThread压测模块 (10种负载)
-- **aosp-softwarerender** - 软件渲染测试模块 (10种负载)
+- **aosp-customscroller** - 自定义Scroller测试模块 (11种负载)
+- **aosp-renderstress** - RenderThread压测模块 (11种负载)
+- **aosp-softwarerender** - 软件渲染测试模块 (11种负载)
 - **aosp-douyin** - 抖音风格视频滑动模块
 - **aosp-video** - 视频Feed模块
 - **aosp-ebook** - 电子书阅读器模块
-- **aosp-purerenderthread** - 纯RenderThread测试模块 (10种负载)
-- **aosp-dualwindow** - 双Window刷新测试模块 (10种负载)
-- **aosp-mixedrender** - 混合渲染测试模块 (10种负载)
-- **compose** - Jetpack Compose测试模块 (10种负载)
+- **aosp-purerenderthread** - 纯RenderThread测试模块 (11种负载)
+- **aosp-dualwindow** - 双Window刷新测试模块 (11种负载)
+- **aosp-mixedrender** - 混合渲染测试模块 (11种负载)
+- **compose** - Jetpack Compose测试模块 (11种负载)
 
 **启动性能模块：**
 - **launch-aosp** - 标准 View 体系 (轻/中/重负载)
