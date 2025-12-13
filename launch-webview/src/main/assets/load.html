@@ -58,21 +58,34 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function runDomThrashing(intensity) {
+        function runHeavyDomConstruction(intensity) {
             const container = document.getElementById('dom-container');
-            const count = intensity * 100;
+            // DOM Construction & Style Recalc
+            // Heavy: 20 * 100 = 2000 rows. With 5 cols = 10,000 nodes! 
+            // This is a heavy DOM for mobile.
+            const rows = intensity * 100; 
+            const cols = 5;
 
-            // Force Layout Thrashing (Read-Write-Read-Write)
-            for (let i = 0; i < count; i++) {
-                const el = document.createElement('div');
-                el.className = 'dummy';
-                container.appendChild(el);
-
-                // FORCE REFLOW
-                const w = container.offsetWidth;
-                el.style.width = (w + 1) + 'px';
+            let html = '<table style="width:100%; border-collapse: collapse;">';
+            for (let r = 0; r < rows; r++) {
+                html += '<tr>';
+                for (let c = 0; c < cols; c++) {
+                    // Unique classes to stress Style Matching
+                    html += `<td class="cell row-${r} col-${c}" style="padding: 5px; border: 1px solid #ccc;">Item ${r},${c}</td>`;
+                }
+                html += '</tr>';
             }
-            container.innerHTML = ""; // Cleanup
+            html += '</table>';
+
+            // 1. Parse HTML & Construct DOM
+            container.innerHTML = html;
+
+            // 2. Force Layout / Reflow
+            const height = container.offsetHeight; 
+            
+            // 3. Force Recalculate Style (change root class)
+            container.className = 'loaded';
+            const width = container.offsetWidth;
         }
 
         function runJsonStress(intensity) {
@@ -142,7 +155,7 @@
             if (intensity > 0) {
                 // Yield to UI thread to show log
                 await delay(10);
-                runDomThrashing(intensity);
+                runHeavyDomConstruction(intensity);
             }
 
             // 4. Data Fetching chunks (Interleaved)

@@ -48,6 +48,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleSim = LifecycleLoadSimulator(loadType)
         lifecycleSim.onCreate(this)
 
+        // Phase 1.5: Inject Message Queue Blockers
+        LoadSimulator.injectMessageQueueBlockers(this, loadType)
+
         // Phase 2: Activity Init Load (Blocking)
         LoadSimulator.onActivityCreate(this, loadType)
 
@@ -130,9 +133,13 @@ class MainActivity : AppCompatActivity() {
     ) {
         @JavascriptInterface
         fun onLoadFinished() {
-            val duration = System.currentTimeMillis() - startTime
-            PerformanceLogger.log("WebView", loadType, startType, duration)
             activity.runOnUiThread {
+                // Phase 4: Final UI Freeze (Jank) - Simulate rendering the web content
+                LoadSimulator.simulateFinalFreeze(loadType)
+
+                val duration = System.currentTimeMillis() - startTime
+                PerformanceLogger.log("WebView", loadType, startType, duration)
+                
                 activity.title = "Finished in ${duration}ms"
                 activity.statusText.text = "Finished in ${duration}ms"
                 activity.statusText.setTextColor(Color.WHITE)

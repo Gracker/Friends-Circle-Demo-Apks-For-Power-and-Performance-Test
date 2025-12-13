@@ -44,6 +44,27 @@ class MainActivity : AppCompatActivity() {
         lifecycleSim = LifecycleLoadSimulator(loadType)
         lifecycleSim.onCreate(this)
 
+        // Phase 1.5: Inject Message Queue Blockers (IdleHandler & Front-of-Queue tasks)
+        LoadSimulator.injectMessageQueueBlockers(this, loadType)
+
+        // AOSP SPECIAL: Real XML Inflation Load
+        // This simulates the heavy cost of XmlPullParser and View reflection in the View System
+        android.os.Trace.beginSection("RealInflation")
+        try {
+            val inflater = android.view.LayoutInflater.from(this)
+            val count = when(loadType) {
+                LoadSimulator.LoadType.LIGHT -> 10
+                LoadSimulator.LoadType.MEDIUM -> 50
+                LoadSimulator.LoadType.HEAVY -> 200
+            }
+            val parent = FrameLayout(this)
+            for (i in 0 until count) {
+                inflater.inflate(R.layout.complex_nest, parent, false)
+            }
+        } finally {
+            android.os.Trace.endSection()
+        }
+
         // Phase 2: Activity Init Load (Blocking) - Kept for legacy "Activity Create" load
         LoadSimulator.onActivityCreate(this, loadType)
 
@@ -96,6 +117,9 @@ class MainActivity : AppCompatActivity() {
             LoadSimulator.simulateAsyncNetworkLoad(this@MainActivity, loadType) { progress ->
                 statusText.text = progress
             }
+            
+            // Phase 4: Final UI Freeze (Simulation of data binding / large list update)
+            LoadSimulator.simulateFinalFreeze(loadType)
             
             // Done
             val duration = System.currentTimeMillis() - startTime

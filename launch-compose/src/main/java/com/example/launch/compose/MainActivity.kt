@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -60,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleSim = LifecycleLoadSimulator(loadType)
         lifecycleSim.onCreate(this)
 
+        // Phase 1.5: Inject Message Queue Blockers
+        LoadSimulator.injectMessageQueueBlockers(this, loadType)
+
         // Phase 2: Activity Init Load (Blocking) - Interleaved
         LoadSimulator.onActivityCreate(this, loadType)
 
@@ -76,6 +80,10 @@ class MainActivity : AppCompatActivity() {
                 LoadSimulator.simulateAsyncNetworkLoad(this@MainActivity, loadType) { progress ->
                     status = progress
                 }
+                
+                // Phase 4: Final UI Freeze (Jank)
+                LoadSimulator.simulateFinalFreeze(loadType)
+                
                 val end = System.currentTimeMillis()
                 duration = end - startTime
                 PerformanceLogger.log("Compose", loadType, startType, duration)
@@ -148,36 +156,38 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun SimulateComposeLoad(loadType: LoadSimulator.LoadType) {
-    // Heavy Side Effect during Composition
-    // Simulate Complex UI Logic:
-    // 1. Large Data List creation
-    // 2. Sorting / Filtering (ViewModel logic)
-    // 3. State Snapshot writes
-    
+    // Compose Specific Load:
+    // 1. Emit a large number of nodes to stress the SlotTable and Layout system.
+    // 2. Use deep modifier chains.
+    val count = when(loadType) {
+        LoadSimulator.LoadType.LIGHT -> 50
+        LoadSimulator.LoadType.MEDIUM -> 200
+        LoadSimulator.LoadType.HEAVY -> 1000
+    }
+
+    // Hidden container that still participates in composition and layout
+    Box(modifier = Modifier.height(0.dp).fillMaxWidth()) {
+        Column {
+            repeat(count) { i ->
+                // Simulate a complex node with modifiers
+                Box(
+                    modifier = Modifier
+                        .padding(1.dp)
+                        .fillMaxWidth()
+                        .padding(2.dp)
+                ) {
+                    Text(text = "Hidden Item $i for load simulation")
+                }
+            }
+        }
+    }
+
+    // Also keep the SideEffect for pure state logic simulation
     SideEffect {
-        val itemCount = when(loadType) {
-            LoadSimulator.LoadType.LIGHT -> 100
-            LoadSimulator.LoadType.MEDIUM -> 2000
-            LoadSimulator.LoadType.HEAVY -> 10000
-        }
-
-        // 1. Data Generation
-        val items = ArrayList<UiModel>(itemCount)
-        val r = Random(123)
-        for(i in 0 until itemCount) {
-            items.add(UiModel(i, "Item $i", r.nextDouble(), if (r.nextBoolean()) "A" else "B"))
-        }
-
-        // 2. Logic (Sort & Filter)
-        val filtered = items.filter { it.category == "A" }
-            .sortedByDescending { it.score }
-            .map { it.copy(name = it.name.uppercase()) }
-
-        // 3. State Churn (Simulate writing to many MutableStates)
-        var globalStateHash = 0
-        filtered.forEach { 
-             globalStateHash += it.id 
-        }
+        // Simple logic churn
+        val list = ArrayList<String>()
+        repeat(count) { list.add("Item $it") }
+        list.sort()
     }
 }
 

@@ -46,6 +46,9 @@ class MainActivity : AppCompatActivity() {
         lifecycleSim = LifecycleLoadSimulator(loadType)
         lifecycleSim.onCreate(this)
 
+        // Phase 1.5: Inject Message Queue Blockers
+        LoadSimulator.injectMessageQueueBlockers(this, loadType)
+
         // Phase 2: Activity Init Load
         LoadSimulator.onActivityCreate(this, loadType)
 
@@ -123,6 +126,9 @@ class MainActivity : AppCompatActivity() {
             glView.queueEvent {
                 renderer.startAssetLoading()
             }
+            
+            // Phase 4: Final UI Freeze (Simulate Main Thread Work concurrent with GL Upload)
+            LoadSimulator.simulateFinalFreeze(loadType)
         }
     }
 

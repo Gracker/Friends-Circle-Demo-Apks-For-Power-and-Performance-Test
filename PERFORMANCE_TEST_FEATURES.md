@@ -1,9 +1,35 @@
 # WeChat Friends Circle Performance Test App - 新增功能文档
 
 ## 概述
-本次更新为性能测试应用增加了多种新的负载测试模式，采用固定的、有实际意义的计算任务，确保测试结果的可重复性和真实性。
+本次更新为性能测试应用增加了多种新的负载测试模式，采用固定的、有实际意义的计算任务，确保测试结果的可重复性和真实性。新增了**启动性能测试**专用模块。
 
-## 新增活动类型
+## 新增：启动性能测试模块
+
+### 核心特性
+专为测试 App 启动过程（Cold Start/Warm Start）设计的仿真负载。
+- **伪随机负载生成器 (Pseudo-random Load Generator)**: 使用固定种子的随机算法，生成确定性但多样化的负载（CPU 循环、IO 大小、Sleep 时间），确保 Benchmark 的可重复性。
+- **并行背景噪声 (Parallel Background Noise)**: 在 `Application.onCreate` 启动并行线程池（2-8 线程），执行混合负载（CPU/IO/Binder/Memory），模拟真实 App 启动时的后台初始化任务（如 SDK 初始化）。
+- **主线程离散负载 (Scattered Main Thread Load)**: 通过 `Handler` 向主线程消息队列注入离散的、带随机延迟的阻塞任务，模拟 UI 线程的竞争和卡顿。
+- **Binder & IO 注入**: 模拟真实的系统调用（`PackageManager.getPackageInfo`）和文件读写操作。
+- **全链路追踪**: 集成 `Trace.beginSection`/`endSection`，支持 Systrace/Perfetto 深度分析。
+
+### 模块说明
+| 模块 | 说明 |
+| :--- | :--- |
+| **launch-aosp** | 基于标准 Android View 体系的启动测试。 |
+| **launch-compose** | 基于 Jetpack Compose 的启动测试，包含状态重组负载。 |
+| **launch-webview** | 基于 WebView 的混合开发启动测试，包含 HTML/JS 加载模拟。 |
+| **launch-gl** | 基于 OpenGL ES 的启动测试，包含纹理上传和渲染负载。 |
+
+### 负载等级 (Load Types)
+所有启动模块均支持通过 Flavor 或 Intent 参数配置负载等级：
+- **Light**: 2 个后台线程，少量主线程注入，轻量级反射/IO。
+- **Medium**: 4 个后台线程，中等主线程注入，中等计算/IO。
+- **Heavy**: 8 个后台线程，大量主线程注入，重度资源解压和反射循环。
+
+---
+
+## 列表滑动性能测试模块
 
 ### 1. 最轻负载模式 (MinimalLoadActivity)
 - **特点**: 完全没有额外的计算负载，作为最轻的基准测试用例
