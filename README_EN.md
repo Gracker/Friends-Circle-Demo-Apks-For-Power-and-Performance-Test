@@ -54,12 +54,16 @@ The project is organized by implementation type:
 | `aosp-purerenderthread` | Pure RenderThread list scrolling |
 | `aosp-dualwindow` | Dual Window rendering demo |
 | `aosp-mixedrender` | Mixed rendering demo |
+| `compose` | Jetpack Compose implementation |
 
-### Compose Module
+### Launch Performance Modules
 
 | Module Directory | Description |
 |-----------------|-------------|
-| `compose` | Jetpack Compose implementation |
+| `launch-aosp` | Standard Android UI launch test (Light/Medium/Heavy) |
+| `launch-compose` | Jetpack Compose launch test (State churn stress) |
+| `launch-webview` | WebView Hybrid launch test (DOM/JSON stress) |
+| `launch-gl` | OpenGL ES launch test (Texture/State stress) |
 
 ### WebView Modules
 
@@ -193,6 +197,21 @@ Simulates e-book reader page-turning experience:
 - **Progress Display**: Page number at bottom, supports progress bar quick jump
 - **Immersive Reading**: Full-screen mode with warm yellow eye-care background
 - Loads "巨婴国" (Giant Baby Nation) e-book by default
+
+### 16. Launch Performance Modules (launch-*)
+
+A suite of demos specifically designed to test App startup performance across different technology stacks, simulating complex real-world startup scenarios.
+
+**Key Features:**
+- **Interleaved Loading**: Simulates fragmented CPU, IO, Binder, and Memory operations on the main thread.
+- **Lifecycle Awareness**: Loads are distributed across `Application.onCreate`, `Activity.onCreate`, `onStart` (Blocking wait), and `onResume` stages.
+- **Async Network Simulation**: Uses Coroutines to simulate network latency with jitter and progressive data fetching.
+- **Architecture Specific Stress**:
+    - **AOSP**: Simulates View Inflation (Reflection/Recursion) stress.
+    - **Compose**: Simulates State Snapshot (Recomposition) stress.
+    - **WebView**: Simulates DOM Thrashing (Layout Reflows) and huge JSON parsing stress.
+    - **OpenGL**: Simulates GL State Thrashing (Context switching) and Texture upload stress.
+- **Multi-dimensional Load**: Provides Light, Medium, and Heavy flavors, corresponding to different startup time targets (100ms - 3s+).
 
 ## Performance Optimization Strategies
 

@@ -66,6 +66,15 @@
 | `aosp-mixedrender` | 混合渲染 Demo |
 | `compose` | Jetpack Compose 实现版本 |
 
+### 启动性能测试模块
+
+| 模块目录 | 说明 |
+|---------|------|
+| `launch-aosp` | 标准 Android UI 启动测试 (支持轻/中/重负载) |
+| `launch-compose` | Jetpack Compose 启动测试 (模拟状态重组) |
+| `launch-webview` | WebView 混合开发启动测试 (模拟 DOM/JSON 压力) |
+| `launch-gl` | OpenGL ES 启动测试 (模拟纹理/状态切换压力) |
+
 ### WebView 模块
 
 | 模块目录 | 说明 |
@@ -204,6 +213,21 @@ OpenGL ES 2.0地图渲染Demo：
 - **沉浸阅读**：全屏模式，暖黄色护眼背景
 - 默认加载《巨婴国》电子书
 
+### 16. 启动性能测试模块 (launch-*)
+
+这是一组专门用于测试不同技术栈 App 启动性能的 Demo，旨在模拟真实的复杂启动场景。
+
+**核心特性：**
+- **交错负载模拟 (Interleaved Loading)**: 模拟主线程上碎片化的 CPU、IO、Binder 和 Memory 操作。
+- **生命周期感知**: 负载分散在 `Application.onCreate`, `Activity.onCreate`, `onStart` (阻塞等待), `onResume` 等阶段。
+- **异步网络模拟**: 使用协程模拟带抖动的网络延迟和渐进式数据加载。
+- **架构特定压力**:
+    - **AOSP**: 模拟 View Inflation (反射/递归) 压力。
+    - **Compose**: 模拟 State Snapshot (重组) 压力。
+    - **WebView**: 模拟 DOM Thrashing (布局回流) 和大 JSON 解析压力。
+    - **OpenGL**: 模拟 GL State Thrashing (状态切换) 和纹理上传压力。
+- **多维度负载**: 提供 Light (轻度), Medium (中度), Heavy (重度) 三种 Flavor，分别对应不同的启动耗时目标 (100ms - 3s+)。
+
 ## 性能优化策略
 
 在 Android 中，要避免列表卡顿，主要从以下几个角度进行优化：
@@ -271,6 +295,12 @@ OpenGL ES 2.0地图渲染Demo：
 - **aosp-dualwindow** - 双Window刷新测试模块 (10种负载)
 - **aosp-mixedrender** - 混合渲染测试模块 (10种负载)
 - **compose** - Jetpack Compose测试模块 (10种负载)
+
+**启动性能模块：**
+- **launch-aosp** - 标准 View 体系 (轻/中/重负载)
+- **launch-compose** - Jetpack Compose (轻/中/重负载)
+- **launch-webview** - WebView 混合开发 (轻/中/重负载)
+- **launch-gl** - OpenGL ES (轻/中/重负载)
 
 **WebView 模块：**
 - **webview** - WebView Functor测试模块 (10种负载)
