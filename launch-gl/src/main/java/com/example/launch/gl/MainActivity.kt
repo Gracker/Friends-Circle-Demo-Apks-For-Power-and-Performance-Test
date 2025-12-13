@@ -14,6 +14,9 @@ import com.example.launch.common.LifecycleLoadSimulator
 import com.example.launch.common.LoadSimulator
 import com.example.launch.common.PerformanceLogger
 import kotlinx.coroutines.launch
+import android.graphics.Color
+import android.graphics.Typeface
+import android.view.Gravity
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +49,40 @@ class MainActivity : AppCompatActivity() {
         // Phase 2: Activity Init Load
         LoadSimulator.onActivityCreate(this, loadType)
 
+        // UI Overlay - Centered
+        val root = FrameLayout(this)
+
+        val centerBucket = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+            }
+        }
+        
+        val infoText = TextView(this).apply {
+            text = "Package: $packageName\nType: GL\nLoad: $loadType\nStart: $startType"
+            textSize = 16f
+            setTextColor(Color.LTGRAY)
+            gravity = Gravity.CENTER
+            setLineSpacing(10f, 1f)
+            setPadding(0, 0, 0, 40)
+        }
+        
+        val statusText = TextView(this).apply {
+            text = "Initializing..."
+            textSize = 24f
+            setTextColor(Color.WHITE)
+            typeface = Typeface.DEFAULT_BOLD
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
         // Setup GL
         glView = GLSurfaceView(this)
         glView.setEGLContextClientVersion(2)
@@ -55,41 +92,24 @@ class MainActivity : AppCompatActivity() {
             val duration = System.currentTimeMillis() - startTime
             PerformanceLogger.log("GL", loadType, startType, duration)
             runOnUiThread {
-                 // Update UI to "Playing"
+                 statusText.text = "Finished\n${duration}ms"
+                 statusText.setTextColor(Color.parseColor("#4CAF50"))
+                 statusText.textSize = 40f
             }
         }
         glView.setRenderer(renderer)
-
-        // UI Overlay
-        val root = FrameLayout(this)
+        
         root.addView(glView)
         
-        val statusText = TextView(this).apply {
-            text = "Initializing..."
-            textSize = 20f
-            setTextColor(android.graphics.Color.WHITE)
-            setPadding(20, 100, 0, 0)
-        }
+        // Center Controls
+        // Controls removed
         
-        val controls = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 200, 0, 0)
-        }
-        controls.addView(Button(this).apply {
-            text = "Kill Process"
-            setOnClickListener { android.os.Process.killProcess(android.os.Process.myPid()) }
-        })
-        controls.addView(Button(this).apply {
-            text = "Restart"
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-        })
+        centerBucket.addView(infoText)
+        centerBucket.addView(statusText)
         
-        root.addView(statusText)
-        root.addView(controls)
+        root.addView(centerBucket) // Add the centered stack
+        // Controls removed
+
         setContentView(root)
         
         // Phase 3: Async Network Load -> Then Trigger GL Assets

@@ -41,26 +41,38 @@ log_header "开始构建所有模块的Release版本APK..."
 
 # 设置密钥库配置
 KEYSTORE_CONFIG_FILE="keystore.properties"
-DEFAULT_KEYSTORE_PATH="/Users/chris/Code/APK-Key/Chris"
-DEFAULT_KEYSTORE_PASSWORD="@Ab2960617"
-DEFAULT_KEY_ALIAS="key0"
-DEFAULT_KEY_PASSWORD="@Ab2960617"
-
 # 读取配置文件（如果存在）
 if [ -f "$KEYSTORE_CONFIG_FILE" ]; then
     log_info "读取配置文件: $KEYSTORE_CONFIG_FILE"
     source "$KEYSTORE_CONFIG_FILE"
-    KEYSTORE_FILE_PATH="${keystore_file:-$DEFAULT_KEYSTORE_PATH}"
-    KEYSTORE_PASSWORD="${keystore_password:-$DEFAULT_KEYSTORE_PASSWORD}"
-    KEY_ALIAS="${key_alias:-$DEFAULT_KEY_ALIAS}"
-    KEY_PASSWORD="${key_password:-$DEFAULT_KEY_PASSWORD}"
-else
-    log_warning "配置文件 $KEYSTORE_CONFIG_FILE 不存在，使用默认配置"
-    KEYSTORE_FILE_PATH="$DEFAULT_KEYSTORE_PATH"
-    KEYSTORE_PASSWORD="$DEFAULT_KEYSTORE_PASSWORD"
-    KEY_ALIAS="$DEFAULT_KEY_ALIAS"
-    KEY_PASSWORD="$DEFAULT_KEY_PASSWORD"
 fi
+
+# 检查必要的配置是否存在
+if [ -z "$keystore_file" ] && [ -z "$KEYSTORE_FILE_PATH" ]; then
+    log_error "未配置 keystore_file (在 $KEYSTORE_CONFIG_FILE 中) 或 KEYSTORE_FILE_PATH 环境变量"
+    exit 1
+fi
+
+if [ -z "$keystore_password" ] && [ -z "$KEYSTORE_PASSWORD" ]; then
+    log_error "未配置 keystore_password (在 $KEYSTORE_CONFIG_FILE 中) 或 KEYSTORE_PASSWORD 环境变量"
+    exit 1
+fi
+
+if [ -z "$key_alias" ] && [ -z "$KEY_ALIAS" ]; then
+    log_error "未配置 key_alias (在 $KEYSTORE_CONFIG_FILE 中) 或 KEY_ALIAS 环境变量"
+    exit 1
+fi
+
+if [ -z "$key_password" ] && [ -z "$KEY_PASSWORD" ]; then
+    log_error "未配置 key_password (在 $KEYSTORE_CONFIG_FILE 中) 或 KEY_PASSWORD 环境变量"
+    exit 1
+fi
+
+# 优先使用环境变量，其次使用配置文件
+KEYSTORE_FILE_PATH="${KEYSTORE_FILE_PATH:-$keystore_file}"
+KEYSTORE_PASSWORD="${KEYSTORE_PASSWORD:-$keystore_password}"
+KEY_ALIAS="${KEY_ALIAS:-$key_alias}"
+KEY_PASSWORD="${KEY_PASSWORD:-$key_password}"
 
 # 检查密钥库是否存在
 if [ ! -f "$KEYSTORE_FILE_PATH" ]; then
@@ -126,6 +138,18 @@ declare -a MODULE_CONFIG=(
     "webview-imagereader|webview-imagereader-release|WebView-ImageReader"
     "surface-map|surface-map-release|Surface地图"
     "gl-map|gl-map-release|GL地图"
+    "launch-aosp|launch-aosp-light-release|AOSP启动器(Light)"
+    "launch-aosp|launch-aosp-medium-release|AOSP启动器(Medium)"
+    "launch-aosp|launch-aosp-heavy-release|AOSP启动器(Heavy)"
+    "launch-compose|launch-compose-light-release|Compose启动器(Light)"
+    "launch-compose|launch-compose-medium-release|Compose启动器(Medium)"
+    "launch-compose|launch-compose-heavy-release|Compose启动器(Heavy)"
+    "launch-webview|launch-webview-light-release|WebView启动器(Light)"
+    "launch-webview|launch-webview-medium-release|WebView启动器(Medium)"
+    "launch-webview|launch-webview-heavy-release|WebView启动器(Heavy)"
+    "launch-gl|launch-gl-light-release|GL启动器(Light)"
+    "launch-gl|launch-gl-medium-release|GL启动器(Medium)"
+    "launch-gl|launch-gl-heavy-release|GL启动器(Heavy)"
 )
 
 # 处理每个模块
@@ -134,6 +158,18 @@ for config in "${MODULE_CONFIG[@]}"; do
     IFS='|' read -r MODULE APK_NAME MODULE_NAME <<< "$config"
     
     SOURCE_APK="${MODULE}/build/outputs/apk/release/${APK_NAME}.apk"
+
+    # 如果默认路径不存在，尝试在flavor目录下查找
+    if [ ! -f "$SOURCE_APK" ]; then
+        for flavor in light medium heavy; do
+             TEMP_PATH="${MODULE}/build/outputs/apk/${flavor}/release/${APK_NAME}.apk"
+             if [ -f "$TEMP_PATH" ]; then
+                 SOURCE_APK="$TEMP_PATH"
+                 break
+             fi
+        done
+    fi
+    
     TARGET_APK="$OUTPUT_DIR/${APK_NAME}-v${VERSION_NAME}.apk"
     
     TOTAL_COUNT=$((TOTAL_COUNT + 1))

@@ -1,14 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>WebView Load</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #status { font-size: 20px; font-weight: bold; color: #333; }
-        #log { margin-top: 10px; color: #666; font-size: 14px; }
-        .dummy { width: 10px; height: 10px; background: red; display: inline-block; }
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        #status {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #log {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .dummy {
+            width: 10px;
+            height: 10px;
+            background: red;
+            display: inline-block;
+        }
     </style>
 </head>
+
 <body>
     <h1>Launch WebView</h1>
     <div id="status">Initializing...</div>
@@ -40,15 +61,15 @@
         function runDomThrashing(intensity) {
             const container = document.getElementById('dom-container');
             const count = intensity * 100;
-            
+
             // Force Layout Thrashing (Read-Write-Read-Write)
-            for(let i=0; i<count; i++) {
+            for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
                 el.className = 'dummy';
                 container.appendChild(el);
-                
+
                 // FORCE REFLOW
-                const w = container.offsetWidth; 
+                const w = container.offsetWidth;
                 el.style.width = (w + 1) + 'px';
             }
             container.innerHTML = ""; // Cleanup
@@ -57,13 +78,35 @@
         function runJsonStress(intensity) {
             // Create Huge Object
             const obj = [];
-            for(let i=0; i < intensity * 1000; i++) {
-                obj.push({id: i, name: "Item " + i, values: [random(), random(), random()]});
+            for (let i = 0; i < intensity * 1000; i++) {
+                obj.push({ id: i, name: "Item " + i, values: [random(), random(), random()] });
             }
             // Serialize
             const json = JSON.stringify(obj);
             // Parse
             JSON.parse(json);
+        }
+
+        async function executeBusinessLogic(type) {
+            const items = type === 'HEAVY' ? 50000 : 5000;
+            const data = [];
+            // Generate
+            for (let i = 0; i < items; i++) {
+                data.push({
+                    id: i,
+                    score: Math.random(),
+                    category: i % 5 === 0 ? 'A' : 'B'
+                });
+            }
+            // Sort
+            data.sort((a, b) => a.score - b.score);
+            // Filter
+            const filtered = data.filter(item => item.category === 'A');
+            // Map
+            const mapped = filtered.map(item => item.score * 2);
+
+            console.log("Processed " + items + " items. Result size: " + mapped.length);
+            await delay(5); // Simulate async processing break
         }
 
         async function simulateLoad() {
@@ -83,18 +126,23 @@
             log("Authenticating...");
             await delay(type === 'HEAVY' ? 300 : 50);
 
-            // 3. Web-Specific Load (DOM & JSON)
-            log("Parsing Data...");
-            const intensity = type === 'HEAVY' ? 10 : (type === 'MEDIUM' ? 2 : 0);
+            // 3. Web-Specific Load (DOM & JSON & Logic)
+            log("Parsing Data & Executing Logic...");
+            const intensity = type === 'HEAVY' ? 20 : (type === 'MEDIUM' ? 5 : 1);
+
+            // A. Heavy JSON Parsing (Simulate REST API payload)
             if (intensity > 0) {
-                 runJsonStress(intensity);
+                runJsonStress(intensity);
             }
-            
+
+            // B. Business Logic (Data transformation, filtering, sorting)
+            await executeBusinessLogic(type);
+
             log("Rendering...");
             if (intensity > 0) {
-                 // Yield to UI thread to show log
-                 await delay(10);
-                 runDomThrashing(intensity);
+                // Yield to UI thread to show log
+                await delay(10);
+                runDomThrashing(intensity);
             }
 
             // 4. Data Fetching chunks (Interleaved)
@@ -103,9 +151,9 @@
                 await delay(type === 'HEAVY' ? 100 : 20);
                 log("Processing batch " + i + "/" + chunks);
             }
-            
+
             log("Finished");
-            
+
             if (window.Android) {
                 window.Android.onLoadFinished();
             }
@@ -114,4 +162,5 @@
         window.onload = simulateLoad;
     </script>
 </body>
+
 </html>

@@ -30,21 +30,23 @@ object LoadSimulator {
     fun onApplicationCreate(context: Context, type: LoadType) {
         // Simulates SDK init, heavy reflection, etc.
         // Interleaved: CPU -> Binder -> IO -> CPU
+        // EXECUTED ON MAIN THREAD for realistic blocking
         runInterleavedLoad(context, type, phase = "AppInit")
     }
 
     // --- Phase 2: Activity Init (Blocking) ---
     fun onActivityCreate(context: Context, type: LoadType) {
         // Simulates View inflation, layout calc, initial data unmarshalling
-        val random = Random(SEED + 1)
+        // EXECUTED ON MAIN THREAD for realistic blocking
         
-        // 1. View Inflation Simulation (Reflection/Recursion)
-        val viewDepth = when(type) {
-            LoadType.LIGHT -> 10
-            LoadType.MEDIUM -> 50
-            LoadType.HEAVY -> 200
+        // 1. View Inflation Simulation (Reflection loop)
+        // Ratio 1:2:4
+        val viewCount = when(type) {
+            LoadType.LIGHT -> 2500
+            LoadType.MEDIUM -> 5000
+            LoadType.HEAVY -> 10000
         }
-        simulateViewInflation(viewDepth)
+        simulateViewInflation(viewCount)
 
         // 2. Interleaved Logic (Memory/CPU mixed)
         runInterleavedLoad(context, type, phase = "ActivityInit")
@@ -56,9 +58,10 @@ object LoadSimulator {
         
         // 1. DNS / Connection Setup (Latency)
         onProgress("Connecting to server...")
+        // Ratio 1:2:4
         val baseLatency = when(type) {
-            LoadType.LIGHT -> 50L
-            LoadType.MEDIUM -> 200L
+            LoadType.LIGHT -> 200L
+            LoadType.MEDIUM -> 400L
             LoadType.HEAVY -> 800L
         }
         val jitter = (baseLatency * 0.2 * (random.nextDouble() - 0.5)).toLong()
@@ -96,23 +99,26 @@ object LoadSimulator {
         val random = Random(SEED + phase.hashCode())
         
         // Determine number of "Context Switches"
+        // Ratio 1:2:4
         val switchCount = when(type) {
-            LoadType.LIGHT -> 2
-            LoadType.MEDIUM -> 10
-            LoadType.HEAVY -> 30
+            LoadType.LIGHT -> 12
+            LoadType.MEDIUM -> 25
+            LoadType.HEAVY -> 50
         }
+        
+        if (switchCount == 0) return
 
         repeat(switchCount) {
-            // Task 1: CPU (Short burst)
-            runCpuLoad(random, 50_000)
+             // Task 1: CPU (Short burst)
+            runCpuLoad(random, 50_000) // Increased to be meaningful
 
             // Task 2: Small IO (Config read)
-            if (it % 5 == 0) { // Every 5th switch
-                 runIoLoad(context, 1024) // 1KB
+            if (it % 10 == 0) { // Less frequent IO
+                 runIoLoad(context, 512) 
             }
 
             // Task 3: Binder (System Service check)
-            if (it % 3 == 0) {
+            if (it % 5 == 0) {
                  runBinderLoad(context, 1)
             }
 
@@ -167,25 +173,19 @@ object LoadSimulator {
         }
     }
 
-    fun simulateViewInflation(depth: Int) {
-        // Recursion + Reflection to simulate View Creation
-        recursiveViewBuilder(depth, 0)
-    }
-
-    private fun recursiveViewBuilder(maxDepth: Int, currentDepth: Int) {
-        if (currentDepth >= maxDepth) return
+    fun simulateViewInflation(count: Int) {
+        // Linear reflection loop to simulate View Creation overhead
+        val clazz = try { Class.forName("java.lang.String") } catch (e: Exception) { return }
         
-        // Reflection overhead
-        try {
-            val clazz = Class.forName("java.lang.String") // Cheap reflection
-            clazz.methods // Trigger method lookup
-        } catch (e: Exception) {}
-
-        // Branching (simulate ViewGroup having children)
-        repeat(2) {
-             recursiveViewBuilder(maxDepth, currentDepth + 1)
+        for(i in 0 until count) {
+            try {
+                // Trigger method lookup (simulate expensive reflection)
+                clazz.methods 
+            } catch (e: Exception) {}
         }
     }
+
+    // Removed recursiveViewBuilder to prevent exponential complexity bug
 
     private fun runCpuLoad(random: Random, iterations: Int) {
         var result = 0.0

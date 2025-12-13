@@ -42,21 +42,42 @@ class MyGLRenderer(
     }
 
     private fun initEngine() {
-        val shaderCode = "void main() { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0); }"
-        repeat(if (loadType == LoadSimulator.LoadType.HEAVY) 50 else 5) {
-            loadShader(GLES20.GL_FRAGMENT_SHADER, shaderCode)
+        // 1. Compile Shaders (Simulate compiling many materials/shaders)
+        val shaderCount = if (loadType == LoadSimulator.LoadType.HEAVY) 20 else 5
+        repeat(shaderCount) {
+             // Generate unique source to force compilation
+             val shaderCode = "void main() { gl_FragColor = vec4(1.0, ${(it % 10)/10.0}, 0.0, 1.0); }"
+             loadShader(GLES20.GL_FRAGMENT_SHADER, shaderCode)
         }
+        
+        // 2. Simulate Game Logic Init (Physics/AI warm up)
+        simulateGameLogicInit()
     }
 
     private fun simulateAssetUpload() {
         val random = Random(12345)
         
-        // 1. Texture Upload
-        if (loadType == LoadSimulator.LoadType.MEDIUM || loadType == LoadSimulator.LoadType.HEAVY) {
-            val size = if (loadType == LoadSimulator.LoadType.HEAVY) 2048 else 512
+        // 1. Level Data IO (Simulate reading large map/model files)
+        if (loadType != LoadSimulator.LoadType.LIGHT) {
+             val mapSize = if (loadType == LoadSimulator.LoadType.HEAVY) 5 * 1024 * 1024 else 512 * 1024
+             // Write/Read text logic to simulate parsing
+             try {
+                val file = java.io.File(context.cacheDir, "level_data.bin")
+                val data = ByteArray(mapSize)
+                random.nextBytes(data)
+                java.io.FileOutputStream(file).use { it.write(data) }
+                java.io.FileInputStream(file).use { it.read(data) } // Read back
+                file.delete()
+             } catch (e: Exception) {}
+        }
+
+        // 2. Texture Upload (GPU Bandwidth)
+        val textureCount = if (loadType == LoadSimulator.LoadType.HEAVY) 5 else 1
+        repeat(textureCount) {
+            val size = if (loadType == LoadSimulator.LoadType.HEAVY) 1024 else 512
             val pixels = ByteBuffer.allocateDirect(size * size * 4)
             val bytes = ByteArray(size * size * 4)
-            random.nextBytes(bytes)
+            random.nextBytes(bytes) // Generate "Texture Content"
             pixels.put(bytes)
             pixels.position(0)
 
@@ -78,6 +99,23 @@ class MyGLRenderer(
                  GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
              }
              GLES20.glDisable(GLES20.GL_BLEND)
+        }
+    }
+
+    private fun simulateGameLogicInit() {
+        // Simulate Physics World construction / AI Graph building
+        val iterations = if (loadType == LoadSimulator.LoadType.HEAVY) 50000 else 5000
+        val random = Random(123)
+        var checkSum = 0.0
+        
+        // Matrix/Vector math simulation
+        for (i in 0 until iterations) {
+            val x = random.nextFloat()
+            val y = random.nextFloat()
+            val z = random.nextFloat()
+            // Normalize vector
+            val len = kotlin.math.sqrt(x*x + y*y + z*z)
+            checkSum += len
         }
     }
 

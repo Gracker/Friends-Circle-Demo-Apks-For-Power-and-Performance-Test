@@ -5,8 +5,14 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.view.Gravity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import android.graphics.Color
+import android.graphics.Typeface
+import android.util.TypedValue
+import android.view.View
+import android.widget.FrameLayout
 import com.example.launch.common.BuildConfig
 import com.example.launch.common.LifecycleLoadSimulator
 import com.example.launch.common.LoadSimulator
@@ -41,38 +47,49 @@ class MainActivity : AppCompatActivity() {
         // Phase 2: Activity Init Load (Blocking) - Kept for legacy "Activity Create" load
         LoadSimulator.onActivityCreate(this, loadType)
 
-        // UI Setup
-        val layout = LinearLayout(this).apply {
+        // UI Setup - Aesthetic & Centered
+        val root = FrameLayout(this)
+        root.setBackgroundColor(Color.parseColor("#121212")) // Dark background
+
+        val centerLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(50, 50, 50, 50)
-        }
-        val statusText = TextView(this).apply {
-            text = "Initializing UI..."
-            textSize = 18f
-        }
-        val infoText = TextView(this).apply {
-            text = "Launch AOSP\nLoad: $loadType\nStart: $startType"
-            textSize = 20f
-        }
-        
-        val btnCold = Button(this).apply {
-            text = "Kill Process"
-            setOnClickListener { android.os.Process.killProcess(android.os.Process.myPid()) }
-        }
-        val btnWarm = Button(this).apply {
-            text = "Restart Activity"
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, MainActivity::class.java)
-                startActivity(intent)
-                finish()
+            gravity = Gravity.CENTER
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
             }
         }
+        
+        val infoText = TextView(this).apply {
+            text = "Package: $packageName\nType: AOSP\nLoad: $loadType\nStart: $startType"
+            textSize = 16f
+            setTextColor(Color.LTGRAY)
+            gravity = Gravity.CENTER
+            setLineSpacing(10f, 1f)
+            setPadding(0, 0, 0, 60)
+        }
 
-        layout.addView(infoText)
-        layout.addView(statusText)
-        layout.addView(btnCold)
-        layout.addView(btnWarm)
-        setContentView(layout)
+        val statusText = TextView(this).apply {
+            text = "Initializing..."
+            textSize = 24f
+            setTextColor(Color.WHITE)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+        }
+        
+        // Controls removed
+
+        // Helper and controls removed
+        // Buttons removed as per request
+        
+        centerLayout.addView(infoText)
+        centerLayout.addView(statusText)
+        // Controls removed
+        root.addView(centerLayout)
+        
+        setContentView(root)
 
         // Phase 3: Async Network / Progressive Load
         lifecycleScope.launch {
@@ -83,7 +100,9 @@ class MainActivity : AppCompatActivity() {
             // Done
             val duration = System.currentTimeMillis() - startTime
             PerformanceLogger.log("AOSP", loadType, startType, duration)
-            statusText.text = "Finished in ${duration}ms"
+            statusText.text = "Finished\n${duration}ms"
+            statusText.setTextColor(Color.parseColor("#4CAF50")) // Green
+            statusText.textSize = 40f
         }
     }
 

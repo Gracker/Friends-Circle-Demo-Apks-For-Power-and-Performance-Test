@@ -8,6 +8,10 @@ import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.FrameLayout
+import android.view.Gravity
+import android.graphics.Color
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import com.example.launch.common.BuildConfig
 import com.example.launch.common.LifecycleLoadSimulator
@@ -20,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var isColdStart = true
     private lateinit var lifecycleSim: LifecycleLoadSimulator
     private var webView: WebView? = null
+    private lateinit var statusText: TextView
 
     companion object {
         var isProcessCold = true
@@ -46,40 +51,56 @@ class MainActivity : AppCompatActivity() {
         // Phase 2: Activity Init Load (Blocking)
         LoadSimulator.onActivityCreate(this, loadType)
 
-        val layout = LinearLayout(this).apply {
+        val mainLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
 
-        webView = WebView(this).apply {
-            settings.javaScriptEnabled = true
-            addJavascriptInterface(WebAppInterface(this@MainActivity, loadType, startType, startTime), "Android")
+        // Header for status
+        statusText = TextView(this).apply {
+             text = "Loading..."
+             textSize = 18f
+             setTextColor(Color.DKGRAY)
+             gravity = Gravity.CENTER
+             setPadding(20, 20, 20, 20)
+             setBackgroundColor(Color.LTGRAY)
+        }
+        mainLayout.addView(statusText)
+
+        // Info Panel
+        val infoText = TextView(this).apply {
+            text = "Package: $packageName\nType: WebView\nLoad: $loadType\nStart: $startType"
+            textSize = 14f
+            setTextColor(Color.DKGRAY)
+            gravity = Gravity.CENTER
+            setLineSpacing(8f, 1f)
+            setPadding(20, 10, 20, 20)
+            setBackgroundColor(Color.LTGRAY)
+        }
+        mainLayout.addView(infoText)
+
+        val webViewContainer = FrameLayout(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 0,
                 1f
             )
         }
+
+        webView = WebView(this).apply {
+            settings.javaScriptEnabled = true
+            addJavascriptInterface(WebAppInterface(this@MainActivity, loadType, startType, startTime), "Android")
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+        }
+        webViewContainer.addView(webView)
+        mainLayout.addView(webViewContainer)
         
         // Native controls to restart
-        val controls = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-        }
-        controls.addView(Button(this).apply { 
-            text = "Kill Process"
-            setOnClickListener { android.os.Process.killProcess(android.os.Process.myPid()) }
-        })
-        controls.addView(Button(this).apply { 
-            text = "Restart"
-            setOnClickListener { 
-                 val intent = Intent(this@MainActivity, MainActivity::class.java)
-                 startActivity(intent)
-                 finish()
-            }
-        })
-
-        layout.addView(webView)
-        layout.addView(controls)
-        setContentView(layout)
+        // Controls removed
+        
+        setContentView(mainLayout)
 
         // Begin Hybrid Load: Load URL -> JS Network Sim -> Finish
         webView!!.loadUrl("file:///android_asset/load.html?type=${loadType.name}")
@@ -111,6 +132,14 @@ class MainActivity : AppCompatActivity() {
         fun onLoadFinished() {
             val duration = System.currentTimeMillis() - startTime
             PerformanceLogger.log("WebView", loadType, startType, duration)
+            activity.runOnUiThread {
+                activity.title = "Finished in ${duration}ms"
+                activity.statusText.text = "Finished in ${duration}ms"
+                activity.statusText.setTextColor(Color.WHITE)
+                activity.statusText.setBackgroundColor(Color.parseColor("#4CAF50"))
+                activity.statusText.textSize = 24f
+                activity.statusText.typeface = Typeface.DEFAULT_BOLD
+            }
         }
     }
 }
