@@ -150,6 +150,9 @@ declare -a MODULE_CONFIG=(
     "launch-gl|launch-gl-light-release|GL启动器(Light)"
     "launch-gl|launch-gl-medium-release|GL启动器(Medium)"
     "launch-gl|launch-gl-heavy-release|GL启动器(Heavy)"
+    "launch-game|launch-game-light-release|Game启动器(Light)"
+    "launch-game|launch-game-medium-release|Game启动器(Medium)"
+    "launch-game|launch-game-heavy-release|Game启动器(Heavy)"
 )
 
 # 处理每个模块
@@ -220,15 +223,83 @@ if [ $SUCCESS_COUNT -eq $TOTAL_COUNT ]; then
     cat > "$INSTALL_SCRIPT" << EOF
 #!/bin/bash
 # 自动安装所有APK的脚本
-echo "开始安装所有APK..."
+# 由 build_release.sh 生成
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 检查adb是否可用
+if ! command -v adb &> /dev/null; then
+    echo -e "\${RED}错误: adb 命令未找到。请确保 Android SDK 已安装并添加到 PATH。\${NC}"
+    exit 1
+fi
+
+# 检查设备是否连接
+if ! adb devices | grep -q "device\$"; then
+    echo -e "\${RED}错误: 没有连接的 Android 设备。请连接设备并开启 USB 调试。\${NC}"
+    exit 1
+fi
+
+echo -e "\${BLUE}开始安装所有APK...\${NC}"
+echo "输出目录: $OUTPUT_DIR"
+echo ""
+
+SUCCESS_COUNT=0
+TOTAL_COUNT=0
+
+# 安装每个APK
 for apk in $OUTPUT_DIR/*.apk; do
-    echo "安装: \$(basename "\$apk")"
-    adb install "\$apk"
+    if [ -f "\$apk" ]; then
+        TOTAL_COUNT=\$((TOTAL_COUNT + 1))
+        APK_NAME=\$(basename "\$apk")
+        APK_SIZE=\$(du -h "\$apk" | cut -f1)
+
+        echo -e "\${YELLOW}安装: \$APK_NAME (\$APK_SIZE)\${NC}"
+
+        # 尝试安装，如果已安装则使用 -r 参数替换
+        if adb install -r "\$apk" 2>&1 | grep -q "Success\|already exists"; then
+            echo -e "\${GREEN}✓ 安装成功\${NC}"
+            SUCCESS_COUNT=\$((SUCCESS_COUNT + 1))
+        else
+            echo -e "\${RED}✗ 安装失败\${NC}"
+        fi
+        echo ""
+    fi
 done
-echo "安装完成!"
+
+echo -e "\${BLUE}安装完成统计:\${NC}"
+echo -e "成功: \${GREEN}\$SUCCESS_COUNT\${NC}/\$TOTAL_COUNT"
+
+if [ \$SUCCESS_COUNT -eq \$TOTAL_COUNT ]; then
+    echo -e "\${GREEN}所有APK安装成功!\${NC}"
+else
+    echo -e "\${YELLOW}部分APK安装失败，可能是由于版本冲突或设备空间不足\${NC}"
+fi
+
+echo ""
+echo -e "\${BLUE}设备上已安装的应用:\${NC}"
+adb shell pm list packages | grep "example\|launch" | sed 's/package:/  - /'
 EOF
     chmod +x "$INSTALL_SCRIPT"
     log_info "已创建安装脚本: $INSTALL_SCRIPT"
+
+    echo ""
+    log_info "其他可用脚本:"
+    echo -e "${YELLOW}   # 安装所有 APK (包括非 launch 模块)${NC}"
+    echo -e "${YELLOW}   ./install_all_apks.sh${NC}"
+    echo ""
+    echo -e "${YELLOW}   # 只安装 launch 变体 (light/medium/heavy)${NC}"
+    echo -e "${YELLOW}   ./install_launch_variants.sh${NC}"
+    echo ""
+    echo -e "${YELLOW}   # 测试 launch 性能${NC}"
+    echo -e "${YELLOW}   ./launch_performance_test.sh${NC}"
+    echo ""
+    echo -e "${YELLOW}   # 测试游戏性能${NC}"
+    echo -e "${YELLOW}   ./launch_game.sh${NC}"
     
 else
     log_error "部分APK构建失败，请检查错误信息"

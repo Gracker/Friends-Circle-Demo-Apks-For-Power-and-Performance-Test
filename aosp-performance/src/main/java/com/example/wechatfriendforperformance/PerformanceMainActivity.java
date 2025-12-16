@@ -42,6 +42,7 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
     public static final String ACTIVITY_TYPE_HEAVY_MIXED = "heavy_mixed";
     public static final String ACTIVITY_TYPE_LONG_FRAME = "long_frame";
 
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("PerformanceMainActivity_onCreate");
@@ -390,4 +391,5 @@ public class PerformanceMainActivity extends AppCompatActivity implements View.O
             packageNameView.setText(appInfo.getPackageName());
         }
     }
-} 
+
+    } 

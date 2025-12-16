@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Game Performance Test</string>
+    <string name="game_loading">Loading Game Resources...</string>
+    <string name="game_compiling">Compiling Shaders...</string>
+    <string name="game_loading_textures">Loading Textures...</string>
+    <string name="game_loading_models">Loading 3D Models...</string>
+    <string name="game_loading_sounds">Loading Audio Files...</string>
+    <string name="game_loading_complete">Game Ready!</string>
+    <string name="game_title">Performance Test Game</string>
+    <string name="game_fps">FPS: %d</string>
+</resources>

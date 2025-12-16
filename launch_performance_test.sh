@@ -90,6 +90,8 @@ case "$1" in
         echo "  $0 medium_mixed           # Launch medium mixed load test"
         echo "  $0 heavy_mixed            # Launch heavy mixed load test"
         echo
+        echo "Note: For game performance tests, use ./launch_game.sh instead"
+        echo
         echo "Direct adb commands (for CI usage):"
         echo "  adb shell am start -n $PACKAGE_NAME/$MAIN_ACTIVITY --es activity_type minimal"
         echo "  adb shell am start -n $PACKAGE_NAME/$MAIN_ACTIVITY --es activity_type heavy"

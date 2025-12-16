@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Game Surface Container -->
+    <FrameLayout
+        android:id="@+id/game_surface_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- This view will be replaced programmatically with GameGLSurfaceView20 -->
+        <com.example.launch.game.GameGLSurfaceView
+            android:id="@+id/game_surface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+      </FrameLayout>
+
+    <!-- Loading Text Overlay (for GL rendering) -->
+    <FrameLayout
+        android:id="@+id/gl_loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="120dp">
+
+            <TextView
+                android:id="@+id/gl_loader_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LOADING"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-condensed"
+                android:shadowColor="#000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                android:alpha="0.9" />
+
+            <TextView
+                android:id="@+id/gl_loader_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="正在加载游戏资源..."
+                android:textColor="#CCCCCC"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif"
+                android:layout_marginTop="8dp"
+                android:alpha="0.8" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginTop="100dp">
+
+                <TextView
+                    android:id="@+id/gl_loading_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0%"
+                    android:textColor="#FFFFFF"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:alpha="0.95" />
+
+                <TextView
+                    android:id="@+id/gl_loading_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LOADING RESOURCES"
+                    android:textColor="#FFD700"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-condensed"
+                    android:layout_marginTop="16dp"
+                    android:alpha="0.9" />
+
+            </LinearLayout>
+
+            <!-- 底部提示 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="80dp"
+                android:layout_gravity="bottom">
+
+                <TextView
+                    android:id="@+id/gl_loading_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="按 ESC 跳过加载"
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:fontFamily="monospace"
+                    android:alpha="0.7" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="正在进行资源优化和预编译"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginTop="4dp"
+                    android:alpha="0.6" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Logo Display -->
+    <LinearLayout
+        android:id="@+id/logo_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@android:color/black"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/logo_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GRACKER"
+            android:textColor="#4CAF50"
+            android:textSize="72sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:shadowColor="#000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Performance Test Game"
+            android:textColor="#888888"
+            android:textSize="18sp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif" />
+
+    </LinearLayout>
+
+    <!-- Loading UI -->
+    <LinearLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#CC000000"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            android:layout_width="300dp"
+            android:layout_height="6dp"
+            android:layout_marginBottom="24dp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressTint="#4CAF50" />
+
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/game_loading"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif" />
+
+        <TextView
+            android:id="@+id/loading_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:alpha="0.8" />
+
+    </LinearLayout>
+
+    <!-- Video player view for loading videos -->
+    <VideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:keepScreenOn="true" />
+
+    <!-- Start Game Button -->
+    <LinearLayout
+        android:id="@+id/start_game_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#AA000000"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="游戏加载完成！"
+            android:textColor="#4CAF50"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp" />
+
+        <Button
+            android:id="@+id/btn_start_game"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="开始游戏"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="#4CAF50"
+            android:elevation="8dp"
+            android:stateListAnimator="@null" />
+
+        <TextView
+            android:id="@+id/load_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text=""
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+
+    </LinearLayout>
+
+    <!-- FPS Counter -->
+    <TextView
+        android:id="@+id/fps_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:layout_margin="16dp"
+        android:text="FPS: 0"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="16sp"
+        android:fontFamily="monospace"
+        android:background="#80000000"
+        android:padding="8dp" />
+
+</FrameLayout>
