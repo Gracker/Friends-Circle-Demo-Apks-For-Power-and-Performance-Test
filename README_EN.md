@@ -37,24 +37,24 @@ All test modules support 11 load types covering different performance testing sc
 
 The project is organized by implementation type:
 
-### AOSP Modules (Standard Android UI + RenderThread)
+### Scrolling Modules (Standard Android UI + RenderThread)
 
 | Module Directory | Description |
 |-----------------|-------------|
 | `app` | Original project with random Friend Circle display |
-| `aosp-performance` | Performance testing with 11 load types |
-| `aosp-power` | Power consumption testing with fixed content |
-| `aosp-picasso` | Using Picasso image loading library |
-| `aosp-customscroller` | Custom CustomOverScroller + CustomTimelineView |
-| `aosp-renderstress` | RenderThread stress testing |
-| `aosp-softwarerender` | Software rendering (hardware acceleration disabled) |
-| `aosp-douyin` | Douyin-style video scrolling |
-| `aosp-video` | Video Feed version |
-| `aosp-ebook` | E-Book Reader demo |
-| `aosp-purerenderthread` | Pure RenderThread list scrolling |
-| `aosp-dualwindow` | Dual Window rendering demo |
-| `aosp-mixedrender` | Mixed rendering demo |
-| `compose` | Jetpack Compose implementation |
+| `scrolling-aosp-performance` | Performance testing with 11 load types |
+| `scrolling-aosp-power` | Power consumption testing with fixed content |
+| `scrolling-aosp-picasso` | Using Picasso image loading library |
+| `scrolling-aosp-customscroller` | Custom CustomOverScroller + CustomTimelineView |
+| `scrolling-aosp-renderstress` | RenderThread stress testing |
+| `scrolling-aosp-softwarerender` | Software rendering (hardware acceleration disabled) |
+| `scrolling-aosp-douyin` | Douyin-style video scrolling |
+| `scrolling-aosp-video` | Video Feed version |
+| `scrolling-aosp-ebook` | E-Book Reader demo |
+| `scrolling-aosp-purerenderthread` | Pure RenderThread list scrolling |
+| `scrolling-aosp-dualwindow` | Dual Window rendering demo |
+| `scrolling-aosp-mixedrender` | Mixed rendering demo |
+| `scrolling-compose` | Jetpack Compose implementation |
 
 ### Launch Performance Modules
 
@@ -69,17 +69,17 @@ The project is organized by implementation type:
 
 | Module Directory | Description |
 |-----------------|-------------|
-| `webview` | Standard WebView implementation |
-| `webview-surface` | WebView + SurfaceView |
-| `webview-texture` | WebView + TextureView |
-| `webview-imagereader` | WebView + ImageReader |
+| `scrolling-webview` | Standard WebView implementation |
+| `scrolling-webview-surface` | WebView + SurfaceView |
+| `scrolling-webview-texture` | WebView + TextureView |
+| `scrolling-webview-imagereader` | WebView + ImageReader |
 
 ### Surface & GL Modules
 
 | Module Directory | Description |
 |-----------------|-------------|
-| `surface-map` | SurfaceView Map Demo |
-| `gl-map` | OpenGL ES 2.0 Map Demo |
+| `scrolling-surface-map` | SurfaceView Map Demo |
+| `scrolling-gl-map` | OpenGL ES 2.0 Map Demo |
 
 ## Module Details
 
@@ -87,31 +87,31 @@ The project is organized by implementation type:
 
 The original high-performance WeChat Friend Circle implementation, from the forked project. This module demonstrates how to efficiently implement a scrolling list similar to WeChat Friend Circle, including various performance optimization techniques.
 
-### 2. Performance Testing Module (aosp-performance)
+### 2. Performance Testing Module (scrolling-aosp-performance)
 
 Specifically designed to test and compare scrolling performance under different loads. Supports 11 load modes with Trace points at key code locations for performance analysis using tools like Perfetto.
 
-### 3. Power Consumption Testing Module (aosp-power)
+### 3. Power Consumption Testing Module (scrolling-aosp-power)
 
 Single Activity design with fixed environment and content for precise power consumption testing.
 
-### 4. WebView Testing Module (webview)
+### 4. WebView Testing Module (scrolling-webview)
 
 Implements the Friend Circle interface using WebView to test performance differences between WebView and native implementation. Supports 11 load levels with JavaScript-Java interaction and dynamic loading of up to 200 items.
 
-### 5. Custom Scroller Module (aosp-customscroller)
+### 5. Custom Scroller Module (scrolling-aosp-customscroller)
 
 - Replaces RecyclerView/ListView with custom `CustomTimelineView` + `CustomOverScroller`
 - Built with Hilt + MVVM + Room data pipeline
 - Supports 11 load types for evaluating OEM optimizations
 
-### 6. RenderThread Stress Module (aosp-renderstress)
+### 6. RenderThread Stress Module (scrolling-aosp-renderstress)
 
 - Based on custom scroller architecture with `CustomOverScroller`
 - `RenderStressOverlayView` applies blur/shader chains during scrolling
 - Supports 11 load types for GPU/vsync analysis
 
-### 7. Software Rendering Module (aosp-softwarerender)
+### 7. Software Rendering Module (scrolling-aosp-softwarerender)
 
 Software rendering mode implementation (hardware acceleration disabled):
 
@@ -119,7 +119,7 @@ Software rendering mode implementation (hardware acceleration disabled):
 - **UI Thread Only**: No RenderThread, all rendering on main thread
 - Supports 11 load types for CPU-intensive testing
 
-### 8. Compose Module (compose)
+### 8. Compose Module (scrolling-compose)
 
 Jetpack Compose implementation:
 
@@ -128,7 +128,7 @@ Jetpack Compose implementation:
 - **Coil Image Loading**: Compose-friendly image loading
 - Supports 11 load types for framework performance comparison
 
-### 9. SurfaceView Map Module (surface-map)
+### 9. SurfaceView Map Module (scrolling-surface-map)
 
 Amap-style map demo application:
 
@@ -137,7 +137,7 @@ Amap-style map demo application:
 - **Scroll Gesture Support**: Supports drag and fling scrolling
 - Supports 11 load types for testing SurfaceView + native View mixed scenarios
 
-### 10. Pure RenderThread Module (aosp-purerenderthread)
+### 10. Pure RenderThread Module (scrolling-aosp-purerenderthread)
 
 Pure RenderThread list scrolling implementation:
 
@@ -146,7 +146,7 @@ Pure RenderThread list scrolling implementation:
 - **SurfaceView Implementation**: Utilizes SurfaceView's independent Surface
 - Supports 11 load types for validating pure render thread performance
 
-### 11. Dual Window Module (aosp-dualwindow)
+### 11. Dual Window Module (scrolling-aosp-dualwindow)
 
 Dual window rendering demonstration:
 
@@ -156,7 +156,7 @@ Dual window rendering demonstration:
 - **Overlay Permission Required**: Uses WindowManager for second window
 - Supports 11 load types for testing multi-window scenarios
 
-### 12. Mixed Rendering Module (aosp-mixedrender)
+### 12. Mixed Rendering Module (scrolling-aosp-mixedrender)
 
 Mixed rendering combining two pipelines:
 
@@ -165,7 +165,7 @@ Mixed rendering combining two pipelines:
 - **Simulates Video Overlay**: Like video player overlay on scrollable list
 - Supports 11 load types for analyzing mixed rendering performance
 
-### 13. OpenGL Map Module (gl-map)
+### 13. OpenGL Map Module (scrolling-gl-map)
 
 OpenGL ES 2.0 map rendering demo:
 
@@ -175,7 +175,7 @@ OpenGL ES 2.0 map rendering demo:
 - **Native UI Overlays**: Search bar and control buttons
 - Supports 11 load types for GPU-intensive testing
 
-### 14. Douyin-style Video Module (aosp-douyin)
+### 14. Douyin-style Video Module (scrolling-aosp-douyin)
 
 Simulates Douyin's full-screen video scrolling experience:
 
@@ -186,7 +186,7 @@ Simulates Douyin's full-screen video scrolling experience:
 - **Perfect UI Recreation**: Bottom navigation, right-side interaction buttons, bottom-left info area
 - Uses Media3 ExoPlayer for video playback
 
-### 15. E-Book Reader Module (aosp-ebook)
+### 15. E-Book Reader Module (scrolling-aosp-ebook)
 
 Simulates e-book reader page-turning experience:
 
@@ -227,14 +227,14 @@ In Android, to avoid list stuttering, optimize from the following aspects:
 ## How to Use
 
 1. Run the `app` module to view the original high-performance Friend Circle implementation
-2. Run the `aosp-performance` module for performance testing:
+2. Run the `scrolling-aosp-performance` module for performance testing:
    - Select any of the 11 load levels
    - Use Perfetto or other performance analysis tools
    - Analyze Trace results for optimization
-3. Run the `aosp-power` module to test power consumption
-4. Run the `webview` module to test WebView performance
-5. Run the `aosp-customscroller` module to evaluate custom scroller
-6. Run the `aosp-renderstress` module for RenderThread analysis
+3. Run the `scrolling-aosp-power` module to test power consumption
+4. Run the `scrolling-webview` module to test WebView performance
+5. Run the `scrolling-aosp-customscroller` module to evaluate custom scroller
+6. Run the `scrolling-aosp-renderstress` module for RenderThread analysis
 
 ## Performance Test Comparison
 

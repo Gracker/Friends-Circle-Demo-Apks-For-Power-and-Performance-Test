@@ -3,16 +3,16 @@
 # 批量为所有模块添加应用信息显示的脚本
 
 MODULES=(
-    "aosp-dualwindow:朋友圈双窗口版本:双Window刷新Demo"
-    "aosp-purerenderthread:朋友圈纯渲染线程版本:纯RenderThread列表滑动"
-    "aosp-power:朋友圈电量测试版本:电量测试版本，固定内容用于精确功耗测试"
-    "aosp-video:朋友圈视频版本:视频Feed版本"
-    "webview:朋友圈WebView版本:标准WebView Functor实现"
-    "webview-surface:朋友圈WebView Surface版本:WebView + SurfaceView"
-    "webview-texture:朋友圈WebView Texture版本:WebView + TextureView"
-    "webview-imagereader:朋友圈WebView ImageReader版本:WebView + ImageReader"
-    "gl-map:朋友圈OpenGL地图版本:OpenGL ES 2.0地图Demo"
-    "surface-map:朋友圈Surface地图版本:SurfaceView地图Demo"
+    "scrolling-aosp-dualwindow:朋友圈双窗口版本:双Window刷新Demo"
+    "scrolling-aosp-purerenderthread:朋友圈纯渲染线程版本:纯RenderThread列表滑动"
+    "scrolling-aosp-power:朋友圈电量测试版本:电量测试版本，固定内容用于精确功耗测试"
+    "scrolling-aosp-video:朋友圈视频版本:视频Feed版本"
+    "scrolling-webview:朋友圈WebView版本:标准WebView Functor实现"
+    "scrolling-webview-surface:朋友圈WebView Surface版本:WebView + SurfaceView"
+    "scrolling-webview-texture:朋友圈WebView Texture版本:WebView + TextureView"
+    "scrolling-webview-imagereader:朋友圈WebView ImageReader版本:WebView + ImageReader"
+    "scrolling-gl-map:朋友圈OpenGL地图版本:OpenGL ES 2.0地图Demo"
+    "scrolling-surface-map:朋友圈Surface地图版本:SurfaceView地图Demo"
 )
 
 BASE_DIR="/Users/chris/Code/HighPerformanceFriendsCircle"
@@ -30,8 +30,8 @@ for module_info in "${MODULES[@]}"; do
         continue
     fi
 
-    # 跳过aosp-douyin和aosp-ebook（按用户要求）
-    if [[ "$module_name" == "aosp-douyin" || "$module_name" == "aosp-ebook" ]]; then
+    # 跳过scrolling-aosp-douyin和scrolling-aosp-ebook（按用户要求）
+    if [[ "$module_name" == "scrolling-aosp-douyin" || "$module_name" == "scrolling-aosp-ebook" ]]; then
         echo "跳过 $module_name（按用户要求）"
         continue
     fi

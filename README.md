@@ -52,24 +52,24 @@
 - **命名优化**: Launch 模块应用名称精简 (例如: `Launch AOSP Light` -> `AOSP-Light`)。
 - **视觉层级**: 优化了图标中字体的视觉层级，关键信息更突显。
 
-### 📦 包含的应用 (20 个模块)（标准 Android UI + RenderThread）
+### 📦 滑动测试模块（标准 Android UI + RenderThread）
 
 | 模块目录 | 说明 |
 |---------|------|
 | `app` | 原始项目，随机展示的微信朋友圈界面 |
-| `aosp-performance` | 性能测试版本，支持11种负载类型 |
-| `aosp-power` | 电量测试版本，固定内容用于精确功耗测试 |
-| `aosp-picasso` | 使用 Picasso 图片加载库 |
-| `aosp-customscroller` | 自研 CustomOverScroller + CustomTimelineView |
-| `aosp-renderstress` | RenderThread 压测版本 |
-| `aosp-softwarerender` | 软件渲染版本（禁用硬件加速） |
-| `aosp-douyin` | 抖音风格视频滑动 |
-| `aosp-video` | 视频 Feed 版本 |
-| `aosp-ebook` | 电子书阅读器 Demo |
-| `aosp-purerenderthread` | 纯 RenderThread 列表滑动 |
-| `aosp-dualwindow` | 双 Window 刷新 Demo |
-| `aosp-mixedrender` | 混合渲染 Demo |
-| `compose` | Jetpack Compose 实现版本 |
+| `scrolling-aosp-performance` | 性能测试版本，支持11种负载类型 |
+| `scrolling-aosp-power` | 电量测试版本，固定内容用于精确功耗测试 |
+| `scrolling-aosp-picasso` | 使用 Picasso 图片加载库 |
+| `scrolling-aosp-customscroller` | 自研 CustomOverScroller + CustomTimelineView |
+| `scrolling-aosp-renderstress` | RenderThread 压测版本 |
+| `scrolling-aosp-softwarerender` | 软件渲染版本（禁用硬件加速） |
+| `scrolling-aosp-douyin` | 抖音风格视频滑动 |
+| `scrolling-aosp-video` | 视频 Feed 版本 |
+| `scrolling-aosp-ebook` | 电子书阅读器 Demo |
+| `scrolling-aosp-purerenderthread` | 纯 RenderThread 列表滑动 |
+| `scrolling-aosp-dualwindow` | 双 Window 刷新 Demo |
+| `scrolling-aosp-mixedrender` | 混合渲染 Demo |
+| `scrolling-compose` | Jetpack Compose 实现版本 |
 
 ### 启动性能测试模块
 
@@ -84,22 +84,22 @@
 
 | 模块目录 | 说明 |
 |---------|------|
-| `webview` | 标准 WebView Functor 实现 |
-| `webview-surface` | WebView + SurfaceView |
-| `webview-texture` | WebView + TextureView |
-| `webview-imagereader` | WebView + ImageReader |
+| `scrolling-webview` | 标准 WebView Functor 实现 |
+| `scrolling-webview-surface` | WebView + SurfaceView |
+| `scrolling-webview-texture` | WebView + TextureView |
+| `scrolling-webview-imagereader` | WebView + ImageReader |
 
 ### Map 模块
 
 | 模块目录 | 说明 |
 |---------|------|
-| `surface-map` | SurfaceView 地图 Demo |
-| `gl-map` | OpenGL ES 2.0 地图 Demo |
+| `scrolling-surface-map` | SurfaceView 地图 Demo |
+| `scrolling-gl-map` | OpenGL ES 2.0 地图 Demo |
 
 ## 主页布局统一说明
-- 参考 `aosp-performance`，所有带主页入口的模块统一为 **无 ActionBar**，并在顶部加入应用信息卡片（40dp 顶部留白，避免被状态栏遮挡）。
+- 参考 `scrolling-aosp-performance`，所有带主页入口的模块统一为 **无 ActionBar**，并在顶部加入应用信息卡片（40dp 顶部留白，避免被状态栏遮挡）。
 - 应用信息模块下方直接衔接各类负载入口，原有负载按钮与卡片布局保持不变。
-- 无主页的模块（如 `aosp-douyin`、`aosp-ebook`）已移除应用信息卡片，保持沉浸式体验。
+- 无主页的模块（如 `scrolling-aosp-douyin`、`scrolling-aosp-ebook`）已移除应用信息卡片，保持沉浸式体验。
 
 ## 模块详细说明
 
@@ -107,31 +107,31 @@
 
 原始的高性能微信朋友圈实现，来自 fork 的项目。这个模块展示了如何高效实现类似微信朋友圈的滑动列表，包含多种性能优化技巧。
 
-### 2. 性能测试模块 (aosp-performance)
+### 2. 性能测试模块 (scrolling-aosp-performance)
 
 专门设计用于测试和比较不同负载下的滑动性能表现。支持11种负载模式，在关键代码处添加了 Trace 点，方便使用 Perfetto 等工具进行性能分析和优化。
 
-### 3. 功耗测试模块 (aosp-power)
+### 3. 功耗测试模块 (scrolling-aosp-power)
 
 单 Activity 设计，每次进去环境都一模一样，内容固定不变，用于精确的功耗测试。
 
-### 4. WebView测试模块 (webview)
+### 4. WebView测试模块 (scrolling-webview)
 
 使用WebView实现朋友圈界面，用于测试WebView与原生实现在性能方面的差异。支持11种负载级别，实现了JavaScript与Java交互，支持动态加载最多200条朋友圈数据。
 
-### 5. 自定义Scroller测试模块 (aosp-customscroller)
+### 5. 自定义Scroller测试模块 (scrolling-aosp-customscroller)
 
 - 完全保留 AOSP UI，但移除了 RecyclerView/ListView，采用自研的 `CustomTimelineView` + `CustomOverScroller`
 - 通过 Hilt + MVVM + Room 构建数据流，启动即缓存 100 条固定数据
 - 支持11种负载类型，便于验证厂商对 `OverScroller` 的自定义优化差异
 
-### 6. RenderThread压测模块 (aosp-renderstress)
+### 6. RenderThread压测模块 (scrolling-aosp-renderstress)
 
 - 代码骨架与自定义 Scroller 模块一致，同样依赖 `CustomOverScroller`
 - 借助 `RenderStressOverlayView` 在滑动事件触发时应用高阶模糊 / Shader 链
 - 支持11种负载类型，模拟"UI 线程快、RenderThread 过载"的真实现象
 
-### 7. 软件渲染测试模块 (aosp-softwarerender)
+### 7. 软件渲染测试模块 (scrolling-aosp-softwarerender)
 
 使用软件渲染模式（禁用硬件加速）的朋友圈实现：
 
@@ -139,7 +139,7 @@
 - **只有UI Thread**：没有RenderThread，所有绑制操作在主线程完成
 - 支持11种负载类型，适合测试CPU密集型场景
 
-### 8. Compose测试模块 (compose)
+### 8. Compose测试模块 (scrolling-compose)
 
 使用Jetpack Compose开发的朋友圈实现：
 
@@ -148,7 +148,7 @@
 - **Coil图片加载**：Compose友好的图片加载库
 - 支持11种负载类型，方便对比框架性能差异
 
-### 9. SurfaceView地图测试模块 (surface-map)
+### 9. SurfaceView地图测试模块 (scrolling-surface-map)
 
 模拟高德地图风格的Demo应用：
 
@@ -157,7 +157,7 @@
 - **滚动手势支持**：支持拖拽和惯性滚动
 - 支持11种负载类型，测试SurfaceView与原生View混合场景
 
-### 10. 纯RenderThread测试模块 (aosp-purerenderthread)
+### 10. 纯RenderThread测试模块 (scrolling-aosp-purerenderthread)
 
 纯RenderThread列表滑动实现：
 
@@ -166,7 +166,7 @@
 - **SurfaceView实现**：利用SurfaceView的独立Surface
 - 支持11种负载类型，验证纯渲染线程方案的性能表现
 
-### 11. 双Window测试模块 (aosp-dualwindow)
+### 11. 双Window测试模块 (scrolling-aosp-dualwindow)
 
 双Window同时刷新渲染：
 
@@ -176,7 +176,7 @@
 - **需要悬浮窗权限**：使用WindowManager添加第二个Window
 - 支持11种负载类型，测试多Window场景的性能表现
 
-### 12. 混合渲染测试模块 (aosp-mixedrender)
+### 12. 混合渲染测试模块 (scrolling-aosp-mixedrender)
 
 混合两种渲染管线的Demo：
 
@@ -185,7 +185,7 @@
 - **模拟视频覆盖场景**：类似视频播放器叠加在可滑动列表上
 - 支持11种负载类型，分析混合渲染的性能特征
 
-### 13. OpenGL地图测试模块 (gl-map)
+### 13. OpenGL地图测试模块 (scrolling-gl-map)
 
 OpenGL ES 2.0地图渲染Demo：
 
@@ -195,7 +195,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **原生UI叠加**：搜索栏和控制按钮
 - 支持11种负载类型，GPU密集型场景测试
 
-### 14. 抖音风格视频滑动模块 (aosp-douyin)
+### 14. 抖音风格视频滑动模块 (scrolling-aosp-douyin)
 
 模拟抖音的全屏视频滑动体验：
 
@@ -206,7 +206,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **完美UI还原**：底部导航栏、右侧互动按钮、左下角信息区域
 - 使用 Media3 ExoPlayer 进行视频播放
 
-### 15. 电子书阅读器模块 (aosp-ebook)
+### 15. 电子书阅读器模块 (scrolling-aosp-ebook)
 
 模拟电子书阅读器的翻页体验：
 
@@ -247,14 +247,14 @@ OpenGL ES 2.0地图渲染Demo：
 ## 如何使用
 
 1. 运行 `app` 模块查看原始的高性能朋友圈实现
-2. 运行 `aosp-performance` 模块进行性能测试：
+2. 运行 `scrolling-aosp-performance` 模块进行性能测试：
    - 选择11种负载级别中的任意一种
    - 使用 Perfetto 或其他性能分析工具收集数据
    - 分析 Trace 结果进行性能优化
-3. 运行 `aosp-power` 模块测试功耗表现
-4. 运行 `webview` 模块测试WebView性能
-5. 运行 `aosp-customscroller` 模块体验自定义滚动容器
-6. 运行 `aosp-renderstress` 模块验证 RenderThread 负载
+3. 运行 `scrolling-aosp-power` 模块测试功耗表现
+4. 运行 `scrolling-webview` 模块测试WebView性能
+5. 运行 `scrolling-aosp-customscroller` 模块体验自定义滚动容器
+6. 运行 `scrolling-aosp-renderstress` 模块验证 RenderThread 负载
 
 ## 性能测试对比
 
@@ -285,21 +285,21 @@ OpenGL ES 2.0地图渲染Demo：
 ### 🚀 自动构建版本
 每次代码更新后，GitHub Actions会自动构建最新版本的APK文件。你可以在[Releases页面](../../releases)下载：
 
-**AOSP 模块：**
+**滑动测试模块：**
 - **app** - 主应用模块
-- **aosp-performance** - 性能测试模块 (11种负载)
-- **aosp-power** - 功耗测试模块  
-- **aosp-picasso** - Picasso图片加载
-- **aosp-customscroller** - 自定义Scroller测试模块 (11种负载)
-- **aosp-renderstress** - RenderThread压测模块 (11种负载)
-- **aosp-softwarerender** - 软件渲染测试模块 (11种负载)
-- **aosp-douyin** - 抖音风格视频滑动模块
-- **aosp-video** - 视频Feed模块
-- **aosp-ebook** - 电子书阅读器模块
-- **aosp-purerenderthread** - 纯RenderThread测试模块 (11种负载)
-- **aosp-dualwindow** - 双Window刷新测试模块 (11种负载)
-- **aosp-mixedrender** - 混合渲染测试模块 (11种负载)
-- **compose** - Jetpack Compose测试模块 (11种负载)
+- **scrolling-aosp-performance** - 性能测试模块 (11种负载)
+- **scrolling-aosp-power** - 功耗测试模块
+- **scrolling-aosp-picasso** - Picasso图片加载
+- **scrolling-aosp-customscroller** - 自定义Scroller测试模块 (11种负载)
+- **scrolling-aosp-renderstress** - RenderThread压测模块 (11种负载)
+- **scrolling-aosp-softwarerender** - 软件渲染测试模块 (11种负载)
+- **scrolling-aosp-douyin** - 抖音风格视频滑动模块
+- **scrolling-aosp-video** - 视频Feed模块
+- **scrolling-aosp-ebook** - 电子书阅读器模块
+- **scrolling-aosp-purerenderthread** - 纯RenderThread测试模块 (11种负载)
+- **scrolling-aosp-dualwindow** - 双Window刷新测试模块 (11种负载)
+- **scrolling-aosp-mixedrender** - 混合渲染测试模块 (11种负载)
+- **scrolling-compose** - Jetpack Compose测试模块 (11种负载)
 
 **启动性能模块：**
 - **launch-aosp** - 标准 View 体系 (轻/中/重负载)
@@ -308,14 +308,14 @@ OpenGL ES 2.0地图渲染Demo：
 - **launch-gl** - OpenGL ES (轻/中/重负载)
 
 **WebView 模块：**
-- **webview** - WebView Functor测试模块 (10种负载)
-- **webview-surface** - WebView+SurfaceView
-- **webview-texture** - WebView+TextureView
-- **webview-imagereader** - WebView+ImageReader
+- **scrolling-webview** - WebView Functor测试模块 (10种负载)
+- **scrolling-webview-surface** - WebView+SurfaceView
+- **scrolling-webview-texture** - WebView+TextureView
+- **scrolling-webview-imagereader** - WebView+ImageReader
 
 **Map 模块：**
-- **surface-map** - SurfaceView地图测试模块 (10种负载)
-- **gl-map** - OpenGL地图测试模块 (10种负载)
+- **scrolling-surface-map** - SurfaceView地图测试模块 (10种负载)
+- **scrolling-gl-map** - OpenGL地图测试模块 (10种负载)
 
 ### 📋 版本说明
 - **Debug版本**: 包含调试信息，可直接安装使用

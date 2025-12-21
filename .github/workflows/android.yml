@@ -30,22 +30,22 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-cleanup: always
-      
+
     - name: Make Gradle wrapper executable
       run: chmod +x ./gradlew
-      
+
     - name: Decode Keystore
       run: |
         echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
         chmod 600 release.keystore
-      
+
     - name: Get version info
       id: version
       run: |
         echo "BUILD_TIME=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
         echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-      
+
     - name: Setup Android app signing
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -57,122 +57,122 @@ jobs:
       run: >
         ./gradlew
         :app:assembleRelease
-        :aosp-performance:assembleRelease
-        :aosp-power:assembleRelease
-        :aosp-picasso:assembleRelease
-        :aosp-customscroller:assembleRelease
-        :aosp-renderstress:assembleRelease
-        :aosp-softwarerender:assembleRelease
-        :aosp-douyin:assembleRelease
-        :aosp-video:assembleRelease
-        :aosp-ebook:assembleRelease
-        :aosp-purerenderthread:assembleRelease
-        :aosp-dualwindow:assembleRelease
-        :aosp-mixedrender:assembleRelease
-        :compose:assembleRelease
-        :webview:assembleRelease
-        :webview-surface:assembleRelease
-        :webview-texture:assembleRelease
-        :webview-imagereader:assembleRelease
-        :surface-map:assembleRelease
-        :gl-map:assembleRelease
+        :scrolling-aosp-performance:assembleRelease
+        :scrolling-aosp-power:assembleRelease
+        :scrolling-aosp-picasso:assembleRelease
+        :scrolling-aosp-customscroller:assembleRelease
+        :scrolling-aosp-renderstress:assembleRelease
+        :scrolling-aosp-softwarerender:assembleRelease
+        :scrolling-aosp-douyin:assembleRelease
+        :scrolling-aosp-video:assembleRelease
+        :scrolling-aosp-ebook:assembleRelease
+        :scrolling-aosp-purerenderthread:assembleRelease
+        :scrolling-aosp-dualwindow:assembleRelease
+        :scrolling-aosp-mixedrender:assembleRelease
+        :scrolling-compose:assembleRelease
+        :scrolling-webview:assembleRelease
+        :scrolling-webview-surface:assembleRelease
+        :scrolling-webview-texture:assembleRelease
+        :scrolling-webview-imagereader:assembleRelease
+        :scrolling-surface-map:assembleRelease
+        :scrolling-gl-map:assembleRelease
         :launch-aosp:assembleRelease
         :launch-compose:assembleRelease
         :launch-webview:assembleRelease
         :launch-gl:assembleRelease
         --parallel
-      
+
     - name: Rename APK files with version info
       run: |
         # Create release directory
         mkdir -p release-apks
-        
+
         # Copy and rename APKs with new naming convention
         # Main app
         if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
           cp app/build/outputs/apk/release/app-release.apk "release-apks/app-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        # AOSP modules
-        if [ -f "aosp-performance/build/outputs/apk/release/aosp-performance-release.apk" ]; then
-          cp aosp-performance/build/outputs/apk/release/aosp-performance-release.apk "release-apks/aosp-performance-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        # Scrolling AOSP modules
+        if [ -f "scrolling-aosp-performance/build/outputs/apk/release/scrolling-aosp-performance-release.apk" ]; then
+          cp scrolling-aosp-performance/build/outputs/apk/release/scrolling-aosp-performance-release.apk "release-apks/scrolling-aosp-performance-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-power/build/outputs/apk/release/aosp-power-release.apk" ]; then
-          cp aosp-power/build/outputs/apk/release/aosp-power-release.apk "release-apks/aosp-power-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-power/build/outputs/apk/release/scrolling-aosp-power-release.apk" ]; then
+          cp scrolling-aosp-power/build/outputs/apk/release/scrolling-aosp-power-release.apk "release-apks/scrolling-aosp-power-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-picasso/build/outputs/apk/release/aosp-picasso-release.apk" ]; then
-          cp aosp-picasso/build/outputs/apk/release/aosp-picasso-release.apk "release-apks/aosp-picasso-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-picasso/build/outputs/apk/release/scrolling-aosp-picasso-release.apk" ]; then
+          cp scrolling-aosp-picasso/build/outputs/apk/release/scrolling-aosp-picasso-release.apk "release-apks/scrolling-aosp-picasso-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-customscroller/build/outputs/apk/release/aosp-customscroller-release.apk" ]; then
-          cp aosp-customscroller/build/outputs/apk/release/aosp-customscroller-release.apk "release-apks/aosp-customscroller-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-customscroller/build/outputs/apk/release/scrolling-aosp-customscroller-release.apk" ]; then
+          cp scrolling-aosp-customscroller/build/outputs/apk/release/scrolling-aosp-customscroller-release.apk "release-apks/scrolling-aosp-customscroller-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-renderstress/build/outputs/apk/release/aosp-renderstress-release.apk" ]; then
-          cp aosp-renderstress/build/outputs/apk/release/aosp-renderstress-release.apk "release-apks/aosp-renderstress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-renderstress/build/outputs/apk/release/scrolling-aosp-renderstress-release.apk" ]; then
+          cp scrolling-aosp-renderstress/build/outputs/apk/release/scrolling-aosp-renderstress-release.apk "release-apks/scrolling-aosp-renderstress-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-softwarerender/build/outputs/apk/release/aosp-softwarerender-release.apk" ]; then
-          cp aosp-softwarerender/build/outputs/apk/release/aosp-softwarerender-release.apk "release-apks/aosp-softwarerender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-softwarerender/build/outputs/apk/release/scrolling-aosp-softwarerender-release.apk" ]; then
+          cp scrolling-aosp-softwarerender/build/outputs/apk/release/scrolling-aosp-softwarerender-release.apk "release-apks/scrolling-aosp-softwarerender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-douyin/build/outputs/apk/release/aosp-douyin-release.apk" ]; then
-          cp aosp-douyin/build/outputs/apk/release/aosp-douyin-release.apk "release-apks/aosp-douyin-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-douyin/build/outputs/apk/release/scrolling-aosp-douyin-release.apk" ]; then
+          cp scrolling-aosp-douyin/build/outputs/apk/release/scrolling-aosp-douyin-release.apk "release-apks/scrolling-aosp-douyin-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-video/build/outputs/apk/release/aosp-video-release.apk" ]; then
-          cp aosp-video/build/outputs/apk/release/aosp-video-release.apk "release-apks/aosp-video-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-video/build/outputs/apk/release/scrolling-aosp-video-release.apk" ]; then
+          cp scrolling-aosp-video/build/outputs/apk/release/scrolling-aosp-video-release.apk "release-apks/scrolling-aosp-video-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-ebook/build/outputs/apk/release/aosp-ebook-release.apk" ]; then
-          cp aosp-ebook/build/outputs/apk/release/aosp-ebook-release.apk "release-apks/aosp-ebook-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-ebook/build/outputs/apk/release/scrolling-aosp-ebook-release.apk" ]; then
+          cp scrolling-aosp-ebook/build/outputs/apk/release/scrolling-aosp-ebook-release.apk "release-apks/scrolling-aosp-ebook-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-purerenderthread/build/outputs/apk/release/aosp-purerenderthread-release.apk" ]; then
-          cp aosp-purerenderthread/build/outputs/apk/release/aosp-purerenderthread-release.apk "release-apks/aosp-purerenderthread-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-purerenderthread/build/outputs/apk/release/scrolling-aosp-purerenderthread-release.apk" ]; then
+          cp scrolling-aosp-purerenderthread/build/outputs/apk/release/scrolling-aosp-purerenderthread-release.apk "release-apks/scrolling-aosp-purerenderthread-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-dualwindow/build/outputs/apk/release/aosp-dualwindow-release.apk" ]; then
-          cp aosp-dualwindow/build/outputs/apk/release/aosp-dualwindow-release.apk "release-apks/aosp-dualwindow-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-dualwindow/build/outputs/apk/release/scrolling-aosp-dualwindow-release.apk" ]; then
+          cp scrolling-aosp-dualwindow/build/outputs/apk/release/scrolling-aosp-dualwindow-release.apk "release-apks/scrolling-aosp-dualwindow-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "aosp-mixedrender/build/outputs/apk/release/aosp-mixedrender-release.apk" ]; then
-          cp aosp-mixedrender/build/outputs/apk/release/aosp-mixedrender-release.apk "release-apks/aosp-mixedrender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-aosp-mixedrender/build/outputs/apk/release/scrolling-aosp-mixedrender-release.apk" ]; then
+          cp scrolling-aosp-mixedrender/build/outputs/apk/release/scrolling-aosp-mixedrender-release.apk "release-apks/scrolling-aosp-mixedrender-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        # Compose module
-        if [ -f "compose/build/outputs/apk/release/compose-release.apk" ]; then
-          cp compose/build/outputs/apk/release/compose-release.apk "release-apks/compose-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        # Scrolling Compose module
+        if [ -f "scrolling-compose/build/outputs/apk/release/scrolling-compose-release.apk" ]; then
+          cp scrolling-compose/build/outputs/apk/release/scrolling-compose-release.apk "release-apks/scrolling-compose-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        # WebView modules
-        if [ -f "webview/build/outputs/apk/release/webview-release.apk" ]; then
-          cp webview/build/outputs/apk/release/webview-release.apk "release-apks/webview-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        # Scrolling WebView modules
+        if [ -f "scrolling-webview/build/outputs/apk/release/scrolling-webview-release.apk" ]; then
+          cp scrolling-webview/build/outputs/apk/release/scrolling-webview-release.apk "release-apks/scrolling-webview-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "webview-surface/build/outputs/apk/release/webview-surface-release.apk" ]; then
-          cp webview-surface/build/outputs/apk/release/webview-surface-release.apk "release-apks/webview-surface-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-webview-surface/build/outputs/apk/release/scrolling-webview-surface-release.apk" ]; then
+          cp scrolling-webview-surface/build/outputs/apk/release/scrolling-webview-surface-release.apk "release-apks/scrolling-webview-surface-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "webview-texture/build/outputs/apk/release/webview-texture-release.apk" ]; then
-          cp webview-texture/build/outputs/apk/release/webview-texture-release.apk "release-apks/webview-texture-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-webview-texture/build/outputs/apk/release/scrolling-webview-texture-release.apk" ]; then
+          cp scrolling-webview-texture/build/outputs/apk/release/scrolling-webview-texture-release.apk "release-apks/scrolling-webview-texture-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "webview-imagereader/build/outputs/apk/release/webview-imagereader-release.apk" ]; then
-          cp webview-imagereader/build/outputs/apk/release/webview-imagereader-release.apk "release-apks/webview-imagereader-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-webview-imagereader/build/outputs/apk/release/scrolling-webview-imagereader-release.apk" ]; then
+          cp scrolling-webview-imagereader/build/outputs/apk/release/scrolling-webview-imagereader-release.apk "release-apks/scrolling-webview-imagereader-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        # Surface and GL modules
-        if [ -f "surface-map/build/outputs/apk/release/surface-map-release.apk" ]; then
-          cp surface-map/build/outputs/apk/release/surface-map-release.apk "release-apks/surface-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        # Scrolling Surface and GL modules
+        if [ -f "scrolling-surface-map/build/outputs/apk/release/scrolling-surface-map-release.apk" ]; then
+          cp scrolling-surface-map/build/outputs/apk/release/scrolling-surface-map-release.apk "release-apks/scrolling-surface-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
-        if [ -f "gl-map/build/outputs/apk/release/gl-map-release.apk" ]; then
-          cp gl-map/build/outputs/apk/release/gl-map-release.apk "release-apks/gl-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+
+        if [ -f "scrolling-gl-map/build/outputs/apk/release/scrolling-gl-map-release.apk" ]; then
+          cp scrolling-gl-map/build/outputs/apk/release/scrolling-gl-map-release.apk "release-apks/scrolling-gl-map-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
         fi
-        
+
         # Launch Modules (Flavored)
         for module in launch-aosp launch-compose launch-webview launch-gl; do
           for flavor in light medium heavy; do
@@ -181,18 +181,18 @@ jobs:
             fi
           done
         done
-        
+
         # List all generated files
         echo "Generated APK files:"
         ls -la release-apks/
-      
+
     - name: Upload APKs as artifacts
       uses: actions/upload-artifact@v4
       with:
         name: all-apks-${{ steps.version.outputs.BUILD_TIME }}
         path: release-apks/
         retention-days: 30
-        
+
     - name: Create Release (only on push to master)
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: softprops/action-gh-release@v1
@@ -201,58 +201,58 @@ jobs:
         name: "Auto Build ${{ steps.version.outputs.BUILD_TIME }}"
         body: |
           🚀 **Automated Build Release**
-          
+
           📅 **Build Time**: ${{ steps.version.outputs.BUILD_TIME }}
           🔗 **Commit**: ${{ steps.version.outputs.SHORT_SHA }}
           🌿 **Branch**: ${{ steps.version.outputs.BRANCH_NAME }}
-          
+
           ## 📦 Included APK Files (20 Modules)
-          
-          ### 🎯 AOSP Modules (Standard Android UI + RenderThread)
+
+          ### 🎯 Scrolling Modules (Standard Android UI + RenderThread)
           - **app** - Main Application
-          - **aosp-performance** - Performance Testing
-          - **aosp-power** - Power Consumption Testing
-          - **aosp-picasso** - Picasso Image Loading
-          - **aosp-customscroller** - Custom Scroller Testing
-          - **aosp-renderstress** - RenderThread Stress Testing
-          - **aosp-softwarerender** - Software Rendering Testing
-          - **aosp-douyin** - Douyin-style Video Scrolling
-          - **aosp-video** - Video Feed Testing
-          - **aosp-ebook** - E-Book Reader Demo
-          - **aosp-purerenderthread** - Pure RenderThread List
-          - **aosp-dualwindow** - Dual Window Rendering
-          - **aosp-mixedrender** - Mixed Rendering Demo
-          
+          - **scrolling-aosp-performance** - Performance Testing
+          - **scrolling-aosp-power** - Power Consumption Testing
+          - **scrolling-aosp-picasso** - Picasso Image Loading
+          - **scrolling-aosp-customscroller** - Custom Scroller Testing
+          - **scrolling-aosp-renderstress** - RenderThread Stress Testing
+          - **scrolling-aosp-softwarerender** - Software Rendering Testing
+          - **scrolling-aosp-douyin** - Douyin-style Video Scrolling
+          - **scrolling-aosp-video** - Video Feed Testing
+          - **scrolling-aosp-ebook** - E-Book Reader Demo
+          - **scrolling-aosp-purerenderthread** - Pure RenderThread List
+          - **scrolling-aosp-dualwindow** - Dual Window Rendering
+          - **scrolling-aosp-mixedrender** - Mixed Rendering Demo
+
           ### 🎨 Compose Module
-          - **compose** - Jetpack Compose Implementation
-          
+          - **scrolling-compose** - Jetpack Compose Implementation
+
           ### 🌐 WebView Modules
-          - **webview** - Standard WebView
-          - **webview-surface** - WebView with SurfaceView
-          - **webview-texture** - WebView with TextureView
-          - **webview-imagereader** - WebView with ImageReader
-          
+          - **scrolling-webview** - Standard WebView
+          - **scrolling-webview-surface** - WebView with SurfaceView
+          - **scrolling-webview-texture** - WebView with TextureView
+          - **scrolling-webview-imagereader** - WebView with ImageReader
+
           ### 🗺️ Surface & GL Modules
-          - **surface-map** - SurfaceView Map Demo
-          - **gl-map** - OpenGL ES Map Demo
-          
+          - **scrolling-surface-map** - SurfaceView Map Demo
+          - **scrolling-gl-map** - OpenGL ES Map Demo
+
           ### 🚀 Launch Performance Modules
           - **launch-aosp** - Standard View System (Light/Medium/Heavy)
           - **launch-compose** - Jetpack Compose (Light/Medium/Heavy)
           - **launch-webview** - WebView Hybrid (Light/Medium/Heavy)
           - **launch-gl** - OpenGL ES (Light/Medium/Heavy)
-          
+
           ## 📝 Notes
           - ✅ Release version, signed with production key
           - ✅ Optimized for better performance and smaller size
           - ✅ All APKs passed automated build and signing verification
           - ✅ Ready for installation and production use
-          
+
           ## 🔧 Installation
           1. Download the APK file
           2. Enable "Install from unknown sources" on your Android device
           3. Install the APK file
-          
+
           ---
           💡 This is an automated release generated by GitHub Actions
         files: release-apks/*

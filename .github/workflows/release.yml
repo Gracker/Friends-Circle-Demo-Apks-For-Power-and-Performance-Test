@@ -15,7 +15,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -34,15 +34,15 @@ jobs:
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
-      
+
     - name: Make Gradle wrapper executable
       run: chmod +x ./gradlew
-      
+
     - name: Decode Keystore
       run: |
         echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
         chmod 600 release.keystore
-        
+
     - name: Build Release APKs
       env:
         KEYSTORE_FILE_PATH: ${{ github.workspace }}/release.keystore
@@ -53,45 +53,45 @@ jobs:
       run: |
         ./gradlew \
           :app:assembleRelease \
-          :aosp-performance:assembleRelease \
-          :aosp-power:assembleRelease \
-          :aosp-picasso:assembleRelease \
-          :aosp-customscroller:assembleRelease \
-          :aosp-renderstress:assembleRelease \
-          :aosp-softwarerender:assembleRelease \
-          :aosp-douyin:assembleRelease \
-          :aosp-video:assembleRelease \
-          :aosp-ebook:assembleRelease \
-          :aosp-purerenderthread:assembleRelease \
-          :aosp-dualwindow:assembleRelease \
-          :aosp-mixedrender:assembleRelease \
-          :compose:assembleRelease \
-          :webview:assembleRelease \
-          :webview-surface:assembleRelease \
-          :webview-texture:assembleRelease \
-          :webview-imagereader:assembleRelease \
-          :surface-map:assembleRelease \
-          :gl-map:assembleRelease \
+          :scrolling-aosp-performance:assembleRelease \
+          :scrolling-aosp-power:assembleRelease \
+          :scrolling-aosp-picasso:assembleRelease \
+          :scrolling-aosp-customscroller:assembleRelease \
+          :scrolling-aosp-renderstress:assembleRelease \
+          :scrolling-aosp-softwarerender:assembleRelease \
+          :scrolling-aosp-douyin:assembleRelease \
+          :scrolling-aosp-video:assembleRelease \
+          :scrolling-aosp-ebook:assembleRelease \
+          :scrolling-aosp-purerenderthread:assembleRelease \
+          :scrolling-aosp-dualwindow:assembleRelease \
+          :scrolling-aosp-mixedrender:assembleRelease \
+          :scrolling-compose:assembleRelease \
+          :scrolling-webview:assembleRelease \
+          :scrolling-webview-surface:assembleRelease \
+          :scrolling-webview-texture:assembleRelease \
+          :scrolling-webview-imagereader:assembleRelease \
+          :scrolling-surface-map:assembleRelease \
+          :scrolling-gl-map:assembleRelease \
           :launch-aosp:assembleRelease \
           :launch-compose:assembleRelease \
           :launch-webview:assembleRelease \
           :launch-gl:assembleRelease \
           --parallel
-      
+
     - name: Prepare Release Files
       run: |
         mkdir -p release-files
-        
+
         # 复制生成的APK文件 (支持普通模块和Flavor模块)
         find . \( -path "*/build/outputs/apk/release/*.apk" -o -path "*/build/outputs/apk/*/release/*.apk" \) -type f | while read apk; do
           filename=$(basename "$apk")
           module_name=$(echo "$filename" | sed 's/-release.*//g')
           cp "$apk" "release-files/${module_name}-${{ github.event.inputs.version_name }}.apk"
         done
-        
+
         echo "准备发布的文件:"
         ls -la release-files/
-        
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
@@ -99,53 +99,53 @@ jobs:
         name: "正式发布 ${{ github.event.inputs.version_name }}"
         body: |
           🎉 **正式版本发布**
-          
+
           📱 **版本**: ${{ github.event.inputs.version_name }}
-          
+
           ## 📝 发布说明
           ${{ github.event.inputs.release_notes }}
-          
+
           ## 📦 包含的应用 (20 个模块)
-          
-          ### 🎯 AOSP 模块 (标准 Android UI + RenderThread)
+
+          ### 🎯 滑动测试模块 (标准 Android UI + RenderThread)
           - **app** - 主应用模块
-          - **aosp-performance** - 性能测试模块 (11种负载)
-          - **aosp-power** - 功耗测试模块
-          - **aosp-picasso** - Picasso图片加载
-          - **aosp-customscroller** - 自定义Scroller测试模块
-          - **aosp-renderstress** - RenderThread压测模块
-          - **aosp-softwarerender** - 软件渲染测试模块
-          - **aosp-douyin** - 抖音风格视频滑动模块
-          - **aosp-video** - 视频Feed模块
-          - **aosp-ebook** - 电子书阅读器模块
-          - **aosp-purerenderthread** - 纯RenderThread测试模块
-          - **aosp-dualwindow** - 双Window刷新测试模块
-          - **aosp-mixedrender** - 混合渲染测试模块
-          
+          - **scrolling-aosp-performance** - 性能测试模块 (11种负载)
+          - **scrolling-aosp-power** - 功耗测试模块
+          - **scrolling-aosp-picasso** - Picasso图片加载
+          - **scrolling-aosp-customscroller** - 自定义Scroller测试模块
+          - **scrolling-aosp-renderstress** - RenderThread压测模块
+          - **scrolling-aosp-softwarerender** - 软件渲染测试模块
+          - **scrolling-aosp-douyin** - 抖音风格视频滑动模块
+          - **scrolling-aosp-video** - 视频Feed模块
+          - **scrolling-aosp-ebook** - 电子书阅读器模块
+          - **scrolling-aosp-purerenderthread** - 纯RenderThread测试模块
+          - **scrolling-aosp-dualwindow** - 双Window刷新测试模块
+          - **scrolling-aosp-mixedrender** - 混合渲染测试模块
+
           ### 🎨 Compose 模块
-          - **compose** - Jetpack Compose测试模块
-          
+          - **scrolling-compose** - Jetpack Compose测试模块
+
           ### 🌐 WebView 模块
-          - **webview** - WebView测试模块
-          - **webview-surface** - WebView+SurfaceView
-          - **webview-texture** - WebView+TextureView
-          - **webview-imagereader** - WebView+ImageReader
-          
+          - **scrolling-webview** - WebView测试模块
+          - **scrolling-webview-surface** - WebView+SurfaceView
+          - **scrolling-webview-texture** - WebView+TextureView
+          - **scrolling-webview-imagereader** - WebView+ImageReader
+
           ### 🗺️ Surface & GL 模块
-          - **surface-map** - SurfaceView地图测试模块
-          - **gl-map** - OpenGL地图测试模块
-          
+          - **scrolling-surface-map** - SurfaceView地图测试模块
+          - **scrolling-gl-map** - OpenGL地图测试模块
+
           ### 🚀 启动性能测试模块
           - **launch-aosp** - 标准 View 体系 (轻/中/重负载)
           - **launch-compose** - Jetpack Compose (轻/中/重负载)
           - **launch-webview** - WebView 混合开发 (轻/中/重负载)
           - **launch-gl** - OpenGL ES (轻/中/重负载)
-          
+
           ## 🔧 安装说明
           1. 下载对应的APK文件
           2. 在Android设备上启用"允许安装未知来源应用"
           3. 直接安装APK文件
-          
+
           ---
           ⭐ 感谢使用！如果觉得有用请给个Star
         files: release-files/*
