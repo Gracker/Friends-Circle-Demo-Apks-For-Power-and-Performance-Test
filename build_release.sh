@@ -154,6 +154,10 @@ declare -a MODULE_CONFIG=(
     "launch-game|launch-game-light-release|Game启动器(Light)"
     "launch-game|launch-game-medium-release|Game启动器(Medium)"
     "launch-game|launch-game-heavy-release|Game启动器(Heavy)"
+    # Switch 模块 - 应用内跳转性能测试
+    "switch-aosp|switch-aosp-release|Switch-AOSP"
+    "switch-flutter|switch-flutter-release|Switch-Flutter"
+    "switch-webview|switch-webview-release|Switch-WebView"
 )
 
 # 处理每个模块

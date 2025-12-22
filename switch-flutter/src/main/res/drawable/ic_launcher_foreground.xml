@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Switch arrows icon - centered -->
+    <group
+        android:translateX="54"
+        android:translateY="48">
+
+        <!-- Up arrow pointing up -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,-24 L10,-12 L5,-12 L5,0 L-5,0 L-5,-12 L-10,-12 Z"/>
+
+        <!-- Down arrow pointing down -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,24 L-10,12 L-5,12 L-5,0 L5,0 L5,12 L10,12 Z"/>
+
+    </group>
+
+    <!-- "F" letter for Flutter -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,65 L48,78 L52,78 L52,73 L58,73 L58,70 L52,70 L52,68 L60,68 L60,65 Z"/>
+
+</vector>

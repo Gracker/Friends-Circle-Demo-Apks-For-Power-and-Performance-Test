@@ -80,6 +80,29 @@
 | `launch-webview` | WebView 混合开发启动测试 (模拟 DOM/JSON 压力) |
 | `launch-gl` | OpenGL ES 启动测试 (模拟纹理/状态切换压力) |
 
+### 🔄 应用内跳转性能测试模块 (switch-*)
+
+| 模块目录 | 说明 |
+|---------|------|
+| `switch-common` | 公共负载模块：真实 XML Inflate、自定义 View、Binder/IO 操作 |
+| `switch-aosp` | 标准 Android UI 跳转测试 (10 种负载组合) |
+| `switch-flutter` | Flutter 风格 Canvas 渲染跳转测试 (10 种负载组合) |
+| `switch-webview` | WebView 混合开发跳转测试 (10 种负载组合) |
+
+**Switch 模块负载说明：**
+- **自身负载 (Self Load)**: 无 / 轻 / 中 / 重 - 模拟目标 Activity 的 UI 复杂度
+- **背景负载 (Background Load)**: 无 / 中 / 重 - 模拟系统繁忙程度
+- **10 种组合**: Pure、Self-Light、Self-Medium、Self-Heavy、Bg-Medium、Bg-Heavy、Light+Med、Med+Med、Heavy+Med、Heavy+Heavy
+
+**特点：**
+- 真实的 XML 布局 Inflate（300+ 布局文件）
+- 真实的自定义 View 创建（5 种复杂度）
+- 真实的 Binder IPC 调用
+- 真实的文件 IO 操作
+- 伪随机确保测试可重复
+- 后台负载在跳转完成 1 秒后自动停止
+- 支持第一帧后的延迟负载模拟
+
 ### WebView 模块
 
 | 模块目录 | 说明 |
@@ -306,6 +329,11 @@ OpenGL ES 2.0地图渲染Demo：
 - **launch-compose** - Jetpack Compose (轻/中/重负载)
 - **launch-webview** - WebView 混合开发 (轻/中/重负载)
 - **launch-gl** - OpenGL ES (轻/中/重负载)
+
+**应用内跳转性能模块 (Switch)：**
+- **switch-aosp** - 标准 Android UI 跳转测试 (10 种负载)
+- **switch-flutter** - Flutter 风格渲染跳转测试 (10 种负载)
+- **switch-webview** - WebView 混合开发跳转测试 (10 种负载)
 
 **WebView 模块：**
 - **scrolling-webview** - WebView Functor测试模块 (10种负载)

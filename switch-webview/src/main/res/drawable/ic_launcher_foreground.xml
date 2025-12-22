@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Switch arrows icon - centered -->
+    <group
+        android:translateX="54"
+        android:translateY="48">
+
+        <!-- Up arrow pointing up -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,-24 L10,-12 L5,-12 L5,0 L-5,0 L-5,-12 L-10,-12 Z"/>
+
+        <!-- Down arrow pointing down -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,24 L-10,12 L-5,12 L-5,0 L5,0 L5,12 L10,12 Z"/>
+
+    </group>
+
+    <!-- "W" letter for WebView -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,65 L47,78 L51,70 L54,78 L57,78 L60,65 L56,65 L54,72 L51,65 L47,72 L45,65 Z"/>
+
+</vector>

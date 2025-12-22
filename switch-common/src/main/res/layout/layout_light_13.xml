@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="#FDF7FB">
+
+    <TextView
+        android:id="@+id/title_13"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Light Item 13"
+        android:textSize="16sp"
+        android:textColor="#333333" />
+
+    <TextView
+        android:id="@+id/subtitle_13"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Subtitle for light item 13"
+        android:textSize="12sp"
+        android:textColor="#666666" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Switch-AOSP</string>
+    <string name="select_load_type">Select Load Type</string>
+    <string name="load_description">Load Description</string>
+    <string name="target_activity">Target Activity</string>
+</resources>

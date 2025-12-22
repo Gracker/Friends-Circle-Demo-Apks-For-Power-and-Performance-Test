@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="load_none">#4CAF50</color>
+    <color name="load_light">#8BC34A</color>
+    <color name="load_medium">#FF9800</color>
+    <color name="load_heavy">#F44336</color>
+</resources>

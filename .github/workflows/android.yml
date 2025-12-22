@@ -80,6 +80,9 @@ jobs:
         :launch-compose:assembleRelease
         :launch-webview:assembleRelease
         :launch-gl:assembleRelease
+        :switch-aosp:assembleRelease
+        :switch-flutter:assembleRelease
+        :switch-webview:assembleRelease
         --parallel
 
     - name: Rename APK files with version info
@@ -182,6 +185,19 @@ jobs:
           done
         done
 
+        # Switch Modules - In-app Activity switching performance testing
+        if [ -f "switch-aosp/build/outputs/apk/release/switch-aosp-release.apk" ]; then
+          cp switch-aosp/build/outputs/apk/release/switch-aosp-release.apk "release-apks/switch-aosp-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+
+        if [ -f "switch-flutter/build/outputs/apk/release/switch-flutter-release.apk" ]; then
+          cp switch-flutter/build/outputs/apk/release/switch-flutter-release.apk "release-apks/switch-flutter-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+
+        if [ -f "switch-webview/build/outputs/apk/release/switch-webview-release.apk" ]; then
+          cp switch-webview/build/outputs/apk/release/switch-webview-release.apk "release-apks/switch-webview-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
+        fi
+
         # List all generated files
         echo "Generated APK files:"
         ls -la release-apks/
@@ -241,6 +257,11 @@ jobs:
           - **launch-compose** - Jetpack Compose (Light/Medium/Heavy)
           - **launch-webview** - WebView Hybrid (Light/Medium/Heavy)
           - **launch-gl** - OpenGL ES (Light/Medium/Heavy)
+
+          ### 🔄 Switch Performance Modules (In-app Activity Switching)
+          - **switch-aosp** - Native Android Activity Switch (10 load types)
+          - **switch-flutter** - Flutter-style Canvas Rendering (10 load types)
+          - **switch-webview** - WebView Hybrid Switch (10 load types)
 
           ## 📝 Notes
           - ✅ Release version, signed with production key

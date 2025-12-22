@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Switch arrows icon - centered -->
+    <group
+        android:translateX="54"
+        android:translateY="48">
+
+        <!-- Up arrow pointing up -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,-24 L10,-12 L5,-12 L5,0 L-5,0 L-5,-12 L-10,-12 Z"/>
+
+        <!-- Down arrow pointing down -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M0,24 L-10,12 L-5,12 L-5,0 L5,0 L5,12 L10,12 Z"/>
+
+    </group>
+
+    <!-- "A" letter for AOSP -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,78 L54,65 L60,78 L56,78 L55,75 L53,75 L52,78 Z M54,70 L53,73 L55,73 Z"/>
+
+</vector>

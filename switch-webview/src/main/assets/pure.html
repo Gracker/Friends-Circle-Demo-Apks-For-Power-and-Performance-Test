@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure - No Load</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        h1 { font-size: 2em; margin-bottom: 10px; }
+        p { font-size: 1em; opacity: 0.9; text-align: center; }
+        .status { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Pure - No Load</h1>
+    <p>This is a minimal WebView page with no additional load.<br>Used as baseline for performance measurement.</p>
+    <div class="status" id="status">Page loaded</div>
+    <script>
+        document.getElementById('status').textContent = 'Loaded at: ' + new Date().toLocaleTimeString();
+    </script>
+</body>
+</html>
