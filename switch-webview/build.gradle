@@ -11,24 +11,34 @@ android {
         applicationId "com.example.switch_webview"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_FILE_PATH") ?: "$System.env.HOME/Code/APK-Key/Chris/keystore.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "123456"
+            keyAlias System.getenv("KEY_ALIAS") ?: "key0"
+            keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '11'
     }
 }
 

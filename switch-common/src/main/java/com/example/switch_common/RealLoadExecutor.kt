@@ -375,6 +375,7 @@ object RealLoadExecutor {
 
     /**
      * 真实的 Binder 调用
+     * 注意：不使用 getInstalledPackages，避免需要 QUERY_ALL_PACKAGES 敏感权限
      */
     private fun executeBinderCalls(context: Context, count: Int) {
         val pm = context.packageManager
@@ -382,7 +383,7 @@ object RealLoadExecutor {
 
         repeat(count) {
             try {
-                // 真实的 Binder IPC 调用
+                // 真实的 Binder IPC 调用 - 获取当前应用信息（不需要权限）
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     pm.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
                 } else {
@@ -390,8 +391,22 @@ object RealLoadExecutor {
                     pm.getPackageInfo(packageName, 0)
                 }
 
-                // 获取其他系统信息
-                pm.getInstalledPackages(0)
+                // 获取当前应用的 ApplicationInfo（不需要权限）
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pm.getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0))
+                } else {
+                    @Suppress("DEPRECATION")
+                    pm.getApplicationInfo(packageName, 0)
+                }
+
+                // 获取当前应用的资源信息（不需要权限）
+                try {
+                    pm.getResourcesForApplication(packageName)
+                } catch (e: Exception) {
+                    // 忽略异常
+                }
+
+                // 系统设置查询（不需要权限）
                 context.contentResolver.query(
                     android.provider.Settings.System.CONTENT_URI,
                     null, null, null, null
