@@ -71,12 +71,12 @@ class FlutterStyleView @JvmOverloads constructor(
         // 绘制背景渐变
         drawBackground(canvas)
 
-        // 根据负载级别绘制不同数量的 "Widget"
+        // 根据负载级别绘制不同数量的 "Widget" - 线性增长
         widgetCount = when (loadLevel) {
             SelfLoadLevel.NONE -> 0
-            SelfLoadLevel.LIGHT -> 20
-            SelfLoadLevel.MEDIUM -> 100
-            SelfLoadLevel.HEAVY -> 300
+            SelfLoadLevel.LIGHT -> 80     // LIGHT: ~100-200ms 目标
+            SelfLoadLevel.MEDIUM -> 300   // MEDIUM: ~300-500ms 目标
+            SelfLoadLevel.HEAVY -> 1000   // HEAVY: ~700-1200ms 目标
         }
 
         // 模拟 Flutter Widget 树的渲染
@@ -169,11 +169,18 @@ class FlutterStyleView @JvmOverloads constructor(
         canvas.drawRoundRect(x, y, x + size, y + size, 12f, 12f, paint)
         paint.style = Paint.Style.FILL
 
-        // 模拟复杂计算（Flutter 的 layout constraints）
-        if (loadLevel == SelfLoadLevel.HEAVY) {
+        // 模拟复杂计算（Flutter 的 layout constraints）- 线性增长
+        val iterations = when (loadLevel) {
+            SelfLoadLevel.NONE -> 0
+            SelfLoadLevel.LIGHT -> 200
+            SelfLoadLevel.MEDIUM -> 2000
+            SelfLoadLevel.HEAVY -> 20000
+        }
+        if (iterations > 0) {
             var result = 0.0
-            for (j in 0 until 100) {
+            for (j in 0 until iterations) {
                 result += sin(j * 0.1 + index) * cos(j * 0.05)
+                result += sqrt((j * index + 1).toDouble()) * 0.01
             }
             blackHole += result
         }
@@ -232,12 +239,18 @@ class FlutterStyleView @JvmOverloads constructor(
         canvas.drawCircle(width - 50f, avatarY, 16f, paint)
         paint.alpha = 255
 
-        // 模拟 Widget rebuild 和数据处理
-        if (loadLevel == SelfLoadLevel.MEDIUM || loadLevel == SelfLoadLevel.HEAVY) {
-            val iterations = if (loadLevel == SelfLoadLevel.HEAVY) 200 else 50
+        // 模拟 Widget rebuild 和数据处理 - 线性增长
+        val iterations = when (loadLevel) {
+            SelfLoadLevel.NONE -> 0
+            SelfLoadLevel.LIGHT -> 100
+            SelfLoadLevel.MEDIUM -> 1000
+            SelfLoadLevel.HEAVY -> 10000
+        }
+        if (iterations > 0) {
             var result = 0.0
             for (j in 0 until iterations) {
                 result += sqrt((j + index).toDouble()) * sin(j * 0.01)
+                result += cos(j * 0.005 + index) * 100
             }
             blackHole += result
         }

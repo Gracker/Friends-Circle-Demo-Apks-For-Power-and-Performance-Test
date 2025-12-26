@@ -129,31 +129,32 @@ object RealLoadExecutor {
         }
     }
 
-    // ==================== 轻负载 ====================
+    // ==================== 轻负载 (目标 ~100-200ms 延迟) ====================
 
     private fun executeLightLoad(context: Context, random: Random, container: ViewGroup?) {
         val inflater = LayoutInflater.from(context)
 
-        // 1. 真实 inflate 20 个轻量级布局
+        // 1. 真实 inflate 80 个轻量级布局 (增加到 80)
         Trace.beginSection("Light_RealInflate")
         val layoutIds = lightLayoutIds ?: return
-        for (i in 0 until minOf(20, layoutIds.size)) {
-            val layoutId = layoutIds[i % layoutIds.size]
+        val mediumIds = mediumLayoutIds ?: emptyList<Int>().toIntArray()
+        for (i in 0 until 80) {
+            val layoutId = if (i < layoutIds.size) layoutIds[i] else mediumIds[i % mediumIds.size]
             if (layoutId != 0) {
                 try {
                     val view = inflater.inflate(layoutId, container, false)
                     container?.addView(view)
                     blackHole += view.hashCode().toDouble()
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to inflate layout_light_${i + 1}", e)
+                    Log.w(TAG, "Failed to inflate layout_${i + 1}", e)
                 }
             }
         }
         Trace.endSection()
 
-        // 2. 创建 5 个轻量级自定义 View
+        // 2. 创建 15 个轻量级自定义 View (增加到 15)
         Trace.beginSection("Light_CustomViews")
-        for (i in 0 until 5) {
+        for (i in 0 until 15) {
             val customView = LightCustomView(context)
             customView.viewIndex = i
             customView.measure(
@@ -165,47 +166,60 @@ object RealLoadExecutor {
         }
         Trace.endSection()
 
-        // 3. 少量 Binder 调用
+        // 3. Binder 调用 (增加到 8)
         Trace.beginSection("Light_Binder")
-        executeBinderCalls(context, 3)
+        executeBinderCalls(context, 8)
         Trace.endSection()
 
-        // 4. 少量 IO
+        // 4. IO 操作 (增加到 5 个文件，每个 2KB)
         Trace.beginSection("Light_IO")
-        executeFileIO(context, 2, 1024) // 2 个文件，每个 1KB
+        executeFileIO(context, 5, 2048)
         Trace.endSection()
+
+        // 5. CPU 计算 (增加到 80,000)
+        Trace.beginSection("Light_CPU")
+        var result = 0.0
+        for (i in 0 until 80000) {
+            result += sin(i * 0.01) * sqrt(i + 1.0)
+        }
+        blackHole += result
+        Trace.endSection()
+
+        // 6. 混合操作 (20 次)
+        executeMixedOperations(context, random, 20)
     }
 
-    // ==================== 中等负载 ====================
+    // ==================== 中等负载 (目标 ~300-500ms 延迟) ====================
 
     private fun executeMediumLoad(context: Context, random: Random, container: ViewGroup?) {
         val inflater = LayoutInflater.from(context)
 
-        // 1. 真实 inflate 100 个中等复杂度布局
+        // 1. 真实 inflate 250 个中等复杂度布局 (增加到 250)
         Trace.beginSection("Medium_RealInflate")
-        val layoutIds = mediumLayoutIds ?: return
-        for (i in 0 until minOf(100, layoutIds.size)) {
-            val layoutId = layoutIds[i % layoutIds.size]
+        val mediumIds = mediumLayoutIds ?: return
+        val heavyIds = heavyLayoutIds ?: emptyList<Int>().toIntArray()
+        for (i in 0 until 250) {
+            val layoutId = if (i < mediumIds.size) mediumIds[i] else heavyIds[i % heavyIds.size]
             if (layoutId != 0) {
                 try {
                     val view = inflater.inflate(layoutId, container, false)
                     container?.addView(view)
                     blackHole += view.hashCode().toDouble()
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to inflate layout_medium_${i + 1}", e)
+                    Log.w(TAG, "Failed to inflate layout_${i + 1}", e)
                 }
             }
 
-            // 穿插一些其他操作，模拟真实 App
-            if (i % 10 == 0) {
-                executeBinderCalls(context, 1)
+            // 穿插 Binder 调用
+            if (i % 25 == 0) {
+                executeBinderCalls(context, 2)
             }
         }
         Trace.endSection()
 
-        // 2. 创建 20 个中等复杂度自定义 View
+        // 2. 创建 60 个中等复杂度自定义 View (增加到 60)
         Trace.beginSection("Medium_CustomViews")
-        for (i in 0 until 20) {
+        for (i in 0 until 60) {
             val customView = MediumCustomView(context)
             customView.viewIndex = i
             customView.measure(
@@ -217,44 +231,59 @@ object RealLoadExecutor {
         }
         Trace.endSection()
 
-        // 3. 数据绑定 View
+        // 3. 数据绑定 View (增加到 15)
         Trace.beginSection("Medium_DataBinding")
-        for (i in 0 until 5) {
+        for (i in 0 until 15) {
             val dataView = DataBindingView(context)
-            dataView.dataComplexity = 20
+            dataView.dataComplexity = 30
             dataView.viewIndex = i
             container?.addView(dataView)
             blackHole += dataView.hashCode().toDouble()
         }
         Trace.endSection()
 
-        // 4. Binder 调用
+        // 4. Binder 调用 (增加到 30)
         Trace.beginSection("Medium_Binder")
-        executeBinderCalls(context, 10)
+        executeBinderCalls(context, 30)
         Trace.endSection()
 
-        // 5. IO 操作
+        // 5. IO 操作 (增加到 15 个文件，每个 8KB)
         Trace.beginSection("Medium_IO")
-        executeFileIO(context, 5, 4096) // 5 个文件，每个 4KB
+        executeFileIO(context, 15, 8192)
         Trace.endSection()
 
-        // 6. 混合操作
-        executeMixedOperations(context, random, 30)
+        // 6. CPU 计算 (增加到 300,000)
+        Trace.beginSection("Medium_CPU")
+        var result = 0.0
+        for (i in 0 until 300000) {
+            result += sin(i * 0.01) * sqrt(i + 1.0)
+            result += cos(i * 0.005) * sqrt(i.toDouble())
+        }
+        blackHole += result
+        Trace.endSection()
+
+        // 7. SQLite 操作
+        Trace.beginSection("Medium_SQLite")
+        executeSqliteOperations(context, 50)
+        Trace.endSection()
+
+        // 8. 混合操作 (增加到 60)
+        executeMixedOperations(context, random, 60)
     }
 
-    // ==================== 重负载 ====================
+    // ==================== 重负载 (目标 ~700-1200ms 延迟) ====================
 
     private fun executeHeavyLoad(context: Context, random: Random, container: ViewGroup?) {
         val inflater = LayoutInflater.from(context)
 
-        // 1. 真实 inflate 180+ 个复杂布局
+        // 1. 真实 inflate 600 个复杂布局 (增加到 600)
         Trace.beginSection("Heavy_RealInflate")
         val heavyIds = heavyLayoutIds ?: emptyList<Int>().toIntArray()
         val mediumIds = mediumLayoutIds ?: emptyList<Int>().toIntArray()
         val lightIds = lightLayoutIds ?: emptyList<Int>().toIntArray()
 
-        // Inflate heavy layouts
-        for (i in 0 until minOf(180, heavyIds.size)) {
+        // Inflate 300 个 heavy layouts
+        for (i in 0 until minOf(300, heavyIds.size)) {
             val layoutId = heavyIds[i % heavyIds.size]
             if (layoutId != 0) {
                 try {
@@ -266,17 +295,14 @@ object RealLoadExecutor {
                 }
             }
 
-            // 穿插其他操作
-            if (i % 20 == 0) {
-                executeBinderCalls(context, 2)
-                if (random.nextBoolean()) {
-                    Thread.sleep(random.nextInt(2).toLong())
-                }
+            // 穿插 Binder 调用
+            if (i % 15 == 0) {
+                executeBinderCalls(context, 3)
             }
         }
 
-        // 额外 inflate medium 和 light 布局
-        for (i in 0 until minOf(50, mediumIds.size)) {
+        // 额外 inflate 200 个 medium 布局 (增加到 200)
+        for (i in 0 until minOf(200, mediumIds.size)) {
             val layoutId = mediumIds[i]
             if (layoutId != 0) {
                 try {
@@ -287,7 +313,8 @@ object RealLoadExecutor {
             }
         }
 
-        for (i in 0 until minOf(20, lightIds.size)) {
+        // 额外 inflate 100 个 light 布局 (增加到 100)
+        for (i in 0 until minOf(100, lightIds.size)) {
             val layoutId = lightIds[i]
             if (layoutId != 0) {
                 try {
@@ -299,9 +326,9 @@ object RealLoadExecutor {
         }
         Trace.endSection()
 
-        // 2. 创建 50 个重量级自定义 View
+        // 2. 创建 150 个重量级自定义 View (增加到 150)
         Trace.beginSection("Heavy_CustomViews")
-        for (i in 0 until 50) {
+        for (i in 0 until 150) {
             val customView = HeavyCustomView(context)
             customView.viewIndex = i
             customView.measure(
@@ -313,16 +340,16 @@ object RealLoadExecutor {
         }
         Trace.endSection()
 
-        // 3. 复杂容器 View
+        // 3. 复杂容器 View (增加到 25)
         Trace.beginSection("Heavy_Containers")
-        for (i in 0 until 10) {
+        for (i in 0 until 25) {
             val containerView = ComplexContainerView(context)
             containerView.containerIndex = i
 
-            // 添加子 View
-            for (j in 0 until 5) {
+            // 添加子 View (增加到 10 个)
+            for (j in 0 until 10) {
                 val child = MediumCustomView(context)
-                child.viewIndex = i * 5 + j
+                child.viewIndex = i * 10 + j
                 containerView.addView(child)
             }
 
@@ -335,31 +362,31 @@ object RealLoadExecutor {
         }
         Trace.endSection()
 
-        // 4. 数据绑定 View
+        // 4. 数据绑定 View (增加到 30)
         Trace.beginSection("Heavy_DataBinding")
-        for (i in 0 until 15) {
+        for (i in 0 until 30) {
             val dataView = DataBindingView(context)
-            dataView.dataComplexity = 50
+            dataView.dataComplexity = 80
             dataView.viewIndex = i
             container?.addView(dataView)
             blackHole += dataView.hashCode().toDouble()
         }
         Trace.endSection()
 
-        // 5. 大量 Binder 调用
+        // 5. 大量 Binder 调用 (增加到 80)
         Trace.beginSection("Heavy_Binder")
-        executeBinderCalls(context, 30)
+        executeBinderCalls(context, 80)
         Trace.endSection()
 
-        // 6. 大量 IO 操作
+        // 6. 大量 IO 操作 (增加到 40 个文件，每个 16KB + 10 个随机读写 32KB)
         Trace.beginSection("Heavy_IO")
-        executeFileIO(context, 15, 8192) // 15 个文件，每个 8KB
-        executeRandomAccessIO(context, 5, 16384) // 5 个文件随机读写，每个 16KB
+        executeFileIO(context, 40, 16384)
+        executeRandomAccessIO(context, 10, 32768)
         Trace.endSection()
 
-        // 7. SQLite 操作
+        // 7. SQLite 操作 (增加到 200)
         Trace.beginSection("Heavy_SQLite")
-        executeSqliteOperations(context, 100)
+        executeSqliteOperations(context, 200)
         Trace.endSection()
 
         // 8. 混合 Chaos 操作
@@ -368,6 +395,17 @@ object RealLoadExecutor {
         // 9. 复杂数据处理
         Trace.beginSection("Heavy_DataProcessing")
         executeDataProcessing(random, 500)
+        Trace.endSection()
+
+        // 10. CPU 计算 (增加到 800,000)
+        Trace.beginSection("Heavy_CPU")
+        var result = 0.0
+        for (i in 0 until 800000) {
+            result += sin(i * 0.01) * sqrt(i + 1.0)
+            result += cos(i * 0.005) * sqrt(i.toDouble())
+            result += sin(i * 0.001) * cos(i * 0.002)
+        }
+        blackHole += result
         Trace.endSection()
     }
 

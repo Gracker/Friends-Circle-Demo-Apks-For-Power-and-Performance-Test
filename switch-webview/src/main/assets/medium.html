@@ -33,19 +33,30 @@
     </style>
 </head>
 <body>
-    <h1>Medium Load (100 Elements)</h1>
+    <h1>Medium Load (150 Elements)</h1>
     <div class="container" id="container"></div>
     <div class="status" id="status">Loading...</div>
     <script>
-        // Simulate medium load: 100 DOM elements with moderate calculations
+        // MEDIUM LOAD - 目标 ~300-500ms 延迟
+        // 150 个 DOM 元素，每个 50,000 次计算 = 7,500,000 总操作
         const container = document.getElementById('container');
         const startTime = performance.now();
 
         // Create data structures
         const dataMap = new Map();
         const dataList = [];
+        const sortedArrays = [];
 
-        for (let i = 0; i < 100; i++) {
+        // Complex math function (Bessel-like)
+        function complexMath(x, i) {
+            let result = 0;
+            for (let j = 0; j < 20; j++) {
+                result += Math.sin(j * 0.1 + x) * Math.cos(j * 0.05 + i);
+            }
+            return Math.abs(result) * 1000;
+        }
+
+        for (let i = 0; i < 150; i++) {
             const item = document.createElement('div');
             item.className = 'item';
 
@@ -58,35 +69,68 @@
 
             const subText = document.createElement('span');
 
-            // Medium computation
+            // 50,000 次计算
             let result = 0;
-            for (let j = 0; j < 5000; j++) {
+            for (let j = 0; j < 50000; j++) {
                 result += Math.sin(j * 0.01 + i) * Math.sqrt(j + 1);
+                result += Math.cos(j * 0.005 + i) * Math.sqrt(Math.abs(Math.sin(j * 0.001) * 1000));
+            }
+
+            // 额外复杂计算
+            for (let k = 0; k < 10000; k++) {
+                result += complexMath(k * 0.01, i);
             }
 
             // Store in data structures
             dataMap.set('item_' + i, { value: result, index: i });
             dataList.push({ id: i, computed: result });
 
-            subText.textContent = result.toFixed(1);
+            // 创建排序数组
+            const arr = [];
+            for (let j = 0; j < 50; j++) {
+                arr.push(Math.random() * 10000);
+            }
+            arr.sort((a, b) => a - b);
+            sortedArrays.push(arr);
+
+            subText.textContent = (result / 1000000).toFixed(1);
             nested.appendChild(mainText);
             nested.appendChild(subText);
             item.appendChild(nested);
 
             // Apply computed styles
-            const hue = (i * 3.6) % 360;
-            item.style.background = `hsla(${hue}, 70%, 50%, 0.3)`;
+            const hue = (i * 2.4) % 360;
+            item.style.background = `hsla(${hue}, 70%, 50%, 0.4)`;
 
             container.appendChild(item);
         }
 
-        // Sort data
-        dataList.sort((a, b) => a.computed - b.computed);
+        // 排序操作
+        dataList.sort((a, b) => b.computed - a.computed);
+
+        // 过滤操作
+        const filtered = dataList.filter(item => item.computed > 0);
+
+        // 搜索操作
+        let searchCount = 0;
+        for (const arr of sortedArrays.slice(0, 50)) {
+            const target = Math.random() * 10000;
+            let left = 0, right = arr.length - 1;
+            while (left <= right) {
+                const mid = Math.floor((left + right) / 2);
+                if (arr[mid] === target) {
+                    searchCount++;
+                    break;
+                }
+                if (arr[mid] < target) left = mid + 1;
+                else right = mid - 1;
+            }
+        }
 
         const endTime = performance.now();
         document.getElementById('status').textContent =
             'Loaded in ' + (endTime - startTime).toFixed(2) + 'ms | ' +
-            'Elements: ' + container.children.length;
+            'Elements: ' + container.children.length + ' | Arrays: ' + sortedArrays.length;
     </script>
 </body>
 </html>

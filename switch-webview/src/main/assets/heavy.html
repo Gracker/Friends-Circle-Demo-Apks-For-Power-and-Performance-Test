@@ -44,11 +44,12 @@
     </style>
 </head>
 <body>
-    <h1>Heavy Load (300+ Elements)</h1>
+    <h1>Heavy Load (300 Elements)</h1>
     <div class="container" id="container"></div>
     <div class="status" id="status">Loading...</div>
     <script>
-        // Simulate heavy load: 300+ DOM elements with complex calculations
+        // HEAVY LOAD - 目标 ~700-1200ms 延迟
+        // 300 个 DOM 元素，每个 300,000 次计算 = 90,000,000 总操作
         const container = document.getElementById('container');
         const startTime = performance.now();
 
@@ -56,6 +57,7 @@
         const dataTree = {};
         const sortedArrays = [];
         const hashMaps = [];
+        const matrixCache = [];
 
         // Bessel function approximation
         function besselJ0(x) {
@@ -71,7 +73,7 @@
             }
         }
 
-        // Matrix multiplication
+        // 4x4 Matrix multiplication
         function multiplyMatrix(a, b) {
             const result = [];
             for (let i = 0; i < a.length; i++) {
@@ -86,11 +88,21 @@
             return result;
         }
 
-        // Create elements with heavy computation
+        // Complex math function with multiple iterations
+        function heavyMath(x, iterations) {
+            let result = x;
+            for (let i = 0; i < iterations; i++) {
+                result = Math.sin(result) * Math.cos(result) + Math.sqrt(Math.abs(result)) + 0.1;
+                result = result * result - Math.floor(result);
+            }
+            return Math.abs(result) * 1000;
+        }
+
+        // Create elements with VERY HEAVY computation
         for (let i = 0; i < 300; i++) {
             const item = document.createElement('div');
             item.className = 'item';
-            item.textContent = i + 1;
+            item.textContent = (i + 1) % 100;
 
             // Add overlay
             const overlay = document.createElement('div');
@@ -104,46 +116,70 @@
                 item.appendChild(badge);
             }
 
-            // Heavy computation
+            // 300,000 次计算 per element
             let result = 0;
 
-            // 1. Complex math
-            for (let j = 0; j < 2000; j++) {
+            // 1. Massive complex math loop
+            for (let j = 0; j < 300000; j++) {
                 result += Math.sin(j * 0.01 + i) * Math.sqrt(j + 1);
-                result += besselJ0(j * 0.001 + result * 0.0001);
+                result += Math.cos(j * 0.005 + i) * Math.sqrt(Math.abs(Math.sin(j * 0.001) * 1000));
+                result += besselJ0(j * 0.0001 + result * 0.000001);
             }
 
-            // 2. Matrix operations (for every 10th item)
-            if (i % 10 === 0) {
-                const matA = [[Math.random(), Math.random()], [Math.random(), Math.random()]];
-                const matB = [[Math.random(), Math.random()], [Math.random(), Math.random()]];
-                const matResult = multiplyMatrix(matA, matB);
-                result += matResult[0][0] + matResult[1][1];
-            }
+            // 2. Additional heavy math
+            result += heavyMath(i, 10000);
 
-            // 3. Data structure operations
+            // 3. 4x4 Matrix operations for EVERY item
+            const matA = [[Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()]];
+            const matB = [[Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()],
+                         [Math.random(), Math.random(), Math.random(), Math.random()]];
+            const matResult = multiplyMatrix(matA, matB);
+            result += matResult[0][0] + matResult[1][1] + matResult[2][2] + matResult[3][3];
+            matrixCache.push(matResult);
+
+            // 4. Data structure operations - larger nested structures
             dataTree['node_' + i] = {
                 id: i,
                 value: result,
                 children: [],
                 metadata: {
                     timestamp: Date.now(),
-                    computed: true
+                    computed: true,
+                    nested: {
+                        level1: { level2: { level3: { data: result * 1000 } } }
+                    }
                 }
             };
 
-            // 4. Array operations
+            // Create nested children (增加到 15)
+            for (let c = 0; c < 15; c++) {
+                dataTree['node_' + i].children.push({
+                    id: `${i}_${c}`,
+                    value: result * (c + 1),
+                    grandchildren: Array(10).fill(null).map((_, g) => ({
+                        id: `${i}_${c}_${g}`,
+                        value: heavyMath(result, 20)
+                    }))
+                });
+            }
+
+            // 5. Array operations - larger arrays (增加到 300)
             const arr = [];
-            for (let j = 0; j < 50; j++) {
-                arr.push(Math.random() * 1000);
+            for (let j = 0; j < 300; j++) {
+                arr.push(Math.random() * 10000);
             }
             arr.sort((a, b) => a - b);
             sortedArrays.push(arr);
 
-            // 5. Hash map operations
+            // 6. Hash map operations (增加到 100)
             const map = {};
-            for (let j = 0; j < 20; j++) {
-                map['key_' + j] = 'value_' + (j * i);
+            for (let j = 0; j < 100; j++) {
+                map['key_' + j] = { value: 'value_' + (j * i), nested: { data: heavyMath(j, 10) } };
             }
             hashMaps.push(map);
 
@@ -155,10 +191,10 @@
             container.appendChild(item);
         }
 
-        // Additional processing - search in sorted arrays
+        // 搜索所有数组
         let searchCount = 0;
-        for (const arr of sortedArrays.slice(0, 50)) {
-            const target = Math.random() * 1000;
+        for (const arr of sortedArrays) {
+            const target = Math.random() * 10000;
             let left = 0, right = arr.length - 1;
             while (left <= right) {
                 const mid = Math.floor((left + right) / 2);
@@ -171,11 +207,17 @@
             }
         }
 
+        // Reduce 操作
+        const totalValue = Object.values(dataTree).reduce((sum, node) => sum + node.value, 0);
+        const avgMatrixValue = matrixCache.reduce((sum, mat) => {
+            return sum + mat.reduce((rowSum, row) => rowSum + row.reduce((cellSum, val) => cellSum + val, 0), 0);
+        }, 0) / matrixCache.length;
+
         const endTime = performance.now();
         document.getElementById('status').textContent =
             'Loaded in ' + (endTime - startTime).toFixed(2) + 'ms | ' +
-            'Elements: ' + container.children.length + ' | ' +
-            'Data nodes: ' + Object.keys(dataTree).length;
+            'Elements: ' + container.children.length + ' | Data nodes: ' + Object.keys(dataTree).length +
+            ' | Matrices: ' + matrixCache.length;
     </script>
 </body>
 </html>

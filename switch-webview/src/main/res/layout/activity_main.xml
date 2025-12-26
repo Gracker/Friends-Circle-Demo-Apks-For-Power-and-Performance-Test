@@ -1,33 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:background="#F2F2F2"
     tools:context=".MainActivity">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Switch WebView Performance Test"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:paddingBottom="8dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select a load type to test WebView Activity switch"
-        android:textSize="14sp"
-        android:gravity="center"
-        android:paddingBottom="16dp"
-        android:textColor="#666666" />
+        <!-- 标题卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:gravity="center">
 
-</LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Switch Activity"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="WebView 版本性能测试"
+                    android:textSize="14sp"
+                    android:textColor="#666666" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 负载选择卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="选择负载类型"
+                    android:textColor="#333333"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <!-- Pure -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_pure"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#4CAF50"
+                    android:text="Pure - 无负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Light -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_self_light"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#8BC34A"
+                    android:text="Self Light - 自身轻负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Medium -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_self_medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF9800"
+                    android:text="Self Medium - 自身中负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Heavy -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_self_heavy"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#F44336"
+                    android:text="Self Heavy - 自身高负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="#E0E0E0" />
+
+                <!-- Bg Medium -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_bg_medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FF9800"
+                    android:text="Bg Medium - 背景中负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Bg Heavy -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_bg_heavy"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#F44336"
+                    android:text="Bg Heavy - 背景高负载"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="12dp"
+                    android:background="#E0E0E0" />
+
+                <!-- Self Light + Bg Medium -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_light_bg_medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#9CCC65"
+                    android:text="Light + Bg Medium"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Medium + Bg Medium -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_bg_medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#FFB74D"
+                    android:text="Medium + Bg Medium"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Medium + Bg Heavy -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_medium_bg_heavy"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="12dp"
+                    android:backgroundTint="#E57373"
+                    android:text="Medium + Bg Heavy"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+                <!-- Self Heavy + Bg Heavy -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_heavy_bg_heavy"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#D32F2F"
+                    android:text="Heavy + Bg Heavy"
+                    android:textSize="16sp"
+                    app:cornerRadius="8dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- 说明卡片 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="测试说明"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="本测试使用 WebView 加载 HTML 页面，评估不同负载条件下 Activity 切换的性能表现。"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</ScrollView>

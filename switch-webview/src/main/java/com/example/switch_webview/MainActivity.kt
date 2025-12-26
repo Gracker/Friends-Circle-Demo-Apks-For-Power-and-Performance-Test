@@ -3,41 +3,70 @@ package com.example.switch_webview
 import android.content.Intent
 import android.os.Bundle
 import android.os.Trace
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.switch_webview.target.*
-import com.example.switch_common.BackgroundLoadLevel
-import com.example.switch_common.SelfLoadLevel
 import com.example.switch_common.SwitchLoadManager
 import com.example.switch_common.SwitchLoadType
+import com.google.android.material.button.MaterialButton
 
 /**
  * 主界面 - 负载类型选择器 (WebView 版本)
+ *
+ * 使用 MaterialButton 显示 10 种负载类型，点击后启动对应的目标 Activity
  */
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = LoadTypeAdapter(SwitchLoadType.entries) { loadType ->
-            launchTargetActivity(loadType)
-        }
+        // 设置按钮点击监听
+        setupButtons()
     }
 
     override fun onResume() {
         super.onResume()
         SwitchLoadManager.stopAllLoads(this)
+    }
+
+    private fun setupButtons() {
+        // Pure
+        findViewById<MaterialButton>(R.id.btn_pure).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.PURE)
+        }
+
+        // Self loads
+        findViewById<MaterialButton>(R.id.btn_self_light).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_LIGHT)
+        }
+        findViewById<MaterialButton>(R.id.btn_self_medium).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_MEDIUM)
+        }
+        findViewById<MaterialButton>(R.id.btn_self_heavy).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_HEAVY)
+        }
+
+        // Background loads
+        findViewById<MaterialButton>(R.id.btn_bg_medium).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.BG_MEDIUM)
+        }
+        findViewById<MaterialButton>(R.id.btn_bg_heavy).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.BG_HEAVY)
+        }
+
+        // Combined loads
+        findViewById<MaterialButton>(R.id.btn_light_bg_medium).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_LIGHT_BG_MEDIUM)
+        }
+        findViewById<MaterialButton>(R.id.btn_medium_bg_medium).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_MEDIUM_BG_MEDIUM)
+        }
+        findViewById<MaterialButton>(R.id.btn_medium_bg_heavy).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_MEDIUM_BG_HEAVY)
+        }
+        findViewById<MaterialButton>(R.id.btn_heavy_bg_heavy).setOnClickListener {
+            launchTargetActivity(SwitchLoadType.SELF_HEAVY_BG_HEAVY)
+        }
     }
 
     private fun launchTargetActivity(loadType: SwitchLoadType) {
@@ -69,64 +98,5 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_LOAD_TYPE = "extra_load_type"
-    }
-}
-
-class LoadTypeAdapter(
-    private val loadTypes: List<SwitchLoadType>,
-    private val onItemClick: (SwitchLoadType) -> Unit
-) : RecyclerView.Adapter<LoadTypeAdapter.ViewHolder>() {
-
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val loadIndicator: View = view.findViewById(R.id.loadIndicator)
-        val tvLoadName: TextView = view.findViewById(R.id.tvLoadName)
-        val tvSelfLoad: TextView = view.findViewById(R.id.tvSelfLoad)
-        val tvBgLoad: TextView = view.findViewById(R.id.tvBgLoad)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_load_type, parent, false)
-        return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val loadType = loadTypes[position]
-        val context = holder.itemView.context
-
-        holder.tvLoadName.text = loadType.displayName
-        holder.tvSelfLoad.text = "Self: ${loadType.selfLoad.name}"
-        holder.tvBgLoad.text = "Background: ${loadType.bgLoad.name}"
-
-        val indicatorColor = getIndicatorColor(loadType)
-        holder.loadIndicator.setBackgroundColor(ContextCompat.getColor(context, indicatorColor))
-
-        holder.itemView.setOnClickListener {
-            onItemClick(loadType)
-        }
-    }
-
-    override fun getItemCount() = loadTypes.size
-
-    private fun getIndicatorColor(loadType: SwitchLoadType): Int {
-        val selfLevel = when (loadType.selfLoad) {
-            SelfLoadLevel.NONE -> 0
-            SelfLoadLevel.LIGHT -> 1
-            SelfLoadLevel.MEDIUM -> 2
-            SelfLoadLevel.HEAVY -> 3
-        }
-        val bgLevel = when (loadType.bgLoad) {
-            BackgroundLoadLevel.NONE -> 0
-            BackgroundLoadLevel.MEDIUM -> 2
-            BackgroundLoadLevel.HEAVY -> 3
-        }
-        val maxLevel = maxOf(selfLevel, bgLevel)
-
-        return when (maxLevel) {
-            0 -> R.color.load_none
-            1 -> R.color.load_light
-            2 -> R.color.load_medium
-            else -> R.color.load_heavy
-        }
     }
 }

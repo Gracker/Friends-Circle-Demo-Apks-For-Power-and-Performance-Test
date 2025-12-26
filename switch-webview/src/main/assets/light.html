@@ -29,32 +29,48 @@
     </style>
 </head>
 <body>
-    <h1>Light Load (20 Elements)</h1>
+    <h1>Light Load (50 Elements)</h1>
     <div class="container" id="container"></div>
     <div class="status" id="status">Loading...</div>
     <script>
-        // Simulate light load: 20 DOM elements with simple calculations
+        // LIGHT LOAD - 目标 ~100-200ms 延迟
+        // 50 个 DOM 元素，每个 15,000 次计算 = 750,000 总操作
         const container = document.getElementById('container');
         const startTime = performance.now();
 
-        for (let i = 0; i < 20; i++) {
+        // 创建数据结构
+        const dataList = [];
+
+        for (let i = 0; i < 50; i++) {
             const item = document.createElement('div');
             item.className = 'item';
-            item.textContent = 'Item ' + (i + 1);
 
-            // Light computation
+            // 计算每个元素的属性
             let result = 0;
-            for (let j = 0; j < 1000; j++) {
-                result += Math.sin(j * 0.01) * Math.cos(j * 0.01);
+
+            // 15,000 次数学计算
+            for (let j = 0; j < 15000; j++) {
+                result += Math.sin(j * 0.01 + i) * Math.sqrt(j + 1);
+                result += Math.cos(j * 0.005) * Math.sqrt(Math.abs(Math.sin(j * 0.001) * 1000));
             }
-            item.style.opacity = 0.7 + (result % 0.3);
+
+            // 存储结果
+            dataList.push({ index: i, value: result });
+
+            // 应用样式
+            const hue = (i * 7.2) % 360;
+            item.style.background = `hsla(${hue}, 70%, 60%, 0.5)`;
+            item.textContent = (i + 1);
 
             container.appendChild(item);
         }
 
+        // 排序操作
+        dataList.sort((a, b) => b.value - a.value);
+
         const endTime = performance.now();
         document.getElementById('status').textContent =
-            'Loaded in ' + (endTime - startTime).toFixed(2) + 'ms';
+            'Loaded in ' + (endTime - startTime).toFixed(2) + 'ms | Total: ' + dataList.length + ' items';
     </script>
 </body>
 </html>
