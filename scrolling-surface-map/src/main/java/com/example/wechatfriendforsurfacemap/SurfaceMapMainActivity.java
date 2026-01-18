@@ -10,7 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wechatfriendforsurfacemap.databinding.ActivityMainBinding;
 
 /**
- * Main activity for selecting different load profiles for SurfaceView map testing.
+ * Main activity for selecting different load profiles for SurfaceView map
+ * testing.
  */
 public class SurfaceMapMainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -44,6 +45,45 @@ public class SurfaceMapMainActivity extends AppCompatActivity implements View.On
 
         // Long frame load
         binding.btnLongFrame.setOnClickListener(this);
+
+        checkForDirectActivityLaunch();
+    }
+
+    private void checkForDirectActivityLaunch() {
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("activity_type")) {
+            String activityType = intent.getStringExtra("activity_type");
+            android.util.Log.e("SurfaceMapMainActivity", "Found activity_type extra: " + activityType);
+            Class<?> targetActivity = null;
+
+            if ("minimal".equals(activityType))
+                targetActivity = MinimalLoadMapActivity.class;
+            else if ("light".equals(activityType))
+                targetActivity = LightLoadMapActivity.class;
+            else if ("medium".equals(activityType))
+                targetActivity = MediumLoadMapActivity.class;
+            else if ("heavy".equals(activityType))
+                targetActivity = HeavyLoadMapActivity.class;
+            else if ("light_between_frames".equals(activityType))
+                targetActivity = LightBetweenFramesMapActivity.class;
+            else if ("medium_between_frames".equals(activityType))
+                targetActivity = MediumBetweenFramesMapActivity.class;
+            else if ("heavy_between_frames".equals(activityType))
+                targetActivity = HeavyBetweenFramesMapActivity.class;
+            else if ("light_mixed".equals(activityType))
+                targetActivity = LightMixedMapActivity.class;
+            else if ("medium_mixed".equals(activityType))
+                targetActivity = MediumMixedMapActivity.class;
+            else if ("heavy_mixed".equals(activityType))
+                targetActivity = HeavyMixedMapActivity.class;
+            else if ("long_frame".equals(activityType))
+                targetActivity = LongFrameMapActivity.class;
+
+            if (targetActivity != null) {
+                startActivity(new Intent(this, targetActivity));
+                finish();
+            }
+        }
     }
 
     @Override
@@ -96,5 +136,3 @@ public class SurfaceMapMainActivity extends AppCompatActivity implements View.On
         }
     }
 }
-
-

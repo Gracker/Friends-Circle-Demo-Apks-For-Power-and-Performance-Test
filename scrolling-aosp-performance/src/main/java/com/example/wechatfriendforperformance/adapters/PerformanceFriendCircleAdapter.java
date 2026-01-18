@@ -73,10 +73,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     // String to identify current load type
     private String mLoadTypeString;
 
-    // Variables for continuous frame load simulation
-    private boolean mIsScrolling = false;
-    private Runnable mFrameLoadRunnable;
-    private Handler mHandler = new Handler(Looper.getMainLooper());
+    // Variables for continuous frame load simulation - REMOVED
 
     private LayoutInflater mLayoutInflater;
 
@@ -97,17 +94,6 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
 
         // 初始化负载模拟器
         mLoadSimulator = new LoadSimulator();
-
-        // 初始化连续加载模拟
-        mFrameLoadRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mIsScrolling) {
-                    mLoadSimulator.executeInFrameLoad(mLoadType, "Adapter_continuousLoad");
-                    mHandler.postDelayed(this, 16); // 约60fps
-                }
-            }
-        };
     }
 
     // 移除带ImageLoader参数的构造函数
@@ -441,20 +427,9 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         mLoadSimulator.executeInFrameLoad(mLoadType, "Adapter_bindLoad");
     }
 
-    /**
-     * 停止持续帧负载模拟，释放资源
-     */
-    public void stopContinuousLoadSimulation() {
-        if (mHandler != null && mFrameLoadRunnable != null) {
-            mHandler.removeCallbacks(mFrameLoadRunnable);
-            mFrameLoadRunnable = null;
-        }
-    }
-
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        stopContinuousLoadSimulation();
 
         // 释放负载模拟器资源
         if (mLoadSimulator != null) {
@@ -477,6 +452,16 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
     @Override
     public void onItemClickPopupMenu(int position, int itemId) {
         // No implementation needed
+    }
+
+    /**
+     * 停止持续负载模拟，释放资源
+     * 在 Activity onDestroy 时调用
+     */
+    public void stopContinuousLoadSimulation() {
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+        }
     }
 
     /**

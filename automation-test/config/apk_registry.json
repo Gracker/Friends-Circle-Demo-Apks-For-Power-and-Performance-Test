@@ -1,0 +1,484 @@
+{
+  "version": "1.0.0",
+  "description": "APK 注册表 - 包含所有测试应用的配置信息",
+  "apk_source_dir": "../apk-released",
+  "scrolling_tests": {
+    "description": "滑动性能测试 APK",
+    "apps": [
+      {
+        "name": "aosp-performance",
+        "package": "com.example.wechatfriendforperformance",
+        "activity": ".PerformanceMainActivity",
+        "apk": "aosp-performance-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed",
+          "long_frame"
+        ]
+      },
+      {
+        "name": "aosp-power",
+        "package": "com.android.wechatfriendforpower",
+        "activity": ".PowerMainActivity",
+        "apk": "aosp-power-release-v1.0.0.apk",
+        "supports_activity_type": false
+      },
+      {
+        "name": "aosp-customscroller",
+        "package": "com.example.wechatfriendforcustomscroller",
+        "activity": ".MainActivity",
+        "apk": "aosp-customscroller-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed",
+          "long_frame"
+        ]
+      },
+      {
+        "name": "aosp-renderstress",
+        "package": "com.example.wechatfriendforrenderstress",
+        "activity": ".MainActivity",
+        "apk": "aosp-renderstress-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed",
+          "long_frame"
+        ]
+      },
+      {
+        "name": "aosp-softwarerender",
+        "package": "com.example.wechatfriendforsoftwarerender",
+        "activity": ".SoftwareRenderMainActivity",
+        "apk": "aosp-softwarerender-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed",
+          "long_frame"
+        ]
+      },
+      {
+        "name": "compose",
+        "package": "com.example.wechatfriendforcompose",
+        "activity": ".MainActivity",
+        "apk": "compose-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed",
+          "long_frame"
+        ]
+      },
+      {
+        "name": "webview",
+        "package": "com.example.wechatfriendforwebview",
+        "activity": ".WebViewMainActivity",
+        "apk": "webview-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed"
+        ]
+      },
+      {
+        "name": "gl-map",
+        "package": "com.example.wechatfriendforglmap",
+        "activity": ".GLMapMainActivity",
+        "apk": "gl-map-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed"
+        ]
+      },
+      {
+        "name": "surface-map",
+        "package": "com.example.wechatfriendforsurfacemap",
+        "activity": ".SurfaceMapMainActivity",
+        "apk": "surface-map-release-v1.0.0.apk",
+        "supports_activity_type": true,
+        "load_types": [
+          "minimal",
+          "light",
+          "medium",
+          "heavy",
+          "light_between_frames",
+          "medium_between_frames",
+          "heavy_between_frames",
+          "light_mixed",
+          "medium_mixed",
+          "heavy_mixed"
+        ]
+      },
+      {
+        "name": "aosp-douyin",
+        "package": "com.example.wechatfriendfordouyin",
+        "activity": ".DouyinMainActivity",
+        "apk": "aosp-douyin-release-v1.0.0.apk",
+        "supports_activity_type": false,
+        "test_type": "vertical_swipe"
+      },
+      {
+        "name": "aosp-ebook",
+        "package": "com.example.wechatfriendforebook",
+        "activity": ".EbookMainActivity",
+        "apk": "scrolling-aosp-ebook-release-v1.0.0.apk",
+        "supports_activity_type": false,
+        "test_type": "horizontal_swipe"
+      }
+    ]
+  },
+  "launch_tests": {
+    "description": "启动性能测试 APK",
+    "apps": [
+      {
+        "name": "launch-aosp",
+        "base_package": "com.example.launch.aosp",
+        "activity": "com.example.launch.aosp.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.aosp.light",
+            "apk": "launch-aosp-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.aosp.medium",
+            "apk": "launch-aosp-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.aosp.heavy",
+            "apk": "launch-aosp-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-compose",
+        "base_package": "com.example.launch.compose",
+        "activity": "com.example.launch.compose.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.compose.light",
+            "apk": "launch-compose-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.compose.medium",
+            "apk": "launch-compose-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.compose.heavy",
+            "apk": "launch-compose-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-webview",
+        "base_package": "com.example.launch.webview",
+        "activity": "com.example.launch.webview.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.webview.light",
+            "apk": "launch-webview-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.webview.medium",
+            "apk": "launch-webview-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.webview.heavy",
+            "apk": "launch-webview-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-gl",
+        "base_package": "com.example.launch.gl",
+        "activity": "com.example.launch.gl.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.gl.light",
+            "apk": "launch-gl-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.gl.medium",
+            "apk": "launch-gl-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.gl.heavy",
+            "apk": "launch-gl-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-game",
+        "base_package": "com.example.launch.game",
+        "activity": "com.example.launch.game.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.game.light",
+            "apk": "launch-game-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.game.medium",
+            "apk": "launch-game-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.game.heavy",
+            "apk": "launch-game-heavy-release-v1.0.0.apk"
+          }
+        ]
+      }
+    ]
+  },
+  "switch_tests": {
+    "description": "应用内跳转测试 APK",
+    "apps": [
+      {
+        "name": "switch-aosp",
+        "package": "com.example.switch_aosp",
+        "activity": ".MainActivity",
+        "apk": "switch-aosp-release-v1.0.0.apk",
+        "load_combinations": [
+          {
+            "name": "pure",
+            "self_load": "none",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_light",
+            "self_load": "light",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_medium",
+            "self_load": "medium",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_heavy",
+            "self_load": "heavy",
+            "bg_load": "none"
+          },
+          {
+            "name": "bg_medium",
+            "self_load": "none",
+            "bg_load": "medium"
+          },
+          {
+            "name": "bg_heavy",
+            "self_load": "none",
+            "bg_load": "heavy"
+          },
+          {
+            "name": "light_med",
+            "self_load": "light",
+            "bg_load": "medium"
+          },
+          {
+            "name": "med_med",
+            "self_load": "medium",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_med",
+            "self_load": "heavy",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_heavy",
+            "self_load": "heavy",
+            "bg_load": "heavy"
+          }
+        ]
+      },
+      {
+        "name": "switch-webview",
+        "package": "com.example.switch_webview",
+        "activity": ".MainActivity",
+        "apk": "switch-webview-release-v1.0.0.apk",
+        "load_combinations": [
+          {
+            "name": "pure",
+            "self_load": "none",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_light",
+            "self_load": "light",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_medium",
+            "self_load": "medium",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_heavy",
+            "self_load": "heavy",
+            "bg_load": "none"
+          },
+          {
+            "name": "bg_medium",
+            "self_load": "none",
+            "bg_load": "medium"
+          },
+          {
+            "name": "bg_heavy",
+            "self_load": "none",
+            "bg_load": "heavy"
+          },
+          {
+            "name": "light_med",
+            "self_load": "light",
+            "bg_load": "medium"
+          },
+          {
+            "name": "med_med",
+            "self_load": "medium",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_med",
+            "self_load": "heavy",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_heavy",
+            "self_load": "heavy",
+            "bg_load": "heavy"
+          }
+        ]
+      },
+      {
+        "name": "switch-flutter",
+        "package": "com.example.switch_flutter",
+        "activity": ".MainActivity",
+        "apk": "switch-flutter-release-v1.0.0.apk",
+        "load_combinations": [
+          {
+            "name": "pure",
+            "self_load": "none",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_light",
+            "self_load": "light",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_medium",
+            "self_load": "medium",
+            "bg_load": "none"
+          },
+          {
+            "name": "self_heavy",
+            "self_load": "heavy",
+            "bg_load": "none"
+          },
+          {
+            "name": "bg_medium",
+            "self_load": "none",
+            "bg_load": "medium"
+          },
+          {
+            "name": "bg_heavy",
+            "self_load": "none",
+            "bg_load": "heavy"
+          },
+          {
+            "name": "light_med",
+            "self_load": "light",
+            "bg_load": "medium"
+          },
+          {
+            "name": "med_med",
+            "self_load": "medium",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_med",
+            "self_load": "heavy",
+            "bg_load": "medium"
+          },
+          {
+            "name": "heavy_heavy",
+            "self_load": "heavy",
+            "bg_load": "heavy"
+          }
+        ]
+      }
+    ]
+  }
+}

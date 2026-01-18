@@ -66,16 +66,16 @@ abstract class BaseTargetActivity : AppCompatActivity() {
     }
 
     /**
-     * 使用 Choreographer 在第一帧渲染完成后通知 Switch 完成
+     * 使用 RealLoadExecutor 的完成回调来判断真正的完成时机
+     * 所有延迟任务（包括第一帧后的任务）执行完毕后才通知完成
      */
     private fun scheduleNotifySwitchComplete() {
-        Choreographer.getInstance().postFrameCallback { frameTimeNanos ->
+        com.example.switch_common.RealLoadExecutor.setCompletionCallback {
             if (!switchCompleteNotified) {
                 switchCompleteNotified = true
                 val duration = System.currentTimeMillis() - startTime
                 Trace.beginSection("NotifySwitchComplete")
-                android.util.Log.d("SwitchPerf", "Flutter switch complete in ${duration}ms, " +
-                        "scheduling background load stop")
+                android.util.Log.d("SwitchPerf", "Flutter switch complete in ${duration}ms (all tasks finished)")
                 SwitchLoadManager.notifySwitchComplete(this)
                 Trace.endSection()
             }

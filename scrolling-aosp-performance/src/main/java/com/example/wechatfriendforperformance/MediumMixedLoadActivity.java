@@ -19,6 +19,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadScheduler;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 
@@ -29,7 +30,7 @@ import com.example.loadconfig.LoadType;
  * 
  * 使用统一的 LoadSimulator 执行负载
  */
-public class MediumMixedLoadActivity extends AppCompatActivity implements Choreographer.FrameCallback {
+public class MediumMixedLoadActivity extends AppCompatActivity {
 
     private static final String TAG = "MediumMixedLoad";
     private RecyclerView recyclerView;
@@ -37,15 +38,10 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     private RequestBuilder<Drawable> imageLoader;
     private int mLoadType = LoadType.MEDIUM_MIXED;
 
-    private Choreographer mChoreographer;
-    private Handler mHandler;
-
     private LoadSimulator mLoadSimulator;
+    private LoadScheduler mLoadScheduler;
 
-    private boolean mIsTaskSchedulingEnabled = true;
-    private boolean mIsScrolling = false;
-
-    private RecyclerView.OnScrollListener mScrollListener;
+    // Removed mIsTaskSchedulingEnabled, mIsScrolling, mScrollListener
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,42 +64,14 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
 
         mLoadSimulator = new LoadSimulator();
 
-        mChoreographer = Choreographer.getInstance();
-        mHandler = new Handler(Looper.getMainLooper());
+        // Use LoadScheduler
+        mLoadScheduler = new LoadScheduler();
+        mLoadScheduler.attach(this, recyclerView, mLoadType);
 
-        initScrollListener();
-        Log.d(TAG, "onCreate: 等待列表滚动时启动负载任务");
+        Log.d(TAG, "onCreate: LoadScheduler attached");
     }
 
-    private void initScrollListener() {
-        mScrollListener = new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    mIsScrolling = false;
-                    mHandler.removeCallbacksAndMessages(null);
-                } else if (!mIsScrolling) {
-                    mIsScrolling = true;
-                    mChoreographer.postFrameCallback(MediumMixedLoadActivity.this);
-                }
-            }
-        };
-        recyclerView.addOnScrollListener(mScrollListener);
-    }
-
-    /**
-     * Choreographer的doFrame回调
-     * 帧间隔由 LoadSimulator 统一控制
-     */
-    @Override
-    public void doFrame(long frameTimeNanos) {
-        if (mIsTaskSchedulingEnabled && mIsScrolling) {
-            // 帧间隔由 LoadSimulator 统一控制
-            mLoadSimulator.executeDoFrameLoad(mLoadType, "MixedLoad_doFrame");
-            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"));
-            mChoreographer.postFrameCallback(this);
-        }
-    }
+    // Removed initScrollListener() and doFrame() manually methods
 
     @Override
     protected void onResume() {
@@ -113,15 +81,11 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
             adapter.setFriendCircleBeans(PerformanceDataCenter.getInstance().getFriendCircleBeans(mLoadType));
         }
         Log.d(TAG, "onResume: " + LoadConfig.getDescription(mLoadType));
-        mIsTaskSchedulingEnabled = true;
-        mIsScrolling = false;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mIsTaskSchedulingEnabled = false;
-        mHandler.removeCallbacksAndMessages(null);
     }
 
     private void initRecyclerView() {
@@ -138,18 +102,14 @@ public class MediumMixedLoadActivity extends AppCompatActivity implements Choreo
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (recyclerView != null && mScrollListener != null) {
-            recyclerView.removeOnScrollListener(mScrollListener);
-        }
-        if (adapter != null) {
-            adapter.stopContinuousLoadSimulation();
-        }
+
+        // Removed scroll listener logic, LoadScheduler handles it
+        // Removed manual handler callbacks logic
+
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        mIsTaskSchedulingEnabled = false;
-        mIsScrolling = false;
-        mHandler.removeCallbacksAndMessages(null);
+
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;

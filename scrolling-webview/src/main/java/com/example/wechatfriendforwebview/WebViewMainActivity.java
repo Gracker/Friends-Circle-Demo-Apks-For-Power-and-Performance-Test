@@ -20,7 +20,7 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
     // UI组件
     private Button btnMinimalLoad;
     private Button btnLightLoad;
-    private Button btnMediumLoad; 
+    private Button btnMediumLoad;
     private Button btnHeavyLoad;
     private Button btnLightBetweenFrames;
     private Button btnMediumBetweenFrames;
@@ -46,13 +46,95 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
 
         Log.d(TAG, "初始化WebView朋友圈测试主界面");
 
-        // 初始化按钮
+        // Initialize buttons
         initViews();
 
         // 设置点击监听器
         setClickListeners();
 
+        // Check for direct launch
+        checkForDirectActivityLaunch();
+
         Trace.endSection();
+    }
+
+    /**
+     * Check if the activity was started with a specific load type to launch
+     * directly
+     */
+    private void checkForDirectActivityLaunch() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            Log.e(TAG, "checkForDirectActivityLaunch: Intent received. Data: " + intent.getDataString());
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                for (String key : extras.keySet()) {
+                    Log.e(TAG, "Extra: " + key + " = " + extras.get(key));
+                }
+            } else {
+                Log.e(TAG, "No extras in intent");
+            }
+        }
+        if (intent != null && intent.hasExtra("activity_type")) {
+            String activityType = intent.getStringExtra("activity_type");
+            Log.e(TAG, "Found activity_type extra: " + activityType);
+            if (activityType != null) {
+                // Clear cache
+                WebViewDataCenter.getInstance().clearCachedData();
+
+                Intent targetIntent = null;
+                int loadType = com.example.loadconfig.LoadType.LIGHT;
+
+                switch (activityType) {
+                    case "minimal":
+                        targetIntent = new Intent(this, MinimalLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.MINIMAL;
+                        break;
+                    case "light":
+                        targetIntent = new Intent(this, LightLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.LIGHT;
+                        break;
+                    case "medium":
+                        targetIntent = new Intent(this, MediumLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.MEDIUM;
+                        break;
+                    case "heavy":
+                        targetIntent = new Intent(this, HeavyLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.HEAVY;
+                        break;
+                    case "light_between_frames":
+                        targetIntent = new Intent(this, LightLoadBetweenFramesWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.LIGHT_BETWEEN_FRAMES;
+                        break;
+                    case "medium_between_frames":
+                        targetIntent = new Intent(this, MediumLoadBetweenFramesWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.MEDIUM_BETWEEN_FRAMES;
+                        break;
+                    case "heavy_between_frames":
+                        targetIntent = new Intent(this, HeavyLoadBetweenFramesWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.HEAVY_BETWEEN_FRAMES;
+                        break;
+                    case "light_mixed":
+                        targetIntent = new Intent(this, LightMixedLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.LIGHT_MIXED;
+                        break;
+                    case "medium_mixed":
+                        targetIntent = new Intent(this, MediumMixedLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.MEDIUM_MIXED;
+                        break;
+                    case "heavy_mixed":
+                        targetIntent = new Intent(this, HeavyMixedLoadWebViewActivity.class);
+                        loadType = com.example.loadconfig.LoadType.HEAVY_MIXED;
+                        break;
+                }
+
+                if (targetIntent != null) {
+                    targetIntent.putExtra(EXTRA_LOAD_TYPE, loadType);
+                    startActivity(targetIntent);
+                    finish(); // Close main activity
+                }
+            }
+        }
     }
 
     /**

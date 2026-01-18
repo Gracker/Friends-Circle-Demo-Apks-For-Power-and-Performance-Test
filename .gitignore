@@ -117,3 +117,9 @@ fastlane/readme.md
 # 测试和调试文件
 /test-output/
 /perfetto-trace/
+
+# Automation Test
+automation-test/results/
+automation-test/__pycache__/
+__pycache__/
+*.pyc

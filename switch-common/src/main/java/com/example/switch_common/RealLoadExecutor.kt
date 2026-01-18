@@ -64,6 +64,11 @@ object RealLoadExecutor {
     private var currentContextRef: WeakReference<Context>? = null
     private val isPostFrameLoadRunning = AtomicBoolean(false)
 
+    // 任务计数器和完成回调（用于精确判断 Switch 完成时机）
+    private val pendingTaskCount = java.util.concurrent.atomic.AtomicInteger(0)
+    private var completionCallback: (() -> Unit)? = null
+    private var switchStartTime: Long = 0L
+
     private val mainHandler = Handler(Looper.getMainLooper())
     private val backgroundExecutor = Executors.newCachedThreadPool()
 
@@ -754,79 +759,52 @@ object RealLoadExecutor {
      * - 长任务：10-50ms
      * - 短任务：1-10ms
      */
+    /**
+     * 设置完成回调
+     * 当所有延迟任务执行完毕后调用
+     */
+    fun setCompletionCallback(callback: () -> Unit) {
+        completionCallback = callback
+        switchStartTime = System.currentTimeMillis()
+        // 如果任务已经全部完成，立即回调
+        if (pendingTaskCount.get() == 0) {
+            callback()
+        }
+    }
+
+    /**
+     * 任务完成时调用，减少计数器
+     */
+    private fun onTaskComplete(taskName: String) {
+        val remaining = pendingTaskCount.decrementAndGet()
+        if (remaining == 0) {
+            val duration = System.currentTimeMillis() - switchStartTime
+            Log.i(TAG, "SWITCH_ALL_TASKS_COMPLETE: All delayed tasks finished in ${duration}ms")
+            Trace.beginSection("SWITCH_COMPLETE")
+            Trace.endSection()
+            completionCallback?.invoke()
+        }
+    }
+
     fun injectDelayedTasks(context: Context, level: SelfLoadLevel) {
         if (level == SelfLoadLevel.NONE) return
 
         currentContextRef = WeakReference(context)
         val random = Random(SEED + 999)
 
-        // 第一阶段：在第一帧前调度的延迟任务（0-500ms）
+        // 计算总任务数
         val immediateTaskCount = when (level) {
             SelfLoadLevel.NONE -> 0
             SelfLoadLevel.LIGHT -> 3
             SelfLoadLevel.MEDIUM -> 8
             SelfLoadLevel.HEAVY -> 15
         }
-
-        repeat(immediateTaskCount) { i ->
-            val delay = (random.nextDouble() * 500).toLong()
-            val taskDuration = getVariedTaskDuration(random, isLongTask = random.nextInt(100) < 30)
-            mainHandler.postDelayed({
-                executeVariedDurationTask(context, random, i, taskDuration, "ImmediateTask")
-            }, delay)
+        val postFrameTaskCount = when (level) {
+            SelfLoadLevel.NONE -> 0
+            SelfLoadLevel.LIGHT -> 5
+            SelfLoadLevel.MEDIUM -> 12
+            SelfLoadLevel.HEAVY -> 25
         }
-
-        // 第二阶段：使用 Choreographer 在第一帧后执行的任务
-        schedulePostFrameLoads(context, level)
-    }
-
-    /**
-     * 调度第一帧后的负载
-     * 使用 Choreographer 确保在第一帧渲染完成后执行
-     */
-    private fun schedulePostFrameLoads(context: Context, level: SelfLoadLevel) {
-        if (!isPostFrameLoadRunning.compareAndSet(false, true)) return
-
-        val random = Random(SEED + 1000)
-
-        // 在第一帧后执行
-        Choreographer.getInstance().postFrameCallback { frameTimeNanos ->
-            Log.d(TAG, "First frame completed, starting post-frame loads")
-
-            val postFrameTaskCount = when (level) {
-                SelfLoadLevel.NONE -> 0
-                SelfLoadLevel.LIGHT -> 5
-                SelfLoadLevel.MEDIUM -> 12
-                SelfLoadLevel.HEAVY -> 25
-            }
-
-            // 第一帧后立即执行的任务
-            repeat(postFrameTaskCount) { i ->
-                // 延迟分布：100ms - 2000ms，模拟持续的后台加载
-                val delay = 100L + (random.nextDouble() * 1900).toLong()
-                val isLongTask = random.nextInt(100) < 40 // 40% 概率是长任务
-                val taskDuration = getVariedTaskDuration(random, isLongTask)
-
-                mainHandler.postDelayed({
-                    currentContextRef?.get()?.let { ctx ->
-                        executePostFrameTask(ctx, random, i, taskDuration, level)
-                    }
-                }, delay)
-            }
-
-            // 额外的后台线程负载（第一帧后）
-            schedulePostFrameBackgroundTasks(context, level)
-
-            isPostFrameLoadRunning.set(false)
-        }
-    }
-
-    /**
-     * 第一帧后的后台线程任务
-     */
-    private fun schedulePostFrameBackgroundTasks(context: Context, level: SelfLoadLevel) {
-        val random = Random(SEED + 2000)
-
         val bgTaskCount = when (level) {
             SelfLoadLevel.NONE -> 0
             SelfLoadLevel.LIGHT -> 2
@@ -834,16 +812,91 @@ object RealLoadExecutor {
             SelfLoadLevel.HEAVY -> 8
         }
 
-        repeat(bgTaskCount) { i ->
-            val delay = 200L + (random.nextDouble() * 800).toLong()
+        // 设置待完成任务总数
+        val totalTasks = immediateTaskCount + postFrameTaskCount + bgTaskCount
+        pendingTaskCount.set(totalTasks)
+        Log.d(TAG, "Starting $totalTasks delayed tasks for level $level")
 
+        // 第一阶段：立即开始执行的任务（连续执行，无延迟）
+        repeat(immediateTaskCount) { i ->
+            val taskDuration = getVariedTaskDuration(random, isLongTask = random.nextInt(100) < 30)
+            // 使用极小延迟（0-5ms）确保任务依次执行但不阻塞 UI
+            val microDelay = (i * 2).toLong()
             mainHandler.postDelayed({
-                backgroundExecutor.submit {
+                executeVariedDurationTask(context, random, i, taskDuration, "ImmediateTask")
+                onTaskComplete("ImmediateTask_$i")
+            }, microDelay)
+        }
+
+        // 第二阶段：使用 Choreographer 在第一帧后执行的任务
+        schedulePostFrameLoads(context, level, postFrameTaskCount, bgTaskCount)
+    }
+
+    /**
+     * 调度第一帧后的负载
+     * 使用 Choreographer 确保在第一帧渲染完成后执行
+     * 任务连续执行，完成时间取决于设备性能
+     */
+    private fun schedulePostFrameLoads(
+        context: Context,
+        level: SelfLoadLevel,
+        postFrameTaskCount: Int,
+        bgTaskCount: Int
+    ) {
+        if (!isPostFrameLoadRunning.compareAndSet(false, true)) return
+
+        val random = Random(SEED + 1000)
+
+        // 在第一帧后执行
+        Choreographer.getInstance().postFrameCallback { frameTimeNanos ->
+            Log.d(TAG, "First frame completed, starting $postFrameTaskCount post-frame loads")
+
+            // 第一帧后连续执行的任务（使用极小延迟避免 ANR，但本质是连续执行）
+            repeat(postFrameTaskCount) { i ->
+                val isLongTask = random.nextInt(100) < 40
+                val taskDuration = getVariedTaskDuration(random, isLongTask)
+                // 极小延迟：0-10ms，确保消息队列有空隙防止 ANR
+                val microDelay = (i * 3).toLong()
+
+                mainHandler.postDelayed({
                     currentContextRef?.get()?.let { ctx ->
-                        runPostFrameBackgroundTask(ctx, i, level)
+                        executePostFrameTask(ctx, random, i, taskDuration, level)
+                        onTaskComplete("PostFrameTask_$i")
+                    } ?: run {
+                        // Context 已释放，直接完成任务
+                        onTaskComplete("PostFrameTask_$i (skipped)")
+                    }
+                }, microDelay)
+            }
+
+            // 后台线程负载（连续执行）
+            schedulePostFrameBackgroundTasks(context, level, bgTaskCount)
+
+            isPostFrameLoadRunning.set(false)
+        }
+    }
+
+    /**
+     * 第一帧后的后台线程任务（连续执行）
+     */
+    private fun schedulePostFrameBackgroundTasks(context: Context, level: SelfLoadLevel, bgTaskCount: Int) {
+        val random = Random(SEED + 2000)
+
+        repeat(bgTaskCount) { i ->
+            // 直接提交到后台线程执行，无固定延迟
+            backgroundExecutor.submit {
+                currentContextRef?.get()?.let { ctx ->
+                    runPostFrameBackgroundTask(ctx, i, level)
+                    // 后台任务完成后通知主线程
+                    mainHandler.post {
+                        onTaskComplete("BgTask_$i")
+                    }
+                } ?: run {
+                    mainHandler.post {
+                        onTaskComplete("BgTask_$i (skipped)")
                     }
                 }
-            }, delay)
+            }
         }
     }
 

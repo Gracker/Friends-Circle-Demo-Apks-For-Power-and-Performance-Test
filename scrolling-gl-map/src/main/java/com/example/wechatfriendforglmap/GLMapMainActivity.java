@@ -32,6 +32,45 @@ public class GLMapMainActivity extends AppCompatActivity implements View.OnClick
         binding.btnMediumMixed.setOnClickListener(this);
         binding.btnHeavyMixed.setOnClickListener(this);
         binding.btnLongFrame.setOnClickListener(this);
+
+        checkForDirectActivityLaunch();
+    }
+
+    private void checkForDirectActivityLaunch() {
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("activity_type")) {
+            String activityType = intent.getStringExtra("activity_type");
+            android.util.Log.e("GLMapMainActivity", "Found activity_type extra: " + activityType);
+            Class<?> targetActivity = null;
+
+            if ("minimal".equals(activityType))
+                targetActivity = MinimalLoadActivity.class;
+            else if ("light".equals(activityType))
+                targetActivity = LightLoadActivity.class;
+            else if ("medium".equals(activityType))
+                targetActivity = MediumLoadActivity.class;
+            else if ("heavy".equals(activityType))
+                targetActivity = HeavyLoadActivity.class;
+            else if ("light_between_frames".equals(activityType))
+                targetActivity = LightBetweenFramesActivity.class;
+            else if ("medium_between_frames".equals(activityType))
+                targetActivity = MediumBetweenFramesActivity.class;
+            else if ("heavy_between_frames".equals(activityType))
+                targetActivity = HeavyBetweenFramesActivity.class;
+            else if ("light_mixed".equals(activityType))
+                targetActivity = LightMixedActivity.class;
+            else if ("medium_mixed".equals(activityType))
+                targetActivity = MediumMixedActivity.class;
+            else if ("heavy_mixed".equals(activityType))
+                targetActivity = HeavyMixedActivity.class;
+            else if ("long_frame".equals(activityType))
+                targetActivity = LongFrameActivity.class;
+
+            if (targetActivity != null) {
+                startActivity(new Intent(this, targetActivity));
+                finish();
+            }
+        }
     }
 
     @Override
@@ -39,17 +78,28 @@ public class GLMapMainActivity extends AppCompatActivity implements View.OnClick
         Class<?> targetActivity = null;
         int id = v.getId();
 
-        if (id == R.id.btn_minimal_load) targetActivity = MinimalLoadActivity.class;
-        else if (id == R.id.btn_light_load) targetActivity = LightLoadActivity.class;
-        else if (id == R.id.btn_medium_load) targetActivity = MediumLoadActivity.class;
-        else if (id == R.id.btn_heavy_load) targetActivity = HeavyLoadActivity.class;
-        else if (id == R.id.btn_light_between_frames) targetActivity = LightBetweenFramesActivity.class;
-        else if (id == R.id.btn_medium_between_frames) targetActivity = MediumBetweenFramesActivity.class;
-        else if (id == R.id.btn_heavy_between_frames) targetActivity = HeavyBetweenFramesActivity.class;
-        else if (id == R.id.btn_light_mixed) targetActivity = LightMixedActivity.class;
-        else if (id == R.id.btn_medium_mixed) targetActivity = MediumMixedActivity.class;
-        else if (id == R.id.btn_heavy_mixed) targetActivity = HeavyMixedActivity.class;
-        else if (id == R.id.btn_long_frame) targetActivity = LongFrameActivity.class;
+        if (id == R.id.btn_minimal_load)
+            targetActivity = MinimalLoadActivity.class;
+        else if (id == R.id.btn_light_load)
+            targetActivity = LightLoadActivity.class;
+        else if (id == R.id.btn_medium_load)
+            targetActivity = MediumLoadActivity.class;
+        else if (id == R.id.btn_heavy_load)
+            targetActivity = HeavyLoadActivity.class;
+        else if (id == R.id.btn_light_between_frames)
+            targetActivity = LightBetweenFramesActivity.class;
+        else if (id == R.id.btn_medium_between_frames)
+            targetActivity = MediumBetweenFramesActivity.class;
+        else if (id == R.id.btn_heavy_between_frames)
+            targetActivity = HeavyBetweenFramesActivity.class;
+        else if (id == R.id.btn_light_mixed)
+            targetActivity = LightMixedActivity.class;
+        else if (id == R.id.btn_medium_mixed)
+            targetActivity = MediumMixedActivity.class;
+        else if (id == R.id.btn_heavy_mixed)
+            targetActivity = HeavyMixedActivity.class;
+        else if (id == R.id.btn_long_frame)
+            targetActivity = LongFrameActivity.class;
 
         if (targetActivity != null) {
             startActivity(new Intent(this, targetActivity));
@@ -72,4 +122,3 @@ public class GLMapMainActivity extends AppCompatActivity implements View.OnClick
         }
     }
 }
-
