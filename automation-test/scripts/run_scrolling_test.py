@@ -73,7 +73,7 @@ class ScrollingTestRunner:
         # 1. 强制停止应用
         log_info(f"停止应用: {package}")
         ADBHelper.force_stop(package)
-        wait_ms(500)
+        wait_ms(1000)
         
         # 2. 启动应用
         log_info(f"启动应用: {package}/{activity}")
@@ -85,8 +85,7 @@ class ScrollingTestRunner:
             return result
             
         # [优化] 进入页面后等待
-        log_info("页面加载中，等待 1.5s...")
-        wait_ms(1500)
+        # wait_ms(1500) # Removed to capture early performance as per user feedback
         
         # 3. 等待页面稳定
         settle_time = self.config.test_config["scrolling_test"]["settle_time_before_test_ms"]
@@ -387,17 +386,17 @@ def main():
         action="store_true",
         help="测试所有应用和负载类型"
     )
+    parser.add_argument("--results-dir", help="Results directory", default=None)
     
     args = parser.parse_args()
     
     # 设置路径
-    script_dir = Path(__file__).parent.absolute()
-    project_dir = script_dir.parent
-    config_dir = project_dir / "config"
-    results_dir = project_dir / "results"
+    LIB_DIR = Path(__file__).parent.absolute()
+    config_dir = str(LIB_DIR.parent / "config")
+    results_dir = args.results_dir or str(LIB_DIR.parent / "results")
     
     # 创建测试执行器
-    runner = ScrollingTestRunner(str(config_dir), str(results_dir))
+    runner = ScrollingTestRunner(config_dir, results_dir)
     
     if args.package:
         # 测试单个应用

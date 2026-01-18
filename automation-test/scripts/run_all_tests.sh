@@ -6,8 +6,17 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# 设置结果目录 (包含时间戳)
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+RESULTS_ROOT="$PROJECT_ROOT/results"
+RESULTS_DIR="$RESULTS_ROOT/$TIMESTAMP"
+
+mkdir -p "$RESULTS_DIR"
+echo "测试结果目录: $RESULTS_DIR"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -90,9 +99,9 @@ run_scrolling_test() {
     log_header "步骤 2/4: 滑动性能测试"
     
     if [[ "$mode" == "full" ]]; then
-        python3 "$SCRIPT_DIR/run_scrolling_test.py" --all
+        python3 "$SCRIPT_DIR/run_scrolling_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_scrolling_test.py"
+        python3 "$SCRIPT_DIR/run_scrolling_test.py" --results-dir "$RESULTS_DIR"
     fi
 }
 
@@ -102,9 +111,9 @@ run_launch_test() {
     log_header "步骤 3/4: 启动性能测试"
     
     if [[ "$mode" == "full" ]]; then
-        python3 "$SCRIPT_DIR/run_launch_test.py" --all
+        python3 "$SCRIPT_DIR/run_launch_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_launch_test.py"
+        python3 "$SCRIPT_DIR/run_launch_test.py" --results-dir "$RESULTS_DIR"
     fi
 }
 
@@ -114,16 +123,16 @@ run_switch_test() {
     log_header "步骤 4/4: Switch 跳转测试"
     
     if [[ "$mode" == "full" ]]; then
-        python3 "$SCRIPT_DIR/run_switch_test.py" --all
+        python3 "$SCRIPT_DIR/run_switch_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_switch_test.py"
+        python3 "$SCRIPT_DIR/run_switch_test.py" --results-dir "$RESULTS_DIR"
     fi
 }
 
 # 生成报告
 run_report() {
     log_header "生成测试报告"
-    python3 "$PROJECT_ROOT/lib/report_generator.py"
+    python3 "$PROJECT_ROOT/lib/report_generator.py" --results-dir "$RESULTS_DIR"
 }
 
 # 主函数

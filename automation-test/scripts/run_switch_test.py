@@ -487,17 +487,18 @@ def main():
         action="store_true",
         help="测试所有应用和组合"
     )
+    parser.add_argument("--results-dir", help="Results directory", default=None)
     
     args = parser.parse_args()
     
     # 设置路径
     script_dir = Path(__file__).parent.absolute()
     project_dir = script_dir.parent
-    config_dir = project_dir / "config"
-    results_dir = project_dir / "results"
+    config_dir = str(project_dir / "config")
+    results_dir = args.results_dir or str(project_dir / "results")
     
     # 创建测试执行器
-    runner = SwitchTestRunner(str(config_dir), str(results_dir))
+    runner = SwitchTestRunner(config_dir, results_dir)
     
     # 批量测试
     app_names = args.apps
