@@ -58,6 +58,14 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
         Trace.endSection();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        Log.d(TAG, "onNewIntent: New intent received");
+        checkForDirectActivityLaunch();
+    }
+
     /**
      * Check if the activity was started with a specific load type to launch
      * directly
@@ -129,9 +137,13 @@ public class WebViewMainActivity extends AppCompatActivity implements View.OnCli
                 }
 
                 if (targetIntent != null) {
-                    targetIntent.putExtra(EXTRA_LOAD_TYPE, loadType);
-                    startActivity(targetIntent);
-                    finish(); // Close main activity
+                    try {
+                        targetIntent.putExtra(EXTRA_LOAD_TYPE, loadType);
+                        startActivity(targetIntent);
+                        finish(); // Close main activity
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to launch target activity", e);
+                    }
                 }
             }
         }
