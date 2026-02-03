@@ -60,6 +60,9 @@ public class GameActivity extends AppCompatActivity {
     private long loadingStartTime;
     private GameEngine gameEngine;
 
+    // 生命周期状态标志，防止 Activity 销毁后后台线程更新 UI 导致 crash
+    private volatile boolean isActivityActive = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Trace.beginSection("GameActivity_onCreate");
@@ -201,14 +204,20 @@ public class GameActivity extends AppCompatActivity {
         gameEngine.setLoadingListener(new GameEngine.LoadingListener() {
             @Override
             public void onLoadingProgress(int progress, String message) {
-                updateLoadingProgress(message, progress);
+                if (isActivityActive) {
+                    updateLoadingProgress(message, progress);
+                }
             }
 
             @Override
             public void onLoadingComplete() {
-                mainHandler.post(() -> {
-                    onAssetsLoaded();
-                });
+                if (isActivityActive && mainHandler != null) {
+                    mainHandler.post(() -> {
+                        if (isActivityActive) {
+                            onAssetsLoaded();
+                        }
+                    });
+                }
             }
         });
 
@@ -236,6 +245,10 @@ public class GameActivity extends AppCompatActivity {
         long logoDuration = 2000;
 
         mainHandler.postDelayed(() -> {
+            // 检查 Activity 是否仍然活跃
+            if (!isActivityActive) {
+                return;
+            }
             // Stage 2: 所有版本都播放视频
             playVideoAndLoadAssets();
         }, logoDuration);
@@ -327,6 +340,10 @@ public class GameActivity extends AppCompatActivity {
 
                 // 2秒后自动停止视频
                 mainHandler.postDelayed(() -> {
+                    // 检查 Activity 是否仍然活跃
+                    if (!isActivityActive) {
+                        return;
+                    }
                     if (mp.isPlaying()) {
                         mp.pause();
                         videoView.setVisibility(View.GONE);
@@ -339,6 +356,9 @@ public class GameActivity extends AppCompatActivity {
             });
 
             videoView.setOnCompletionListener(mp -> {
+                if (!isActivityActive) {
+                    return;
+                }
                 Log.d(TAG, "Video playback completed naturally");
                 videoView.setVisibility(View.GONE);
                 loadGameAssets();
@@ -346,6 +366,9 @@ public class GameActivity extends AppCompatActivity {
 
             videoView.setOnErrorListener((mp, what, extra) -> {
                 Log.w(TAG, "Video playback error: " + what + ", extra: " + extra);
+                if (!isActivityActive) {
+                    return true;
+                }
                 videoView.setVisibility(View.GONE);
                 // 视频播放失败，直接进入资源加载
                 loadGameAssets();
@@ -470,22 +493,36 @@ public class GameActivity extends AppCompatActivity {
                 updateGLLoadingProgress("加载完成!", 100);
                 Thread.sleep(500);
 
-                // 通知主线程加载完成
-                mainHandler.post(() -> {
-                    onAssetsLoaded();
-                });
+                // 通知主线程加载完成（检查 Activity 是否仍然活跃）
+                if (isActivityActive && mainHandler != null) {
+                    mainHandler.post(() -> {
+                        if (isActivityActive) {
+                            onAssetsLoaded();
+                        }
+                    });
+                }
 
             } catch (Exception e) {
                 Log.e(TAG, "Error during resource loading", e);
-                mainHandler.post(() -> {
-                    onAssetsLoaded();
-                });
+                if (isActivityActive && mainHandler != null) {
+                    mainHandler.post(() -> {
+                        if (isActivityActive) {
+                            onAssetsLoaded();
+                        }
+                    });
+                }
             }
         }, "ResourceLoadingThread").start();
     }
 
     private void updateLoadingProgress(String message, int progress) {
+        if (!isActivityActive || mainHandler == null) {
+            return;
+        }
         mainHandler.post(() -> {
+            if (!isActivityActive) {
+                return;
+            }
             if (loadingDetail != null) {
                 loadingDetail.setText(message);
             }
@@ -496,6 +533,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updateGLLoadingProgress(String message, int progress) {
+        // 检查 Activity 是否仍然活跃，防止 crash
+        if (!isActivityActive) {
+            return;
+        }
+
         // 更新渲染的加载进度
         if (USE_CANVAS_2D && simpleView != null) {
             simpleView.updateLoadingProgress(message, progress);
@@ -505,6 +547,11 @@ public class GameActivity extends AppCompatActivity {
             // 安全地更新文字覆盖层 - 必须在主线程执行
             try {
                 runOnUiThread(() -> {
+                    // 再次检查，因为在 runOnUiThread 执行前 Activity 可能已被销毁
+                    if (!isActivityActive) {
+                        return;
+                    }
+
                     if (glLoadingPercent != null) {
                         glLoadingPercent.setText(progress + "%");
                     }
@@ -610,6 +657,7 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isActivityActive = true;
         if (isGameReady && gameSurfaceView20 != null) {
             gameSurfaceView20.onResume();
         } else if (isGameReady && gameSurfaceView != null) {
@@ -620,6 +668,8 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        // 标记 Activity 不再活跃，防止后台线程更新 UI
+        isActivityActive = false;
         if (gameSurfaceView20 != null) {
             gameSurfaceView20.onPause();
         } else if (gameSurfaceView != null) {
@@ -629,12 +679,28 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        // 首先标记 Activity 已销毁
+        isActivityActive = false;
 
-        // 游戏引擎清理已在其他地方处理
-
+        // 清理 Handler 中的所有待处理消息
         if (mainHandler != null) {
             mainHandler.removeCallbacksAndMessages(null);
+            mainHandler = null;
         }
+
+        // 停止VideoView播放并释放资源
+        if (videoView != null) {
+            videoView.stopPlayback();
+            videoView.setOnPreparedListener(null);
+            videoView.setOnCompletionListener(null);
+            videoView.setOnErrorListener(null);
+        }
+
+        // 清理GLSurfaceView
+        if (gameSurfaceView20 != null) {
+            gameSurfaceView20.onPause();
+        }
+
+        super.onDestroy();
     }
 }

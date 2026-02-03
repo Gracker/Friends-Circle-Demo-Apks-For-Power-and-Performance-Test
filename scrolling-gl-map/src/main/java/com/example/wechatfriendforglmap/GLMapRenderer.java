@@ -103,6 +103,45 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        // 释放OpenGL资源
+        releaseGLResources();
+    }
+
+    /**
+     * 释放所有OpenGL资源，防止内存泄漏
+     * 应在GLSurfaceView的onPause或销毁时调用
+     */
+    public void releaseGLResources() {
+        // 删除shader程序
+        if (program != 0) {
+            GLES20.glDeleteProgram(program);
+            program = 0;
+        }
+
+        // 清空FloatBuffer引用，让GC回收Native内存
+        // 注意：DirectByteBuffer的Native内存由JVM的Cleaner自动回收
+        gridVertices = null;
+        roadVertices = null;
+        mainRoadVertices = null;
+        subwayVertices = null;
+        buildingVertices = null;
+        markerVertices = null;
+        waterVertices = null;
+        parkVertices = null;
+        riverVertices = null;
+
+        // 重置顶点计数
+        gridVertexCount = 0;
+        roadVertexCount = 0;
+        mainRoadVertexCount = 0;
+        subwayVertexCount = 0;
+        buildingVertexCount = 0;
+        markerVertexCount = 0;
+        waterVertexCount = 0;
+        parkVertexCount = 0;
+        riverVertexCount = 0;
+
+        Log.d(TAG, "OpenGL resources released");
     }
 
     public void setOffset(float dx, float dy) {

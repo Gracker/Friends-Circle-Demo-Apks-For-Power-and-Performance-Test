@@ -50,6 +50,12 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
     private Handler flingHandler;
     private Runnable flingRunnable;
 
+    // 主 Handler 用于所有延迟任务
+    private Handler mHandler;
+
+    // 生命周期状态标志，防止 Activity 销毁后更新 UI 导致 crash
+    protected volatile boolean isActivityActive = true;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +63,16 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_circle_webview);
 
-        // 获取传入的负载类型
-        loadType = getIntent().getIntExtra(WebViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        // 初始化主 Handler
+        mHandler = new Handler(Looper.getMainLooper());
+
+        // 获取传入的负载类型（添加空指针保护）
+        android.content.Intent intent = getIntent();
+        if (intent != null) {
+            loadType = intent.getIntExtra(WebViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        } else {
+            loadType = com.example.loadconfig.LoadType.LIGHT;
+        }
 
         // 初始化视图
         initViews();
@@ -108,8 +122,9 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         // 设置缓存模式
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // 允许混合内容（现代API已经不再支持以前的方法）
-        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        // 允许混合内容（使用兼容模式而非总是允许，提高安全性）
+        // 注意：本地文件协议不受此限制
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         // 允许加载网络图片
         webSettings.setBlockNetworkImage(false);
@@ -136,11 +151,33 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                if (!isActivityActive) return;
                 // 页面加载完成后，隐藏进度条
                 progressBar.setVisibility(View.GONE);
 
                 // 页面加载完成后，加载朋友圈数据
                 loadFriendCircleData();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if (!isActivityActive) return;
+                Log.e(TAG, "WebView加载错误: " + error.getDescription());
+                // 显示错误提示
+                if (request.isForMainFrame()) {
+                    Toast.makeText(BaseFriendCircleWebViewActivity.this,
+                            "页面加载失败: " + error.getDescription(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceResponse errorResponse) {
+                super.onReceivedHttpError(view, request, errorResponse);
+                if (!isActivityActive) return;
+                Log.e(TAG, "WebView HTTP错误: " + errorResponse.getStatusCode());
             }
         });
 
@@ -159,7 +196,7 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
             }
         });
 
-        // 添加JavaScript接口
+        // 添加JavaScript接口（使用WeakReference版本避免内存泄漏）
         webView.addJavascriptInterface(new WebAppInterface(this), "Android");
 
         Log.d(TAG, "JavascriptInterface已注册到WebView");
@@ -250,6 +287,11 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         flingRunnable = new Runnable() {
             @Override
             public void run() {
+                // 检查 Activity 是否仍然活跃
+                if (!isActivityActive) {
+                    isFling = false;
+                    return;
+                }
                 if (isFling && flingFrameCount < MAX_FLING_FRAMES) {
                     flingFrameCount++;
                     Log.d(TAG, "执行fling负载帧 " + flingFrameCount + "/" + MAX_FLING_FRAMES);
@@ -258,7 +300,7 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
                     executeFlingLoad();
 
                     // 继续安排下一帧，但不使用循环
-                    if (flingHandler != null) {
+                    if (flingHandler != null && isActivityActive) {
                         flingHandler.postDelayed(this, 16);
                     }
                 } else {
@@ -297,24 +339,30 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         Trace.beginSection("BaseFriendCircleWebView_loadFriendCircleData");
 
         // 减少延迟时间，加快数据加载速度
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            try {
-                // 获取朋友圈JSON数据
-                String jsonData = WebViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
-
-                // 将数据传递给WebView
-                if (webView != null && jsonData != null) {
-                    String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
-                    webView.evaluateJavascript(jsCode, null);
-                    Log.d(TAG, "朋友圈数据已加载");
+        if (mHandler != null) {
+            mHandler.postDelayed(() -> {
+                // 检查 Activity 是否仍然活跃
+                if (!isActivityActive) {
+                    return;
                 }
+                try {
+                    // 获取朋友圈JSON数据
+                    String jsonData = WebViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
 
-                // 执行额外的负载逻辑，由子类实现
-                performLoadTask();
-            } catch (Exception e) {
-                Log.e(TAG, "加载朋友圈数据失败", e);
-            }
-        }, 100); // 减少延迟到100ms
+                    // 将数据传递给WebView
+                    if (webView != null && jsonData != null) {
+                        String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
+                        webView.evaluateJavascript(jsCode, null);
+                        Log.d(TAG, "朋友圈数据已加载");
+                    }
+
+                    // 执行额外的负载逻辑，由子类实现
+                    performLoadTask();
+                } catch (Exception e) {
+                    Log.e(TAG, "加载朋友圈数据失败", e);
+                }
+            }, 100); // 减少延迟到100ms
+        }
 
         Trace.endSection();
     }
@@ -326,14 +374,15 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
 
     /**
      * JavaScript接口，用于实现JavaScript和Android的交互
+     * 使用WeakReference避免内存泄漏
      */
     @SuppressLint("JavascriptInterface")
-    public class WebAppInterface {
-        private Context context;
-        private Handler handler;
+    public static class WebAppInterface {
+        private final java.lang.ref.WeakReference<BaseFriendCircleWebViewActivity> activityRef;
+        private final Handler handler;
 
-        public WebAppInterface(Context context) {
-            this.context = context;
+        public WebAppInterface(BaseFriendCircleWebViewActivity activity) {
+            this.activityRef = new java.lang.ref.WeakReference<>(activity);
             this.handler = new Handler(Looper.getMainLooper());
         }
 
@@ -343,7 +392,9 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         @JavascriptInterface
         public void showToast(String message) {
             handler.post(() -> {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                BaseFriendCircleWebViewActivity activity = activityRef.get();
+                if (activity == null || !activity.isActivityActive) return;
+                Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -352,7 +403,8 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
          */
         @JavascriptInterface
         public int getLoadType() {
-            return loadType;
+            BaseFriendCircleWebViewActivity activity = activityRef.get();
+            return activity != null ? activity.loadType : com.example.loadconfig.LoadType.LIGHT;
         }
 
         /**
@@ -362,7 +414,9 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         public void showImage(String imageUrl) {
             Log.d(TAG, "显示图片: " + imageUrl);
             handler.post(() -> {
-                Toast.makeText(context, "查看图片: " + imageUrl, Toast.LENGTH_SHORT).show();
+                BaseFriendCircleWebViewActivity activity = activityRef.get();
+                if (activity == null || !activity.isActivityActive) return;
+                Toast.makeText(activity, "查看图片: " + imageUrl, Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -373,7 +427,9 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         public void reportPerformance(String loadType, int fps, boolean isScrolling) {
             Log.d(TAG, "性能数据: 负载=" + loadType + ", FPS=" + fps + ", 滚动状态=" + isScrolling);
             handler.post(() -> {
-                Toast.makeText(context, "性能: " + loadType + ", FPS=" + fps, Toast.LENGTH_SHORT).show();
+                BaseFriendCircleWebViewActivity activity = activityRef.get();
+                if (activity == null || !activity.isActivityActive) return;
+                Toast.makeText(activity, "性能: " + loadType + ", FPS=" + fps, Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -384,8 +440,10 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         public void loadMoreItems(int count) {
             Log.d(TAG, "请求加载更多数据: " + count + "条");
             handler.post(() -> {
+                BaseFriendCircleWebViewActivity activity = activityRef.get();
+                if (activity == null || !activity.isActivityActive) return;
                 // 生成更多朋友圈数据并返回给JavaScript
-                generateMoreFriendCircleData(count);
+                activity.generateMoreFriendCircleData(count);
             });
         }
     }
@@ -394,6 +452,10 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
      * 生成更多朋友圈数据并发送回JavaScript
      */
     private void generateMoreFriendCircleData(int count) {
+        // 检查 Activity 是否仍然活跃
+        if (!isActivityActive) {
+            return;
+        }
         try {
             String jsonData = WebViewDataCenter.getInstance().getMoreFriendCircleJsonData(count);
 
@@ -417,18 +479,40 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        // 标记 Activity 不再活跃
+        isActivityActive = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityActive = true;
+    }
+
+    @Override
     protected void onDestroy() {
-        // 清理WebView
-        if (webView != null) {
-            webView.loadUrl("about:blank");
-            webView.destroy();
-            webView = null;
+        // 首先标记 Activity 已销毁
+        isActivityActive = false;
+
+        // 清理主 Handler
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
         }
 
         // 清理fling Handler
         if (flingHandler != null) {
             flingHandler.removeCallbacksAndMessages(null);
             flingHandler = null;
+        }
+
+        // 清理WebView
+        if (webView != null) {
+            webView.loadUrl("about:blank");
+            webView.destroy();
+            webView = null;
         }
 
         super.onDestroy();

@@ -54,6 +54,10 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
 
     private Surface surface;
 
+    // 生命周期状态标志
+    protected volatile boolean isActivityActive = true;
+    protected Handler mHandler;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +65,14 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geckoview_texture);
 
-        loadType = getIntent().getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        mHandler = new Handler(Looper.getMainLooper());
+        // 获取传入的负载类型（添加空指针保护）
+        android.content.Intent intent = getIntent();
+        if (intent != null) {
+            loadType = intent.getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        } else {
+            loadType = com.example.loadconfig.LoadType.LIGHT;
+        }
 
         initViews();
         initGeckoRuntime();
@@ -93,12 +104,16 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         geckoSession.setProgressDelegate(new GeckoSession.ProgressDelegate() {
             @Override
             public void onPageStart(@NonNull GeckoSession session, @NonNull String url) {
-                runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
+                runOnUiThread(() -> {
+                    if (!isActivityActive) return;
+                    progressBar.setVisibility(View.VISIBLE);
+                });
             }
 
             @Override
             public void onPageStop(@NonNull GeckoSession session, boolean success) {
                 runOnUiThread(() -> {
+                    if (!isActivityActive) return;
                     progressBar.setVisibility(View.GONE);
                     loadFriendCircleData();
                 });
@@ -106,7 +121,10 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
 
             @Override
             public void onProgressChange(@NonNull GeckoSession session, int progress) {
-                runOnUiThread(() -> progressBar.setProgress(progress));
+                runOnUiThread(() -> {
+                    if (!isActivityActive) return;
+                    progressBar.setProgress(progress);
+                });
             }
         });
 
@@ -200,20 +218,27 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         flingFrameCount = 0;
         executeFlingLoad();
 
-        Handler handler = new Handler(Looper.getMainLooper());
         Runnable flingRunnable = new Runnable() {
             @Override
             public void run() {
+                if (!isActivityActive) {
+                    isFling = false;
+                    return;
+                }
                 if (isFling && flingFrameCount < MAX_FLING_FRAMES) {
                     flingFrameCount++;
                     executeFlingLoad();
-                    handler.postDelayed(this, 16);
+                    if (mHandler != null && isActivityActive) {
+                        mHandler.postDelayed(this, 16);
+                    }
                 } else {
                     isFling = false;
                 }
             }
         };
-        handler.postDelayed(flingRunnable, 16);
+        if (mHandler != null) {
+            mHandler.postDelayed(flingRunnable, 16);
+        }
     }
 
     protected abstract void executeFlingLoad();
@@ -223,18 +248,21 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     }
 
     protected void loadFriendCircleData() {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            try {
-                String jsonData = GeckoViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
-                if (geckoSession != null && jsonData != null) {
-                    String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
-                    geckoSession.loadUri(jsCode);
+        if (mHandler != null) {
+            mHandler.postDelayed(() -> {
+                if (!isActivityActive) return;
+                try {
+                    String jsonData = GeckoViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
+                    if (geckoSession != null && jsonData != null && isActivityActive) {
+                        String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
+                        geckoSession.loadUri(jsCode);
+                    }
+                    performLoadTask();
+                } catch (Exception e) {
+                    Log.e(TAG, "加载朋友圈数据失败", e);
                 }
-                performLoadTask();
-            } catch (Exception e) {
-                Log.e(TAG, "加载朋友圈数据失败", e);
-            }
-        }, 100);
+            }, 100);
+        }
     }
 
     protected abstract void performLoadTask();
@@ -260,6 +288,8 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        isActivityActive = false;
+        isFling = false;
         if (geckoSession != null) {
             geckoSession.setActive(false);
         }
@@ -268,6 +298,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        isActivityActive = true;
         if (geckoSession != null) {
             geckoSession.setActive(true);
         }
@@ -275,6 +306,14 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        isActivityActive = false;
+        isFling = false;
+
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
+        }
+
         if (geckoDisplay != null) {
             geckoDisplay.surfaceDestroyed();
             geckoSession.releaseDisplay(geckoDisplay);

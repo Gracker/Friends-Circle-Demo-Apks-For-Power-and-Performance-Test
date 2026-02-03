@@ -20,17 +20,18 @@ import com.example.loadconfig.LoadConfig;
 public class GeckoViewDataCenter {
     private static final String TAG = "GeckoViewDataCenter";
 
-    private static GeckoViewDataCenter instance;
+    // 使用volatile保证多线程可见性，修复DCL问题
+    private static volatile GeckoViewDataCenter instance;
 
-    // 缓存的JSON数据
-    private Map<Integer, String> cachedJsonData = new HashMap<>();
+    // 使用线程安全的ConcurrentHashMap替代HashMap
+    private final Map<Integer, String> cachedJsonData = new java.util.concurrent.ConcurrentHashMap<>();
 
     // 私有构造函数
     private GeckoViewDataCenter() {
         // 单例模式，不做初始化
     }
 
-    // 获取单例实例
+    // 获取单例实例（Double-Checked Locking with volatile）
     public static GeckoViewDataCenter getInstance() {
         if (instance == null) {
             synchronized (GeckoViewDataCenter.class) {

@@ -147,6 +147,9 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
     protected void onPause() {
         super.onPause();
         mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -162,7 +165,13 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mIsEnabled = false;
+        mIsScrolling = false;
+        mHandler.removeCallbacksAndMessages(null);
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
@@ -172,11 +181,10 @@ public class LongFrameLoadActivity extends AppCompatActivity implements Choreogr
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        mIsEnabled = false;
-        mHandler.removeCallbacksAndMessages(null);
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 }

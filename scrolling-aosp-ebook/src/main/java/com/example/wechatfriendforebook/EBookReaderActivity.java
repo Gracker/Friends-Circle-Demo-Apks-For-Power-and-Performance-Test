@@ -69,6 +69,9 @@ public class EBookReaderActivity extends AppCompatActivity {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    // 生命周期标志
+    private volatile boolean isActivityActive = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,6 +198,7 @@ public class EBookReaderActivity extends AppCompatActivity {
 
                 if (!success) {
                     mainHandler.post(() -> {
+                        if (!isActivityActive) return;
                         showLoading(false);
                         Toast.makeText(this, "无法加载电子书", Toast.LENGTH_LONG).show();
                     });
@@ -203,14 +207,18 @@ public class EBookReaderActivity extends AppCompatActivity {
 
                 // 等待视图测量完成后再分页
                 mainHandler.post(() -> {
+                    if (!isActivityActive) return;
                     pageView.post(() -> {
-                        splitPagesAndDisplay();
+                        if (isActivityActive) {
+                            splitPagesAndDisplay();
+                        }
                     });
                 });
 
             } catch (Exception e) {
                 Log.e(TAG, "加载电子书失败", e);
                 mainHandler.post(() -> {
+                    if (!isActivityActive) return;
                     showLoading(false);
                     Toast.makeText(this, "加载失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
@@ -244,6 +252,7 @@ public class EBookReaderActivity extends AppCompatActivity {
                 pageSplitter.splitPages(epubParser.getAllContent());
 
                 mainHandler.post(() -> {
+                    if (!isActivityActive) return;
                     showLoading(false);
 
                     // 设置书名
@@ -262,6 +271,7 @@ public class EBookReaderActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "分页失败", e);
                 mainHandler.post(() -> {
+                    if (!isActivityActive) return;
                     showLoading(false);
                     Toast.makeText(this, "分页失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
@@ -363,8 +373,27 @@ public class EBookReaderActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        isActivityActive = false;
+        if (mainHandler != null) {
+            mainHandler.removeCallbacksAndMessages(null);
+            mainHandler = null;
+        }
+        // 正确关闭ExecutorService，等待任务完成
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+            try {
+                // 等待最多1秒让任务完成
+                if (!executor.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS)) {
+                    // 如果超时，强制关闭
+                    executor.shutdownNow();
+                    android.util.Log.w("EBookReader", "Executor did not terminate in time, forced shutdown");
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
         super.onDestroy();
-        executor.shutdown();
     }
 
     @Override

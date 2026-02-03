@@ -42,12 +42,19 @@ public class DouyinMainActivity extends AppCompatActivity {
     private final SparseArray<MediaPlayer> mPlayerMap = new SparseArray<>();
     // 背景播放器（用于模糊效果）
     private final SparseArray<MediaPlayer> mBgPlayerMap = new SparseArray<>();
+    // 前景 Surface（需要手动释放）
+    private final SparseArray<Surface> mFgSurfaceMap = new SparseArray<>();
+    // 背景 Surface（需要手动释放）
+    private final SparseArray<Surface> mBgSurfaceMap = new SparseArray<>();
     // 页面View引用
     private final SparseArray<View> mPageViewMap = new SparseArray<>();
     // TextureView 就绪状态
     private final SparseArray<Boolean> mTextureReadyMap = new SparseArray<>();
 
     private int mCurrentPlayingIndex = -1;
+
+    // 生命周期标志
+    private volatile boolean isActivityActive = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -260,7 +267,9 @@ public class DouyinMainActivity extends AppCompatActivity {
         try {
             // 前景播放器
             MediaPlayer fgPlayer = new MediaPlayer();
-            fgPlayer.setSurface(new Surface(fgView.getSurfaceTexture()));
+            Surface fgSurface = new Surface(fgView.getSurfaceTexture());
+            mFgSurfaceMap.put(position, fgSurface);
+            fgPlayer.setSurface(fgSurface);
             fgPlayer.setDataSource(this, uri);
             fgPlayer.setLooping(true);
             fgPlayer.setVolume(1f, 1f);
@@ -269,7 +278,9 @@ public class DouyinMainActivity extends AppCompatActivity {
             MediaPlayer bgPlayer = null;
             if (bgView != null && bgView.isAvailable()) {
                 bgPlayer = new MediaPlayer();
-                bgPlayer.setSurface(new Surface(bgView.getSurfaceTexture()));
+                Surface bgSurface = new Surface(bgView.getSurfaceTexture());
+                mBgSurfaceMap.put(position, bgSurface);
+                bgPlayer.setSurface(bgSurface);
                 bgPlayer.setDataSource(this, uri);
                 bgPlayer.setLooping(true);
                 bgPlayer.setVolume(0f, 0f);
@@ -293,7 +304,9 @@ public class DouyinMainActivity extends AppCompatActivity {
                 }
 
                 if (loading != null)
-                    runOnUiThread(() -> loading.setVisibility(View.GONE));
+                    runOnUiThread(() -> {
+                        if (isActivityActive) loading.setVisibility(View.GONE);
+                    });
                 if (position == mCurrentPlayingIndex) {
                     mp.start();
                     if (bg != null) {
@@ -311,7 +324,9 @@ public class DouyinMainActivity extends AppCompatActivity {
             });
 
             if (loading != null)
-                runOnUiThread(() -> loading.setVisibility(View.VISIBLE));
+                runOnUiThread(() -> {
+                    if (isActivityActive) loading.setVisibility(View.VISIBLE);
+                });
 
             fgPlayer.prepareAsync();
             if (bgPlayer != null)
@@ -393,21 +408,48 @@ public class DouyinMainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        isActivityActive = false;
+        // 先释放 MediaPlayer
         for (int i = 0; i < mPlayerMap.size(); i++) {
             MediaPlayer p = mPlayerMap.valueAt(i);
-            if (p != null)
-                p.release();
+            if (p != null) {
+                try {
+                    p.release();
+                } catch (Exception e) {
+                    Log.w(TAG, "Error releasing foreground player", e);
+                }
+            }
         }
         for (int i = 0; i < mBgPlayerMap.size(); i++) {
             MediaPlayer p = mBgPlayerMap.valueAt(i);
-            if (p != null)
-                p.release();
+            if (p != null) {
+                try {
+                    p.release();
+                } catch (Exception e) {
+                    Log.w(TAG, "Error releasing background player", e);
+                }
+            }
+        }
+        // 再释放 Surface（MediaPlayer.release() 后再释放 Surface）
+        for (int i = 0; i < mFgSurfaceMap.size(); i++) {
+            Surface s = mFgSurfaceMap.valueAt(i);
+            if (s != null && s.isValid()) {
+                s.release();
+            }
+        }
+        for (int i = 0; i < mBgSurfaceMap.size(); i++) {
+            Surface s = mBgSurfaceMap.valueAt(i);
+            if (s != null && s.isValid()) {
+                s.release();
+            }
         }
         mPlayerMap.clear();
         mBgPlayerMap.clear();
+        mFgSurfaceMap.clear();
+        mBgSurfaceMap.clear();
         mPageViewMap.clear();
         mTextureReadyMap.clear();
+        super.onDestroy();
     }
 
     private static class VideoData {

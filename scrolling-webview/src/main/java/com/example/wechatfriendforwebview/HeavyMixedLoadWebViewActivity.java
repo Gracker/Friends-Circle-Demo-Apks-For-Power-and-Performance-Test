@@ -51,12 +51,13 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
                 taskIntervalRandom.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
 
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled)
+            // 检查 Activity 是否仍然活跃
+            if (!isTaskSchedulingEnabled || !isActivityActive)
                 return;
 
             mLoadSimulator.executeBetweenFrameLoad(mLoadType, "HeavyMixedWV_betweenFrameLoad");
 
-            if (webView != null) {
+            if (webView != null && isActivityActive) {
                 String js = "(function() { var s = 0; for(var i = 0; i < 1000; i++) { s += Math.pow(Math.sin(i), 2) + Math.pow(Math.cos(i), 2); } return s; })();";
                 webView.evaluateJavascript(js, null);
             }
@@ -73,7 +74,8 @@ public class HeavyMixedLoadWebViewActivity extends BaseFriendCircleWebViewActivi
                 doFrameIntervalRandom.nextInt(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS);
 
         handler.postDelayed(() -> {
-            if (!isTaskSchedulingEnabled)
+            // 检查 Activity 是否仍然活跃
+            if (!isTaskSchedulingEnabled || !isActivityActive)
                 return;
 
             mLoadSimulator.executeDoFrameLoad(mLoadType, "HeavyMixedWV_doFrameLoad");

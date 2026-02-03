@@ -119,6 +119,9 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
     protected void onPause() {
         super.onPause();
         mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -135,7 +138,10 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
 
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
@@ -147,12 +153,12 @@ public class LightLoadActivity extends AppCompatActivity implements Choreographe
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        mIsEnabled = false;
 
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 
     @Override

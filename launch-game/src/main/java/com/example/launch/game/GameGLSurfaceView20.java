@@ -484,9 +484,36 @@ public class GameGLSurfaceView20 extends GLSurfaceView {
         }
 
         public void cleanup() {
-            glDeleteProgram(backgroundProgram);
-            glDeleteProgram(progressProgram);
-            glDeleteProgram(particleProgram);
+            // 删除着色器程序
+            if (backgroundProgram != 0) {
+                glDeleteProgram(backgroundProgram);
+                backgroundProgram = 0;
+            }
+            if (progressProgram != 0) {
+                glDeleteProgram(progressProgram);
+                progressProgram = 0;
+            }
+            if (particleProgram != 0) {
+                glDeleteProgram(particleProgram);
+                particleProgram = 0;
+            }
+
+            // 删除纹理
+            if (textures[0] != 0) {
+                glDeleteTextures(1, textures, 0);
+                textures[0] = 0;
+            }
+
+            // 释放FloatBuffer引用，让GC回收Native内存
+            particleVertices = null;
+            particleColors = null;
+            particleVelocities = null;
+
+            // 重置状态
+            gameStarted = false;
+            isLoading = false;
+
+            Log.d(TAG, "GameRenderer resources cleaned up");
         }
 
         private void updateFPS() {

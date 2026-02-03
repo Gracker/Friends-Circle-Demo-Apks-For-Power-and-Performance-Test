@@ -270,9 +270,14 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
 
     @Override
     protected void onDestroy() {
-        // 停止监控
+        // 停止监控 - 在调用 super.onDestroy() 之前执行，因为基类会销毁 webView
+        // 注意：此时 Activity 仍在销毁过程中，不需要检查 isActivityActive
         if (webView != null) {
-            webView.evaluateJavascript("javascript: lightLoadEnabled = false;", null);
+            try {
+                webView.evaluateJavascript("javascript: lightLoadEnabled = false;", null);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to disable light load on destroy", e);
+            }
         }
         super.onDestroy();
     }
@@ -282,6 +287,11 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
      */
     @Override
     protected void executeFlingLoad() {
+        // 检查 Activity 是否仍然活跃
+        if (!isActivityActive || webView == null) {
+            return;
+        }
+
         // 轻微阻塞主线程
         try {
             Thread.sleep(1);
@@ -292,6 +302,10 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         // 执行同步JavaScript
         final String testJs = "\"测试成功\"";
         webView.evaluateJavascript(testJs, value -> {
+            // 检查 Activity 是否仍然活跃
+            if (!isActivityActive || webView == null) {
+                return;
+            }
             // 测试成功后直接执行负载
             if (value != null && !value.equals("null")) {
                 // 低负载JavaScript
@@ -368,10 +382,12 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
                     "  return '耗时:' + (endTime - startTime).toFixed(2) + 'ms';\n" +
                     "})();";
 
-                webView.evaluateJavascript(loadJs, loadResult -> {
-                    // 不输出Toast，只记录日志
-                    Log.d(TAG, "低负载JavaScript结果: " + loadResult);
-                });
+                if (isActivityActive && webView != null) {
+                    webView.evaluateJavascript(loadJs, loadResult -> {
+                        // 不输出Toast，只记录日志
+                        Log.d(TAG, "低负载JavaScript结果: " + loadResult);
+                    });
+                }
             }
         });
     }

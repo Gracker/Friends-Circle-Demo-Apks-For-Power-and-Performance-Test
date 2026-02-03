@@ -59,7 +59,13 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         viewModel = new ViewModelProvider(this).get(CustomScrollViewModel.class);
         itemRenderer = new FriendCircleItemRenderer(this);
 
-        loadType = getIntent().getIntExtra(EXTRA_LOAD_TYPE, LoadType.LIGHT);
+        // 获取传入的负载类型（添加空指针保护）
+        android.content.Intent intent = getIntent();
+        if (intent != null) {
+            loadType = intent.getIntExtra(EXTRA_LOAD_TYPE, LoadType.LIGHT);
+        } else {
+            loadType = LoadType.LIGHT;
+        }
 
         CustomTimelineView timelineView = binding.customTimelineView;
         timelineView.setItemRenderer(itemRenderer);

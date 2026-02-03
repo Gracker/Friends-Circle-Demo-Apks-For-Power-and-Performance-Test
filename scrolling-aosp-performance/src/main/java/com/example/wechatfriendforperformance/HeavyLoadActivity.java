@@ -102,6 +102,10 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
     protected void onPause() {
         super.onPause();
         mIsEnabled = false;
+        // 移除 Choreographer 回调，防止 Activity 销毁后继续执行
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -117,7 +121,12 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        // 先移除 Choreographer 回调
+        mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
@@ -127,11 +136,11 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        mIsEnabled = false;
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 
     @Override

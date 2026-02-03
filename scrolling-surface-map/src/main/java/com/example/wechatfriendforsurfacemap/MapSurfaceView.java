@@ -246,9 +246,21 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         isRunning = false;
         stopBackgroundTasks();
         try {
-            renderThread.join();
+            // 添加超时限制，防止ANR
+            if (renderThread != null) {
+                renderThread.join(1000); // 最多等待1秒
+                if (renderThread.isAlive()) {
+                    Log.w(TAG, "Render thread did not stop in time, interrupting");
+                    renderThread.interrupt();
+                }
+            }
         } catch (InterruptedException e) {
             Log.e(TAG, "Error stopping render thread", e);
+            Thread.currentThread().interrupt(); // 恢复中断状态
+        }
+        if (mLoadSimulator != null) {
+            mLoadSimulator.release();
+            mLoadSimulator = null;
         }
     }
 

@@ -110,6 +110,9 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
     protected void onPause() {
         super.onPause();
         mIsBetweenFrameLoadEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -125,7 +128,15 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mIsBetweenFrameLoadEnabled = false;
+        mIsScrolling = false;
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
@@ -134,11 +145,10 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         }
         recyclerView.setAdapter(null);
         adapter = null;
-        mIsBetweenFrameLoadEnabled = false;
-        mIsScrolling = false;
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 }

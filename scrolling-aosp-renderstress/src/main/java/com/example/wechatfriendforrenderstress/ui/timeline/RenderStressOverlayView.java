@@ -248,6 +248,13 @@ public class RenderStressOverlayView extends View implements Choreographer.Frame
             canvas.drawPath(accentPath, accentPaint);
         }
     }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        // 确保 View 被移除时停止所有动画和 Choreographer 回调
+        stop();
+    }
 }
 
 

@@ -49,7 +49,8 @@ public class CustomTimelineView extends ViewGroup {
     private final Runnable continuousLoadRunnable = new Runnable() {
         @Override
         public void run() {
-            if (!continuousLoadRunning) {
+            // 检查 View 是否仍然 attached 以及是否仍在运行
+            if (!continuousLoadRunning || !isAttachedToWindow()) {
                 return;
             }
             LoadStressSimulator.runContinuousLoad(loadProfile);

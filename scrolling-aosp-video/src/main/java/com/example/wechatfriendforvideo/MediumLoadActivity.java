@@ -101,6 +101,9 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
     protected void onPause() {
         super.onPause();
         mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -116,7 +119,11 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
@@ -126,10 +133,10 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         recyclerView.setAdapter(null);
         adapter = null;
         imageLoader = null;
-        mIsEnabled = false;
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 }

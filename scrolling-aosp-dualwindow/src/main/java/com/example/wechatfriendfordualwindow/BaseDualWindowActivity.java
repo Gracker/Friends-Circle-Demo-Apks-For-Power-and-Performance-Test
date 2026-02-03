@@ -230,6 +230,10 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
     protected void onPause() {
         super.onPause();
         mIsEnabled = false;
+        // 显式移除 Choreographer 回调，防止 Activity 销毁后继续执行
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
         if (isSecondWindowAdded) {
             secondWindowView.stopAnimation();
         }
@@ -237,6 +241,12 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
 
     @Override
     protected void onDestroy() {
+        // 首先标记不再活跃并移除 Choreographer 回调
+        mIsEnabled = false;
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         // 移除滚动监听器
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);

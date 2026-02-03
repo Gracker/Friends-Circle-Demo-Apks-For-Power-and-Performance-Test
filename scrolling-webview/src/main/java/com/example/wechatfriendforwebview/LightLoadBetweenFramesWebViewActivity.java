@@ -43,18 +43,22 @@ public class LightLoadBetweenFramesWebViewActivity extends BaseFriendCircleWebVi
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (!isTaskSchedulingEnabled) return;
+        // 检查 Activity 是否仍然活跃
+        if (!isTaskSchedulingEnabled || !isActivityActive) return;
 
         // 每帧调用，由 LoadSimulator 统一控制伪随机帧间隔
         mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFramesWV_load");
 
         // 执行JavaScript轻负载（每帧执行）
-        if (webView != null) {
+        if (webView != null && isActivityActive) {
             String js = "(function() { var s = 0; for(var i = 0; i < 100; i++) { s += Math.sqrt(i); } return s; })();";
             webView.evaluateJavascript(js, null);
         }
 
-        choreographer.postFrameCallback(this);
+        // 再次检查后再注册下一帧回调
+        if (isTaskSchedulingEnabled && isActivityActive) {
+            choreographer.postFrameCallback(this);
+        }
     }
 
     @Override

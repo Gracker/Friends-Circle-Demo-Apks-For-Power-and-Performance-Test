@@ -107,6 +107,9 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         super.onPause();
         mIsTaskSchedulingEnabled = false;
         mHandler.removeCallbacksAndMessages(null);
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
     }
 
     private void initRecyclerView() {
@@ -122,7 +125,13 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        mIsTaskSchedulingEnabled = false;
+        mIsScrolling = false;
+        mHandler.removeCallbacksAndMessages(null);
+        if (mChoreographer != null) {
+            mChoreographer.removeFrameCallback(this);
+        }
+
         if (recyclerView != null && mScrollListener != null) {
             recyclerView.removeOnScrollListener(mScrollListener);
         }
@@ -131,12 +140,10 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         }
         recyclerView.setAdapter(null);
         adapter = null;
-        mIsTaskSchedulingEnabled = false;
-        mIsScrolling = false;
-        mHandler.removeCallbacksAndMessages(null);
         if (mLoadSimulator != null) {
             mLoadSimulator.release();
             mLoadSimulator = null;
         }
+        super.onDestroy();
     }
 }

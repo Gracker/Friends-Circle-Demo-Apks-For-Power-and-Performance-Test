@@ -54,6 +54,11 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     private int surfaceWidth = 0;
     private int surfaceHeight = 0;
 
+    // 生命周期状态标志
+    protected volatile boolean isActivityActive = true;
+    // 主 Handler 用于所有延迟任务
+    protected Handler mHandler;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +66,16 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geckoview_surface);
 
-        loadType = getIntent().getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        // 初始化 Handler
+        mHandler = new Handler(Looper.getMainLooper());
+
+        // 获取传入的负载类型（添加空指针保护）
+        android.content.Intent intent = getIntent();
+        if (intent != null) {
+            loadType = intent.getIntExtra(GeckoViewMainActivity.EXTRA_LOAD_TYPE, com.example.loadconfig.LoadType.LIGHT);
+        } else {
+            loadType = com.example.loadconfig.LoadType.LIGHT;
+        }
 
         initViews();
         initGeckoRuntime();
@@ -98,13 +112,17 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
             @Override
             public void onPageStart(@NonNull GeckoSession session, @NonNull String url) {
                 Log.d(TAG, "页面开始加载: " + url);
-                runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
+                runOnUiThread(() -> {
+                    if (!isActivityActive) return;
+                    progressBar.setVisibility(View.VISIBLE);
+                });
             }
 
             @Override
             public void onPageStop(@NonNull GeckoSession session, boolean success) {
                 Log.d(TAG, "页面加载完成, 成功: " + success);
                 runOnUiThread(() -> {
+                    if (!isActivityActive) return;
                     progressBar.setVisibility(View.GONE);
                     loadFriendCircleData();
                 });
@@ -112,7 +130,10 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
 
             @Override
             public void onProgressChange(@NonNull GeckoSession session, int progress) {
-                runOnUiThread(() -> progressBar.setProgress(progress));
+                runOnUiThread(() -> {
+                    if (!isActivityActive) return;
+                    progressBar.setProgress(progress);
+                });
             }
         });
 
@@ -229,14 +250,20 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         flingFrameCount = 0;
         executeFlingLoad();
 
-        Handler handler = new Handler(Looper.getMainLooper());
         Runnable flingRunnable = new Runnable() {
             @Override
             public void run() {
+                // 检查 Activity 是否仍然活跃
+                if (!isActivityActive) {
+                    isFling = false;
+                    return;
+                }
                 if (isFling && flingFrameCount < MAX_FLING_FRAMES) {
                     flingFrameCount++;
                     executeFlingLoad();
-                    handler.postDelayed(this, 16);
+                    if (mHandler != null && isActivityActive) {
+                        mHandler.postDelayed(this, 16);
+                    }
                 } else {
                     isFling = false;
                     long duration = SystemClock.elapsedRealtime() - startTime;
@@ -245,7 +272,9 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
             }
         };
 
-        handler.postDelayed(flingRunnable, 16);
+        if (mHandler != null) {
+            mHandler.postDelayed(flingRunnable, 16);
+        }
     }
 
     protected abstract void executeFlingLoad();
@@ -260,22 +289,28 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     protected void loadFriendCircleData() {
         Trace.beginSection("BaseGeckoViewSurface_loadFriendCircleData");
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            try {
-                String jsonData = GeckoViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
-
-                if (geckoSession != null && jsonData != null) {
-                    // 使用 loadUri 注入数据的方式
-                    String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
-                    geckoSession.loadUri(jsCode);
-                    Log.d(TAG, "朋友圈数据已发送到 GeckoView");
+        if (mHandler != null) {
+            mHandler.postDelayed(() -> {
+                // 检查 Activity 是否仍然活跃
+                if (!isActivityActive) {
+                    return;
                 }
+                try {
+                    String jsonData = GeckoViewDataCenter.getInstance().getFriendCircleJsonData(loadType);
 
-                performLoadTask();
-            } catch (Exception e) {
-                Log.e(TAG, "加载朋友圈数据失败", e);
-            }
-        }, 100);
+                    if (geckoSession != null && jsonData != null && isActivityActive) {
+                        // 使用 loadUri 注入数据的方式
+                        String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
+                        geckoSession.loadUri(jsCode);
+                        Log.d(TAG, "朋友圈数据已发送到 GeckoView");
+                    }
+
+                    performLoadTask();
+                } catch (Exception e) {
+                    Log.e(TAG, "加载朋友圈数据失败", e);
+                }
+            }, 100);
+        }
 
         Trace.endSection();
     }
@@ -310,12 +345,19 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
      * 执行 JavaScript (通过 loadUri javascript: 协议)
      */
     public void evaluateJavascript(String script, Runnable callback) {
+        if (!isActivityActive || geckoSession == null) {
+            return;
+        }
         Log.d(TAG, "准备执行JavaScript: " + (script.length() > 100 ? script.substring(0, 100) + "..." : script));
         try {
             // GeckoView 新版本使用 loadUri 执行 JavaScript
             geckoSession.loadUri("javascript:" + script);
-            if (callback != null) {
-                new Handler(Looper.getMainLooper()).postDelayed(callback, 50);
+            if (callback != null && mHandler != null && isActivityActive) {
+                mHandler.postDelayed(() -> {
+                    if (isActivityActive) {
+                        callback.run();
+                    }
+                }, 50);
             }
         } catch (Exception e) {
             Log.e(TAG, "执行JavaScript时出错", e);
@@ -331,6 +373,9 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        // 标记 Activity 不再活跃
+        isActivityActive = false;
+        isFling = false;
         if (geckoSession != null) {
             geckoSession.setActive(false);
         }
@@ -339,6 +384,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        isActivityActive = true;
         if (geckoSession != null) {
             geckoSession.setActive(true);
         }
@@ -346,6 +392,16 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        // 首先标记 Activity 已销毁
+        isActivityActive = false;
+        isFling = false;
+
+        // 清理 Handler
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
+        }
+
         if (geckoDisplay != null) {
             geckoDisplay.surfaceDestroyed();
             geckoSession.releaseDisplay(geckoDisplay);
