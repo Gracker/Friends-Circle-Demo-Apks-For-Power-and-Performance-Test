@@ -1,5 +1,25 @@
+pluginManagement {
+    includeBuild("build-logic")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.mozilla.org/maven2/' }
+    }
+}
+
 include ':app'
 include ':load-config'
+include ':scrolling-common'
 include ':scrolling-aosp-power'
 include ':scrolling-aosp-performance'
 include ':scrolling-aosp-picasso'

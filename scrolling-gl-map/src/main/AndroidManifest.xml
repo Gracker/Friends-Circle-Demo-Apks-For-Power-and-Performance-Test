@@ -21,17 +21,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MinimalLoadActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".LightLoadActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".MediumLoadActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".HeavyLoadActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".LightBetweenFramesActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".MediumBetweenFramesActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".HeavyBetweenFramesActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".LightMixedActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".MediumMixedActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".HeavyMixedActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
-        <activity android:name=".LongFrameActivity" android:exported="true" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".MinimalLoadActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".LightLoadActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".MediumLoadActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".HeavyLoadActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".LightBetweenFramesActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".MediumBetweenFramesActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".HeavyBetweenFramesActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".LightMixedActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".MediumMixedActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".HeavyMixedActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
+        <activity android:name=".LongFrameActivity" android:exported="false" android:theme="@style/Theme.GLMap.NoActionBar" />
 
     </application>
 

@@ -4,10 +4,10 @@ import android.content.Context;
 import android.view.View;
 
 import com.android.wechatfriendforpower.beans.CommentBean;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
-import com.android.wechatfriendforpower.beans.OtherInfoBean;
-import com.android.wechatfriendforpower.beans.PraiseBean;
-import com.android.wechatfriendforpower.beans.UserBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 
 import org.mockito.Mockito;
 
@@ -110,26 +110,26 @@ public class PowerTestUtil {
     }
 
     /**
-     * 创建完整的测试用FriendCircleBean
+     * 创建完整的测试用PowerFriendCircleBean
      */
-    public static FriendCircleBean createTestFriendCircleBean() {
-        FriendCircleBean friendCircleBean = new FriendCircleBean();
+    public static PowerFriendCircleBean createTestPowerFriendCircleBean() {
+        PowerFriendCircleBean friendCircleBean = new PowerFriendCircleBean();
         friendCircleBean.setUserBean(createTestUserBean());
         friendCircleBean.setContent("这是一条测试朋友圈内容，用于单元测试");
         friendCircleBean.setPraiseBeans(createTestPraiseBeans(3));
-        friendCircleBean.setCommentBeans(createTestCommentBeans(5));
+        friendCircleBean.setPowerCommentBeans(createTestCommentBeans(5));
         friendCircleBean.setImageUrls(createTestImageUrls(4));
         friendCircleBean.setOtherInfoBean(createTestOtherInfoBean());
         return friendCircleBean;
     }
 
     /**
-     * 创建多个测试用FriendCircleBean列表
+     * 创建多个测试用PowerFriendCircleBean列表
      */
-    public static List<FriendCircleBean> createTestFriendCircleBeans(int count) {
-        List<FriendCircleBean> beans = new ArrayList<>();
+    public static List<PowerFriendCircleBean> createTestPowerFriendCircleBeans(int count) {
+        List<PowerFriendCircleBean> beans = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            FriendCircleBean bean = createTestFriendCircleBean();
+            PowerFriendCircleBean bean = createTestPowerFriendCircleBean();
             // 稍微修改一下内容，确保每个Bean不完全相同
             bean.setContent("这是第" + i + "条测试朋友圈内容，用于单元测试");
             beans.add(bean);

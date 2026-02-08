@@ -9,7 +9,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 
 import com.android.wechatfriendforpower.PowerTestUtil;
-import com.android.wechatfriendforpower.beans.PraiseBean;
+import com.example.scrolling.common.beans.PraiseBean;
 
 import org.junit.Before;
 import org.junit.Test;

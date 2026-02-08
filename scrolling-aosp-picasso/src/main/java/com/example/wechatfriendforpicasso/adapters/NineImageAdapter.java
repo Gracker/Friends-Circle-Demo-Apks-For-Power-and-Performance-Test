@@ -12,15 +12,37 @@ import androidx.core.content.ContextCompat;
 
 import com.squareup.picasso.Picasso;
 import com.example.wechatfriendforpicasso.R;
-import com.example.wechatfriendforpicasso.widgets.NineGridView;
+import com.example.scrolling.common.widgets.NineGridView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * NineImageAdapter for displaying images in a grid
  * 使用 Picasso 进行图片加载
  */
 public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private Context mContext;
     private List<String> mImageUrls;
@@ -78,8 +100,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             boolean imageLoaded = false;
 
             // 1. 首先尝试直接使用URL作为资源名称
-            int resourceId = mContext.getResources().getIdentifier(
-                    url, "drawable", mContext.getPackageName());
+            int resourceId = getDrawableId(mContext, url);
 
             if (resourceId != 0) {
                 Picasso.get()
@@ -92,11 +113,10 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
 
             // 2. 如果未加载成功，尝试使用local系列图片
             if (!imageLoaded) {
-                int localImgIndex = (position % 11) + 1; // 使用1-11的范围
+                int localImgIndex = (position % 11) + 1;
                 String localResource = "local" + localImgIndex;
 
-                resourceId = mContext.getResources().getIdentifier(
-                        localResource, "drawable", mContext.getPackageName());
+                resourceId = getDrawableId(mContext, localResource);
 
                 if (resourceId != 0) {
                     Picasso.get()
@@ -110,11 +130,10 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
 
             // 3. 如果仍未加载成功，尝试使用avatar系列图片
             if (!imageLoaded) {
-                int avatarImgIndex = (position % 11) + 1; // 使用1-11的范围
+                int avatarImgIndex = (position % 11) + 1;
                 String avatarResource = "avatar" + avatarImgIndex;
 
-                resourceId = mContext.getResources().getIdentifier(
-                        avatarResource, "drawable", mContext.getPackageName());
+                resourceId = getDrawableId(mContext, avatarResource);
 
                 if (resourceId != 0) {
                     Picasso.get()

@@ -1,16 +1,13 @@
 plugins {
-    id 'com.android.application'
+    id 'convention.android-app'
     id 'org.jetbrains.kotlin.android'
 }
 
 android {
     namespace 'com.example.launch.aosp'
-    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.launch.aosp"
-        minSdk 24
-        targetSdk 34
         versionCode 3
         versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,36 +31,12 @@ android {
             resValue "string", "app_name", "AOSP-Heavy"
         }
     }
-
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KEYSTORE_FILE_PATH") ?: "$System.env.HOME/Code/APK-Key/Chris/keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "123456"
-            keyAlias System.getenv("KEY_ALIAS") ?: "key0"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = '11'
-    }
 }
 
 dependencies {
     implementation project(':launch-common')
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation libs.core.ktx
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
 }

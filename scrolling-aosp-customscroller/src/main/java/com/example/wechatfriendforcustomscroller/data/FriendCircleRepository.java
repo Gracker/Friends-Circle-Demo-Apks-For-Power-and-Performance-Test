@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.example.wechatfriendforcustomscroller.CustomScrollDataGenerator;
 import com.example.loadconfig.LoadType;
-import com.example.wechatfriendforcustomscroller.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
 import com.example.wechatfriendforcustomscroller.data.local.FriendCircleDao;
 import com.example.wechatfriendforcustomscroller.data.local.FriendCircleEntity;
 import com.google.gson.Gson;

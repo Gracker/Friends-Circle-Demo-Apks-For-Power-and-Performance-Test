@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
 import com.example.wechatfriendfordualwindow.adapters.DualWindowFriendCircleAdapter;
-import com.example.wechatfriendfordualwindow.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
 
 import java.util.List;
 

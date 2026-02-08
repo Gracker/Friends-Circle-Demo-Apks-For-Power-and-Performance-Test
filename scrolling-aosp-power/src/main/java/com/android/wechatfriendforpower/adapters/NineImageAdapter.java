@@ -9,17 +9,39 @@ import androidx.core.content.ContextCompat;
 
 import com.android.wechatfriendforpower.PowerUtils;
 import com.android.wechatfriendforpower.R;
-import com.android.wechatfriendforpower.widgets.NineGridView;
+import com.example.scrolling.common.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 九宫格图片适配器
  */
 public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private List<String> mImageUrls;
     private Context mContext;
@@ -48,7 +70,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
     }
 
     @Override
-    public View getView(int position, View itemView) {
+    public View getView(int position, View itemView, ViewGroup parent) {
         ImageView imageView;
         if (itemView == null) {
             imageView = new ImageView(mContext);
@@ -60,8 +82,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
         }
 
         String url = mImageUrls.get(position);
-        int resourceId = mContext.getResources().getIdentifier(
-            url, "drawable", mContext.getPackageName());
+        int resourceId = getDrawableId(mContext, url);
         if (resourceId != 0) {
             Glide.with(mContext)
                 .load(resourceId)

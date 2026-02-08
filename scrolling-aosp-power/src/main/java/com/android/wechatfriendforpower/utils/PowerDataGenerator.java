@@ -3,10 +3,10 @@ package com.android.wechatfriendforpower.utils;
 import android.content.Context;
 
 import com.android.wechatfriendforpower.beans.CommentBean;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
-import com.android.wechatfriendforpower.beans.OtherInfoBean;
-import com.android.wechatfriendforpower.beans.PraiseBean;
-import com.android.wechatfriendforpower.beans.UserBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 
 import com.example.loadconfig.LoadConfig;
 
@@ -62,15 +62,15 @@ public class PowerDataGenerator {
      * @param count 生成的数据条数
      * @return 朋友圈数据列表
      */
-    public List<FriendCircleBean> generateFakeFriendCircleData(int count) {
+    public List<PowerFriendCircleBean> generateFakeFriendCircleData(int count) {
         if (count <= 0) {
             return new ArrayList<>();
         }
 
-        List<FriendCircleBean> result = new ArrayList<>(count);
+        List<PowerFriendCircleBean> result = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            FriendCircleBean bean = new FriendCircleBean();
+            PowerFriendCircleBean bean = new PowerFriendCircleBean();
 
             // 设置用户信息
             bean.setUserBean(generateUser());
@@ -93,7 +93,7 @@ public class PowerDataGenerator {
             // 设置评论（60%的概率有评论）
             if (random.nextFloat() < 0.6f) {
                 int commentCount = random.nextInt(5) + 1; // 1-5条评论
-                bean.setCommentBeans(generateComments(commentCount));
+                bean.setPowerCommentBeans(generateComments(commentCount));
             }
 
             // 设置其他信息

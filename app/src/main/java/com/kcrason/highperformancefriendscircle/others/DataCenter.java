@@ -16,6 +16,7 @@ import com.example.loadconfig.LoadConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -28,7 +29,7 @@ public class DataCenter {
     private static final Random sRandom = new Random(LoadConfig.DATA_GENERATION_SEED);
 
     // 获取0到max-1之间的随机整数
-    private static int getRandomInt(int max) {
+    private static synchronized int getRandomInt(int max) {
         return sRandom.nextInt(max);
     }
 
@@ -36,7 +37,7 @@ public class DataCenter {
         new Thread(DataCenter::loadEmojis).start();
     }
 
-    public static final List<EmojiDataSource> emojiDataSources = new ArrayList<>();
+    public static final List<EmojiDataSource> emojiDataSources = new CopyOnWriteArrayList<>();
 
     public static void loadEmojis() {
         for (int i = 0; i < 2; i++) {

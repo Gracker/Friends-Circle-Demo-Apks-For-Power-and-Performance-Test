@@ -22,7 +22,7 @@ public class Constants {
 
     public static final String SCHEME_AT = "com.kcrason.at//";
 
-    public static final String BLUE = "#ff0000";
+    public static final String BLUE = "#0000ff";
 
     public static String[] IMAGE_URL = new String[]{
             "local1",

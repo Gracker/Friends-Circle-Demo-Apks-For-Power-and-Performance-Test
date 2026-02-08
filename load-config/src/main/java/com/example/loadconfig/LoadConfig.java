@@ -177,7 +177,7 @@ public final class LoadConfig {
     public static final int MIXED_DOFRAME_MEDIUM_INTENSITY = 1500;
 
     /** 混合高负载 - doFrame任务强度（2.25倍） */
-    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 1500;
+    public static final int MIXED_DOFRAME_HEAVY_INTENSITY = 2250;
 
     // ==================== 帧间负载配置（1.5倍递增）====================
 
@@ -188,7 +188,7 @@ public final class LoadConfig {
     public static final int BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
 
     /** 帧间高负载强度（2.25倍） */
-    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 1750;
+    public static final int BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
 
     // ==================== 混合负载 - 帧间配置（1.5倍递增）====================
 
@@ -199,7 +199,7 @@ public final class LoadConfig {
     public static final int MIXED_BETWEEN_FRAME_MEDIUM_INTENSITY = 1500;
 
     /** 混合高负载 - 帧间任务强度（2.25倍） */
-    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 1500;
+    public static final int MIXED_BETWEEN_FRAME_HEAVY_INTENSITY = 2250;
 
     // ==================== 帧间任务概率配置 ====================
 

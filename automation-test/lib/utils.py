@@ -5,6 +5,7 @@
 提供 ADB 操作、配置读取、数据处理等通用功能
 """
 
+import shlex
 import subprocess
 import json
 import os
@@ -31,11 +32,9 @@ class ADBHelper:
             (成功标志, 输出内容)
         """
         try:
-            full_cmd = f"adb {command}"
-            # print(f"[DEBUG] Executing: {full_cmd}") # Uncomment for deep debugging
+            args = ["adb"] + shlex.split(command)
             result = subprocess.run(
-                full_cmd,
-                shell=True,
+                args,
                 capture_output=True,
                 text=True,
                 timeout=timeout
@@ -359,14 +358,12 @@ class FPSAnalyzer:
             result["percentile_95"] = sorted_times[int(len(sorted_times) * 0.95)]
             result["percentile_99"] = sorted_times[int(len(sorted_times) * 0.99)]
             
-            # Avg FPS calculation
-            if result["total_frames"] > 0:
-                 non_janky_ratio = 1 - (result["janky_percent"] / 100)
-                 result["avg_fps"] = target_fps * non_janky_ratio
+            # Avg FPS: compute from actual frame durations
+            avg_frame_time_ms = sum(frame_durations) / len(frame_durations)
+            result["avg_fps"] = round(1000.0 / avg_frame_time_ms, 1) if avg_frame_time_ms > 0 else 0
         elif result["total_frames"] > 0 and result["avg_fps"] == 0:
-             # Fallback to legacy calculation
-             non_janky_ratio = 1 - (result["janky_percent"] / 100)
-             result["avg_fps"] = target_fps * non_janky_ratio
+             # Fallback: no framestats available, cannot compute real FPS
+             result["avg_fps"] = 0
         
         return result
     
@@ -475,34 +472,34 @@ class LogcatMonitor:
         stop_event = threading.Event()
         
         def monitor():
+            args = ["adb", "logcat", "-v", "time", f"{LogcatMonitor.LAUNCH_TAG}:I", "*:S"]
+            proc = subprocess.Popen(
+                args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
             try:
-                cmd = f"adb logcat -v time {LogcatMonitor.LAUNCH_TAG}:I *:S"
-                proc = subprocess.Popen(
-                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                
                 while not stop_event.is_set():
                     line = proc.stdout.readline()
                     if not line:
                         break
-                    
+
                     match = re.search(r'\[Duration:\s*(\d+)ms\]', line)
                     if match:
                         result["found"] = True
                         result["duration"] = int(match.group(1))
                         stop_event.set()
                         break
-                
-                proc.terminate()
             except Exception as e:
                 log_error(f"Logcat monitor error: {e}")
-        
+            finally:
+                proc.terminate()
+                proc.wait()
+
         thread = threading.Thread(target=monitor)
         thread.daemon = True
         thread.start()
         thread.join(timeout=timeout)
         stop_event.set()
-        
+
         return result["found"], result["duration"]
     
     @staticmethod
@@ -522,18 +519,17 @@ class LogcatMonitor:
         stop_event = threading.Event()
         
         def monitor():
+            # [Fix] SwitchPerf uses Log.d, so we must use :D level or lower
+            args = ["adb", "logcat", "-v", "time", f"{LogcatMonitor.SWITCH_TAG}:D", "*:S"]
+            proc = subprocess.Popen(
+                args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            )
             try:
-                # [Fix] SwitchPerf uses Log.d, so we must use :D level or lower
-                cmd = f"adb logcat -v time {LogcatMonitor.SWITCH_TAG}:D *:S"
-                proc = subprocess.Popen(
-                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                
                 while not stop_event.is_set():
                     line = proc.stdout.readline()
                     if not line:
                         break
-                    
+
                     # 匹配 "Switch complete in xxxms" (忽略大小写和前缀)
                     # 兼容 "WebView switch complete..." 和 "Switch complete..."
                     match = re.search(r'[Ss]witch complete in (\d+)ms', line)
@@ -542,17 +538,18 @@ class LogcatMonitor:
                         result["duration"] = int(match.group(1))
                         stop_event.set()
                         break
-                
-                proc.terminate()
             except Exception as e:
                 log_error(f"Logcat monitor error: {e}")
-        
+            finally:
+                proc.terminate()
+                proc.wait()
+
         thread = threading.Thread(target=monitor)
         thread.daemon = True
         thread.start()
         thread.join(timeout=timeout)
         stop_event.set()
-        
+
         return result["found"], result["duration"]
 
 
@@ -565,8 +562,17 @@ class TestStrategy:
     MAP_DRAG = "map_drag"
     
     @staticmethod
-    def get_strategy_for_app(app_name: str) -> str:
-        """根据 App 名称返回测试策略"""
+    def get_strategy_for_app(app_name: str, test_type: str = None) -> str:
+        """根据 App 名称或 registry test_type 返回测试策略"""
+        if test_type:
+            type_mapping = {
+                "vertical_swipe": TestStrategy.DOUYIN_FLIP,
+                "horizontal_swipe": TestStrategy.EBOOK_PAGE,
+                "map_drag": TestStrategy.MAP_DRAG,
+            }
+            if test_type in type_mapping:
+                return type_mapping[test_type]
+        # Fallback to name-based matching
         if app_name == "aosp-douyin":
             return TestStrategy.DOUYIN_FLIP
         elif app_name == "aosp-ebook":

@@ -2,6 +2,7 @@
 # ============================================================================
 # APK 安装脚本
 # 用于安装所有测试 APK 到设备
+# APK 列表从 apk_registry.json 动态读取，避免硬编码
 # ============================================================================
 
 set -e
@@ -9,6 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 APK_DIR="${PROJECT_ROOT}/../apk-released"
+REGISTRY_FILE="${PROJECT_ROOT}/config/apk_registry.json"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -33,7 +35,7 @@ check_device() {
         echo "  3. 已授权该电脑进行调试"
         exit 1
     fi
-    
+
     DEVICE_MODEL=$(adb shell getprop ro.product.model | tr -d '\r')
     ANDROID_VERSION=$(adb shell getprop ro.build.version.release | tr -d '\r')
     log_info "已连接设备: ${DEVICE_MODEL} (Android ${ANDROID_VERSION})"
@@ -43,12 +45,12 @@ check_device() {
 install_apk() {
     local apk_file="$1"
     local apk_name=$(basename "$apk_file")
-    
+
     if [[ ! -f "$apk_file" ]]; then
         log_warning "APK 不存在: $apk_name"
         return 1
     fi
-    
+
     log_info "安装中: $apk_name"
     if adb install -r -d "$apk_file" > /dev/null 2>&1; then
         log_success "安装成功: $apk_name"
@@ -57,6 +59,69 @@ install_apk() {
         log_error "安装失败: $apk_name"
         return 1
     fi
+}
+
+# ============================================================================
+# 从 apk_registry.json 读取 APK 列表的辅助函数
+# ============================================================================
+
+get_scrolling_apks() {
+    python3 -c "
+import json
+with open('${REGISTRY_FILE}') as f:
+    data = json.load(f)
+for app in data.get('scrolling_tests', {}).get('apps', []):
+    apk = app.get('apk', '')
+    if apk:
+        print(apk)
+"
+}
+
+get_launch_apks() {
+    python3 -c "
+import json
+with open('${REGISTRY_FILE}') as f:
+    data = json.load(f)
+for app in data.get('launch_tests', {}).get('apps', []):
+    for flavor in app.get('flavors', []):
+        apk = flavor.get('apk', '')
+        if apk:
+            print(apk)
+"
+}
+
+get_switch_apks() {
+    python3 -c "
+import json
+with open('${REGISTRY_FILE}') as f:
+    data = json.load(f)
+for app in data.get('switch_tests', {}).get('apps', []):
+    apk = app.get('apk', '')
+    if apk:
+        print(apk)
+"
+}
+
+get_quick_apks() {
+    python3 -c "
+import json
+with open('${REGISTRY_FILE}') as f:
+    data = json.load(f)
+quick_names = {'aosp-performance', 'compose'}
+quick_launch = {'launch-aosp'}
+quick_switch = {'switch-aosp'}
+for app in data.get('scrolling_tests', {}).get('apps', []):
+    if app['name'] in quick_names and app.get('apk'):
+        print(app['apk'])
+for app in data.get('launch_tests', {}).get('apps', []):
+    if app['name'] in quick_launch:
+        for flavor in app.get('flavors', []):
+            if flavor.get('apk'):
+                print(flavor['apk'])
+for app in data.get('switch_tests', {}).get('apps', []):
+    if app['name'] in quick_switch and app.get('apk'):
+        print(app['apk'])
+"
 }
 
 # 函数：显示帮助
@@ -79,21 +144,33 @@ show_help() {
 
 # 函数：列出所有 APK
 list_apks() {
-    echo "可用的 APK 文件:"
+    echo "可用的 APK 文件 (来自 apk_registry.json):"
     echo ""
     echo "滑动测试 APK:"
-    ls -1 "$APK_DIR"/*-release-*.apk 2>/dev/null | grep -E "(aosp|compose|webview|gl-map|surface-map)" | grep -v "launch-" | grep -v "switch-" | while read f; do
-        echo "  - $(basename "$f")"
+    get_scrolling_apks | while IFS= read -r apk; do
+        if [[ -f "$APK_DIR/$apk" ]]; then
+            echo "  + $apk"
+        else
+            echo "  - $apk (未找到)"
+        fi
     done
     echo ""
     echo "启动测试 APK:"
-    ls -1 "$APK_DIR"/launch-*.apk 2>/dev/null | while read f; do
-        echo "  - $(basename "$f")"
+    get_launch_apks | while IFS= read -r apk; do
+        if [[ -f "$APK_DIR/$apk" ]]; then
+            echo "  + $apk"
+        else
+            echo "  - $apk (未找到)"
+        fi
     done
     echo ""
     echo "Switch 测试 APK:"
-    ls -1 "$APK_DIR"/switch-*.apk 2>/dev/null | while read f; do
-        echo "  - $(basename "$f")"
+    get_switch_apks | while IFS= read -r apk; do
+        if [[ -f "$APK_DIR/$apk" ]]; then
+            echo "  + $apk"
+        else
+            echo "  - $apk (未找到)"
+        fi
     done
 }
 
@@ -102,28 +179,15 @@ install_scrolling() {
     log_info "安装滑动测试 APK..."
     local success=0
     local failed=0
-    
-    SCROLLING_APKS=(
-        "aosp-performance-release-v1.0.0.apk"
-        "compose-release-v1.0.0.apk"
-        "webview-release-v1.0.0.apk"
-        "gl-map-release-v1.0.0.apk"
-        "surface-map-release-v1.0.0.apk"
-        "aosp-customscroller-release-v1.0.0.apk"
-        "aosp-renderstress-release-v1.0.0.apk"
-        "aosp-softwarerender-release-v1.0.0.apk"
-        "aosp-douyin-release-v1.0.0.apk"
-        "scrolling-aosp-ebook-release-v1.0.0.apk"
-    )
-    
-    for apk in "${SCROLLING_APKS[@]}"; do
+
+    while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
             ((success++))
         else
             ((failed++))
         fi
-    done
-    
+    done < <(get_scrolling_apks)
+
     log_info "滑动测试 APK: $success 成功, $failed 失败"
 }
 
@@ -132,33 +196,15 @@ install_launch() {
     log_info "安装启动测试 APK..."
     local success=0
     local failed=0
-    
-    LAUNCH_APKS=(
-        "launch-aosp-light-release-v1.0.0.apk"
-        "launch-aosp-medium-release-v1.0.0.apk"
-        "launch-aosp-heavy-release-v1.0.0.apk"
-        "launch-compose-light-release-v1.0.0.apk"
-        "launch-compose-medium-release-v1.0.0.apk"
-        "launch-compose-heavy-release-v1.0.0.apk"
-        "launch-webview-light-release-v1.0.0.apk"
-        "launch-webview-medium-release-v1.0.0.apk"
-        "launch-webview-heavy-release-v1.0.0.apk"
-        "launch-gl-light-release-v1.0.0.apk"
-        "launch-gl-medium-release-v1.0.0.apk"
-        "launch-gl-heavy-release-v1.0.0.apk"
-        "launch-game-light-release-v1.0.0.apk"
-        "launch-game-medium-release-v1.0.0.apk"
-        "launch-game-heavy-release-v1.0.0.apk"
-    )
-    
-    for apk in "${LAUNCH_APKS[@]}"; do
+
+    while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
             ((success++))
         else
             ((failed++))
         fi
-    done
-    
+    done < <(get_launch_apks)
+
     log_info "启动测试 APK: $success 成功, $failed 失败"
 }
 
@@ -167,48 +213,32 @@ install_switch() {
     log_info "安装 Switch 测试 APK..."
     local success=0
     local failed=0
-    
-    SWITCH_APKS=(
-        "switch-aosp-release-v1.0.0.apk"
-        "switch-webview-release-v1.0.0.apk"
-        "switch-flutter-release-v1.0.0.apk"
-    )
-    
-    for apk in "${SWITCH_APKS[@]}"; do
+
+    while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
             ((success++))
         else
             ((failed++))
         fi
-    done
-    
+    done < <(get_switch_apks)
+
     log_info "Switch 测试 APK: $success 成功, $failed 失败"
 }
 
 # 函数：安装核心 APK (快速模式)
 install_quick() {
     log_info "安装核心测试 APK (快速模式)..."
-    
-    QUICK_APKS=(
-        "aosp-performance-release-v1.0.0.apk"
-        "compose-release-v1.0.0.apk"
-        "launch-aosp-light-release-v1.0.0.apk"
-        "launch-aosp-medium-release-v1.0.0.apk"
-        "launch-aosp-heavy-release-v1.0.0.apk"
-        "switch-aosp-release-v1.0.0.apk"
-    )
-    
     local success=0
     local failed=0
-    
-    for apk in "${QUICK_APKS[@]}"; do
+
+    while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
             ((success++))
         else
             ((failed++))
         fi
-    done
-    
+    done < <(get_quick_apks)
+
     log_info "核心 APK: $success 成功, $failed 失败"
 }
 
@@ -218,7 +248,19 @@ main() {
         show_help
         exit 0
     fi
-    
+
+    # 检查注册表文件
+    if [[ ! -f "$REGISTRY_FILE" ]]; then
+        log_error "APK 注册表不存在: $REGISTRY_FILE"
+        exit 1
+    fi
+
+    # 检查 python3 是否可用
+    if ! command -v python3 &> /dev/null; then
+        log_error "需要 python3 来解析 APK 注册表"
+        exit 1
+    fi
+
     case "$1" in
         --all)
             check_device

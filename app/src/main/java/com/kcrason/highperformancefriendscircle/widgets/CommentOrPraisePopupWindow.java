@@ -12,8 +12,6 @@ import com.kcrason.highperformancefriendscircle.interfaces.OnPraiseOrCommentClic
 
 public class CommentOrPraisePopupWindow extends PopupWindow implements View.OnClickListener {
 
-    private Context mContext;
-
     private OnPraiseOrCommentClickListener mOnPraiseOrCommentClickListener;
 
     private int mPopupWindowHeight;

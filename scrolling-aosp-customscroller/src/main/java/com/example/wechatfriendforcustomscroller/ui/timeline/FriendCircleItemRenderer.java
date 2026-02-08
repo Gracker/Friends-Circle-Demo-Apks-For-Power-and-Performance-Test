@@ -20,13 +20,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.R;
 import com.example.wechatfriendforcustomscroller.adapters.NineImageAdapter;
-import com.example.wechatfriendforcustomscroller.beans.CommentBean;
-import com.example.wechatfriendforcustomscroller.beans.FriendCircleBean;
-import com.example.wechatfriendforcustomscroller.beans.OtherInfoBean;
-import com.example.wechatfriendforcustomscroller.beans.PraiseBean;
-import com.example.wechatfriendforcustomscroller.beans.UserBean;
-import com.example.wechatfriendforcustomscroller.utils.PerformanceSpanUtils;
-import com.example.wechatfriendforcustomscroller.widgets.NineGridView;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
+import com.example.scrolling.common.utils.SpanUtils;
+import com.example.scrolling.common.widgets.NineGridView;
 
 import java.util.List;
 
@@ -146,7 +146,7 @@ public class FriendCircleItemRenderer {
         if (hasPraise) {
             SpannableStringBuilder praiseSpan = bean.getPraiseSpan();
             if (praiseSpan == null) {
-                praiseSpan = PerformanceSpanUtils.makePraiseSpan(holder.itemView.getContext(), praiseBeans);
+                praiseSpan = SpanUtils.makePraiseSpan(holder.itemView.getContext(), praiseBeans);
                 bean.setPraiseSpan(praiseSpan);
             }
             holder.layoutPraise.setVisibility(View.VISIBLE);

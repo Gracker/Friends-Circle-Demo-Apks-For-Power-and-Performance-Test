@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.wechatfriendforpower.adapters.PowerFriendCircleAdapter;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
 import com.android.wechatfriendforpower.utils.PowerDataGenerator;
 import com.android.wechatfriendforpower.utils.PowerMonitorUtils;
 
@@ -89,7 +89,7 @@ public class PowerActivity extends AppCompatActivity implements PowerFriendCircl
      * @param count 数据条数
      */
     public void loadData(int count) {
-        List<FriendCircleBean> data = dataGenerator.generateFakeFriendCircleData(count);
+        List<PowerFriendCircleBean> data = dataGenerator.generateFakeFriendCircleData(count);
         adapter.setFriendCircleBeans(data);
     }
 
@@ -140,7 +140,7 @@ public class PowerActivity extends AppCompatActivity implements PowerFriendCircl
     }
 
     @Override
-    public void onPraiseClick(FriendCircleBean friendCircleBean, int position) {
+    public void onPraiseClick(PowerFriendCircleBean friendCircleBean, int position) {
         // 处理点赞事件
         if (friendCircleBean != null) {
             // 实际应用中这里应该调用API请求
@@ -150,7 +150,7 @@ public class PowerActivity extends AppCompatActivity implements PowerFriendCircl
     }
 
     @Override
-    public void onCommentClick(FriendCircleBean friendCircleBean, int position) {
+    public void onCommentClick(PowerFriendCircleBean friendCircleBean, int position) {
         // 处理评论事件
         if (friendCircleBean != null) {
             // 显示评论输入框
@@ -163,7 +163,7 @@ public class PowerActivity extends AppCompatActivity implements PowerFriendCircl
      * @param friendCircleBean 朋友圈数据
      * @param position 位置
      */
-    public void showCommentBox(FriendCircleBean friendCircleBean, int position) {
+    public void showCommentBox(PowerFriendCircleBean friendCircleBean, int position) {
         // 实际应用中这里应该弹出软键盘和评论输入框
         // 这里简单模拟
     }

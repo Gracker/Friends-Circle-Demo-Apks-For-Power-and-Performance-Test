@@ -20,10 +20,13 @@ public class FriendsCircleApplication extends Application {
         DataCenter.init();
 
         // 设置全局异常处理器
+        final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             android.util.Log.e("FriendsCircleApp", "Uncaught exception in thread " + thread.getName(), throwable);
             // 调用默认处理器
-            Thread.getDefaultUncaughtExceptionHandler();
+            if (previousHandler != null) {
+                previousHandler.uncaughtException(thread, throwable);
+            }
         });
     }
 

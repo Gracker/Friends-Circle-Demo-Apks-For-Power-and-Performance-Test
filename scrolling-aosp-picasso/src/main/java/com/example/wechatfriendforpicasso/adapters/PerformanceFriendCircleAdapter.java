@@ -20,19 +20,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wechatfriendforpicasso.PerformanceConstants;
 import com.example.wechatfriendforpicasso.R;
-import com.example.wechatfriendforpicasso.beans.CommentBean;
-import com.example.wechatfriendforpicasso.beans.FriendCircleBean;
-import com.example.wechatfriendforpicasso.beans.OtherInfoBean;
-import com.example.wechatfriendforpicasso.beans.UserBean;
-import com.example.wechatfriendforpicasso.interfaces.OnItemClickPopupMenuListener;
-import com.example.wechatfriendforpicasso.interfaces.OnPraiseOrCommentClickListener;
-import com.example.wechatfriendforpicasso.utils.PerformanceSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.UserBean;
+import com.example.scrolling.common.interfaces.OnItemClickPopupMenuListener;
+import com.example.scrolling.common.interfaces.OnPraiseOrCommentClickListener;
+import com.example.scrolling.common.utils.SpanUtils;
 import com.example.wechatfriendforpicasso.utils.RoundedCornersTransformation;
-import com.example.wechatfriendforpicasso.widgets.NineGridView;
+import com.example.scrolling.common.widgets.NineGridView;
 import com.squareup.picasso.Picasso;
 
+import androidx.recyclerview.widget.DiffUtil;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.example.loadconfig.LoadConfig;
@@ -49,6 +53,31 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_NORMAL = 1;
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            String[] extraNames = {"main_bg", "main_avatar"};
+            for (String resName : extraNames) {
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private Context mContext;
     private List<FriendCircleBean> mFriendCircleBeans;
@@ -118,8 +147,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         if (imgCover != null) {
             try {
                 // 优先尝试加载main_bg
-                int coverResourceId = mContext.getResources().getIdentifier(
-                    "main_bg", "drawable", mContext.getPackageName());
+                int coverResourceId = getDrawableId(mContext, "main_bg");
 
                 if (coverResourceId != 0) {
                     Picasso.get()
@@ -132,8 +160,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     boolean bgLoaded = false;
                     for (int i = 1; i <= 11 && !bgLoaded; i++) {
                         String localName = "local" + i;
-                        int localId = mContext.getResources().getIdentifier(
-                            localName, "drawable", mContext.getPackageName());
+                        int localId = getDrawableId(mContext, localName);
 
                         if (localId != 0) {
                             Picasso.get()
@@ -162,8 +189,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         if (imgUserAvatar != null) {
             try {
                 // 先尝试加载固定的main_avatar头像
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                    "main_avatar", "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, "main_avatar");
 
                 if (avatarResourceId != 0) {
                     Picasso.get()
@@ -177,8 +203,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     boolean avatarLoaded = false;
                     for (int i = 1; i <= 11 && !avatarLoaded; i++) {
                         String avatarName = "avatar" + i;
-                        int avatarId = mContext.getResources().getIdentifier(
-                            avatarName, "drawable", mContext.getPackageName());
+                        int avatarId = getDrawableId(mContext, avatarName);
 
                         if (avatarId != 0) {
                             Picasso.get()
@@ -278,8 +303,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
                 // 首先尝试直接加载原始URL
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                        avatarUrl, "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, avatarUrl);
 
                 if (avatarResourceId != 0) {
                     Picasso.get()
@@ -293,8 +317,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
                     int avatarIndex = dataPosition % 11 + 1; // 使用1-11范围
                     String avatarResource = "avatar" + avatarIndex;
 
-                    int avatarSeriesId = mContext.getResources().getIdentifier(
-                            avatarResource, "drawable", mContext.getPackageName());
+                    int avatarSeriesId = getDrawableId(mContext, avatarResource);
 
                     if (avatarSeriesId != 0) {
                         Picasso.get()
@@ -351,7 +374,7 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
             if (hasPraise) {
                 // 如果点赞文本为空，重新生成
                 if (friendCircleBean.getPraiseSpan() == null) {
-                    SpannableStringBuilder praiseSpan = PerformanceSpanUtils.makePraiseSpan(
+                    SpannableStringBuilder praiseSpan = SpanUtils.makePraiseSpan(
                             mContext, friendCircleBean.getPraiseBeans());
                     friendCircleBean.setPraiseSpan(praiseSpan);
                 }
@@ -468,9 +491,37 @@ public class PerformanceFriendCircleAdapter extends RecyclerView.Adapter<Recycle
         return mHeaderView == null ? count : count + 1;
     }
 
-    public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
-        this.mFriendCircleBeans = friendCircleBeans;
-        notifyDataSetChanged();
+    public void setFriendCircleBeans(List<FriendCircleBean> newBeans) {
+        final List<FriendCircleBean> oldBeans = this.mFriendCircleBeans;
+        this.mFriendCircleBeans = newBeans != null ? newBeans : new ArrayList<>();
+
+        if (oldBeans == null || oldBeans.isEmpty()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldBeans.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return mFriendCircleBeans.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+        });
+        result.dispatchUpdatesTo(this);
     }
 
     @Override

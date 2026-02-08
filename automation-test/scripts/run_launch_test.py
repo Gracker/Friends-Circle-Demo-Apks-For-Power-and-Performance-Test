@@ -30,57 +30,6 @@ class LaunchTestRunner:
         self.config = ConfigManager(config_dir)
         self.results = ResultsManager(results_dir)
         
-    def run_single_launch(
-        self,
-        package: str,
-        activity: str,
-        clear_cache: bool = False
-    ) -> Dict[str, Any]:
-        """
-        执行单次冷启动测试
-        
-        Args:
-            package: 应用包名
-            activity: Activity 名称
-            clear_cache: 是否清除缓存
-        
-        Returns:
-            单次测试结果
-        """
-        # 1. 强制停止应用
-        ADBHelper.force_stop(package)
-        
-        # [优化] 退出后等待
-        wait_ms(1000 + self.config.test_config["launch_test"]["wait_after_force_stop_ms"])
-        
-        # 2. 可选：清除缓存
-        if clear_cache:
-            ADBHelper.clear_app_data(package)
-            wait_ms(500)
-        
-        # 3. 启动并计时
-        success, total_time, wait_time = ADBHelper.start_activity_with_timing(package, activity)
-        
-        if not success:
-            return {
-                "status": "failed",
-                "total_time": 0,
-                "wait_time": 0
-            }
-        
-        # 4. 等待应用完全加载
-        wait_ms(self.config.test_config["launch_test"]["wait_after_launch_ms"])
-        
-        # 5. 返回主界面
-        ADBHelper.press_home()
-        wait_ms(500)
-        
-        return {
-            "status": "success",
-            "total_time": total_time,
-            "wait_time": wait_time
-        }
-    
     def run_single_launch_monitored(
         self,
         package: str,
@@ -120,7 +69,6 @@ class LaunchTestRunner:
         
         # 4. 启动应用（不使用 -W）
         start_time = time.time()
-        print(f"[DEBUG] run_single_launch_monitored calling start_activity with package='{package}' activity='{activity}'")
         success = ADBHelper.start_activity(package, activity)
         
         if not success:

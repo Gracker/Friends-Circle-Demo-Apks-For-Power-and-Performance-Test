@@ -23,8 +23,9 @@ public final class SimpleWeakObjectPool<T> {
     }
 
     public synchronized T get() {
-        if (curPointer == -1 || curPointer > objsPool.length) return null;
-        T obj = objsPool[curPointer].get();
+        if (curPointer == -1 || curPointer >= objsPool.length) return null;
+        WeakReference<T> ref = objsPool[curPointer];
+        T obj = ref != null ? ref.get() : null;
         objsPool[curPointer] = null;
         curPointer--;
         return obj;
@@ -41,8 +42,10 @@ public final class SimpleWeakObjectPool<T> {
 
     public void clearPool() {
         for (int i = 0; i < objsPool.length; i++) {
-            objsPool[i].clear();
-            objsPool[i] = null;
+            if (objsPool[i] != null) {
+                objsPool[i].clear();
+                objsPool[i] = null;
+            }
         }
         curPointer = -1;
     }

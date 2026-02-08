@@ -24,16 +24,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MinimalLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".LightLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".MediumLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".HeavyLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".LightLoadBetweenFramesGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".MediumLoadBetweenFramesGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".HeavyLoadBetweenFramesGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".LightMixedLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".MediumMixedLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
-        <activity android:name=".HeavyMixedLoadGeckoViewActivity" android:exported="true" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".MinimalLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".LightLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".MediumLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".HeavyLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".LightLoadBetweenFramesGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".MediumLoadBetweenFramesGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".HeavyLoadBetweenFramesGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".LightMixedLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".MediumMixedLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
+        <activity android:name=".HeavyMixedLoadGeckoViewActivity" android:exported="false" android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
     </application>
 

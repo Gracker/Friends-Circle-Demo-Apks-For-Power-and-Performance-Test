@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.wechatfriendforpower.adapters.PowerFriendCircleAdapter;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
 import com.android.wechatfriendforpower.utils.PowerDataGenerator;
 
 import org.junit.Before;
@@ -119,7 +119,7 @@ public class PowerActivityTest {
     @Test
     public void testLoadData() {
         // 准备模拟数据
-        List<FriendCircleBean> testData = PowerTestUtil.createTestFriendCircleBeans(10);
+        List<PowerFriendCircleBean> testData = PowerTestUtil.createTestPowerFriendCircleBeans(10);
 
         // 模拟PowerDataGenerator生成数据
         PowerDataGenerator mockGenerator = mock(PowerDataGenerator.class);
@@ -129,7 +129,7 @@ public class PowerActivityTest {
         activitySpy.loadData(10);
 
         // 验证设置适配器数据
-        verify(mockAdapter, times(1)).setFriendCircleBeans(any());
+        verify(mockAdapter, times(1)).setPowerFriendCircleBeans(any());
     }
 
     @Test
@@ -141,7 +141,7 @@ public class PowerActivityTest {
         verify(mockSwipeRefreshLayout, times(1)).setRefreshing(true);
 
         // 验证数据加载
-        verify(mockAdapter, times(1)).setFriendCircleBeans(any());
+        verify(mockAdapter, times(1)).setPowerFriendCircleBeans(any());
 
         // 验证结束刷新
         verify(mockSwipeRefreshLayout, times(1)).setRefreshing(false);
@@ -150,7 +150,7 @@ public class PowerActivityTest {
     @Test
     public void testOnPraiseClick() {
         // 创建测试数据
-        FriendCircleBean testBean = PowerTestUtil.createTestFriendCircleBean();
+        PowerFriendCircleBean testBean = PowerTestUtil.createTestPowerFriendCircleBean();
         int position = 1;
 
         // 调用点赞方法
@@ -163,7 +163,7 @@ public class PowerActivityTest {
     @Test
     public void testOnCommentClick() {
         // 创建测试数据
-        FriendCircleBean testBean = PowerTestUtil.createTestFriendCircleBean();
+        PowerFriendCircleBean testBean = PowerTestUtil.createTestPowerFriendCircleBean();
         int position = 1;
 
         // 调用评论方法

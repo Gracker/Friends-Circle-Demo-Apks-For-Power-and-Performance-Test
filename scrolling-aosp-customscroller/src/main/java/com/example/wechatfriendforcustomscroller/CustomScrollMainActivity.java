@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforcustomscroller.databinding.ActivityPerformanceMainBinding;
-import com.example.wechatfriendforcustomscroller.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 
 import dagger.hilt.android.AndroidEntryPoint;
 

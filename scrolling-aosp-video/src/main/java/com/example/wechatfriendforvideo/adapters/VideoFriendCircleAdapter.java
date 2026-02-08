@@ -33,20 +33,23 @@ import java.util.Map;
 
 import com.example.wechatfriendforvideo.VideoConstants;
 import com.example.wechatfriendforvideo.R;
-import com.example.wechatfriendforvideo.beans.CommentBean;
-import com.example.wechatfriendforvideo.beans.FriendCircleBean;
-import com.example.wechatfriendforvideo.beans.OtherInfoBean;
-import com.example.wechatfriendforvideo.beans.UserBean;
-import com.example.wechatfriendforvideo.interfaces.OnItemClickPopupMenuListener;
-import com.example.wechatfriendforvideo.interfaces.OnPraiseOrCommentClickListener;
-import com.example.wechatfriendforvideo.utils.VideoSpanUtils;
-import com.example.wechatfriendforvideo.widgets.NineGridView;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.wechatfriendforvideo.beans.VideoFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.UserBean;
+import com.example.scrolling.common.interfaces.OnItemClickPopupMenuListener;
+import com.example.scrolling.common.interfaces.OnPraiseOrCommentClickListener;
+import com.example.scrolling.common.utils.SpanUtils;
+import com.example.scrolling.common.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 // 移除StfalconImageViewer相关imports
+
+import androidx.recyclerview.widget.DiffUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,8 +74,33 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
     private static final int TYPE_NORMAL = 1;
     private static final int TYPE_VIDEO = 2;  // 新增：视频类型
 
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            String[] extraNames = {"main_bg", "main_avatar"};
+            for (String resName : extraNames) {
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
+
     private Context mContext;
-    private List<FriendCircleBean> mFriendCircleBeans;
+    private List<VideoFriendCircleBean> mFriendCircleBeans;
     private RequestOptions mRequestOptions;
     private int mAvatarSize;
     private DrawableTransitionOptions mDrawableTransitionOptions;
@@ -170,7 +198,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 continue;
             }
 
-            FriendCircleBean bean = mFriendCircleBeans.get(dataPosition);
+            VideoFriendCircleBean bean = mFriendCircleBeans.get(dataPosition);
             if (bean.isVideoType()) {
                 View itemView = mLayoutManager.findViewByPosition(i);
                 if (itemView != null) {
@@ -291,8 +319,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         if (imgCover != null) {
             try {
                 // 优先尝试加载main_bg
-                int coverResourceId = mContext.getResources().getIdentifier(
-                    "main_bg", "drawable", mContext.getPackageName());
+                int coverResourceId = getDrawableId(mContext, "main_bg");
 
                 if (coverResourceId != 0) {
                     Glide.with(mContext)
@@ -304,8 +331,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     boolean bgLoaded = false;
                     for (int i = 1; i <= 11 && !bgLoaded; i++) {
                         String localName = "local" + i;
-                        int localId = mContext.getResources().getIdentifier(
-                            localName, "drawable", mContext.getPackageName());
+                        int localId = getDrawableId(mContext, localName);
 
                         if (localId != 0) {
                             Glide.with(mContext)
@@ -333,8 +359,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         if (imgUserAvatar != null) {
             try {
                 // 先尝试加载固定的main_avatar头像
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                    "main_avatar", "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, "main_avatar");
 
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
@@ -347,8 +372,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     boolean avatarLoaded = false;
                     for (int i = 1; i <= 11 && !avatarLoaded; i++) {
                         String avatarName = "avatar" + i;
-                        int avatarId = mContext.getResources().getIdentifier(
-                            avatarName, "drawable", mContext.getPackageName());
+                        int avatarId = getDrawableId(mContext, avatarName);
 
                         if (avatarId != 0) {
                             Glide.with(mContext)
@@ -405,7 +429,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         // 判断是否为视频类型
         int dataPosition = getDataPosition(position);
         if (dataPosition >= 0 && mFriendCircleBeans != null && dataPosition < mFriendCircleBeans.size()) {
-            FriendCircleBean bean = mFriendCircleBeans.get(dataPosition);
+            VideoFriendCircleBean bean = mFriendCircleBeans.get(dataPosition);
             if (bean.isVideoType()) {
                 return TYPE_VIDEO;
             }
@@ -443,7 +467,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             return;
         }
 
-        FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
+        VideoFriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
         if (friendCircleBean == null) {
             return;
         }
@@ -468,8 +492,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
                 // 首先尝试直接加载原始URL
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                        avatarUrl, "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, avatarUrl);
 
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
@@ -482,8 +505,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     int avatarIndex = dataPosition % 11 + 1; // 使用1-11范围
                     String avatarResource = "avatar" + avatarIndex;
 
-                    int avatarSeriesId = mContext.getResources().getIdentifier(
-                            avatarResource, "drawable", mContext.getPackageName());
+                    int avatarSeriesId = getDrawableId(mContext, avatarResource);
 
                     if (avatarSeriesId != 0) {
                         Glide.with(mContext)
@@ -537,7 +559,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             if (hasPraise) {
                 // 如果点赞文本为空，重新生成
                 if (friendCircleBean.getPraiseSpan() == null) {
-                    SpannableStringBuilder praiseSpan = VideoSpanUtils.makePraiseSpan(
+                    SpannableStringBuilder praiseSpan = SpanUtils.makePraiseSpan(
                             mContext, friendCircleBean.getPraiseBeans());
                     friendCircleBean.setPraiseSpan(praiseSpan);
                 }
@@ -695,9 +717,37 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         return mHeaderView == null ? count : count + 1;
     }
 
-    public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
-        this.mFriendCircleBeans = friendCircleBeans;
-        notifyDataSetChanged();
+    public void setFriendCircleBeans(List<VideoFriendCircleBean> newBeans) {
+        final List<VideoFriendCircleBean> oldBeans = this.mFriendCircleBeans;
+        this.mFriendCircleBeans = newBeans != null ? newBeans : new ArrayList<>();
+
+        if (oldBeans == null || oldBeans.isEmpty()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldBeans.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return mFriendCircleBeans.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+        });
+        result.dispatchUpdatesTo(this);
     }
 
     @Override
@@ -707,7 +757,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
     // ========== 新增：视频绑定方法 ==========
 
-    private void bindVideoViewHolder(VideoViewHolder holder, FriendCircleBean bean, int adapterPosition) {
+    private void bindVideoViewHolder(VideoViewHolder holder, VideoFriendCircleBean bean, int adapterPosition) {
         int dataPosition = getDataPosition(adapterPosition);
 
         // 设置用户信息
@@ -717,8 +767,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
             try {
                 String avatarUrl = userBean.getUserAvatarUrl();
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                        avatarUrl, "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, avatarUrl);
 
                 if (avatarResourceId != 0) {
                     Glide.with(mContext)
@@ -729,8 +778,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 } else {
                     int avatarIndex = dataPosition % 11 + 1;
                     String avatarResource = "avatar" + avatarIndex;
-                    int avatarSeriesId = mContext.getResources().getIdentifier(
-                            avatarResource, "drawable", mContext.getPackageName());
+                    int avatarSeriesId = getDrawableId(mContext, avatarResource);
 
                     if (avatarSeriesId != 0) {
                         Glide.with(mContext)
@@ -776,7 +824,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
             if (hasPraise) {
                 if (bean.getPraiseSpan() == null) {
-                    SpannableStringBuilder praiseSpan = VideoSpanUtils.makePraiseSpan(
+                    SpannableStringBuilder praiseSpan = SpanUtils.makePraiseSpan(
                             mContext, bean.getPraiseBeans());
                     bean.setPraiseSpan(praiseSpan);
                 }
@@ -844,7 +892,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
-    private void setupVideoPlayer(VideoViewHolder holder, FriendCircleBean bean, int adapterPosition) {
+    private void setupVideoPlayer(VideoViewHolder holder, VideoFriendCircleBean bean, int adapterPosition) {
         // 释放旧的播放器
         ExoPlayer oldPlayer = mPlayerMap.get(adapterPosition);
         if (oldPlayer != null) {

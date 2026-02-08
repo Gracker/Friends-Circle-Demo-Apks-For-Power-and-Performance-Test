@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loadconfig.LoadType;
 import com.example.wechatfriendforrenderstress.databinding.ActivityPerformanceMainBinding;
-import com.example.wechatfriendforrenderstress.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 
 import dagger.hilt.android.AndroidEntryPoint;
 

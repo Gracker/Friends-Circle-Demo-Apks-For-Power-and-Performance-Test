@@ -3,7 +3,7 @@ package com.example.wechatfriendforcustomscroller.ui.state;
 import androidx.annotation.Nullable;
 
 import com.example.loadconfig.LoadType;
-import com.example.wechatfriendforcustomscroller.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
 
 import java.util.Collections;
 import java.util.List;

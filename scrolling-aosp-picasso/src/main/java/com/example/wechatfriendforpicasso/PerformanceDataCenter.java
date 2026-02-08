@@ -3,12 +3,11 @@ package com.example.wechatfriendforpicasso;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforpicasso.beans.CommentBean;
-import com.example.wechatfriendforpicasso.beans.FriendCircleBean;
-import com.example.wechatfriendforpicasso.beans.OtherInfoBean;
-import com.example.wechatfriendforpicasso.beans.PraiseBean;
-import com.example.wechatfriendforpicasso.beans.UserBean;
-import com.example.wechatfriendforpicasso.utils.PerformanceSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapter;
 
 import com.example.loadconfig.LoadConfig;

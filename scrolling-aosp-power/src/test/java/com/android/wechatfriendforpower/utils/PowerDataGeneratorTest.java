@@ -9,10 +9,10 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 
 import com.android.wechatfriendforpower.beans.CommentBean;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
-import com.android.wechatfriendforpower.beans.OtherInfoBean;
-import com.android.wechatfriendforpower.beans.PraiseBean;
-import com.android.wechatfriendforpower.beans.UserBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -40,23 +40,23 @@ public class PowerDataGeneratorTest {
     @Test
     public void testGenerateFakeFriendCircleData() {
         // 测试生成朋友圈数据
-        List<FriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(10);
+        List<PowerFriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(10);
 
         // 验证结果
         assertNotNull(result);
         assertEquals(10, result.size());
 
         // 验证每个朋友圈项目的有效性
-        for (FriendCircleBean item : result) {
+        for (PowerFriendCircleBean item : result) {
             assertNotNull(item);
-            validateFriendCircleBean(item);
+            validatePowerFriendCircleBean(item);
         }
     }
 
     @Test
     public void testGenerateFakeFriendCircleDataWithZeroCount() {
         // 测试count=0的情况
-        List<FriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(0);
+        List<PowerFriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(0);
 
         // 验证结果
         assertNotNull(result);
@@ -66,7 +66,7 @@ public class PowerDataGeneratorTest {
     @Test
     public void testGenerateFakeFriendCircleDataWithNegativeCount() {
         // 测试count为负的情况
-        List<FriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(-5);
+        List<PowerFriendCircleBean> result = dataGenerator.generateFakeFriendCircleData(-5);
 
         // 验证结果
         assertNotNull(result);
@@ -169,7 +169,7 @@ public class PowerDataGeneratorTest {
     /**
      * 辅助方法：验证朋友圈数据的有效性
      */
-    private void validateFriendCircleBean(FriendCircleBean bean) {
+    private void validatePowerFriendCircleBean(PowerFriendCircleBean bean) {
         // 验证用户信息
         assertNotNull(bean.getUserBean());
         assertNotNull(bean.getUserBean().getUserId());

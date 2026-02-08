@@ -31,7 +31,6 @@ public class VerticalCommentWidget extends LinearLayout implements ViewGroup.OnH
     private static final String TAG = "VerticalCommentWidget";
     private List<CommentBean> mCommentBeans;
 
-    private LinearLayout.LayoutParams mLayoutParams;
     private SimpleWeakObjectPool<View> COMMENT_TEXT_POOL;
     private int mCommentVerticalSpace;
 
@@ -195,13 +194,11 @@ public class VerticalCommentWidget extends LinearLayout implements ViewGroup.OnH
 
 
     private LayoutParams generateMarginLayoutParams(int index) {
-        if (mLayoutParams == null) {
-            mLayoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
+        LayoutParams layoutParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         if (mCommentBeans != null && index > 0) {
-            mLayoutParams.bottomMargin = index == mCommentBeans.size() - 1 ? 0 : mCommentVerticalSpace;
+            layoutParams.bottomMargin = index == mCommentBeans.size() - 1 ? 0 : mCommentVerticalSpace;
         }
-        return mLayoutParams;
+        return layoutParams;
     }
 
     @Override

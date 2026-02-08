@@ -5,6 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -94,8 +98,8 @@ public class BeanTest {
     }
 
     @Test
-    public void testFriendCircleBean() {
-        FriendCircleBean friendCircleBean = new FriendCircleBean();
+    public void testPowerFriendCircleBean() {
+        PowerFriendCircleBean friendCircleBean = new PowerFriendCircleBean();
 
         // 测试设置和获取内容
         friendCircleBean.setContent("测试朋友圈内容");
@@ -130,10 +134,10 @@ public class BeanTest {
         CommentBean commentBean = new CommentBean();
         commentBean.setCommentContent("测试评论");
         commentBeans.add(commentBean);
-        friendCircleBean.setCommentBeans(commentBeans);
-        assertNotNull(friendCircleBean.getCommentBeans());
-        assertEquals(1, friendCircleBean.getCommentBeans().size());
-        assertEquals("测试评论", friendCircleBean.getCommentBeans().get(0).getCommentContent());
+        friendCircleBean.setPowerCommentBeans(commentBeans);
+        assertNotNull(friendCircleBean.getPowerCommentBeans());
+        assertEquals(1, friendCircleBean.getPowerCommentBeans().size());
+        assertEquals("测试评论", friendCircleBean.getPowerCommentBeans().get(0).getCommentContent());
 
         // 测试设置和获取图片URL列表
         List<String> imageUrls = new ArrayList<>();

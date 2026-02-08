@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wechatfriendforebook.parser.EpubParser;
 import com.example.wechatfriendforebook.parser.PageSplitter;
 import com.example.wechatfriendforebook.view.PageView;
-import com.example.wechatfriendforebook.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

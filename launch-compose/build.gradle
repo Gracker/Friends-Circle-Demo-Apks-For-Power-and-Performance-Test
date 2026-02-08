@@ -1,17 +1,14 @@
 plugins {
-    id 'com.android.application'
+    id 'convention.android-app'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'convention.android-compose'
 }
 
 android {
     namespace 'com.example.launch.compose'
-    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.launch.compose"
-        minSdk 24
-        targetSdk 34
         versionCode 3
         versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -36,29 +33,6 @@ android {
         }
     }
 
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KEYSTORE_FILE_PATH") ?: "$System.env.HOME/Code/APK-Key/Chris/keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "123456"
-            keyAlias System.getenv("KEY_ALIAS") ?: "key0"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = '11'
-    }
     buildFeatures {
         compose true
     }
@@ -66,13 +40,13 @@ android {
 
 dependencies {
     implementation project(':launch-common')
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.activity:activity-compose:1.8.2'
-    implementation platform('androidx.compose:compose-bom:2023.08.00')
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material3:material3'
-    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation libs.core.ktx
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.activity.compose
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.material3
+    implementation libs.appcompat
 }

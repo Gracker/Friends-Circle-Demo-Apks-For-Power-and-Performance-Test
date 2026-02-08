@@ -3,13 +3,11 @@ package com.example.wechatfriendforcustomscroller;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforcustomscroller.beans.CommentBean;
-import com.example.wechatfriendforcustomscroller.beans.FriendCircleBean;
-import com.example.wechatfriendforcustomscroller.beans.OtherInfoBean;
-import com.example.wechatfriendforcustomscroller.beans.PraiseBean;
-import com.example.wechatfriendforcustomscroller.beans.UserBean;
-import com.example.wechatfriendforcustomscroller.utils.PerformanceSpanUtils;
-
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

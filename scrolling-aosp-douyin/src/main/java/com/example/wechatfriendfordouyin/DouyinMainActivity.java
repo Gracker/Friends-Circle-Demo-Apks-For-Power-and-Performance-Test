@@ -21,7 +21,7 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.wechatfriendfordouyin.view.VerticalVideoScroller;
-import com.example.wechatfriendfordouyin.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -3,12 +3,11 @@ package com.example.wechatfriendforperformance;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforperformance.beans.CommentBean;
-import com.example.wechatfriendforperformance.beans.FriendCircleBean;
-import com.example.wechatfriendforperformance.beans.OtherInfoBean;
-import com.example.wechatfriendforperformance.beans.PraiseBean;
-import com.example.wechatfriendforperformance.beans.UserBean;
-import com.example.wechatfriendforperformance.utils.PerformanceSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 
 import com.example.loadconfig.LoadConfig;

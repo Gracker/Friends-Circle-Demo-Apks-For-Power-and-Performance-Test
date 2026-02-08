@@ -1,58 +1,30 @@
 plugins {
-    id 'com.android.application'
+    id 'convention.android-app'
 }
 
 android {
     namespace 'com.example.wechatfriendforpicasso'
-    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.wechatfriendforpicasso"
-        minSdk 24
-        targetSdk 34
         versionCode 3
         versionName "1.2.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-    }
-
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KEYSTORE_FILE_PATH") ?: "$System.env.HOME/Code/APK-Key/Chris/keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "123456"
-            keyAlias System.getenv("KEY_ALIAS") ?: "key0"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
 dependencies {
     implementation project(':load-config')
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation project(':scrolling-common')
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
+    implementation libs.picasso
+    implementation libs.photoview
+    implementation libs.viewpager2
 
-    // Picasso image loading library (替代 Glide)
-    implementation 'com.squareup.picasso:picasso:2.8'
-
-    // PhotoView image viewer
-    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    implementation 'androidx.viewpager2:viewpager2:1.0.0'
-
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    testImplementation libs.junit
+    androidTestImplementation libs.test.ext.junit
+    androidTestImplementation libs.espresso.core
 }

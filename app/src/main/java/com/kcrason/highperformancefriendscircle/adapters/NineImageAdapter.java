@@ -12,13 +12,35 @@ import com.kcrason.highperformancefriendscircle.widgets.NineGridView;
 import com.kcrason.highperformancefriendscircle.R;
 import com.kcrason.highperformancefriendscircle.utils.Utils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author KCrason
  * @date 2018/4/27
  */
 public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private List<String> mImageBeans;
 
@@ -59,8 +81,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             imageView = (ImageView) itemView;
         }
         String url = mImageBeans.get(position);
-        int resourceId = mContext.getResources().getIdentifier(
-            url, "drawable", mContext.getPackageName());
+        int resourceId = getDrawableId(mContext, url);
         if (resourceId != 0) {
             Glide.with(mContext).load(resourceId).apply(mRequestOptions).transition(mDrawableTransitionOptions).into(imageView);
         }

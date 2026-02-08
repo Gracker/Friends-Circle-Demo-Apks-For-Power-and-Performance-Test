@@ -4,10 +4,10 @@ import android.content.Context;
 import android.text.SpannableStringBuilder;
 
 import com.android.wechatfriendforpower.beans.CommentBean;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
-import com.android.wechatfriendforpower.beans.OtherInfoBean;
-import com.android.wechatfriendforpower.beans.PraiseBean;
-import com.android.wechatfriendforpower.beans.UserBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.android.wechatfriendforpower.utils.PowerSpanUtils;
 
 import java.util.ArrayList;
@@ -32,12 +32,12 @@ public class PowerDataCenter {
     /**
      * 生成固定的朋友圈数据，每次都返回相同的数据
      */
-    public static List<FriendCircleBean> makeFriendCircleBeans(Context context) {
-        List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
+    public static List<PowerFriendCircleBean> makeFriendCircleBeans(Context context) {
+        List<PowerFriendCircleBean> friendCircleBeans = new ArrayList<>();
 
         // 生成固定的100个朋友圈项目
         for (int i = 0; i < 100; i++) {
-            FriendCircleBean friendCircleBean = new FriendCircleBean();
+            PowerFriendCircleBean friendCircleBean = new PowerFriendCircleBean();
 
             // 设置视图类型，循环使用三种类型
             int viewType = i % 3;
@@ -48,7 +48,7 @@ public class PowerDataCenter {
             friendCircleBean.setContent(PowerConstants.CONTENTS[contentIndex]);
 
             // 设置评论，根据位置循环变化评论数量
-            friendCircleBean.setCommentBeans(makeCommentBeans(context, i));
+            friendCircleBean.setPowerCommentBeans(makeCommentBeans(context, i));
 
             // 设置点赞，根据位置循环变化点赞数量
             List<PraiseBean> praiseBeans = makePraiseBeans(i);

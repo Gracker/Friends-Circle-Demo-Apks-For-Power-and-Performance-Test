@@ -2,11 +2,11 @@ package com.example.wechatfriendfordualwindow;
 
 import android.content.Context;
 
-import com.example.wechatfriendfordualwindow.beans.CommentBean;
-import com.example.wechatfriendfordualwindow.beans.FriendCircleBean;
-import com.example.wechatfriendfordualwindow.beans.OtherInfoBean;
-import com.example.wechatfriendfordualwindow.beans.PraiseBean;
-import com.example.wechatfriendfordualwindow.beans.UserBean;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 
 import com.example.loadconfig.LoadConfig;
 

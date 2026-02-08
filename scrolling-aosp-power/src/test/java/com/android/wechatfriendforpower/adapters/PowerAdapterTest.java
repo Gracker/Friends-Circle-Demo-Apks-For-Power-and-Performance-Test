@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.wechatfriendforpower.PowerTestUtil;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
 import com.android.wechatfriendforpower.interfaces.OnItemClickPopupMenuListener;
 import com.stfalcon.imageviewer.loader.ImageLoader;
 
@@ -88,8 +88,8 @@ public class PowerAdapterTest {
         assertEquals(1, adapter.getItemCount()); // 只有header
 
         // 添加数据
-        List<FriendCircleBean> beans = PowerTestUtil.createTestFriendCircleBeans(3);
-        adapter.setFriendCircleBeans(beans);
+        List<PowerFriendCircleBean> beans = PowerTestUtil.createTestPowerFriendCircleBeans(3);
+        adapter.setPowerFriendCircleBeans(beans);
         assertEquals(4, adapter.getItemCount()); // 3个数据项 + header
     }
 
@@ -99,8 +99,8 @@ public class PowerAdapterTest {
         adapter.setHeaderView(mockView);
 
         // 添加数据
-        List<FriendCircleBean> beans = PowerTestUtil.createTestFriendCircleBeans(3);
-        adapter.setFriendCircleBeans(beans);
+        List<PowerFriendCircleBean> beans = PowerTestUtil.createTestPowerFriendCircleBeans(3);
+        adapter.setPowerFriendCircleBeans(beans);
 
         // 测试头部视图类型
         assertEquals(PowerFriendCircleAdapter.TYPE_HEADER, adapter.getItemViewType(0));
@@ -126,12 +126,12 @@ public class PowerAdapterTest {
     }
 
     @Test
-    public void testSetFriendCircleBeans() {
+    public void testSetPowerFriendCircleBeans() {
         // 创建测试数据
-        List<FriendCircleBean> beans = PowerTestUtil.createTestFriendCircleBeans(5);
+        List<PowerFriendCircleBean> beans = PowerTestUtil.createTestPowerFriendCircleBeans(5);
 
         // 设置数据
-        adapter.setFriendCircleBeans(beans);
+        adapter.setPowerFriendCircleBeans(beans);
 
         // 设置header view
         adapter.setHeaderView(mockView);
@@ -163,8 +163,8 @@ public class PowerAdapterTest {
         // 验证监听器是否被正确设置 (通过反射检查私有字段可能会更好，但这里简化处理)
 
         // 创建测试数据和视图模拟，以便调用点赞/评论方法
-        List<FriendCircleBean> beans = PowerTestUtil.createTestFriendCircleBeans(1);
-        adapter.setFriendCircleBeans(beans);
+        List<PowerFriendCircleBean> beans = PowerTestUtil.createTestPowerFriendCircleBeans(1);
+        adapter.setPowerFriendCircleBeans(beans);
         adapter.setHeaderView(mockView);
 
         // 注意：我们不能直接测试内部的回调，因为它们在视图持有者中设置

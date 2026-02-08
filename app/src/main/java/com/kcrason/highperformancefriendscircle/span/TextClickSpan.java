@@ -10,6 +10,8 @@ import android.view.View;
 
 import com.kcrason.highperformancefriendscircle.R;
 
+import java.lang.ref.WeakReference;
+
 /**
  * @author KCrason
  * @date 2018/4/28
@@ -17,13 +19,13 @@ import com.kcrason.highperformancefriendscircle.R;
 public class TextClickSpan extends ClickableSpan {
 
     private static final String TAG = "TextClickSpan";
-    private Context mContext;
+    private WeakReference<Context> mContextRef;
 
     private String mUserName;
     private boolean mPressed;
 
     public TextClickSpan(Context context, String userName) {
-        this.mContext = context;
+        this.mContextRef = new WeakReference<>(context);
         this.mUserName = userName;
     }
 
@@ -34,8 +36,12 @@ public class TextClickSpan extends ClickableSpan {
     @Override
     public void updateDrawState(TextPaint ds) {
         super.updateDrawState(ds);
-        ds.bgColor = mPressed ? ContextCompat.getColor(mContext, R.color.base_B5B5B5) : Color.TRANSPARENT;
-        ds.setColor(ContextCompat.getColor(mContext, R.color.base_697A9F));
+        Context context = mContextRef.get();
+        if (context == null) {
+            return;
+        }
+        ds.bgColor = mPressed ? ContextCompat.getColor(context, R.color.base_B5B5B5) : Color.TRANSPARENT;
+        ds.setColor(ContextCompat.getColor(context, R.color.base_697A9F));
         ds.setUnderlineText(false);
     }
 

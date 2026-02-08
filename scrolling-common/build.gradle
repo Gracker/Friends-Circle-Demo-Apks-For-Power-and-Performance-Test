@@ -1,0 +1,22 @@
+plugins {
+    id 'convention.android-library'
+}
+
+android {
+    namespace 'com.example.scrolling.common'
+
+    defaultConfig {
+        minSdk 21
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+}
+
+dependencies {
+    api project(':load-config')
+    api libs.appcompat
+    api libs.material
+    api libs.constraintlayout
+    api libs.recyclerview
+    api libs.viewpager2
+}

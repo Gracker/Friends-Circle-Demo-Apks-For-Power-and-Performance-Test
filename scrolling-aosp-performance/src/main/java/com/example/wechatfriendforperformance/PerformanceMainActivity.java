@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
-import com.example.wechatfriendforperformance.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 import com.example.loadconfig.LoadConfig;
 
 /**

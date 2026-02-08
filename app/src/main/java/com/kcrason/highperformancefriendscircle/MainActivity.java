@@ -25,7 +25,7 @@ import java.util.List;
 import io.reactivex.Single;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener,
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private static final String TAG = "MainActivity";
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private Disposable mDisposable;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private FriendCircleAdapter mFriendCircleAdapter;
     // 移除StfalconImageViewer成员变量
     private EmojiPanelView mEmojiPanelView;
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 
     private void asyncMakeData() {
-        mDisposable = Single.create((SingleOnSubscribe<List<FriendCircleBean>>) emitter ->
+        mCompositeDisposable.add(Single.create((SingleOnSubscribe<List<FriendCircleBean>>) emitter ->
                 emitter.onSuccess(DataCenter.makeFriendCircleBeans(this)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -90,16 +90,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     if (friendCircleBeans != null && throwable == null) {
                         mFriendCircleAdapter.setFriendCircleBeans(friendCircleBeans);
                     }
-                });
+                }));
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mDisposable != null && !mDisposable.isDisposed()) {
-            mDisposable.dispose();
-        }
+        mCompositeDisposable.clear();
     }
 
     @Override

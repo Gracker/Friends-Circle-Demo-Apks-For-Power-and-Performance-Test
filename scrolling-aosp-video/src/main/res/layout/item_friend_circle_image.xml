@@ -45,7 +45,7 @@
         app:layout_constraintTop_toBottomOf="@+id/txt_user_name"
         tools:text="朋友圈内容" />
 
-    <com.example.wechatfriendforvideo.widgets.NineGridView
+    <com.example.scrolling.common.widgets.NineGridView
         android:id="@+id/nine_grid_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -8,7 +8,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wechatfriendformixedrender.databinding.ActivityMainBinding;
-import com.example.wechatfriendformixedrender.model.AppInfo;
+import com.example.scrolling.common.model.AppInfo;
 
 public class MixedRenderMainActivity extends AppCompatActivity implements View.OnClickListener {
 

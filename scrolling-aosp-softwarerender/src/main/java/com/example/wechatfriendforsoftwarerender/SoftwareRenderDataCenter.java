@@ -3,12 +3,11 @@ package com.example.wechatfriendforsoftwarerender;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforsoftwarerender.beans.CommentBean;
-import com.example.wechatfriendforsoftwarerender.beans.FriendCircleBean;
-import com.example.wechatfriendforsoftwarerender.beans.OtherInfoBean;
-import com.example.wechatfriendforsoftwarerender.beans.PraiseBean;
-import com.example.wechatfriendforsoftwarerender.beans.UserBean;
-import com.example.wechatfriendforsoftwarerender.utils.SoftwareRenderSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.example.wechatfriendforsoftwarerender.adapters.SoftwareRenderFriendCircleAdapter;
 
 import com.example.loadconfig.LoadConfig;

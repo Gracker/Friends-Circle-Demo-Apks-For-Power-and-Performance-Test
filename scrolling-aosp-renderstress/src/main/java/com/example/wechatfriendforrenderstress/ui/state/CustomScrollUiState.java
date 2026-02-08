@@ -3,7 +3,7 @@ package com.example.wechatfriendforrenderstress.ui.state;
 import androidx.annotation.Nullable;
 
 import com.example.loadconfig.LoadType;
-import com.example.wechatfriendforrenderstress.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
 
 import java.util.Collections;
 import java.util.List;

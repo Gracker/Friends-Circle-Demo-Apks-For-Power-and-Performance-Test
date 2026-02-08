@@ -6,6 +6,7 @@ import android.text.SpannableStringBuilder;
 import com.android.wechatfriendforpower.PowerConstants;
 import com.android.wechatfriendforpower.enums.TranslationState;
 import com.android.wechatfriendforpower.utils.PowerSpanUtils;
+import com.example.scrolling.common.beans.UserBean;
 
 /**
  * 评论信息Bean类

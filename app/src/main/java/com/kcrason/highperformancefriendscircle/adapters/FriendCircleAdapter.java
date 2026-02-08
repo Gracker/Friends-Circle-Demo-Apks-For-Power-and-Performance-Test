@@ -28,8 +28,12 @@ import com.kcrason.highperformancefriendscircle.beans.FriendCircleBean;
 import com.kcrason.highperformancefriendscircle.beans.OtherInfoBean;
 import com.kcrason.highperformancefriendscircle.beans.UserBean;
 import com.kcrason.highperformancefriendscircle.widgets.VerticalCommentWidget;
+import androidx.recyclerview.widget.DiffUtil;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 // 移除StfalconImageViewer相关imports
 import android.util.Log;
 
@@ -41,6 +45,26 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         implements OnItemClickPopupMenuListener {
 
     private static final String TAG = "FriendCircleAdapter";
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private Context mContext;
 
@@ -75,9 +99,37 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         }
     }
 
-    public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
-        this.mFriendCircleBeans = friendCircleBeans;
-        notifyDataSetChanged();
+    public void setFriendCircleBeans(List<FriendCircleBean> newBeans) {
+        final List<FriendCircleBean> oldBeans = this.mFriendCircleBeans;
+        this.mFriendCircleBeans = newBeans != null ? newBeans : new ArrayList<>();
+
+        if (oldBeans == null || oldBeans.isEmpty()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldBeans.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return mFriendCircleBeans.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+        });
+        result.dispatchUpdatesTo(this);
     }
 
     public void addFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
@@ -85,8 +137,9 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             if (mFriendCircleBeans == null) {
                 mFriendCircleBeans = new ArrayList<>();
             }
+            int insertPosition = mFriendCircleBeans.size();
             this.mFriendCircleBeans.addAll(friendCircleBeans);
-            notifyItemRangeInserted(mFriendCircleBeans.size(), friendCircleBeans.size());
+            notifyItemRangeInserted(insertPosition, friendCircleBeans.size());
         }
     }
 
@@ -102,7 +155,7 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
             return new WordAndImagesViewHolder(
                     mLayoutInflater.inflate(R.layout.item_recycler_firend_circle_word_and_images, parent, false));
         }
-        return null;
+        throw new IllegalArgumentException("Unknown view type: " + viewType);
     }
 
     @Override
@@ -152,8 +205,7 @@ public class FriendCircleAdapter extends RecyclerView.Adapter<FriendCircleAdapte
         if (userBean != null) {
             holder.txtUserName.setText(userBean.getUserName());
             String avatarUrl = userBean.getUserAvatarUrl();
-            int resourceId = mContext.getResources().getIdentifier(
-                    avatarUrl, "drawable", mContext.getPackageName());
+            int resourceId = getDrawableId(mContext, avatarUrl);
             if (resourceId != 0) {
                 Glide.with(mContext).load(resourceId)
                         .apply(mRequestOptions.override(mAvatarSize, mAvatarSize))

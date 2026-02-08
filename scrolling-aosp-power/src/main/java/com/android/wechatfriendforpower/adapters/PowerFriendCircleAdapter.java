@@ -15,20 +15,23 @@ import com.android.wechatfriendforpower.PowerConstants;
 import com.android.wechatfriendforpower.PowerUtils;
 import com.android.wechatfriendforpower.R;
 import com.android.wechatfriendforpower.beans.CommentBean;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
-import com.android.wechatfriendforpower.beans.OtherInfoBean;
-import com.android.wechatfriendforpower.beans.UserBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.android.wechatfriendforpower.interfaces.OnItemClickPopupMenuListener;
-import com.android.wechatfriendforpower.interfaces.OnPraiseOrCommentClickListener;
-import com.android.wechatfriendforpower.widgets.NineGridView;
+import com.example.scrolling.common.widgets.NineGridView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.example.loadconfig.LoadConfig;
 import com.bumptech.glide.request.RequestOptions;
 // 移除StfalconImageViewer相关imports
 
+import androidx.recyclerview.widget.DiffUtil;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import android.util.Log;
 
@@ -43,8 +46,33 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
     private static final String TAG = "PowerFriendCircleAdapter";
 
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            String[] extraNames = {"main_bg", "main_avatar"};
+            for (String resName : extraNames) {
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
+
     private Context mContext;
-    private List<FriendCircleBean> mFriendCircleBeans;
+    private List<PowerFriendCircleBean> mFriendCircleBeans;
     private RequestOptions mRequestOptions;
     private int mAvatarSize;
     private DrawableTransitionOptions mDrawableTransitionOptions;
@@ -80,8 +108,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             // 设置固定的背景图片 main_bg.jpg
             ImageView imgCover = mHeaderView.findViewById(R.id.img_cover);
             if (imgCover != null) {
-                int coverResourceId = mContext.getResources().getIdentifier(
-                    "main_bg", "drawable", mContext.getPackageName());
+                int coverResourceId = getDrawableId(mContext, "main_bg");
                 if (coverResourceId != 0) {
                     Glide.with(mContext)
                          .load(coverResourceId)
@@ -93,8 +120,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             // 设置固定的头像 main_avatar.jpg，使用大圆角变换
             ImageView imgUserAvatar = mHeaderView.findViewById(R.id.img_user_avatar);
             if (imgUserAvatar != null) {
-                int avatarResourceId = mContext.getResources().getIdentifier(
-                    "main_avatar", "drawable", mContext.getPackageName());
+                int avatarResourceId = getDrawableId(mContext, "main_avatar");
                 if (avatarResourceId != 0) {
                     RequestOptions options = new RequestOptions()
                         .centerCrop()
@@ -121,9 +147,37 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
-    public void setFriendCircleBeans(List<FriendCircleBean> friendCircleBeans) {
-        this.mFriendCircleBeans = friendCircleBeans;
-        notifyDataSetChanged();
+    public void setFriendCircleBeans(List<PowerFriendCircleBean> newBeans) {
+        final List<PowerFriendCircleBean> oldBeans = this.mFriendCircleBeans;
+        this.mFriendCircleBeans = newBeans != null ? newBeans : new ArrayList<>();
+
+        if (oldBeans == null || oldBeans.isEmpty()) {
+            notifyDataSetChanged();
+            return;
+        }
+
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldBeans.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return mFriendCircleBeans.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return oldBeans.get(oldPos) == mFriendCircleBeans.get(newPos);
+            }
+        });
+        result.dispatchUpdatesTo(this);
     }
 
     @Override
@@ -173,7 +227,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     );
                 }
 
-                FriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
+                PowerFriendCircleBean friendCircleBean = mFriendCircleBeans.get(dataPosition);
 
                 // 设置内容
                 circleHolder.txtContent.setText(friendCircleBean.getContent());
@@ -183,8 +237,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                 if (userBean != null) {
                     circleHolder.txtUserName.setText(userBean.getUserName());
                     String avatarUrl = userBean.getUserAvatarUrl();
-                    int resourceId = mContext.getResources().getIdentifier(
-                        avatarUrl, "drawable", mContext.getPackageName());
+                    int resourceId = getDrawableId(mContext, avatarUrl);
                     if (resourceId != 0) {
                         // 添加圆角变换
                         RequestOptions avatarOptions = new RequestOptions()
@@ -225,7 +278,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
                 // 设置点赞和评论区域
                 if (friendCircleBean.getPraiseBeans() != null && !friendCircleBean.getPraiseBeans().isEmpty() || 
-                    friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
+                    friendCircleBean.getPowerCommentBeans() != null && !friendCircleBean.getPowerCommentBeans().isEmpty()) {
                     circleHolder.layoutPraiseComment.setVisibility(View.VISIBLE);
 
                     // 设置点赞内容
@@ -234,7 +287,7 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                         circleHolder.txtPraise.setText(friendCircleBean.getPraiseSpan());
 
                         // 如果有评论，显示分割线
-                        if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
+                        if (friendCircleBean.getPowerCommentBeans() != null && !friendCircleBean.getPowerCommentBeans().isEmpty()) {
                             circleHolder.viewLine.setVisibility(View.VISIBLE);
                         } else {
                             circleHolder.viewLine.setVisibility(View.GONE);
@@ -245,12 +298,12 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
                     }
 
                     // 设置评论内容
-                    if (friendCircleBean.getCommentBeans() != null && !friendCircleBean.getCommentBeans().isEmpty()) {
+                    if (friendCircleBean.getPowerCommentBeans() != null && !friendCircleBean.getPowerCommentBeans().isEmpty()) {
                         circleHolder.commentLayout.setVisibility(View.VISIBLE);
                         circleHolder.commentLayout.removeAllViews();
 
                         // 显示所有评论
-                        for (CommentBean commentBean : friendCircleBean.getCommentBeans()) {
+                        for (CommentBean commentBean : friendCircleBean.getPowerCommentBeans()) {
                             TextView textView = new TextView(mContext);
                             textView.setTextSize(16);
                             textView.setPadding(0, 4, 0, 4);
@@ -355,13 +408,13 @@ public class PowerFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
          * @param friendCircleBean 朋友圈数据
          * @param position 位置
          */
-        void onPraiseClick(FriendCircleBean friendCircleBean, int position);
+        void onPraiseClick(PowerFriendCircleBean friendCircleBean, int position);
 
         /**
          * 评论点击事件
          * @param friendCircleBean 朋友圈数据
          * @param position 位置
          */
-        void onCommentClick(FriendCircleBean friendCircleBean, int position);
+        void onCommentClick(PowerFriendCircleBean friendCircleBean, int position);
     }
 } 

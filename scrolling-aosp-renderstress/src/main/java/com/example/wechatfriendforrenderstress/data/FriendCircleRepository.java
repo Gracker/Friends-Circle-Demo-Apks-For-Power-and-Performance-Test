@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.example.wechatfriendforrenderstress.CustomScrollDataGenerator;
 import com.example.loadconfig.LoadType;
-import com.example.wechatfriendforrenderstress.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
 import com.example.wechatfriendforrenderstress.data.local.FriendCircleDao;
 import com.example.wechatfriendforrenderstress.data.local.FriendCircleEntity;
 import com.google.gson.Gson;

@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.android.wechatfriendforpower.adapters.PowerFriendCircleAdapter;
-import com.android.wechatfriendforpower.beans.FriendCircleBean;
+import com.android.wechatfriendforpower.beans.PowerFriendCircleBean;
 import com.android.wechatfriendforpower.interfaces.OnPraiseOrCommentClickListener;
 import com.bumptech.glide.Glide;
 // 移除ImageLoader import
@@ -54,7 +54,7 @@ public class PowerMainActivity extends AppCompatActivity implements OnPraiseOrCo
      * 加载朋友圈数据
      */
     private void loadData() {
-        List<FriendCircleBean> friendCircleBeans = PowerDataCenter.makeFriendCircleBeans(this);
+        List<PowerFriendCircleBean> friendCircleBeans = PowerDataCenter.makeFriendCircleBeans(this);
         mFriendCircleAdapter.setFriendCircleBeans(friendCircleBeans);
     }
 

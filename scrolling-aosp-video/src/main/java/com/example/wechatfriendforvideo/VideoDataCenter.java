@@ -3,12 +3,12 @@ package com.example.wechatfriendforvideo;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforvideo.beans.CommentBean;
-import com.example.wechatfriendforvideo.beans.FriendCircleBean;
-import com.example.wechatfriendforvideo.beans.OtherInfoBean;
-import com.example.wechatfriendforvideo.beans.PraiseBean;
-import com.example.wechatfriendforvideo.beans.UserBean;
-import com.example.wechatfriendforvideo.utils.VideoSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.wechatfriendforvideo.beans.VideoFriendCircleBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 import com.example.wechatfriendforvideo.adapters.VideoFriendCircleAdapter;
 
 import com.example.loadconfig.LoadConfig;
@@ -28,9 +28,9 @@ public class VideoDataCenter {
     private static final int FRIEND_CIRCLE_COUNT = 100; // 固定生成100条朋友圈数据
 
     private static final VideoDataCenter instance = new VideoDataCenter();
-    private List<FriendCircleBean> cachedLightLoadFriendCircleBeans;
-    private List<FriendCircleBean> cachedMediumLoadFriendCircleBeans;
-    private List<FriendCircleBean> cachedHeavyLoadFriendCircleBeans;
+    private List<VideoFriendCircleBean> cachedLightLoadFriendCircleBeans;
+    private List<VideoFriendCircleBean> cachedMediumLoadFriendCircleBeans;
+    private List<VideoFriendCircleBean> cachedHeavyLoadFriendCircleBeans;
 
     // Fixed avatar resource name array
     private static final String[] AVATAR_RES_NAMES = {
@@ -69,11 +69,11 @@ public class VideoDataCenter {
         cachedHeavyLoadFriendCircleBeans = null;
     }
 
-    public List<FriendCircleBean> getFriendCircleBeans() {
+    public List<VideoFriendCircleBean> getFriendCircleBeans() {
         return getFriendCircleBeans(com.example.loadconfig.LoadType.LIGHT);
     }
 
-    public List<FriendCircleBean> getFriendCircleBeans(int loadType) {
+    public List<VideoFriendCircleBean> getFriendCircleBeans(int loadType) {
         String loadTypeStr = "";
         switch (loadType) {
             case com.example.loadconfig.LoadType.LIGHT:
@@ -106,7 +106,7 @@ public class VideoDataCenter {
     /**
      * 打印数据统计信息
      */
-    private void printStatistics(List<FriendCircleBean> beans, int loadType) {
+    private void printStatistics(List<VideoFriendCircleBean> beans, int loadType) {
         if (beans == null || beans.isEmpty()) {
             return;
         }
@@ -118,7 +118,7 @@ public class VideoDataCenter {
         int maxPraise = 0;
         int maxComment = 0;
 
-        for (FriendCircleBean bean : beans) {
+        for (VideoFriendCircleBean bean : beans) {
             int praiseCount = bean.getPraiseBeans() != null ? bean.getPraiseBeans().size() : 0;
             int commentCount = bean.getCommentBeans() != null ? bean.getCommentBeans().size() : 0;
 
@@ -132,8 +132,8 @@ public class VideoDataCenter {
     /**
      * 生成朋友圈数据
      */
-    private List<FriendCircleBean> generateFriendCircleBeans(int loadType) {
-        List<FriendCircleBean> friendCircleBeans = new ArrayList<>();
+    private List<VideoFriendCircleBean> generateFriendCircleBeans(int loadType) {
+        List<VideoFriendCircleBean> friendCircleBeans = new ArrayList<>();
 
         // 使用 LoadConfig 统一管理的数据生成种子
         long randomSeed = LoadConfig.getDataGenerationSeed(loadType);
@@ -141,7 +141,7 @@ public class VideoDataCenter {
 
         // 确保生成固定数量的朋友圈数据
         for (int i = 0; i < FRIEND_CIRCLE_COUNT; i++) {
-            FriendCircleBean friendCircleBean = new FriendCircleBean();
+            VideoFriendCircleBean friendCircleBean = new VideoFriendCircleBean();
 
             // User information
             UserBean userBean = new UserBean();
@@ -361,11 +361,11 @@ public class VideoDataCenter {
     /**
      * 直接生成指定负载类型的数据，不使用缓存
      */
-    public List<FriendCircleBean> generateDataForLoadType(int loadType) {
+    public List<VideoFriendCircleBean> generateDataForLoadType(int loadType) {
         String loadTypeStr = getLoadTypeString(loadType);
 
         // 生成数据并返回
-        List<FriendCircleBean> friendCircleBeans = generateFriendCircleBeans(loadType);
+        List<VideoFriendCircleBean> friendCircleBeans = generateFriendCircleBeans(loadType);
 
         // 打印统计信息
         printStatistics(friendCircleBeans, loadType);
@@ -376,7 +376,7 @@ public class VideoDataCenter {
     /**
      * 直接生成指定负载类型的数据，不使用缓存，并传入Context
      */
-    public List<FriendCircleBean> generateDataForLoadType(Context context, int loadType) {
+    public List<VideoFriendCircleBean> generateDataForLoadType(Context context, int loadType) {
         setContext(context);
         return generateDataForLoadType(loadType);
     }

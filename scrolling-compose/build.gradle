@@ -1,17 +1,14 @@
 plugins {
-    id 'com.android.application'
+    id 'convention.android-app'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'convention.android-compose'
 }
 
 android {
     namespace 'com.example.wechatfriendforcompose'
-    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.wechatfriendforcompose"
-        minSdk 24
-        targetSdk 34
         versionCode 3
         versionName "1.2.0"
 
@@ -19,32 +16,6 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-    }
-
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("KEYSTORE_FILE_PATH") ?: "$System.env.HOME/Code/APK-Key/Chris/keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "123456"
-            keyAlias System.getenv("KEY_ALIAS") ?: "key0"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "123456"
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = '11'
     }
 
     buildFeatures {
@@ -60,35 +31,33 @@ android {
 
 dependencies {
     implementation project(':load-config')
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
-    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation libs.core.ktx
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.activity.compose
 
     // Compose BOM
-    implementation platform('androidx.compose:compose-bom:2024.02.00')
-    implementation 'androidx.compose.ui:ui'
-    implementation 'androidx.compose.ui:ui-graphics'
-    implementation 'androidx.compose.ui:ui-tooling-preview'
-    implementation 'androidx.compose.material3:material3'
-    implementation 'androidx.compose.foundation:foundation'
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.material3
+    implementation libs.compose.foundation
 
     // Navigation
-    implementation 'androidx.navigation:navigation-compose:2.7.7'
+    implementation libs.navigation.compose
 
     // Coil for image loading
-    implementation 'io.coil-kt:coil-compose:2.5.0'
+    implementation libs.coil.compose
 
     // For tracing
-    implementation 'androidx.tracing:tracing-ktx:1.2.0'
+    implementation libs.tracing.ktx
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation platform('androidx.compose:compose-bom:2024.02.00')
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    testImplementation libs.junit
+    androidTestImplementation libs.test.ext.junit
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation platform(libs.compose.bom)
+    androidTestImplementation libs.compose.ui.test.junit4
 
-    debugImplementation 'androidx.compose.ui:ui-tooling'
-    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    debugImplementation libs.compose.ui.tooling
+    debugImplementation libs.compose.ui.test.manifest
 }
-
-

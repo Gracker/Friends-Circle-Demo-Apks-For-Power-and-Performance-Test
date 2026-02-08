@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 
 import com.android.wechatfriendforpower.PowerConstants;
-import com.android.wechatfriendforpower.beans.PraiseBean;
+import com.example.scrolling.common.beans.PraiseBean;
 
 import java.util.List;
 

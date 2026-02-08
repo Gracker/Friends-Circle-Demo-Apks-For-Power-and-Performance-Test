@@ -40,11 +40,12 @@ class ScrollingTestRunner:
         app_name: str = "",
         load_type: Optional[str] = None,
         swipe_count: int = 20,
-        swipe_duration_ms: int = 300
+        swipe_duration_ms: int = 300,
+        test_type: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         执行单次滑动测试
-        
+
         Args:
             package: 应用包名
             activity: Activity 名称
@@ -52,12 +53,13 @@ class ScrollingTestRunner:
             load_type: 负载类型（如 minimal, medium, heavy 等）
             swipe_count: 滑动次数
             swipe_duration_ms: 单次滑动持续时间
-        
+            test_type: 注册表中的测试类型（如 vertical_swipe, horizontal_swipe）
+
         Returns:
             测试结果字典
         """
         # 确定测试策略
-        strategy = TestStrategy.get_strategy_for_app(app_name)
+        strategy = TestStrategy.get_strategy_for_app(app_name, test_type)
         strategy_desc = TestStrategy.get_strategy_description(strategy)
         
         result = {
@@ -230,6 +232,115 @@ class ScrollingTestRunner:
             if (i + 1) % 3 == 0:
                 log_info(f"  拖拽进度: {i + 1}/{drag_count}")
     
+    def run_iterations(
+        self,
+        package: str,
+        activity: str,
+        app_name: str = "",
+        load_type: Optional[str] = None,
+        swipe_count: int = 20,
+        swipe_duration_ms: int = 300,
+        warmup_runs: int = 1,
+        iterations: int = 3,
+        test_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        执行多次滑动测试（含预热）并返回聚合统计结果
+
+        Args:
+            package: 应用包名
+            activity: Activity 名称
+            app_name: 应用名称
+            load_type: 负载类型
+            swipe_count: 滑动次数
+            swipe_duration_ms: 单次滑动持续时间
+            warmup_runs: 预热次数（结果丢弃）
+            iterations: 正式测试迭代次数
+            test_type: 注册表中的测试类型
+
+        Returns:
+            聚合统计结果
+        """
+        # 预热阶段
+        for i in range(warmup_runs):
+            log_info(f"  预热 {i + 1}/{warmup_runs}...")
+            self.run_single_test(
+                package, activity, app_name, load_type,
+                swipe_count, swipe_duration_ms, test_type=test_type
+            )
+
+        # 正式测试
+        results = []
+        for i in range(iterations):
+            log_info(f"  迭代 {i + 1}/{iterations}...")
+            result = self.run_single_test(
+                package, activity, app_name, load_type,
+                swipe_count, swipe_duration_ms, test_type=test_type
+            )
+            if result["status"] == "success":
+                results.append(result)
+
+        if not results:
+            return {
+                "status": "all_failed",
+                "package": package,
+                "app_name": app_name,
+                "load_type": load_type or "default",
+                "iterations": iterations,
+                "successful": 0
+            }
+
+        # 聚合 FPS 统计
+        janky_percents = [r["fps_data"]["janky_percent"] for r in results]
+        p90s = [r["fps_data"]["percentile_90"] for r in results]
+        p95s = [r["fps_data"]["percentile_95"] for r in results]
+        p99s = [r["fps_data"]["percentile_99"] for r in results]
+        avg_fps_list = [r["fps_data"]["avg_fps"] for r in results]
+
+        stats = {
+            "status": "completed",
+            "package": package,
+            "app_name": app_name,
+            "load_type": load_type or "default",
+            "warmup_runs": warmup_runs,
+            "iterations": iterations,
+            "successful": len(results),
+            "janky_percent": {
+                "avg": sum(janky_percents) / len(janky_percents),
+                "min": min(janky_percents),
+                "max": max(janky_percents),
+                "values": janky_percents
+            },
+            "percentile_90": {
+                "avg": sum(p90s) / len(p90s),
+                "min": min(p90s),
+                "max": max(p90s)
+            },
+            "percentile_95": {
+                "avg": sum(p95s) / len(p95s),
+                "min": min(p95s),
+                "max": max(p95s)
+            },
+            "percentile_99": {
+                "avg": sum(p99s) / len(p99s),
+                "min": min(p99s),
+                "max": max(p99s)
+            },
+            "avg_fps": {
+                "avg": sum(avg_fps_list) / len(avg_fps_list),
+                "min": min(avg_fps_list),
+                "max": max(avg_fps_list)
+            }
+        }
+
+        # 根据平均 janky_percent 计算评分
+        janky_thresholds = self.config.test_config["thresholds"]["janky_percent"]
+        stats["grade"] = FPSAnalyzer.calculate_grade(
+            stats["janky_percent"]["avg"], janky_thresholds
+        )
+
+        return stats
+
     def run_app_test(
         self,
         app_config: Dict,
@@ -238,12 +349,12 @@ class ScrollingTestRunner:
     ) -> List[Dict[str, Any]]:
         """
         测试单个应用的多种负载
-        
+
         Args:
             app_config: 应用配置
             load_types: 要测试的负载类型列表
             swipe_count: 滑动次数
-        
+
         Returns:
             测试结果列表
         """
@@ -251,7 +362,8 @@ class ScrollingTestRunner:
         package = app_config["package"]
         activity = app_config["activity"]
         app_name = app_config["name"]
-        
+        test_type = app_config.get("test_type")
+
         # 确定要测试的负载类型
         if app_config.get("supports_activity_type", False):
             available_types = app_config.get("load_types", [])
@@ -262,30 +374,37 @@ class ScrollingTestRunner:
                 types_to_test = available_types
         else:
             types_to_test = [None]  # 不支持负载类型的应用只测试默认状态
-        
+
+        warmup_runs = self.config.test_config["scrolling_test"].get("warmup_runs", 1)
+        iterations = self.config.test_config["scrolling_test"].get("iterations", 3)
+
         log_info(f"\n{'='*60}")
         log_info(f"开始测试应用: {app_name}")
         log_info(f"负载类型: {types_to_test}")
+        log_info(f"预热: {warmup_runs}次, 迭代: {iterations}次")
         log_info(f"{'='*60}")
-        
+
         for load_type in types_to_test:
             log_info(f"\n--- 测试负载: {load_type or 'default'} ---")
-            result = self.run_single_test(
+            stats = self.run_iterations(
                 package=package,
                 activity=activity,
                 app_name=app_name,
                 load_type=load_type,
-                swipe_count=swipe_count
+                swipe_count=swipe_count,
+                warmup_runs=warmup_runs,
+                iterations=iterations,
+                test_type=test_type
             )
-            results.append(result)
-            
+            results.append(stats)
+
             # 保存原始数据
             self.results.save_raw_data(
                 "scrolling",
                 f"{app_name}_{load_type or 'default'}",
-                result
+                stats
             )
-        
+
         return results
     
     def run_full_test(
@@ -333,25 +452,45 @@ class ScrollingTestRunner:
         log_info(f"准备测试 {len(apps_to_test)} 个应用, 负载类型: {load_types}")
         
         all_results = []
-        
+
         for app_config in apps_to_test:
             app_results = self.run_app_test(app_config, load_types, swipe_count)
             all_results.extend(app_results)
-        
+
         # 汇总结果
         summary = {
             "status": "completed",
             "device_info": device_info,
             "test_time": time.strftime("%Y-%m-%d %H:%M:%S"),
             "total_tests": len(all_results),
-            "successful_tests": sum(1 for r in all_results if r["status"] == "success"),
+            "successful_tests": sum(1 for r in all_results if r["status"] == "completed"),
             "results": all_results
         }
-        
+
         # 保存汇总结果
         summary_path = self.results.save_raw_data("scrolling_summary", "all", summary)
         log_success(f"\n测试完成！结果保存至: {summary_path}")
-        
+
+        # 打印汇总表格
+        print("\n" + "=" * 80)
+        print("滑动测试结果汇总")
+        print("=" * 80)
+        print(f"{'应用':<20} {'负载':<15} {'Janky%':<12} {'P95(ms)':<12} {'FPS':<10} {'评分':<6}")
+        print("-" * 80)
+
+        for r in all_results:
+            if r["status"] == "completed":
+                print(
+                    f"{r['app_name']:<20} "
+                    f"{r['load_type']:<15} "
+                    f"{r['janky_percent']['avg']:<12.1f} "
+                    f"{r['percentile_95']['avg']:<12.1f} "
+                    f"{r['avg_fps']['avg']:<10.1f} "
+                    f"{r['grade']:<6}"
+                )
+
+        print("=" * 80)
+
         return summary
 
 

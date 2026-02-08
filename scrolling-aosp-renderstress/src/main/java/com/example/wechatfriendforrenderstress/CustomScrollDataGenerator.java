@@ -3,12 +3,11 @@ package com.example.wechatfriendforrenderstress;
 import android.content.Context;
 import android.util.Log;
 
-import com.example.wechatfriendforrenderstress.beans.CommentBean;
-import com.example.wechatfriendforrenderstress.beans.FriendCircleBean;
-import com.example.wechatfriendforrenderstress.beans.OtherInfoBean;
-import com.example.wechatfriendforrenderstress.beans.PraiseBean;
-import com.example.wechatfriendforrenderstress.beans.UserBean;
-import com.example.wechatfriendforrenderstress.utils.PerformanceSpanUtils;
+import com.example.scrolling.common.beans.CommentBean;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.PraiseBean;
+import com.example.scrolling.common.beans.UserBean;
 
 import java.util.ArrayList;
 import java.util.List;

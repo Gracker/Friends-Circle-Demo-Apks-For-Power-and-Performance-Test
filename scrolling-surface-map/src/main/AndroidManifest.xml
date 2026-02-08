@@ -21,55 +21,55 @@
         <!-- Minimal Load -->
         <activity
             android:name=".MinimalLoadMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
 
         <!-- In-Frame Loads -->
         <activity
             android:name=".LightLoadMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".MediumLoadMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".HeavyLoadMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
 
         <!-- Between-Frame Loads -->
         <activity
             android:name=".LightBetweenFramesMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".MediumBetweenFramesMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".HeavyBetweenFramesMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
 
         <!-- Mixed Loads -->
         <activity
             android:name=".LightMixedMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".MediumMixedMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
         <activity
             android:name=".HeavyMixedMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
 
         <!-- Long Frame Load -->
         <activity
             android:name=".LongFrameMapActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.SurfaceMap.NoActionBar" />
 
     </application>

@@ -14,14 +14,36 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.wechatfriendforsoftwarerender.R;
-import com.example.wechatfriendforsoftwarerender.widgets.NineGridView;
+import com.example.scrolling.common.widgets.NineGridView;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * NineImageAdapter for displaying images in a grid
  */
 public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
+
+    private static Map<String, Integer> sResourceMap;
+
+    private static int getDrawableId(Context context, String name) {
+        if (sResourceMap == null) {
+            sResourceMap = new HashMap<>();
+            for (int i = 1; i <= 11; i++) {
+                String resName = "local" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+            for (int i = 1; i <= 20; i++) {
+                String resName = "avatar" + i;
+                int id = context.getResources().getIdentifier(resName, "drawable", context.getPackageName());
+                if (id != 0) sResourceMap.put(resName, id);
+            }
+        }
+        Integer id = sResourceMap.get(name);
+        return id != null ? id : 0;
+    }
 
     private Context mContext;
     private List<String> mImageUrls;
@@ -89,8 +111,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
             boolean imageLoaded = false;
 
             // 1. 首先尝试直接使用URL作为资源名称
-            int resourceId = mContext.getResources().getIdentifier(
-                    url, "drawable", mContext.getPackageName());
+            int resourceId = getDrawableId(mContext, url);
 
             if (resourceId != 0) {
                 Glide.with(mContext)
@@ -106,8 +127,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                 int localImgIndex = (position % 11) + 1; // 使用1-11的范围
                 String localResource = "local" + localImgIndex;
 
-                resourceId = mContext.getResources().getIdentifier(
-                        localResource, "drawable", mContext.getPackageName());
+                resourceId = getDrawableId(mContext, localResource);
 
                 if (resourceId != 0) {
                     Glide.with(mContext)
@@ -124,8 +144,7 @@ public class NineImageAdapter implements NineGridView.NineGridAdapter<String> {
                 int avatarImgIndex = (position % 11) + 1; // 使用1-11的范围
                 String avatarResource = "avatar" + avatarImgIndex;
 
-                resourceId = mContext.getResources().getIdentifier(
-                        avatarResource, "drawable", mContext.getPackageName());
+                resourceId = getDrawableId(mContext, avatarResource);
 
                 if (resourceId != 0) {
                     Glide.with(mContext)

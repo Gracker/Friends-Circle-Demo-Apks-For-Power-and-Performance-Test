@@ -8,11 +8,13 @@
     },
     "scrolling_test": {
         "enabled": true,
+        "warmup_runs": 1,
+        "iterations": 3,
         "swipe_count": 20,
         "swipe_duration_ms": 300,
         "swipe_start_y_ratio": 0.7,
         "swipe_end_y_ratio": 0.3,
-        "settle_time_before_test_ms": 4000,
+        "settle_time_before_test_ms": 1000,
         "settle_time_after_test_ms": 1000,
         "fps_sample_window_frames": 120,
         "test_apps": [
