@@ -4,17 +4,33 @@
 
 [![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
 [![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
-[![API Level](https://img.shields.io/badge/API-21%2B-blue.svg)](https://android-arsenal.com/api?level=21)
-[![Gradle](https://img.shields.io/badge/Gradle-8.2.2-blue.svg)](https://gradle.org)
+[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+[![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
 [![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
-[![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
+[![Language](https://img.shields.io/badge/Language-Java%20%26%20Kotlin-orange.svg)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
-This project is a performance testing platform based on WeChat Friend Circle UI, designed to study Android scrolling performance and power consumption. The project now ships with multiple specialized APKs that cover CPU-heavy, RenderThread-heavy, power-sensitive and WebView scenarios.
+This project is a performance testing platform based on WeChat Friend Circle UI, designed to study Android scrolling performance and power consumption. The project ships 32 modules (28 app + 4 shared libraries) covering CPU-heavy, RenderThread-heavy, power-sensitive and WebView scenarios.
 
 *Read this in [Chinese](README.md)*
+
+## Tech Stack
+
+| Item | Version |
+|------|---------|
+| Android Gradle Plugin | 8.7.3 |
+| Kotlin | 2.0.21 |
+| compileSdk | 35 |
+| minSdk | 24 |
+| Jetpack Compose BOM | 2024.12.01 |
+
+**Build System Features:**
+- **Version Catalog** (`gradle/libs.versions.toml`): Centralized dependency version management
+- **Convention Plugin** (`build-logic/`): Unified Android App / Library / Compose build configuration
+- **Configuration Cache**: Faster incremental builds
 
 ## Load Types
 
@@ -32,10 +48,20 @@ All test modules support 11 load types covering different performance testing sc
 | Mixed Light | Mixed Light Load | Both in-frame and between-frame light loads |
 | Mixed Medium | Mixed Medium Load | Both in-frame and between-frame medium loads |
 | Mixed Heavy | Mixed Heavy Load | Both in-frame and between-frame heavy loads |
+| **Long Frame** | **Long Frame Load** | **2-3 random super-long frames (HEAVY×10) during scrolling** |
 
 ## Project Structure
 
 The project is organized by implementation type:
+
+### Shared Library Modules
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `load-config` | Centralized load simulation config (11 load types, intensity params, scheduling) |
+| `scrolling-common` | Shared scrolling code (Beans, interfaces, custom views, utilities, resources) |
+| `launch-common` | Shared launch code (3 Flavors: Light/Medium/Heavy) |
+| `switch-common` | Shared switch code (10 load combinations, XML Inflate, custom Views) |
 
 ### Scrolling Modules (Standard Android UI + RenderThread)
 
@@ -64,6 +90,15 @@ The project is organized by implementation type:
 | `launch-compose` | Jetpack Compose launch test (State churn stress) |
 | `launch-webview` | WebView Hybrid launch test (DOM/JSON stress) |
 | `launch-gl` | OpenGL ES launch test (Texture/State stress) |
+| `launch-game` | Game engine launch test (Physics/AI/Texture loading stress) |
+
+### Switch Modules (In-App Navigation Performance)
+
+| Module Directory | Description |
+|-----------------|-------------|
+| `switch-aosp` | Standard Android UI navigation test (10 load combinations) |
+| `switch-flutter` | Flutter-style Canvas rendering navigation test (10 load combinations) |
+| `switch-webview` | WebView hybrid navigation test (10 load combinations) |
 
 ### WebView Modules
 

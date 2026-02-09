@@ -4,17 +4,33 @@
 
 [![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
 [![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
-[![API Level](https://img.shields.io/badge/API-21%2B-blue.svg)](https://android-arsenal.com/api?level=21)
-[![Gradle](https://img.shields.io/badge/Gradle-8.2.2-blue.svg)](https://gradle.org)
+[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+[![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
 [![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
-[![Language](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com)
+[![Language](https://img.shields.io/badge/Language-Java%20%26%20Kotlin-orange.svg)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
-本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含多个主要模块，分别用于不同方面的测试和研究。
+本项目是一个基于微信朋友圈 UI 的性能测试平台，旨在研究 Android 滑动性能和功耗表现。项目包含 32 个模块（28 个应用 + 4 个共享库），分别用于不同方面的测试和研究。
 
 *Read this in [English](README_EN.md)*
+
+## 技术栈
+
+| 项目 | 版本 |
+|------|------|
+| Android Gradle Plugin | 8.7.3 |
+| Kotlin | 2.0.21 |
+| compileSdk | 35 |
+| minSdk | 24 |
+| Jetpack Compose BOM | 2024.12.01 |
+
+**构建系统特性：**
+- **Version Catalog** (`gradle/libs.versions.toml`)：集中管理所有依赖版本
+- **Convention Plugin** (`build-logic/`)：统一 Android App / Library / Compose 构建配置
+- **Configuration Cache**：加速增量构建
 
 ## 负载类型说明
 
@@ -46,6 +62,15 @@
 ## 项目结构
 
 项目按实现类型分为以下几类模块：
+
+### 📚 共享库模块
+
+| 模块目录 | 说明 |
+|---------|------|
+| `load-config` | 统一负载模拟配置（11 种负载类型、强度参数、调度配置） |
+| `scrolling-common` | 滑动模块公共代码（Beans、接口、自定义控件、工具类、资源） |
+| `launch-common` | 启动模块公共代码（3 种 Flavor：Light/Medium/Heavy） |
+| `switch-common` | 跳转模块公共代码（10 种负载组合、XML Inflate、自定义 View） |
 
 ### 🆕 v1.1.0 更新说明
 - **图标升级**: 全新设计的应用图标，采用 3 行式布局，清晰展示模块类型、技术栈和 Flavor。
@@ -79,6 +104,7 @@
 | `launch-compose` | Jetpack Compose 启动测试 (模拟状态重组) |
 | `launch-webview` | WebView 混合开发启动测试 (模拟 DOM/JSON 压力) |
 | `launch-gl` | OpenGL ES 启动测试 (模拟纹理/状态切换压力) |
+| `launch-game` | 游戏引擎启动测试 (模拟物理/AI/纹理加载压力) |
 
 ### 🔄 应用内跳转性能测试模块 (switch-*)
 
@@ -329,6 +355,7 @@ OpenGL ES 2.0地图渲染Demo：
 - **launch-compose** - Jetpack Compose (轻/中/重负载)
 - **launch-webview** - WebView 混合开发 (轻/中/重负载)
 - **launch-gl** - OpenGL ES (轻/中/重负载)
+- **launch-game** - 游戏引擎 (轻/中/重负载)
 
 **应用内跳转性能模块 (Switch)：**
 - **switch-aosp** - 标准 Android UI 跳转测试 (10 种负载)
