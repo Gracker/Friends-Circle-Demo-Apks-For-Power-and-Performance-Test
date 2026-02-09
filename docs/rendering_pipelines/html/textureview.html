@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextureView Rendering Pipeline (App-side Composition)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>TextureView Rendering Pipeline (App-side Composition) - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>TextureView Rendering Pipeline (App-side Composition)</h1>
+<br>
+<p><code>TextureView</code> 是 Android 4.0 引入的，尽管随着 <code>SurfaceView</code> 重回舞台（得益于 BLAST 同步），TextureView 的使用频率有所下降，但它仍是某些特效场景的唯一选择。</p>
+<br>
+<h2>1. 纹理合成流程详解 (Deep Execution Flow)</h2>
+<br>
+<p>TextureView 是一个“伪装者”，它表面上是 View，背后却走了一套复杂的“转手”流程。</p>
+<br>
+<h3>第一阶段：Producer (生产者)</h3>
+<p>和 SurfaceView 一样，这里也有一个独立的线程在画图（视频/相机）：</p>
+<p>1.  <b>Produce</b>: 解码器生成一帧图像。</p>
+<p>2.  <b>queueBuffer</b>: 提交给 <code>SurfaceTexture</code> (这是 TextureView 的私有队列)。</p>
+<p>3.  <b>Callback</b>: 触发 <code>onFrameAvailable</code> 回调，<b>通知 App 主线程</b>。</p>
+<br>
+<h3>第二阶段：App Main Thread (中转站)</h3>
+<p>这是 TextureView 性能问题的根源 —— 它必须切回主线程：</p>
+<p>1.  <b>Receive Callback</b>: 主线程收到“有新帧”的消息。</p>
+<p>2.  <b>Invalidate</b>: 告诉 View 系统，“我（TextureView）脏了，下一帧重画我”。</p>
+<p>3.  <b>Wait</b>: 等待 Choreographer 的 Vsync 信号。</p>
+<br>
+<h3>第三阶段：RenderThread (最终上屏)</h3>
+<p>1.  <b>updateTexImage</b>: 在绘制 TextureView 时，RenderThread 会调用这个方法。</p>
+<li>  它把 SurfaceTexture 里的最新 Buffer，**转录**成一个 OpenGL 纹理 (OES Texture)。</li>
+<p>2.  <b>Draw</b>: 把它当做一张普通的贴图，画在 App 的主窗口上。</p>
+<p>3.  <b>Composite</b>: 随 App 主窗口一起提交给 SurfaceFlinger。</p>
+<li>  *代价*: 因为要在 App 渲染管线里走一遭，所以如果 App 主线程卡顿，视频也会跟着卡。</li>
+<br>
+<hr>
+<br>
+<h2>2. 核心机制：纹理合成 (Texture Upload)</h2>
+<br>
+<p>TextureView 不再拥有独立的 Window/Layer。</p>
+<li>  它提供一个 `SurfaceTexture` 给 Producer。</li>
+<li>  Producer 生产的图像，被转化为 OpenGL 的 **OES 纹理**。</li>
+<li>  App 的 `RenderThread` 在绘制 View 树时，将被动地把这个纹理“画”在自己的 Buffer 上。</li>
+<br>
+<h2>2. 详细渲染时序图</h2>
+<br>
+<p>这条链路涉及 <b>跨线程同步</b>。注意：最终提交 App 窗口时，App 会使用 BLAST Transaction 提交。</p>
+<br>
+<br>
+<p>1.  <b>Producer (e.g. Decoder)</b>:</p>
+<li>  `queueBuffer` 到 SurfaceTexture。</li>
+<li>  触发 `onFrameAvailable` 回调。</li>
+<p>2.  <b>Main Thread (App)</b>:</p>
+<li>  收到回调，执行 `Runnable`。</li>
+<li>  调用 `invalidate()` 请求重绘。</li>
+<p>3.  <b>Vsync-App</b>:</p>
+<li>  RenderThread 开始 `DrawFrame`。</li>
+<li>  **关键步骤**: 调用 `SurfaceTexture.updateTexImage()`。</li>
+<li>  这会从 `BufferQueue` 中 `acquire` 最新的一帧。</li>
+<li>  将 Buffer 绑定到 GLES 上下文。</li>
+<p>4.  <b>GPU Draw</b>:</p>
+<li>  RenderThread 使用 Shader 采样该 OES 纹理。</li>
+<li>  合成到 App 的主 Framebuffer 中。</li>
+<p>5.  <b>Release</b>:</p>
+<li>  RenderThread 释放旧的 Buffer (`releaseBuffer`) 回给 Producer。</li>
+<br>
+<hr>
+<br>
+<h2>3. Buffer 流转示意图</h2>
+<br>
+<br>
+<h2>4. 总结</h2>
+<li>  **灵活性**: 极高，可以当做普通 View 处理。</li>
+<li>  **性能**: 较差。</li>
+<li>  多一次 GPU Copy。</li>
+<li>  受主线程卡顿影响。</li>
+<li>  内存占用更高（App Buffer + Texture Buffer）。</li>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "P", "name": "Producer"}, {"id": "ST", "name": "SurfaceTexture"}, {"id": "RT", "name": "RenderThread (App)"}, {"id": "SF", "name": "SurfaceFlinger"}], "events": [{"type": "flow", "src": "P", "dst": "ST", "time": 20, "endTime": 50, "label": "queueBuffer (Internal BQ)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "ST", "dst": "RT", "time": 55, "endTime": 85, "label": "**Wait for Next DrawFrame**", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "RT", "dst": "ST", "time": 90, "endTime": 120, "label": "updateTexImage()", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "RT", "dst": "RT", "time": 125, "endTime": 155, "label": "GPU Composite (Copy)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "RT", "start": 125, "end": 155, "label": "GPU Composite (Copy)", "color": "#4db6ac"}, {"type": "flow", "src": "RT", "dst": "SF", "time": 160, "endTime": 190, "label": "Transaction (via BLAST)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "SF", "dst": "HWC", "time": 195, "endTime": 225, "label": "Composite", "color": "rgba(255,255,255,0.2)"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

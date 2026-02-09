@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard AOSP Rendering Pipeline (Deep Dive: BLAST)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Standard AOSP Rendering Pipeline (Deep Dive: BLAST) - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>Standard AOSP Rendering Pipeline (Deep Dive: BLAST)</h1>
+<br>
+<p>> [!NOTE]</p>
+<p>> <b>适用版本</b>: 本文档基于 <b>Android 12+ BLAST 成熟架构</b>。Android 16 新增的 <code>RuntimeColorFilter</code> / <code>RuntimeXfermode</code> API 允许开发者创建自定义图形效果（如 Threshold、Sepia、Hue Saturation），进一步扩展了 RenderThread 的能力。</p>
+<br>
+<p>这是 Android 现代硬件加速渲染链路（Android 10+, 尤其是 Android 12+ 之后）。与旧版相比，最核心的变化是引入了 <b>BLAST (Buffer Layer State Transition)</b> 机制，取代了传统的 Binder-based BufferQueue 提交模式。</p>
+<br>
+<h2>1. 全链路执行流程详解 (Deep Execution Flow)</h2>
+<br>
+<p>在深入图表之前，我们先从 App 的视角完整走一遍“一帧是如何画出来的”。这个过程像是一个精密的工厂流水线：</p>
+<br>
+<h3>第一阶段：UI Thread (主线程) - 生产蓝图</h3>
+<p>当 <code>Vsync-App</code> 信号到达时，主线程被唤醒，开始构建这一帧的“绘制蓝图”：</p>
+<p>1.  <b>Input (输入处理)</b>: 处理触摸事件。如果你点击了按钮，View 的状态在这里改变（如 <code>setPressed(true)</code>），并标记 <code>invalidate()</code>。</p>
+<p>2.  <b>Animation (动画)</b>: 属性动画 (<code>ValueAnimator</code>) 在这里计算当前时间点的值（比如按钮缩放到 1.1倍）。</p>
+<p>3.  <b>Measure (测量)</b>: 确定每个 View 的大小。这是自顶向下的递归调用，父 View 问子 View “你要多大”，子 View 算完告诉父 View。</p>
+<p>4.  <b>Layout (布局)</b>: 确定每个 View 的位置。父 View 根据测量结果，告诉子 View “你坐在 (x, y) 坐标”。</p>
+<p>5.  <b>Draw (记录/构建)</b>: <b>注意，这里并没有真正的像素产生！</b></p>
+<li>  这里执行 `View.onDraw(Canvas)`。</li>
+<li>  但这个 Canvas 是 `RecordingCanvas`。它的作用是把你的绘制命令（画圆、画文字、画图）**记录** 下来，存到一个叫 `DisplayList` (或 `RenderNode`) 的数据结构中。</li>
+<li>  产物：**一堆绘制指令列表 (DisplayList)**。</li>
+<br>
+<h3>第二阶段：Sync (同步) - 移交蓝图</h3>
+<p>UI 线程做完所有事后，需要把最新的 DisplayList 交给渲染线程。</p>
+<li>  **SyncFrameState**: 这是一个阻塞操作。UI 线程会卡住，等待 RenderThread 醒来并把 DisplayList 及其相关资源（Bitmap 等）同步过去。</li>
+<li>  **为什么阻塞？** 为了保证线程安全，防止 RenderThread 在画的时候 UI 线程改了数据。</li>
+<br>
+<h3>第三阶段：RenderThread (渲染线程) - 真正的绘制</h3>
+<p>RenderThread 拿到蓝图后，开始干活：</p>
+<p>1.  <b>dequeueBuffer</b>: 它向系统（BLASTBufferQueue）要一张空白的画布（Buffer）。</p>
+<li>  *Trace*: 你会看到 `dequeueBuffer` 耗时，如果很久，说明前面太慢或者没 Buffer 了。</li>
+<p>2.  <b>Flush Commands (GPU Draw)</b>:</p>
+<li>  它遍历 DisplayList，把里面的“画圆、画图”指令，翻译成 GPU 能听懂的 **OpenGL/Vulkan 指令**。</li>
+<li>  调用 `glDraw*` 或 `vkCmdDraw`。</li>
+<li>  此时 CPU 并不怎么累，累的是 GPU。</li>
+<p>3.  <b>queueBuffer (提交)</b>:</p>
+<li>  画完了，把这张 Buffer 还回去。</li>
+<li>  在 BLAST 模式下，这会触发一个 Transaction。</li>
+<br>
+<h3>第四阶段：提交与合成 (BLAST & SurfaceFlinger)</h3>
+<p>1.  <b>BLAST Transaction</b>: App 告诉 SurfaceFlinger：“这是新的一帧（Buffer），同时我的窗口位置在 (x, y)”。</p>
+<p>2.  <b>SurfaceFlinger</b>: 收到所有 App 的 Transaction，按照 Z-Order 把它们拼在一起。</p>
+<p>3.  <b>HWC</b>: 最终把拼好的图送到屏幕上显示。</p>
+<br>
+<hr>
+<br>
+<h2>2. 核心组件交互图 (Overview)</h2>
+<br>
+<p>在深入 Trace 之前，先建立宏观视角：</p>
+<br>
+<p>-   <b>App (UI Thread)</b>: 负责构建视图树，生产 DisplayList。</p>
+<p>-   <b>App (RenderThread)</b>: 负责将 DisplayList 转换为 GPU 指令。</p>
+<p>-   <b>BLASTBufferQueue (BBQ)</b>: 运行在 App 进程侧的适配器。它将传统的 <code>BufferQueue</code> 生产模式转化为 <code>SurfaceControl</code> 的 Transaction 提交。</p>
+<p>-   <b>SurfaceFlinger (SF)</b>: 接收 Transaction，原子性地应用这些 Buffer 更新。</p>
+<p>-   <b>HWC (Hardware Composer)</b>: 硬件合成。</p>
+<br>
+<hr>
+<br>
+<h2>2. 详细渲染时序图 (BLAST Sequence)</h2>
+<br>
+<p>这张图展示了引入 BLAST 后的变化：Buffer 的提交变成了 Transaction 的一部分。</p>
+<br>
+<br>
+<hr>
+<br>
+<h2>3. 渲染步骤深度拆解 (Trace 视角)</h2>
+<br>
+<p>以下步骤对应 Perfetto Trace 中的实际 Slice 标签。</p>
+<br>
+<h3>阶段一：Sync & RenderThread (生产)</h3>
+<br>
+<p>当 <code>Vsync-App</code> 触发，UI 线程完成后：</p>
+<br>
+<p>1.  <b>DrawFrame</b>: RenderThread 开始绘制。</p>
+<li>  *Trace*: `DrawFrame`</li>
+<p>2.  <b>dequeueBuffer</b>: RT 向本地的 BBQ 申请 Buffer。</p>
+<li>  *注意*: 在 BLAST 模式下，BufferQueue 的逻辑主要在 App 进程内（BLASTBufferQueue 是 Consumer）。</li>
+<li>  *Trace*: `dequeueBuffer`, `BLASTBufferQueue::dequeueBuffer `</li>
+<p>3.  <b>queueBuffer</b>: 绘制完成，还给 BBQ。</p>
+<li>  *Trace*: `queueBuffer`, `BLASTBufferQueue::onFrameAvailable`</li>
+<br>
+<h3>阶段二：BLAST Adapter (转换)</h3>
+<br>
+<p>这是最关键的新增步骤，通常发生在 RenderThread 或专门的 BLAST 线程中。</p>
+<br>
+<p>4.  <b>acquireNextBuffer</b>: BBQ 作为消费者，从队列中取回刚刚画好的 Buffer。</p>
+<p>5.  <b>Build Transaction</b>: BBQ 创建一个 <code>SurfaceControl.Transaction</code>。</p>
+<li>  `t.setBuffer(buffer)`: 设置新的 Buffer。</li>
+<li>  `t.setAcquireFence(fence)`: 设置同步栅栏。</li>
+<p>6.  <b>applyTransaction</b>: 将 Transaction 发送给 SurfaceFlinger。</p>
+<li>  *Trace*: `SurfaceControl::applyTransaction` (可以看到 Binder 调用)</li>
+<br>
+<h3>阶段三：SurfaceFlinger (事务处理)</h3>
+<br>
+<p>7.  <b>setTransactionState</b>: SF 收到 Transaction，放入待处理队列。</p>
+<li>  *Trace*: `setTransactionState`</li>
+<p>8.  <b>handleMessageInvalidate/Refresh</b>: Vsync-SF 到达。</p>
+<p>9.  <b>flushTransaction</b>: SF 统一应用所有挂起的 Transaction（包括 App Buffer 更新、Window 位置变化等）。</p>
+<li>  **原子性**: 保证 Buffer 更新和窗口大小变化是**同时**生效的，彻底解决了旧架构中的画面撕裂和尺寸不同步问题。</li>
+<p>10. <b>latchBuffer</b>: 锁定当前显示的 Buffer。</p>
+<br>
+<hr>
+<br>
+<h2>3.5 BlastBufferQueue Buffer 生命周期 (Deep Dive)</h2>
+<br>
+<p>这是理解 BLAST 异步机制的核心。BBQ 内部维护一个 <b>Buffer 槽位池</b>（通常 3 个槽位，支持 Triple Buffering）。</p>
+<br>
+<h3>Buffer 状态机</h3>
+<br>
+<div class="mermaid">stateDiagram-v2
+    [*] --> FREE: 初始化
+    FREE --> DEQUEUED: dequeueBuffer (App 拿走)
+    DEQUEUED --> QUEUED: queueBuffer (App 归还)
+    QUEUED --> ACQUIRED: acquireBuffer (BBQ 消费)
+    ACQUIRED --> RELEASED: releaseBuffer (SF 用完)
+    RELEASED --> FREE: Buffer 回收</div>
+<br>
+<h3>Buffer 计数逻辑 (槽位视角)</h3>
+<br>
+<p>| 操作 | 触发者 | 槽位变化 | Fence |</p>
+<p>|:---|:---|:---|:---|</p>
+<p>| <b>dequeueBuffer</b> | RenderThread | FREE → DEQUEUED (App 占用 +1) | 返回 acquireFence |</p>
+<p>| <b>queueBuffer</b> | RenderThread | DEQUEUED → QUEUED (App 占用 -1, 待消费 +1) | 传入 releaseFence |</p>
+<p>| <b>acquireBuffer</b> | BBQ 内部 | QUEUED → ACQUIRED (待消费 -1, 消费中 +1) | — |</p>
+<p>| <b>releaseBuffer</b> | SF (通过回调) | ACQUIRED → FREE (消费中 -1) | presentFence 通知完成 |</p>
+<br>
+<h3>异步流转时序 (App → SF)</h3>
+<br>
+<br>
+<h3>关键点：为什么是异步的？</h3>
+<br>
+<p>1.  <b>Binder 非阻塞</b>: <code>applyTransaction</code> 是异步 Binder 调用，RenderThread 不等待 SF 处理完。</p>
+<p>2.  <b>Fence 同步</b>: GPU 完成通过 releaseFence 告知 SF，而非 CPU 等待。</p>
+<p>3.  <b>槽位复用</b>: App 可以继续 dequeue 下一个槽位（如 slot=1），无需等待 slot=0 被 SF 释放。</p>
+<br>
+<h3>Triple Buffering 示意</h3>
+<br>
+<pre><code>
+时间 →
+App:    [Draw F0]  [Draw F1]  [Draw F2]  [Draw F3] ...
+           ↓          ↓          ↓          ↓
+Slot:   slot[0]    slot[1]    slot[2]    slot[0]  ← 循环复用
+           ↓          ↓          ↓          ↓
+SF:        ...    [Latch F0] [Latch F1] [Latch F2] ...
+</code></pre>
+<br>
+<h2>4. 线程任务详情 (Thread Roles)</h2>
+<br>
+<p>| 线程名称 | 关键职责 | 常见 Trace 标签 |</p>
+<p>| :--- | :--- | :--- |</p>
+<p>| <b>RenderThread</b> | 生成 GPU 指令, <b>通过 BLAST 提交事务</b> | <code>DrawFrame</code>, <code>queueBuffer</code>, <code>applyTransaction</code> |</p>
+<p>| <b>SurfaceFlinger</b> | 处理 Transactions, Latch Buffers, 合成 | <code>setTransactionState</code>, <code>handleMessageRefresh</code>, <code>latchBuffer</code> |</p>
+<p>| <b>Binder Driver</b> | 传输 Transaction 数据 | <code>binder transaction</code> |</p>
+<br>
+<hr>
+<br>
+<h2>6. FrameTimeline & Jank Detection (Android 12+)</h2>
+<br>
+<p>在 AOSP 16 中，性能分析不再单纯依赖 "Vsync 周期"，而是基于 <b>FrameTimeline</b>。</p>
+<br>
+<h3>核心机制</h3>
+<p>1.  <b>VsyncId</b>: 每个 Vsync 信号都有一个唯一的 ID。</p>
+<p>2.  <b>Propagation</b>:</p>
+<li>  `Choreographer` 收到 `VsyncId` (e.g., 1001)。</li>
+<li>  App 在 `doFrame` 开始时根据 1001 计算预期上屏时间 (`ExpectedPresentTime`)。</li>
+<li>  `RenderThread` 在提交 `queueBuffer` 时，将这个 1001 传给 SurfaceFlinger。</li>
+<p>3.  <b>Matching</b>: SF 收到 Buffer 后，检查当前实际时间是否超过了 ID=1001 的预期时间。如果超过，标记为 <b>Jank</b>。</p>
+<br>
+<h3>Trace 表现</h3>
+<p>在 Perfetto 中：</p>
+<li>  **Expected Timeline**: 绿条，表示“这帧这应该在这里结束”。</li>
+<li>  **Actual Timeline**: 实心条，表示“这帧实际在这里结束”。</li>
+<li>  **Jank Tag**: 如果 Actual > Expected，系统会自动标记 `Jank` 或 `BigJank`。</li>
+<br>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "RT", "name": "RenderThread"}, {"id": "BBQ", "name": "BlastBufferQueue"}, {"id": "Binder", "name": "Binder Driver"}, {"id": "SF", "name": "SurfaceFlinger"}], "events": [{"type": "flow", "src": "RT", "dst": "BBQ", "time": 20, "endTime": 50, "label": "dequeueBuffer(slot=0)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "BBQ", "dst": "RT", "time": 55, "endTime": 85, "label": "Buffer ptr + acquireFence", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "RT", "dst": "RT", "time": 90, "endTime": 120, "label": "GPU Draw (\u5f02\u6b65)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "RT", "start": 90, "end": 120, "label": "GPU Draw (\u5f02\u6b65)", "color": "#4db6ac"}, {"type": "flow", "src": "RT", "dst": "BBQ", "time": 125, "endTime": 155, "label": "queueBuffer(slot=0, releaseFence)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "BBQ", "dst": "BBQ", "time": 160, "endTime": 190, "label": "acquireNextBuffer(slot=0)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "BBQ", "start": 160, "end": 190, "label": "acquireNextBuffer(slot=0)", "color": "#ffb74d"}, {"type": "flow", "src": "BBQ", "dst": "Binder", "time": 195, "endTime": 225, "label": "Transaction{Buffer, releaseFence}", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "Binder", "dst": "SF", "time": 230, "endTime": 260, "label": "setTransactionState()", "color": "rgba(255,255,255,0.2)"}, {"type": "vsync", "time": 300}, {"type": "flow", "src": "SF", "dst": "SF", "time": 300, "endTime": 330, "label": "VSync-SF", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 300, "end": 330, "label": "VSync-SF", "color": "#e57373"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 335, "endTime": 365, "label": "Wait releaseFence", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 335, "end": 365, "label": "Wait releaseFence", "color": "#e57373"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 370, "endTime": 400, "label": "latchBuffer", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 370, "end": 400, "label": "latchBuffer", "color": "#e57373"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 405, "endTime": 435, "label": "Composite", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 405, "end": 435, "label": "Composite", "color": "#e57373"}, {"type": "flow", "src": "SF", "dst": "Binder", "time": 440, "endTime": 470, "label": "releaseBuffer(slot=0, presentFence)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "Binder", "dst": "BBQ", "time": 475, "endTime": 505, "label": "onBufferReleased(slot=0)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "BBQ", "dst": "RT", "time": 510, "endTime": 540, "label": "\u69fd\u4f4d\u53ef\u7528 (\u4e0b\u6b21 dequeue \u53ef\u7528)", "color": "rgba(255,255,255,0.2)"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulkan Native Rendering Pipeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Vulkan Native Rendering Pipeline - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>Vulkan Native Rendering Pipeline</h1>
+<br>
+<p>> [!NOTE]</p>
+<p>> <b>Android 15+ 推荐路径</b>: Vulkan 已成为 Android 15+ 的默认图形 API。新设备将强制通过 <b>ANGLE</b> 处理 GLES 调用，并统一支持 <b>Vulkan Profiles for Android (VPA)</b>。</p>
+<br>
+<p>随着 Android 10+ 对 Vulkan 的支持日益成熟，越来越多的高性能应用（游戏、模拟器、UI 框架如 Impeller）开始直接使用 Vulkan API 进行渲染，绕过传统的 GLES 状态机。</p>
+<br>
+<h2>0. Vulkan Profiles for Android (VPA) — Android 15+</h2>
+<br>
+<p><b>VPA</b> 是 Google 为解决 Vulkan 碎片化问题引入的标准化方案。</p>
+<br>
+<h3>0.1 问题背景</h3>
+<br>
+<p>| 问题 | 传统 Vulkan | VPA 解决方案 |</p>
+<p>|:---|:---|:---|</p>
+<p>| <b>特性碎片化</b> | 每个设备支持不同的 Extension | 定义标准 Profile (如 <code>VPA_android_baseline_2022</code>) |</p>
+<p>| <b>能力查询成本</b> | 运行时逐一查询 | 声明式 Profile 匹配 |</p>
+<p>| <b>开发复杂度</b> | 需要大量 fallback 代码 | 保证 Profile 内特性全支持 |</p>
+<br>
+<h3>0.2 标准 Profile 层级</h3>
+<br>
+<pre><code>
+VPA_android_baseline_2021  ← 基础层
+       ↓
+VPA_android_baseline_2022  ← 推荐层 (Android 14+)
+       ↓
+VPA_android_baseline_2024  ← 最新层 (Android 16+)
+</code></pre>
+<br>
+<h3>0.3 使用方式</h3>
+<br>
+<pre><code>
+// 检查设备是否支持目标 Profile
+VpProfileProperties profileProps = { VPA_ANDROID_BASELINE_2022, 1 };
+VkBool32 supported;
+vpGetPhysicalDeviceProfileSupport(instance, physicalDevice, &profileProps, &supported);
+
+if (supported) {
+    // 可以安全使用 Profile 内所有特性
+    vpCreateDevice(physicalDevice, &createInfo, &profileProps, &device);
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>1. 核心架构：显式控制 (Explicit Control)</h2>
+<br>
+<p>Vulkan 的最大特征是<b>一切皆显式</b>。从内存分配到同步原语 (Fence/Semaphore)，都需要 App 自己管理。</p>
+<br>
+<h3>关键组件</h3>
+<br>
+<p>1.  <b>VkInstance / VkDevice</b>: Vulkan 上下文。</p>
+<p>2.  <b>VkSurfaceKHR</b>: 对应 Android 的 <code>Surface</code> (ANativeWindow)。</p>
+<p>3.  <b>VkSwapchainKHR</b>: 交换链，管理一组 Image (Back Buffers)。</p>
+<p>4.  <b>VkQueue</b>: 提交命令的队列 (Graphics/Present)。</p>
+<br>
+<hr>
+<br>
+<h2>2. 渲染流程详解 (Deep Execution Flow)</h2>
+<br>
+<h3>第一阶段：Acquire (获取)</h3>
+<p>1.  <b>vkAcquireNextImageKHR</b>:</p>
+<li>  App 向 Swapchain 请求一个可用的 Image Index。</li>
+<li>  *同步*: 需要提供一个 `VkSemaphore` (ImageAvailable)，当 Image 真正可用时，这个信号量会被 Signal。</li>
+<li>  *Trace*: 这一步通常非阻塞，但在双缓冲占满时会阻塞。</li>
+<br>
+<h3>第二阶段：Record & Submit (录制与提交)</h3>
+<p>1.  <b>Command Buffer Recording</b>:</p>
+<li>  `vkCmdBeginRenderPass` -> `vkCmdDraw` -> `vkCmdEndRenderPass`。</li>
+<li>  这一步可以在任意线程并行进行（这是 Vulkan 重大优势）。</li>
+<p>2.  <b>vkQueueSubmit</b>:</p>
+<li>  将 Command Buffer 提交给 GPU 队列。</li>
+<li>  *Wait*: 等待 `ImageAvailable` 信号量（确保 Image 已经准备好写了）。</li>
+<li>  *Signal*: 渲染完成后 Signal 另一个 `VkSemaphore` (RenderFinished)。</li>
+<br>
+<h3>第三阶段：Present (展示/BLAST)</h3>
+<p>这是与 Android 系统交互的边界：</p>
+<br>
+<p>1.  <b>vkQueuePresentKHR</b>:</p>
+<li>  请求将渲染好的 Image 展示到屏幕。</li>
+<li>  *Wait*: 等待 `RenderFinished` 信号量（确保 GPU 画完了）。</li>
+<p>2.  <b>Android Integration (BLAST)</b>:</p>
+<li>  在 Android 10+，Vulkan Driver 底层会将这个 Present 操作转换为 `queueBuffer`。</li>
+<li>  BLAST Adapter 捕获 Buffer，封装为 Transaction 提交给 SF。</li>
+<br>
+<hr>
+<br>
+<h2>3. 渲染时序图</h2>
+<br>
+<p>注意信号量 (Semaphore) 在 GPU 内部的同步作用，CPU 仅负责提交指令。</p>
+<br>
+<br>
+<h2>4. 性能特征</h2>
+<br>
+<p>1.  <b>Cpu Overhead</b>: 极低。由于 Command Buffer 可以复用，且 Driver 开销小，CPU 占用远低于 GLES。</p>
+<p>2.  <b>Pipeline Barriers</b>: 开发者必须精确控制 Image Layout Transition (e.g., <code>COLOR_ATTACHMENT_OPTIMAL</code> -> <code>PRESENT_SRC_KHR</code>)，否则会导致显存读写竞争或画面撕裂花屏。</p>
+<p>3.  <b>Frame Pacing</b>: 结合 Swappy 库，Vulkan 可以实现微秒级的帧这一预测。</p>
+<br>
+<h2>5. 调试工具</h2>
+<br>
+<li>  **RenderDoc**: 抓帧神器，查看具体 DrawCall 和资源。</li>
+<li>  **Gapid**: Google 官方图形调试工具。</li>
+<li>  **Validation Layers**: 开发阶段必须开启，Vulkan 出错通常直接 Crash 或黑屏，Layer 是唯一的报错来源。</li>
+<br>
+<h2>6. Presentation Mode 详解 (帧率与延迟)</h2>
+<br>
+<p>Vulkan Swapchain 支持多种 Presentation Mode，直接影响帧率稳定性和输入延迟。</p>
+<br>
+<p>| Mode | 行为 | 延迟 | 撕裂 | 适用场景 |</p>
+<p>|:---|:---|:---|:---|:---|</p>
+<p>| <b>FIFO</b> | 严格 VSync，帧队列先进先出 | 较高 (1-2帧) | ❌ 无 | 电影播放、省电 |</p>
+<p>| <b>FIFO_RELAXED</b> | VSync，但允许迟到帧跳过等待 | 中等 | ⚠️ 可能 | 游戏 (偶尔掉帧可接受) |</p>
+<p>| <b>MAILBOX</b> | 新帧覆盖旧帧，立即上屏 | 最低 | ❌ 无 | 竞技游戏、输入敏感 |</p>
+<p>| <b>IMMEDIATE</b> | 无 VSync，立即 Present | 极低 | ⚠️ 常见 | 基准测试 |</p>
+<br>
+<h3>6.1 检测支持的 Mode</h3>
+<pre><code>
+uint32_t count;
+vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count, NULL);
+VkPresentModeKHR* modes = malloc(count * sizeof(VkPresentModeKHR));
+vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count, modes);
+</code></pre>
+<br>
+<h3>6.2 Android 特性</h3>
+<li>  **默认 FIFO**: Android 为了省电，默认强制 FIFO。</li>
+<li>  **MAILBOX 支持**: 需要 Android 10+ 且部分厂商 Driver 支持。</li>
+<li>  **VRR (可变刷新率)**: 需要搭配 Display 的 VRR 能力，详见 [VRR 管线](variable_refresh_rate.md)。</li>
+<br>
+<h2>7. Swappy Frame Pacing 机制</h2>
+<br>
+<p>[Android Game SDK - Swappy](https://developer.android.com/games/sdk/frame-pacing) 是 Google 官方的帧节奏库，解决了 Vulkan 在移动设备上的三大问题：</p>
+<br>
+<h3>7.1 解决的问题</h3>
+<br>
+<p>1.  <b>帧节奏不稳定</b>: 不同厂商的 Vsync 实现差异巨大。</p>
+<p>2.  <b>Input-to-Display 延迟</b>: 原生 Vulkan 无法预测帧着陆时间。</p>
+<p>3.  <b>高刷适配</b>: 90Hz/120Hz/144Hz 屏幕需要动态调整。</p>
+<br>
+<h3>7.2 核心原理</h3>
+<br>
+<br>
+<h3>7.3 关键 API</h3>
+<pre><code>
+// 初始化
+SwappyVk_initAndGetRefreshCycleDuration(env, activity, physicalDevice, device, 
+                                         swapchain, &refreshDuration);
+
+// 替代原生 vkQueuePresentKHR
+SwappyVk_queuePresent(queue, presentInfo);
+
+// 设置目标帧率 (如 60fps)
+SwappyVk_setSwapIntervalNS(device, swapchain, 16666666);
+</code></pre>
+<br>
+<h3>7.4 Trace 特征</h3>
+<p>在 Perfetto 中：</p>
+<li>  **Swappy**: 独立 Track，显示帧提交时间。</li>
+<li>  **FrameTimeline**: Android 12+ 的原生帧时间线支持。</li>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "App", "name": "App"}, {"id": "Swappy", "name": "Swappy"}, {"id": "GPU", "name": "GPU"}, {"id": "SF", "name": "SF"}], "events": [{"type": "flow", "src": "App", "dst": "Swappy", "time": 20, "endTime": 50, "label": "swapBuffers()", "color": "rgba(255,255,255,0.2)"}, {"type": "vsync", "time": 300}, {"type": "flow", "src": "Swappy", "dst": "Swappy", "time": 300, "endTime": 330, "label": "\u8ba1\u7b97\u76ee\u6807 VSync (Frame Timeline)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "Swappy", "start": 300, "end": 330, "label": "\u8ba1\u7b97\u76ee\u6807 VSync (Frame Timeline)", "color": "#81c784"}, {"type": "flow", "src": "Swappy", "dst": "App", "time": 335, "endTime": 365, "label": "\u8fd4\u56de (\u975e\u963b\u585e)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "App", "dst": "App", "time": 370, "endTime": 400, "label": "\u7ee7\u7eed\u4e0b\u4e00\u5e27\u903b\u8f91", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "App", "start": 370, "end": 400, "label": "\u7ee7\u7eed\u4e0b\u4e00\u5e27\u903b\u8f91", "color": "#81c784"}, {"type": "flow", "src": "Swappy", "dst": "GPU", "time": 405, "endTime": 435, "label": "Inject Fence Wait", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "GPU", "dst": "SF", "time": 440, "endTime": 470, "label": "queueBuffer (\u7cbe\u51c6\u65f6\u673a)", "color": "rgba(255,255,255,0.2)"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

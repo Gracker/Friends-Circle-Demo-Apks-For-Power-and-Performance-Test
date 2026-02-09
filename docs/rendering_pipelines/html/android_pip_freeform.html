@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIP & Freeform Window Rendering</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>PIP & Freeform Window Rendering - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>PIP & Freeform Window Rendering</h1>
+<br>
+<p>Android 的多窗口模式（Split Screen, Freeform, Picture-in-Picture）在渲染层面上并没有太多魔法，但理解其窗口组织形式对于性能分析很有帮助。</p>
+<br>
+<h2>1. 窗口组织架构 (Window Hierarchy)</h2>
+<br>
+<p>在 SurfaceFlinger 侧，所有的窗口都是 Layer Tree 的一部分。</p>
+<br>
+<li>  **Task Layer**: 在多窗口模式下，系统会为每个 Task 创建一个根容器 Layer。</li>
+<li>  **Activity Layer**: Task 下面挂载各个 Activity 的 SurfaceControl。</li>
+<li>  **App Surface**: Activity 下面才是我们熟悉的 App Window Surface。</li>
+<br>
+<div class="mermaid">graph TD
+    Display[Display Root]
+    Stack[Stack / Task Container]
+    WinA[Window A (Main App)]
+    WinB[Window B (PIP / Freeform)]
+    
+    Display --> Stack
+    Stack --> WinA
+    Stack --> WinB</div>
+<br>
+<h2>2. PIP (画中画) 渲染流程</h2>
+<br>
+<h3>2.1 进入 PIP</h3>
+<p>1.  <b>Enter</b>: App 调用 <code>enterPictureInPictureMode()</code>。</p>
+<p>2.  <b>Animation</b>: WindowManagerSystem (WMS) 接管窗口动画。</p>
+<li>  WMS 使用 SurfaceControl 动画 API，将 App 的 Surface 缩小并移动到角落。</li>
+<li>  *注意*: 在动画过程中，App 仍然在全分辨率渲染（或者根据 configuration change 变为小分辨率）。</li>
+<br>
+<h3>2.2 持续渲染</h3>
+<p>在 PIP 模式下，App 的渲染循环与全屏模式<b>完全一致</b>：</p>
+<p>1.  <b>Vsync</b>: 照常接收 Vsync-App。</p>
+<p>2.  <b>Draw</b>: 照常绘制。</p>
+<p>3.  <b>Submit</b>: 提交 Buffer。</p>
+<p>4.  <b>Composite</b>: SF 将其作为一个小 Layer 合成到屏幕上。</p>
+<br>
+<h3>2.3 性能考量</h3>
+<li>  **Overdraw**: PIP 窗口悬浮在桌面或其他 App 之上，这一定会带来 Overdraw。</li>
+<li>  **Touch Input**: 输入事件会被分发给 PIP 窗口，App 需要处理小窗口下的点击逻辑。</li>
+<li>  **Resource Budget**: 系统通常会限制 PIP 窗口的 CPU/GPU 优先级，确保主前台应用（Background Task）流畅。</li>
+<br>
+<h2>3. Freeform (自由窗口 / 桌面模式)</h2>
+<br>
+<p>这在折叠屏和平板电脑上越来越常见。</p>
+<br>
+<li>  **Multiple Resizing**: 用户可以随意拉伸窗口。</li>
+<li>  **Latency**: 窗口边框的拖拽通常由 SystemUI 渲染（作为一个独立的 Layer），而 App 内容跟随 resize。</li>
+<li>  如果 App 响应慢，会出现“黑边”或“内容拉伸”。</li>
+<li>  **BLAST Sync** 极其关键：WMS 会将“窗口边框大小”和“App 内容 Buffer”同步提交，消除这些瑕疵。</li>
+<br>
+<h2>4. Trace 分析特征</h2>
+<br>
+<p>在 System Trace 中：</p>
+<p>1.  <b>BufferQueue</b>: 每个独立窗口都有自己的 BufferQueue。</p>
+<p>2.  <b>Vsync-App</b>: 所有可见窗口都会收到 Vsync。</p>
+<p>3.  <b>Composition</b>: SurfaceFlinger 的 <code>handleMessageRefresh</code> 处理所有可见 Layer 的合成。如果只有 PIP 窗口更新，背景不动，HWC 可能可以直接复用背景 Layer 的 Cache。</p>
+<br>
+<h2>5. Freeform Resize 同步竞态 (Deep Dive)</h2>
+<br>
+<p>在 Freeform 窗口拖拽调整大小时，存在一个经典的<b>竞态条件</b>，理解它对于分析"黑边"和"内容拉伸"问题至关重要。</p>
+<br>
+<h3>5.1 竞态流程</h3>
+<br>
+<br>
+<h3>5.2 BLAST Sync 解决方案</h3>
+<br>
+<p>Android 12+ 通过 <b>BLAST Sync</b> 解决此问题：</p>
+<br>
+<p>1.  <b>Sync Token</b>: WMS 为这次 resize 生成一个 Token。</p>
+<p>2.  <b>App Barrier</b>: App 完成新尺寸的渲染后，带着同一个 Token 提交 Buffer。</p>
+<p>3.  <b>SF 等待</b>: SF 收到 Window Bounds Transaction 时，会<b>等待</b>对应 Token 的 Buffer 到达。</p>
+<p>4.  <b>原子应用</b>: 两者同时生效，无撕裂。</p>
+<br>
+<h3>5.3 Trace 定位</h3>
+<br>
+<p>在 Perfetto 中查找：</p>
+<li>  `WMS.resizeTask`: 标记 resize 开始。</li>
+<li>  `Transaction.apply`: 查看是否带有 `SyncId`。</li>
+<li>  `SurfaceFlinger.waitForSync`: 如果这个 Slice 很长，说明 App 响应慢。</li>
+<br>
+<h3>5.4 优化建议</h3>
+<br>
+<p>1.  <b>减少 Configuration Change 开销</b>: 避免在 <code>onConfigurationChanged</code> 中做重计算。</p>
+<p>2.  <b>预渲染策略</b>: 如 Chrome 会预渲染几个常见尺寸的 Bitmap Cache。</p>
+<p>3.  <b>Skeleton UI</b>: 在 resize 过程中显示骨架屏而非空白。</p>
+<br>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "User", "name": "User Drag"}, {"id": "WMS", "name": "WindowManager"}, {"id": "App", "name": "App Process"}, {"id": "SF", "name": "SurfaceFlinger"}], "events": [{"type": "flow", "src": "User", "dst": "WMS", "time": 20, "endTime": 50, "label": "Resize Start (\u8fb9\u6846\u62d6\u52a8)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "WMS", "dst": "App", "time": 55, "endTime": 85, "label": "Configuration Change (\u65b0\u5c3a\u5bf8)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "WMS", "dst": "SF", "time": 90, "endTime": 120, "label": "Transaction (Window Bounds = \u65b0\u5c3a\u5bf8)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "App", "dst": "App", "time": 125, "endTime": 155, "label": "Measure -> Layout -> Draw", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "App", "start": 125, "end": 155, "label": "Measure -> Layout -> Draw", "color": "#81c784"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 160, "endTime": 190, "label": "Composite (\u65e7\u5185\u5bb9 + \u65b0\u8fb9\u6846)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 160, "end": 190, "label": "Composite (\u65e7\u5185\u5bb9 + \u65b0\u8fb9\u6846)", "color": "#e57373"}, {"type": "flow", "src": "App", "dst": "SF", "time": 195, "endTime": 225, "label": "queueBuffer (\u65b0\u5185\u5bb9)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 230, "endTime": 260, "label": "Composite (\u540c\u6b65)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 230, "end": 260, "label": "Composite (\u540c\u6b65)", "color": "#e57373"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

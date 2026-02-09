@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView GL Functor Pipeline (Standard/Shared)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>WebView GL Functor Pipeline (Standard/Shared) - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>WebView GL Functor Pipeline (Standard/Shared)</h1>
+<br>
+<p>在普通的 App 页面中嵌入 WebView（如新闻详情页），默认使用的是 <b>GL Functor</b> 模式。</p>
+<br>
+<h2>0. 初始化与桥接 (WebViewFactory)</h2>
+<br>
+<p>在进入渲染流程前，理解 Android Framework 如何加载 WebView 内核至关重要。这解释了为什么 App process 里会有 Chromium 的代码。</p>
+<br>
+<h3>核心工厂模式</h3>
+<p>Android 系统通过 <code>WebViewFactory</code> 类动态加载 WebView 实现（通常是 Google WebView 或 Chrome）。</p>
+<p>1.  <b>WebViewFactory.getProvider()</b>:</p>
+<li>  这是 Framework 的入口。</li>
+<li>  它会 `dlopen` 系统 WebView 的 Native 库 (`libwebviewchromium.so`)。</li>
+<li>  实例化 `WebViewChromiumFactoryProvider`。</li>
+<p>2.  <b>AwContents</b>:</p>
+<li>  这是 Chromium 侧与 Android `WebView` 类对应的一对一核心对象。</li>
+<li>  所有的 `loadUrl`, `onDraw` 调用最终都会委托给 AwContents。</li>
+<p>3.  <b>DrawGL Functor 注册</b>:</p>
+<li>  在初始化时，AwContents 会通过 JNI 向 App 的 `RenderThread` 注册一个 Functor。</li>
+<li>  这就是为什么 App 的 RenderThread 能够“认识”并回调 Chromium 的渲染代码。</li>
+<br>
+<hr>
+<br>
+<h2>1. 共享上下文流程详解 (Deep Execution Flow)</h2>
+<br>
+<p>此模式的核心特点是：WebView <b>蹭车</b>。它没有独立的 Surface，而是把自己的绘制指令注入到 App 的 <code>RenderThread</code> 中执行。</p>
+<br>
+<h3>第一阶段：Renderer Process (渲染器进程)</h3>
+<p>1.  <b>Parse/Style/Layout</b>: 解析 HTML/CSS，计算页面布局。</p>
+<p>2.  <b>Paint</b>: 生成 DisplayItemList。</p>
+<p>3.  <b>Commit</b>: 提交给 Compositor Thread。</p>
+<p>4.  <b>Tiling/Raster</b>: 在渲染进程生成 DrawQuad 指令（注意，这里通常生成的是“元指令”，还不是最终像素）。</p>
+<p>5.  <b>Invalidate</b>: 通过 IPC 通知 App 进程：“我准备好了，你重绘一下”。</p>
+<br>
+<h3>第二阶段：App UI Thread (主线程)</h3>
+<p>1.  <b>onDraw</b>: View 树遍历到 WebView。</p>
+<p>2.  <b>Record</b>: WebView 往 Canvas 里写一个特殊的 <code>DrawFunctorOp</code>。这是一个占位符，相当于告诉 RenderThread：“到这儿的时候，去调一下 WebView 的原生代码”。</p>
+<br>
+<h3>第三阶段：App RenderThread (渲染线程)</h3>
+<p>1.  <b>Sync</b>: 获取 DrawFunctorOp。</p>
+<p>2.  <b>Invoke Functor</b>: 执行到占位符时，调用 WebView 提供的 C++ 回调 (<code>DrawGL</code>)。</p>
+<li>  **Context Switch**: 此时 OpenGL 上下文仍然是 App 的，但执行权交给了 Chromium 的代码。</li>
+<p>3.  <b>Execute GL</b>: Chromium 用 App 的 EGLContext 执行它的 GL 指令（画网页内容）。</p>
+<li>  *风险*: 如果网页太复杂，画得太慢，会直接拖慢 App 的 `DrawFrame` 总耗时，导致 App 掉帧。</li>
+<br>
+<hr>
+<br>
+<h2>2. 渲染时序图</h2>
+<br>
+<p>注意 <code>Invoke Functor</code> 这一步，它是在 App 的渲染循环中同步执行的。</p>
+<br>
+<br>
+<h2>3. Hardware Draw Functor API (Android 10+)</h2>
+<br>
+<p>从 Android Q 开始，Framework 引入了 <b>Hardware Draw Functor API</b>，作为传统 GL Functor 的演进版本。</p>
+<br>
+<h3>3.1 与传统 GL Functor 的区别</h3>
+<br>
+<p>| 特性 | Legacy GL Functor | Hardware Draw Functor |</p>
+<p>|:---|:---|:---|</p>
+<p>| <b>Fence 控制</b> | 隐式 | <b>显式</b> (App 可控制 acquireFence) |</p>
+<p>| <b>同步模式</b> | 强制同步 | 支持异步 |</p>
+<p>| <b>Vulkan 支持</b> | ❌ 仅 GLES | ✅ GLES + Vulkan |</p>
+<p>| <b>线程安全</b> | 有限 | 完全线程安全 |</p>
+<br>
+<h3>3.2 核心 API (Native)</h3>
+<br>
+<pre><code>
+// 创建 Functor
+typedef int (*AWDrawFn)(long functor, void* data, 
+                         AWDrawFnCallbackInfo* callbackInfo);
+
+// 注册回调
+AHardwareBufferFunctorProvider_create(
+    AWDrawFn drawFn,
+    void* userData,
+    int64_t* outFunctorId
+);
+
+// 提交给 RenderThread
+AHardwareBufferFunctorProvider_apply(
+    int64_t functorId,
+    AHardwareBuffer* buffer,
+    int acquireFenceFd  // 显式 Fence
+);
+</code></pre>
+<br>
+<h3>3.3 性能优势</h3>
+<br>
+<p>1.  <b>Fence Pipelining</b>: WebView 可以在 GPU 还没完成时就返回，RenderThread 不被阻塞。</p>
+<p>2.  <b>Vulkan Path</b>: 现代浏览器内核 (Viz) 可以走 Vulkan 路径，Command Buffer 更高效。</p>
+<p>3.  <b>Trace 可见性</b>: 在 Perfetto 中可以看到 <code>HardwareDrawFunctor</code> 独立 Slice，便于分析。</p>
+<br>
+<h3>3.4 兼容性说明</h3>
+<br>
+<li>  **Android 10 (Q)**: 引入基础 API。</li>
+<li>  **Android 11 (R)**: 完善异步模式。</li>
+<li>  **Android 12 (S)**: 与 BLAST 深度整合。</li>
+<br>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "HW", "name": "Hardware VSync"}, {"id": "UI", "name": "App UI Thread"}, {"id": "RT", "name": "App RenderThread"}, {"id": "WP", "name": "WebView (Renderer)"}, {"id": "SF", "name": "SurfaceFlinger"}, {"id": "HWC", "name": "HWC"}], "events": [{"type": "flow", "src": "HW", "dst": "UI", "time": 20, "endTime": 50, "label": "Signal", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "UI", "dst": "UI", "time": 55, "endTime": 85, "label": "Build DisplayList (Op: DrawFunctor)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "UI", "start": 55, "end": 85, "label": "Build DisplayList (Op: DrawFunctor)", "color": "#ba68c8"}, {"type": "flow", "src": "UI", "dst": "RT", "time": 90, "endTime": 120, "label": "SyncFrameState", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "UI", "start": 55, "end": 145, "label": "Signal", "color": "#ba68c8"}, {"type": "flow", "src": "RT", "dst": "RT", "time": 155, "endTime": 185, "label": "DrawFrame", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "RT", "start": 155, "end": 185, "label": "DrawFrame", "color": "#4db6ac"}, {"type": "flow", "src": "RT", "dst": "WP", "time": 190, "endTime": 220, "label": "Invoke Functor (DrawGL)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "WP", "dst": "WP", "time": 225, "endTime": 255, "label": "Execute GL Commands (Shared Context)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "WP", "start": 225, "end": 255, "label": "Execute GL Commands (Shared Context)", "color": "#4fc3f7"}, {"type": "flow", "src": "WP", "dst": "RT", "time": 260, "endTime": 290, "label": "Return", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "WP", "start": 225, "end": 315, "label": "Invoke Functor (DrawGL)", "color": "#4fc3f7"}, {"type": "flow", "src": "RT", "dst": "SF", "time": 325, "endTime": 355, "label": "queueBuffer (App Window)", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "RT", "start": 155, "end": 380, "label": "SyncFrameState", "color": "#4db6ac"}, {"type": "vsync", "time": 600}, {"type": "flow", "src": "HW", "dst": "SF", "time": 600, "endTime": 630, "label": "VSync-SF Signal", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "SF", "dst": "SF", "time": 635, "endTime": 665, "label": "latchBuffer", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 635, "end": 665, "label": "latchBuffer", "color": "#e57373"}, {"type": "flow", "src": "SF", "dst": "HWC", "time": 670, "endTime": 700, "label": "Composite", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "SF", "start": 635, "end": 725, "label": "VSync-SF Signal", "color": "#e57373"}, {"type": "flow", "src": "HWC", "dst": "HWC", "time": 735, "endTime": 765, "label": "Display Panel", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "HWC", "start": 735, "end": 765, "label": "Display Panel", "color": "#7986cb"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

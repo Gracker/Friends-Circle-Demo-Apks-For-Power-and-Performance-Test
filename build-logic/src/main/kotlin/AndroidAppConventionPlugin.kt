@@ -7,6 +7,7 @@ class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("com.android.application")
+            configureTraceFix()
 
             val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
             val versionCode = libs.findVersion("app-version-code").get().requiredVersion.toInt()

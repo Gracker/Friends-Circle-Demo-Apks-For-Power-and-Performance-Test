@@ -31,8 +31,9 @@
 *.dex
 *.apk
 
-# APK发布目录 (GitHub有100MB文件大小限制，APK通过Release发布)
+# APK输出目录 (GitHub有100MB文件大小限制，APK通过Release发布)
 /apk-released/
+/apk-debug/
 
 # Build output directories
 /apk/

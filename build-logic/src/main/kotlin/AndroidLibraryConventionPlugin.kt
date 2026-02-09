@@ -6,6 +6,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("com.android.library")
+            configureTraceFix()
 
             extensions.configure<LibraryExtension>("android") {
                 configureAndroidCommon(this)

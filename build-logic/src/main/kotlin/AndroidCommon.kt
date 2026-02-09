@@ -30,6 +30,19 @@ internal fun Project.configureAndroidCommon(
 }
 
 /**
+ * Conditionally applies the TraceFix plugin when `-PenableTraceFix=true` is passed.
+ *
+ * TraceFix auto-inserts Trace.beginSection()/endSection() around every method,
+ * making all app code visible in Perfetto/Systrace without manual annotation.
+ * Only activates during explicit debug builds; normal builds remain unchanged.
+ */
+internal fun Project.configureTraceFix() {
+    if (hasProperty("enableTraceFix")) {
+        pluginManager.apply("auto-add-systrace")
+    }
+}
+
+/**
  * Configures Kotlin JVM target when the Kotlin Android plugin is present.
  *
  * Uses [pluginManager.withPlugin] to defer configuration until the Kotlin plugin

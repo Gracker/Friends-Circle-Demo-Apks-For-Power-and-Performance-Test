@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANGLE Rendering Pipeline (GLES-over-Vulkan)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0f1115;
+            --bg-sidebar: #1a1d23;
+            --border-color: #2e323a;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --accent: #8ab4f8;
+            --row-h: 28px;
+            --sb-w: 160px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            padding: 12px 24px;
+            background: var(--bg-sidebar);
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { font-size: 16px; margin: 0; font-weight: 500; }
+        .legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .color-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .main-ui {
+            display: flex;
+            position: relative;
+            max-height: 500px; /* Limit height for many tracks */
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Sidebar: Sticky Names */
+        .sidebar {
+            width: var(--sb-w);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding-top: 30px; /* Ruler height */
+            z-index: 100;
+            overflow-y: hidden; /* Sync with viewport */
+        }
+        .track-name {
+            height: var(--row-h);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Viewport: Scrollable Timeline */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .timeline-ruler {
+            height: 30px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            display: flex;
+            pointer-events: none;
+        }
+        .ruler-tick {
+            position: absolute;
+            bottom: 0;
+            border-left: 1px solid #3c4043;
+            height: 8px;
+            font-size: 9px;
+            color: #5f6368;
+            padding-left: 4px;
+            line-height: 1;
+        }
+
+        .chart-canvas {
+            position: relative;
+            background-image: linear-gradient(to bottom, transparent var(--row-h), rgba(255,255,255,0.02) var(--row-h));
+            background-size: 100% calc(var(--row-h) + 1px);
+        }
+
+        /* Slices: Thin and clean */
+        .slice {
+            position: absolute;
+            height: 18px;
+            border-radius: 2px;
+            font-size: 10px;
+            color: rgba(255,255,255,0.9);
+            padding: 0 6px;
+            line-height: 18px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: filter 0.2s, transform 0.1s;
+            cursor: default;
+        }
+        .slice:hover {
+            filter: brightness(1.3);
+            transform: scaleY(1.1);
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Flows: 1px professional lines */
+        .flow-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        path.flow-line {
+            fill: none;
+            stroke-width: 1px;
+            opacity: 0.3;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+        path.flow-line.active {
+            opacity: 0.9 !important;
+            stroke-width: 2px;
+        }
+
+        /* Guides */
+        .vsync-guide {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 1px;
+            border-left: 1px dashed rgba(138, 180, 248, 0.4);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: #1e1e1e;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 11px;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        
+        /* Markdown Content Section */
+        .doc-section {
+            padding: 40px;
+            background: #15181e;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        .doc-content { max-width: 1000px; margin: 0 auto; line-height: 1.7; }
+        .doc-content h2 { color: var(--accent); margin-top: 2.5rem; }
+        .doc-content pre { padding: 1.5rem; background: #0b0d11; border-radius: 8px; }
+        
+        .mermaid { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>ANGLE Rendering Pipeline (GLES-over-Vulkan) - Android Rendering Pipeline</h1>
+    <div class="legend" id="legend"></div>
+</div>
+
+<div class="main-ui">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="viewport" id="viewport">
+        <div class="timeline-ruler" id="ruler"></div>
+        <div class="chart-canvas" id="canvas">
+            <svg class="flow-layer" id="flow-svg"></svg>
+        </div>
+    </div>
+</div>
+
+<div class="doc-section">
+    <div class="doc-content">
+        <h1>ANGLE Rendering Pipeline (GLES-over-Vulkan)</h1>
+<br>
+<p>> [!WARNING]</p>
+<p>> <b>Android 15+ 强制采用</b>: 从 Android 15 开始，新设备将<b>强制</b>使用 ANGLE 作为 OpenGL ES 的默认实现。如果您的 App 依赖厂商特定的 GLES 扩展（如 <code>GL_QCOM_*</code>），必须测试 ANGLE 兼容性或迁移到 Vulkan。</p>
+<br>
+<p><b>ANGLE</b> (Almost Native Graphics Layer Engine) 是 Google 开发的开源图形抽象层，将 OpenGL ES API 翻译为底层原生 API (Vulkan/Metal/D3D)。从 Android 10 开始部分设备启用，<b>Android 15+ 成为强制默认 GLES 实现</b>。</p>
+<br>
+<h2>1. 为什么需要 ANGLE？</h2>
+<br>
+<p>传统 Android 图形栈的痛点：</p>
+<br>
+<p>| 问题 | 根因 | ANGLE 解决方案 |</p>
+<p>|:---|:---|:---|</p>
+<p>| <b>驱动碎片化</b> | 每个 GPU 厂商实现不同 | 统一的 ANGLE 翻译层 |</p>
+<p>| <b>兼容性 Bug</b> | 厂商 GLES 驱动质量参差 | Google 维护的标准实现 |</p>
+<p>| <b>调试困难</b> | 厂商驱动闭源 | ANGLE 开源，可 Debug |</p>
+<p>| <b>Vulkan 资源利用</b> | 老 App 用 GLES 无法享受 Vulkan 优势 | 透明翻译到 Vulkan |</p>
+<br>
+<h2>2. 核心架构</h2>
+<br>
+<div class="mermaid">graph TD
+    subgraph "App Layer"
+        App[App (GLES Calls)]
+    end
+    
+    subgraph "ANGLE Layer"
+        Translator[GLES -> Vulkan Translator]
+        Shader[SPIR-V Compiler]
+        State[State Tracker]
+    end
+    
+    subgraph "System"
+        VK[Vulkan Driver]
+        GPU[GPU]
+    end
+    
+    App -->|glDrawArrays| Translator
+    Translator -->|vkCmdDraw| VK
+    Translator -->|Shader| Shader
+    Shader -->|SPIR-V| VK
+    VK -->|Execute| GPU</div>
+<br>
+<h2>3. 启用检测</h2>
+<br>
+<h3>3.1 运行时检测</h3>
+<br>
+<pre><code>
+// 检查 ANGLE 是否启用
+String renderer = GLES20.glGetString(GLES20.GL_RENDERER);
+boolean isANGLE = renderer.contains("ANGLE");
+
+// 获取后端
+// "ANGLE (Google, Vulkan 1.3.x, ...)"
+</code></pre>
+<br>
+<h3>3.2 adb 命令</h3>
+<br>
+<pre><code>
+# 查看当前 ANGLE 状态
+adb shell settings get global angle_gl_driver_all_apps
+
+# 强制所有 App 使用 ANGLE
+adb shell settings put global angle_gl_driver_all_apps angle
+
+# 恢复系统默认
+adb shell settings delete global angle_gl_driver_all_apps
+</code></pre>
+<br>
+<h2>4. 渲染时序图</h2>
+<br>
+<p>注意 GLES 调用被翻译为 Vulkan 调用。</p>
+<br>
+<br>
+<h2>5. 性能特征</h2>
+<br>
+<h3>5.1 优势</h3>
+<br>
+<p>| 方面 | 传统 GLES Driver | ANGLE-Vulkan |</p>
+<p>|:---|:---|:---|</p>
+<p>| <b>Draw Call 开销</b> | 较高 (状态机) | 较低 (显式状态) |</p>
+<p>| <b>多线程</b> | 有限 | 完全支持 |</p>
+<p>| <b>Shader 编译</b> | 运行时 | 预编译 SPIR-V |</p>
+<p>| <b>调试工具</b> | 厂商特定 | RenderDoc 统一 |</p>
+<br>
+<h3>5.2 开销</h3>
+<br>
+<li>  **翻译层开销**: ~5-10% CPU 开销 (复杂场景)</li>
+<li>  **首次 Shader 编译**: 稍慢 (GLSL → SPIR-V → GPU Binary)</li>
+<li>  **内存**: 略高 (需要维护翻译状态)</li>
+<br>
+<h2>6. Trace 分析</h2>
+<br>
+<p>在 Perfetto 中 ANGLE 的特征：</p>
+<br>
+<p>1.  <b>GPU Track</b>: 看到 <code>vkQueue*</code> 而非 <code>glDraw*</code></p>
+<p>2.  <b>ANGLE Thread</b>: 可能有独立的翻译线程</p>
+<p>3.  <b>Shader Compile</b>: <code>ANGLE Shader Compile</code> Slice</p>
+<br>
+<h3>6.1 常见问题定位</h3>
+<br>
+<pre><code>
+-- 查找 ANGLE 相关耗时
+SELECT name, dur FROM slice 
+WHERE name LIKE '%ANGLE%' OR name LIKE '%vk%'
+ORDER BY dur DESC LIMIT 20;
+</code></pre>
+<br>
+<h2>7. 开发者建议</h2>
+<br>
+<p>1.  <b>测试覆盖</b>: 确保 App 在 ANGLE 和 Native GLES 下都测试过</p>
+<p>2.  <b>避免厂商扩展</b>: 如 <code>GL_QCOM_*</code>, ANGLE 可能不支持</p>
+<p>3.  <b>Shader 优化</b>: ANGLE 对 Shader 要求更严格，不合规的 GLSL 会报错</p>
+<p>4.  <b>调试模式</b>: 使用 <code>angle_debug_layers</code> 开启验证层</p>
+<p>5.  <b>优先 Vulkan</b>: 新项目建议直接使用 Vulkan，避免 ANGLE 翻译层开销</p>
+<br>
+<h2>8. 兼容性</h2>
+<br>
+<p>| Android 版本 | ANGLE 状态 |</p>
+<p>|:---|:---|</p>
+<p>| <b>Android 16</b> (API 36) | <b>强制默认</b> + VPA 统一 Vulkan 特性 |</p>
+<p>| <b>Android 15</b> (API 35) | <b>强制默认</b>，新设备无法绕过 |</p>
+<p>| Android 14 (API 34) | 多数设备默认 |</p>
+<p>| Android 13 (API 33) | 多数设备默认 |</p>
+<p>| Android 12 (API 31) | 更广泛默认启用 |</p>
+<p>| Android 11 (API 30) | 部分设备默认启用 |</p>
+<p>| Android 10 (API 29) | 实验性，需手动启用 |</p>
+<br>
+    </div>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<script>
+    mermaid.initialize({ startOnLoad: true });
+
+    const timelineData = {"participants": [{"id": "App", "name": "App (GLES)"}, {"id": "ANGLE", "name": "ANGLE Translator"}, {"id": "VK", "name": "Vulkan Driver"}, {"id": "GPU", "name": "GPU"}, {"id": "SF", "name": "SurfaceFlinger"}], "events": [{"type": "flow", "src": "App", "dst": "ANGLE", "time": 20, "endTime": 50, "label": "glDrawArrays()", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "ANGLE", "dst": "ANGLE", "time": 55, "endTime": 85, "label": "State Validation", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "ANGLE", "start": 55, "end": 85, "label": "State Validation", "color": "#64b5f6"}, {"type": "flow", "src": "ANGLE", "dst": "VK", "time": 90, "endTime": 120, "label": "vkCmdDraw()", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "App", "dst": "ANGLE", "time": 125, "endTime": 155, "label": "eglSwapBuffers()", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "ANGLE", "dst": "VK", "time": 160, "endTime": 190, "label": "vkQueuePresentKHR()", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "VK", "dst": "SF", "time": 195, "endTime": 225, "label": "queueBuffer (via BLAST)", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "SF", "dst": "GPU", "time": 230, "endTime": 260, "label": "Composite", "color": "rgba(255,255,255,0.2)"}, {"type": "flow", "src": "GPU", "dst": "GPU", "time": 265, "endTime": 295, "label": "Scanout", "color": "rgba(255,255,255,0.2)"}, {"type": "slice", "track": "GPU", "start": 265, "end": 295, "label": "Scanout", "color": "#64b5f6"}]};
+    const PX_PER_MS = 2.0; 
+    const ROW_H = 28;
+    const SLICE_H = 18;
+    const RULER_H = 30;
+
+    function initUI() {
+        if (!timelineData || !timelineData.events) return;
+        
+        const sidebar = document.getElementById('sidebar');
+        const canvas = document.getElementById('canvas');
+        const ruler = document.getElementById('ruler');
+        const svg = document.getElementById('flow-svg');
+        const legend = document.getElementById('legend');
+
+        // 1. Establish participants and tracks
+        const trackY = {};
+        const participants = timelineData.participants;
+        participants.forEach((p, i) => {
+            const y = i * ROW_H;
+            trackY[p.id] = y;
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'track-name';
+            nameDiv.textContent = p.name || p.id;
+            sidebar.appendChild(nameDiv);
+        });
+
+        // Sync Sidebar vertical scroll with Viewport
+        viewport.onscroll = () => {
+            sidebar.scrollTop = viewport.scrollTop;
+            ruler.style.left = -viewport.scrollLeft + 'px';
+        };
+
+        // 2. Scale canvas
+        let maxT = 0;
+        timelineData.events.forEach(e => {
+            const t = e.end || e.time || 0;
+            if (t > maxT) maxT = t;
+        });
+        maxT += 100;
+        const totalW = maxT * PX_PER_MS;
+        const totalH = participants.length * ROW_H;
+
+        canvas.style.width = totalW + 'px';
+        canvas.style.height = totalH + 'px';
+        ruler.style.width = totalW + 'px';
+        svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+        // 3. Ruler Ticks
+        for (let t = 0; t <= maxT; t += 50) {
+            const tick = document.createElement('div');
+            tick.className = 'ruler-tick';
+            tick.style.left = (t * PX_PER_MS) + 'px';
+            tick.textContent = t + 'ms';
+            ruler.appendChild(tick);
+        }
+
+        // 4. Arrow Marker for SVG
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255,255,255,0.4)" />
+                </marker>
+            </defs>
+        `;
+
+        // 5. Render Events
+        timelineData.events.forEach((ev, idx) => {
+            const x = (ev.start || ev.time) * PX_PER_MS;
+            
+            if (ev.type === 'slice') {
+                const w = Math.max((ev.end - ev.start) * PX_PER_MS, 4);
+                const s = document.createElement('div');
+                s.className = 'slice';
+                s.style.left = x + 'px';
+                s.style.width = w + 'px';
+                s.style.top = (trackY[ev.track] + (ROW_H-SLICE_H)/2) + 'px';
+                s.style.backgroundColor = ev.color;
+                s.textContent = ev.label;
+                s.id = 'slice-' + idx;
+
+                s.onmouseenter = () => highlightFlows(idx, true, ev);
+                s.onmouseleave = () => highlightFlows(idx, false);
+                canvas.appendChild(s);
+            }
+            else if (ev.type === 'flow') {
+                // DON'T draw flow if src == dst (Self call)
+                if (ev.src === ev.dst) return;
+
+                const y1 = trackY[ev.src] + ROW_H/2;
+                const x1 = x;
+                const y2 = trackY[ev.dst] + ROW_H/2;
+                const x2 = ev.endTime * PX_PER_MS;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 30} ${y1}, ${x2 - 30} ${y2}, ${x2} ${y2}`);
+                path.setAttribute("class", "flow-line");
+                path.setAttribute("stroke", ev.color || "#8ab4f8");
+                path.setAttribute("fill", "none"); // CRITICAL FIX
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                path.id = 'flow-' + idx;
+                svg.appendChild(path);
+            }
+            else if (ev.type === 'vsync') {
+                const g = document.createElement('div');
+                g.className = 'vsync-guide';
+                g.style.left = x + 'px';
+                canvas.appendChild(g);
+            }
+        });
+    }
+
+    const tooltip = document.getElementById('tooltip');
+    function highlightFlows(idx, active, data) {
+        if (active) {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<strong>${data.label}</strong><br>Dur: ${(data.end-data.start).toFixed(1)}ms`;
+        } else {
+            tooltip.style.display = 'none';
+        }
+
+        // Logic to highlight connected flows? 
+        // For now just show duration
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (tooltip.style.display === 'block') {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        }
+    });
+
+    initUI();
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation("com.android.tools.build:gradle:${libs.versions.agp.get()}")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
+    implementation("io.github.gracker:TraceFix:${libs.versions.tracefix.get()}")
 }
 
 gradlePlugin {
