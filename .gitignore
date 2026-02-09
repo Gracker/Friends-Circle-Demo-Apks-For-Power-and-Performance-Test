@@ -1,6 +1,7 @@
 # Android Studio / IntelliJ IDEA
 *.iml
 .gradle
+.kotlin/
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
