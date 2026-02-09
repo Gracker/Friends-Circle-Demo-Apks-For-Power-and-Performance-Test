@@ -6,8 +6,6 @@ android {
     defaultConfig {
         applicationId "com.kcrason.highperformancefriendscircle"
         minSdk 21
-        versionCode 3
-        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

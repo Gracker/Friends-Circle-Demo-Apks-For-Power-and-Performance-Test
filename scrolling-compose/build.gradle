@@ -9,8 +9,6 @@ android {
 
     defaultConfig {
         applicationId "com.example.wechatfriendforcompose"
-        versionCode 3
-        versionName "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

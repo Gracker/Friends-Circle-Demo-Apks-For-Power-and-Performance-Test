@@ -1,4 +1,8 @@
 [versions]
+# App version
+app-version-code = "4"
+app-version-name = "1.3.0"
+
 # Build tools
 agp = "8.7.3"
 kotlin = "2.0.21"

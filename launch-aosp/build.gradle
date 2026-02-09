@@ -8,8 +8,6 @@ android {
 
     defaultConfig {
         applicationId "com.example.launch.aosp"
-        versionCode 3
-        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

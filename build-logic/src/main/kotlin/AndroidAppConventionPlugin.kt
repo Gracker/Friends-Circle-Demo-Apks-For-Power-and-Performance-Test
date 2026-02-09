@@ -1,16 +1,23 @@
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.VersionCatalogsExtension
 
 class AndroidAppConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("com.android.application")
 
+            val libs = extensions.getByType(VersionCatalogsExtension::class.java).named("libs")
+            val versionCode = libs.findVersion("app-version-code").get().requiredVersion.toInt()
+            val versionName = libs.findVersion("app-version-name").get().requiredVersion
+
             extensions.configure<ApplicationExtension>("android") {
                 configureAndroidCommon(this)
 
                 defaultConfig {
+                    this.versionCode = versionCode
+                    this.versionName = versionName
                     targetSdk = 35
                 }
 

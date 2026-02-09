@@ -8,8 +8,6 @@ android {
 
     defaultConfig {
         applicationId "com.example.wechatfriendforrenderstress"
-        versionCode 3
-        versionName "1.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"

@@ -7,8 +7,6 @@ android {
 
     defaultConfig {
         applicationId "com.example.wechatfriendforglmap"
-        versionCode 3
-        versionName "1.2.0"
     }
 
     buildFeatures {
