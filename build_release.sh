@@ -105,7 +105,7 @@ else
 fi
 
 # 获取版本信息
-VERSION_NAME=$(grep "versionName" app/build.gradle | sed 's/.*"\(.*\)".*/\1/')
+VERSION_NAME=$(grep 'app-version-name' gradle/libs.versions.toml | sed 's/.*= *"\(.*\)".*/\1/')
 BUILD_TIME=$(date +"%Y%m%d_%H%M%S")
 GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
