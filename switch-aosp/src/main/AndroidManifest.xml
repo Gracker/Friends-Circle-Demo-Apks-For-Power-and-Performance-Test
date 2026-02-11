@@ -21,25 +21,25 @@
 
         <!-- Target Activities for each load type -->
         <activity android:name=".target.PureActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfLightActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfMediumActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfHeavyActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.BgMediumActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.BgHeavyActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfLightBgMediumActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfMediumBgMediumActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfMediumBgHeavyActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity android:name=".target.SelfHeavyBgHeavyActivity"
-            android:exported="false" />
+            android:exported="true" />
 
         <!-- Background Load Service - runs in separate process -->
         <service

@@ -554,7 +554,9 @@ def main():
             sys.exit(1)
         
         load_types = [args.load_type] if args.load_type else None
-        runner.run_app_test(app_config, load_types, args.swipe_count or 20)
+        results = runner.run_app_test(app_config, load_types, args.swipe_count or 20)
+        if not results or any(r.get("status") != "completed" for r in results):
+            sys.exit(1)
     else:
         # 批量测试
         app_names = args.apps
@@ -564,11 +566,17 @@ def main():
             app_names = None  # 测试全部
             load_types = None
         
-        runner.run_full_test(
+        summary = runner.run_full_test(
             app_names=app_names,
             load_types=load_types,
             swipe_count=args.swipe_count
         )
+        if summary.get("status") != "completed":
+            sys.exit(1)
+        if summary.get("total_tests", 0) == 0:
+            sys.exit(1)
+        if summary.get("successful_tests", 0) != summary.get("total_tests", 0):
+            sys.exit(1)
 
 
 if __name__ == "__main__":

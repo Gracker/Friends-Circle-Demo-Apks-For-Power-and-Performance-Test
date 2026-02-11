@@ -13,10 +13,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 # 设置结果目录 (包含时间戳)
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 RESULTS_ROOT="$PROJECT_ROOT/results"
-RESULTS_DIR="$RESULTS_ROOT/$TIMESTAMP"
-
-mkdir -p "$RESULTS_DIR"
-echo "测试结果目录: $RESULTS_DIR"
+RESULTS_DIR=""
 
 # 颜色定义
 RED='\033[0;31m'
@@ -41,7 +38,7 @@ show_help() {
     echo ""
     echo "选项:"
     echo "  --full          完整测试（所有应用、所有负载类型）"
-    echo "  --quick         快速测试（核心应用、部分负载类型）"
+    echo "  --quick         快速测试（核心应用子集）"
     echo "  --scrolling     只运行滑动测试"
     echo "  --launch        只运行启动测试"
     echo "  --switch        只运行 Switch 测试"
@@ -81,6 +78,31 @@ check_device() {
     log_info "已连接设备: ${DEVICE_MODEL} (Android ${ANDROID_VERSION})"
 }
 
+# 查找最近一次包含 summary 的结果目录
+find_latest_results_dir() {
+    python3 - "$RESULTS_ROOT" <<'PY'
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+patterns = [
+    "scrolling_summary_*.json",
+    "launch_summary_*.json",
+    "switch_summary_*.json",
+]
+
+files = []
+for pattern in patterns:
+    files.extend(root.rglob(pattern))
+
+if not files:
+    raise SystemExit(1)
+
+latest = max(files, key=lambda p: p.stat().st_mtime)
+print(latest.parent)
+PY
+}
+
 # 安装 APK
 run_install() {
     local mode=$1
@@ -101,7 +123,9 @@ run_scrolling_test() {
     if [[ "$mode" == "full" ]]; then
         python3 "$SCRIPT_DIR/run_scrolling_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_scrolling_test.py" --results-dir "$RESULTS_DIR"
+        python3 "$SCRIPT_DIR/run_scrolling_test.py" \
+            --apps aosp-performance compose \
+            --results-dir "$RESULTS_DIR"
     fi
 }
 
@@ -113,7 +137,9 @@ run_launch_test() {
     if [[ "$mode" == "full" ]]; then
         python3 "$SCRIPT_DIR/run_launch_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_launch_test.py" --results-dir "$RESULTS_DIR"
+        python3 "$SCRIPT_DIR/run_launch_test.py" \
+            --apps launch-aosp \
+            --results-dir "$RESULTS_DIR"
     fi
 }
 
@@ -125,7 +151,9 @@ run_switch_test() {
     if [[ "$mode" == "full" ]]; then
         python3 "$SCRIPT_DIR/run_switch_test.py" --all --results-dir "$RESULTS_DIR"
     else
-        python3 "$SCRIPT_DIR/run_switch_test.py" --results-dir "$RESULTS_DIR"
+        python3 "$SCRIPT_DIR/run_switch_test.py" \
+            --apps switch-aosp \
+            --results-dir "$RESULTS_DIR"
     fi
 }
 
@@ -201,9 +229,24 @@ main() {
     echo "║  Switch测试: $(printf '%-49s' "$run_switch")║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
+
+    # 选择结果目录
+    if [[ "$report_only" == true ]]; then
+        if RESULTS_DIR="$(find_latest_results_dir)"; then
+            log_info "使用已有测试数据目录: $RESULTS_DIR"
+        else
+            log_error "未找到历史测试 summary 文件，无法执行 --report-only"
+            exit 1
+        fi
+    else
+        RESULTS_DIR="$RESULTS_ROOT/$TIMESTAMP"
+        mkdir -p "$RESULTS_DIR"
+        log_info "测试结果目录: $RESULTS_DIR"
+    fi
     
     # 如果只生成报告
     if [[ "$report_only" == true ]]; then
+        check_python
         run_report
         exit 0
     fi

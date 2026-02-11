@@ -43,6 +43,7 @@ public class LoadSimulator {
     // 伪随机数生成器（使用固定种子确保可重现）
     private Random mComputationRandom;
     private Random mStringRandom;  // 用于字符串生成的独立随机数生成器
+    private Random mTaskProbabilityRandom; // 用于触发概率判定的随机数生成器
 
     // 用于存储计算结果，防止编译器优化
     // volatile 关键字确保每次读写都直接访问内存，防止寄存器缓存优化
@@ -84,6 +85,7 @@ public class LoadSimulator {
         // 使用固定种子初始化随机数生成器
         mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
         mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
+        mTaskProbabilityRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
         mDoFrameIntervalRandom = new Random(LoadConfig.DOFRAME_INTERVAL_SEED);
         mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
 
@@ -99,6 +101,7 @@ public class LoadSimulator {
     public void resetRandomState() {
         mComputationRandom = new Random(LoadConfig.COMPUTATION_SEED);
         mStringRandom = new Random(LoadConfig.STRING_GENERATION_SEED);
+        mTaskProbabilityRandom = new Random(LoadConfig.TASK_INTERVAL_SEED);
         mDoFrameIntervalRandom = new Random(LoadConfig.DOFRAME_INTERVAL_SEED);
         mBetweenFrameIntervalRandom = new Random(LoadConfig.BETWEEN_FRAME_INTERVAL_SEED);
         mExecutionCounter = 0;
@@ -183,6 +186,11 @@ public class LoadSimulator {
         // 计算下一次执行的目标帧数
         mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
 
+        // 命中时间窗口后，再按伪随机概率决定是否执行
+        if (!shouldExecuteByProbability(level)) {
+            return;
+        }
+
         // 执行负载
         Trace.beginSection(traceTag);
         mExecutionCounter++;
@@ -222,6 +230,21 @@ public class LoadSimulator {
     }
 
     /**
+     * 伪随机判定当前时机是否真正执行负载
+     * 使用固定种子随机数，确保每次测试触发序列可重现
+     */
+    private boolean shouldExecuteByProbability(int loadLevel) {
+        float probability = LoadConfig.getTaskProbabilityByLevel(loadLevel);
+        if (probability <= 0f) {
+            return false;
+        }
+        if (probability >= 1f) {
+            return true;
+        }
+        return mTaskProbabilityRandom.nextFloat() < probability;
+    }
+
+    /**
      * 执行 doFrame 负载（混合负载的 doFrame 部分）
      * 使用伪随机帧间隔触发，确保测试可重现
      * 
@@ -251,6 +274,11 @@ public class LoadSimulator {
 
         // 计算下一次执行的目标帧数
         mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
+
+        // 命中时间窗口后，再按伪随机概率决定是否执行
+        if (!shouldExecuteByProbability(level)) {
+            return;
+        }
 
         // 执行负载
         Trace.beginSection(traceTag);
@@ -305,6 +333,11 @@ public class LoadSimulator {
 
         // 计算下一次执行的目标帧数
         mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+
+        // 命中时间窗口后，再按伪随机概率决定是否执行
+        if (!shouldExecuteByProbability(level)) {
+            return;
+        }
 
         // 执行负载
         Trace.beginSection(traceTag);
@@ -374,6 +407,11 @@ public class LoadSimulator {
 
         // 计算下一次执行的目标帧数
         mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
+
+        // 命中时间窗口后，再按伪随机概率决定是否执行
+        if (!shouldExecuteByProbability(level)) {
+            return;
+        }
 
         // 执行负载
         Trace.beginSection(traceTag);

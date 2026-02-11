@@ -30,61 +30,61 @@
         <!-- 最轻负载Activity -->
         <activity
             android:name=".MinimalLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 轻负载Activity -->
         <activity
             android:name=".LightLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 中等负载Activity -->
         <activity
             android:name=".MediumLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 高负载Activity -->
         <activity
             android:name=".HeavyLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间轻负载Activity -->
         <activity
             android:name=".LightLoadBetweenFramesWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间中负载Activity -->
         <activity
             android:name=".MediumLoadBetweenFramesWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间高负载Activity -->
         <activity
             android:name=".HeavyLoadBetweenFramesWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合轻负载Activity -->
         <activity
             android:name=".LightMixedLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合中负载Activity -->
         <activity
             android:name=".MediumMixedLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合高负载Activity -->
         <activity
             android:name=".HeavyMixedLoadWebViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
     </application>

@@ -46,6 +46,15 @@ class ReportGenerator:
                 log_info(f"加载 {test_type} 测试结果: {files[0]}")
         
         return results
+
+    @staticmethod
+    def has_any_results(results: Dict[str, Any]) -> bool:
+        """判断是否至少加载到一类有效测试结果"""
+        for test_type in ["scrolling", "launch", "switch"]:
+            data = results.get(test_type)
+            if data and data.get("results"):
+                return True
+        return False
     
     def generate_markdown(self, results: Dict[str, Any]) -> str:
         """生成 Markdown 格式报告"""
@@ -87,6 +96,20 @@ class ReportGenerator:
                         f"{fps.get('total_frames', 0)} | "
                         f"{fps.get('janky_percent', 0):.1f}% | "
                         f"{fps.get('grade', 'N/A')} |"
+                    )
+                elif r.get("status") == "completed":
+                    janky_data = r.get("janky_percent", {})
+                    if isinstance(janky_data, dict):
+                        janky_percent = float(janky_data.get("avg", 0))
+                    else:
+                        janky_percent = float(janky_data or 0)
+
+                    lines.append(
+                        f"| {r.get('app_name', 'N/A')} | "
+                        f"{r.get('load_type', 'default')} | "
+                        f"N/A | "
+                        f"{janky_percent:.1f}% | "
+                        f"{r.get('grade', 'N/A')} |"
                     )
             lines.append("")
         
@@ -249,38 +272,44 @@ class ReportGenerator:
             "switch_tests": results.get("switch")
         }
         return json.dumps(report, indent=2, ensure_ascii=False)
+
+    def generate(self, output_format: str = "all") -> Dict[str, str]:
+        """根据指定格式生成报告文件"""
+        results = self.load_latest_results()
+        if not self.has_any_results(results):
+            raise ValueError(f"未在结果目录找到可用 summary: {self.results_dir}")
+
+        output_files = {}
+
+        if output_format in ("markdown", "all"):
+            md_content = self.generate_markdown(results)
+            md_path = self.results_dir / f"report_{self.timestamp}.md"
+            with open(md_path, 'w', encoding='utf-8') as f:
+                f.write(md_content)
+            output_files["markdown"] = str(md_path)
+            log_success(f"生成 Markdown 报告: {md_path}")
+
+        if output_format in ("html", "all"):
+            html_content = self.generate_html(results)
+            html_path = self.results_dir / f"report_{self.timestamp}.html"
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            output_files["html"] = str(html_path)
+            log_success(f"生成 HTML 报告: {html_path}")
+
+        if output_format in ("json", "all"):
+            json_content = self.generate_json(results)
+            json_path = self.results_dir / f"report_{self.timestamp}.json"
+            with open(json_path, 'w', encoding='utf-8') as f:
+                f.write(json_content)
+            output_files["json"] = str(json_path)
+            log_success(f"生成 JSON 报告: {json_path}")
+
+        return output_files
     
     def generate_all(self) -> Dict[str, str]:
         """生成所有格式的报告"""
-        results = self.load_latest_results()
-        
-        output_files = {}
-        
-        # Markdown
-        md_content = self.generate_markdown(results)
-        md_path = self.results_dir / f"report_{self.timestamp}.md"
-        with open(md_path, 'w', encoding='utf-8') as f:
-            f.write(md_content)
-        output_files["markdown"] = str(md_path)
-        log_success(f"生成 Markdown 报告: {md_path}")
-        
-        # HTML
-        html_content = self.generate_html(results)
-        html_path = self.results_dir / f"report_{self.timestamp}.html"
-        with open(html_path, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-        output_files["html"] = str(html_path)
-        log_success(f"生成 HTML 报告: {html_path}")
-        
-        # JSON
-        json_content = self.generate_json(results)
-        json_path = self.results_dir / f"report_{self.timestamp}.json"
-        with open(json_path, 'w', encoding='utf-8') as f:
-            f.write(json_content)
-        output_files["json"] = str(json_path)
-        log_success(f"生成 JSON 报告: {json_path}")
-        
-        return output_files
+        return self.generate("all")
 
 
 def main():
@@ -308,7 +337,11 @@ def main():
     
     # 生成报告
     log_info("开始生成测试报告...")
-    output_files = generator.generate_all()
+    try:
+        output_files = generator.generate(args.format)
+    except Exception as e:
+        log_error(f"报告生成失败: {e}")
+        sys.exit(1)
     
     print("\n" + "="*50)
     print("报告生成完成！")

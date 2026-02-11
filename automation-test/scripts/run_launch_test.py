@@ -410,6 +410,8 @@ def main():
             iterations
         )
         print(json.dumps(stats, indent=2))
+        if stats.get("status") != "completed":
+            sys.exit(1)
     else:
         # 批量测试
         app_names = args.apps
@@ -419,11 +421,17 @@ def main():
             app_names = None
             flavors = None
         
-        runner.run_full_test(
+        summary = runner.run_full_test(
             app_names=app_names,
             flavors=flavors,
             iterations=args.iterations
         )
+        if summary.get("status") != "completed":
+            sys.exit(1)
+        if summary.get("total_tests", 0) == 0:
+            sys.exit(1)
+        if summary.get("successful_tests", 0) != summary.get("total_tests", 0):
+            sys.exit(1)
 
 
 if __name__ == "__main__":

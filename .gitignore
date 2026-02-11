@@ -119,6 +119,10 @@ fastlane/readme.md
 # 测试和调试文件
 /test-output/
 /perfetto-trace/
+Tools/trace/
+Tools/trace/**
+*.pftrace
+*.ptrace
 
 # Automation Test
 automation-test/results/

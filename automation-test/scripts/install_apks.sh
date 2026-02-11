@@ -182,13 +182,18 @@ install_scrolling() {
 
     while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
-            ((success++))
+            ((success+=1))
         else
-            ((failed++))
+            ((failed+=1))
         fi
     done < <(get_scrolling_apks)
 
     log_info "滑动测试 APK: $success 成功, $failed 失败"
+    if ((failed > 0)); then
+        log_error "滑动测试 APK 安装存在失败"
+        return 1
+    fi
+    return 0
 }
 
 # 函数：安装启动测试 APK
@@ -199,13 +204,18 @@ install_launch() {
 
     while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
-            ((success++))
+            ((success+=1))
         else
-            ((failed++))
+            ((failed+=1))
         fi
     done < <(get_launch_apks)
 
     log_info "启动测试 APK: $success 成功, $failed 失败"
+    if ((failed > 0)); then
+        log_error "启动测试 APK 安装存在失败"
+        return 1
+    fi
+    return 0
 }
 
 # 函数：安装 Switch 测试 APK
@@ -216,13 +226,18 @@ install_switch() {
 
     while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
-            ((success++))
+            ((success+=1))
         else
-            ((failed++))
+            ((failed+=1))
         fi
     done < <(get_switch_apks)
 
     log_info "Switch 测试 APK: $success 成功, $failed 失败"
+    if ((failed > 0)); then
+        log_error "Switch 测试 APK 安装存在失败"
+        return 1
+    fi
+    return 0
 }
 
 # 函数：安装核心 APK (快速模式)
@@ -233,13 +248,18 @@ install_quick() {
 
     while IFS= read -r apk; do
         if install_apk "$APK_DIR/$apk"; then
-            ((success++))
+            ((success+=1))
         else
-            ((failed++))
+            ((failed+=1))
         fi
     done < <(get_quick_apks)
 
     log_info "核心 APK: $success 成功, $failed 失败"
+    if ((failed > 0)); then
+        log_error "核心 APK 安装存在失败"
+        return 1
+    fi
+    return 0
 }
 
 # 主程序

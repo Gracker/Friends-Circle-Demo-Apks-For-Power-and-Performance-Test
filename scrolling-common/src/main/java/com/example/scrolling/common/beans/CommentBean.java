@@ -19,8 +19,10 @@ public class CommentBean {
     private String childUserName;
     private String parentUserName;
     private String commentContent;
-    private SpannableStringBuilder commentContentSpan;
-    private Context mContext;
+    // UI-only cached span, should not be serialized to storage.
+    private transient SpannableStringBuilder commentContentSpan;
+    // Runtime context holder for span building, should not be serialized.
+    private transient Context mContext;
 
     public CommentBean() {
     }

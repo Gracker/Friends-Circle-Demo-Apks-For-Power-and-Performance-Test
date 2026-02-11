@@ -31,61 +31,61 @@
         <!-- 最轻负载Activity -->
         <activity
             android:name=".MinimalLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 轻负载Activity -->
         <activity
             android:name=".LightLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 中等负载Activity -->
         <activity
             android:name=".MediumLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 高负载Activity -->
         <activity
             android:name=".HeavyLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间轻负载Activity -->
         <activity
             android:name=".LightLoadBetweenFramesGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间中负载Activity -->
         <activity
             android:name=".MediumLoadBetweenFramesGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间高负载Activity -->
         <activity
             android:name=".HeavyLoadBetweenFramesGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合轻负载Activity -->
         <activity
             android:name=".LightMixedLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合中负载Activity -->
         <activity
             android:name=".MediumMixedLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 混合高负载Activity -->
         <activity
             android:name=".HeavyMixedLoadGeckoViewActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
     </application>

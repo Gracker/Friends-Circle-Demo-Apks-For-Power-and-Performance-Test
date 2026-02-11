@@ -21,7 +21,7 @@
 
         <activity 
             android:name=".CustomScrollFeedActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
     </application>

@@ -417,20 +417,44 @@ def main():
     
     # 创建测试执行器
     runner = SwitchTestRunner(config_dir, results_dir)
-    
+
+    if args.package:
+        # 测试单个应用包名
+        app_config = None
+        for app in runner.config.get_switch_apps():
+            if app.get("package") == args.package:
+                app_config = app
+                break
+
+        if not app_config:
+            log_error(f"未在注册表中找到应用: {args.package}")
+            sys.exit(1)
+
+        iterations = args.iterations or runner.config.test_config["switch_test"]["iterations"]
+        results = runner.run_app_test(app_config, args.combinations, iterations)
+        if not results or any(r.get("status") != "completed" for r in results):
+            sys.exit(1)
+        return
+
     # 批量测试
     app_names = args.apps
     combinations = args.combinations
-    
+
     if args.all:
         app_names = None
         combinations = None
-    
-    runner.run_full_test(
+
+    summary = runner.run_full_test(
         app_names=app_names,
         load_combinations=combinations,
         iterations=args.iterations
     )
+    if summary.get("status") != "completed":
+        sys.exit(1)
+    if summary.get("total_tests", 0) == 0:
+        sys.exit(1)
+    if summary.get("successful_tests", 0) != summary.get("total_tests", 0):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

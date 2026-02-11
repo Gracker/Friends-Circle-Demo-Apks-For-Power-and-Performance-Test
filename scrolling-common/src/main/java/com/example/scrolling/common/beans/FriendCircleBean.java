@@ -16,7 +16,8 @@ public class FriendCircleBean {
     private List<String> imageUrls;
     private List<CommentBean> commentBeans;
     private List<PraiseBean> praiseBeans;
-    private SpannableStringBuilder praiseSpan;
+    // UI-only cached span, should not be serialized to storage.
+    private transient SpannableStringBuilder praiseSpan;
 
     public int getViewType() {
         return viewType;

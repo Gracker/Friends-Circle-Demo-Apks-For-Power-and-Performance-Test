@@ -23,56 +23,67 @@
         <!-- 最轻负载Activity -->
         <activity
             android:name=".MinimalLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 轻负载Activity（帧内）-->
         <activity
             android:name=".LightLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 中等负载Activity（帧内）-->
         <activity
             android:name=".MediumLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 高负载Activity（帧内）-->
         <activity
             android:name=".HeavyLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间轻负载Activity -->
         <activity
             android:name=".LightLoadBetweenFramesActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间中等负载Activity -->
         <activity
             android:name=".MediumLoadBetweenFramesActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 帧间高负载Activity -->
         <activity
             android:name=".HeavyLoadBetweenFramesActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 轻混合负载Activity -->
         <activity
             android:name=".LightMixedLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 中混合负载Activity -->
         <activity
             android:name=".MediumMixedLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 高混合负载Activity -->
         <activity
             android:name=".HeavyMixedLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
         <!-- 超长帧负载Activity -->
         <activity
             android:name=".LongFrameLoadActivity"
+            android:exported="true"
             android:theme="@style/Theme.HighPerformanceFriendsCircle.NoActionBar" />
 
     </application>
