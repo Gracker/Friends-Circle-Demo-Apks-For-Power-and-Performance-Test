@@ -332,7 +332,7 @@ OpenGL ES 2.0地图渲染Demo：
 ## 📱 下载应用
 
 ### 🚀 自动构建版本
-每次代码更新后，GitHub Actions会自动构建最新版本的APK文件。你可以在[Releases页面](../../releases)下载：
+每次代码更新后，GitHub Actions 会自动构建最新版本的 APK 文件。你可以在 [Releases 页面](https://github.com/Gracker/HighPerformanceFriendsCircle/releases) 下载：
 
 **滑动测试模块：**
 - **app** - 主应用模块
@@ -387,10 +387,10 @@ OpenGL ES 2.0地图渲染Demo：
 - **自动发布**: 构建成功后自动创建GitHub Release
 - **手动发布**: 支持手动触发带版本号的正式发布
 
-详细配置说明请查看 [RELEASE_SETUP.md](RELEASE_SETUP.md)
+详细配置说明：当前仓库未包含 `RELEASE_SETUP.md`，请参考 CI 工作流配置（待人工补充文档）。
 
 ### 签名配置
-如需配置APK签名，请参考 [SIGNING_CONFIG_EXAMPLE.md](SIGNING_CONFIG_EXAMPLE.md)
+当前仓库未包含 `SIGNING_CONFIG_EXAMPLE.md`，请根据本地 keystore 与 Gradle signingConfig 进行配置（待人工补充示例文档）。
 
 
 # 项目截图
