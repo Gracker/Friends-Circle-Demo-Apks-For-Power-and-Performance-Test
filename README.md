@@ -4,10 +4,10 @@
 
 [![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
 [![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
-[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels)
 [![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
 [![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
 [![Language](https://img.shields.io/badge/Language-Java%20%26%20Kotlin-orange.svg)](https://kotlinlang.org)
@@ -332,7 +332,7 @@ OpenGL ES 2.0地图渲染Demo：
 ## 📱 下载应用
 
 ### 🚀 自动构建版本
-每次代码更新后，GitHub Actions会自动构建最新版本的APK文件。你可以在[Releases页面](../../releases)下载：
+每次代码更新后，GitHub Actions 会自动构建最新版本的 APK 文件。你可以在 [Releases 页面](https://github.com/Gracker/HighPerformanceFriendsCircle/releases) 下载：
 
 **滑动测试模块：**
 - **app** - 主应用模块
@@ -387,10 +387,10 @@ OpenGL ES 2.0地图渲染Demo：
 - **自动发布**: 构建成功后自动创建GitHub Release
 - **手动发布**: 支持手动触发带版本号的正式发布
 
-详细配置说明请查看 [RELEASE_SETUP.md](RELEASE_SETUP.md)
+详细配置说明：当前仓库未包含 `RELEASE_SETUP.md`，请参考 CI 工作流配置（待人工补充文档）。
 
 ### 签名配置
-如需配置APK签名，请参考 [SIGNING_CONFIG_EXAMPLE.md](SIGNING_CONFIG_EXAMPLE.md)
+当前仓库未包含 `SIGNING_CONFIG_EXAMPLE.md`，请根据本地 keystore 与 Gradle signingConfig 进行配置（待人工补充示例文档）。
 
 
 # 项目截图
