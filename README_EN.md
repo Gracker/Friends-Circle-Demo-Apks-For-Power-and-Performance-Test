@@ -7,7 +7,7 @@
 [![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels)
 [![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Downloads](https://img.shields.io/github/downloads/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/total?label=Downloads&color=orange)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/releases)
 [![Stars](https://img.shields.io/github/stars/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test?label=Stars&color=yellow)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/stargazers)
 [![Language](https://img.shields.io/badge/Language-Java%20%26%20Kotlin-orange.svg)](https://kotlinlang.org)
