@@ -2,14 +2,14 @@
 
 ## 📊 Project Status
 
-[![Android CI/CD](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/HighPerformanceFriendsCircle/actions/workflows/android.yml)
-[![Release](https://img.shields.io/github/v/release/Gracker/HighPerformanceFriendsCircle?label=Release&color=brightgreen)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
-[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+[![Android CI/CD](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/actions/workflows/android.yml)
+[![Release](https://img.shields.io/github/v/release/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test?label=Release&color=brightgreen)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/releases)
+[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels)
 [![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
-[![Downloads](https://img.shields.io/github/downloads/Gracker/HighPerformanceFriendsCircle/total?label=Downloads&color=orange)](https://github.com/Gracker/HighPerformanceFriendsCircle/releases)
-[![Stars](https://img.shields.io/github/stars/Gracker/HighPerformanceFriendsCircle?label=Stars&color=yellow)](https://github.com/Gracker/HighPerformanceFriendsCircle/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/total?label=Downloads&color=orange)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/releases)
+[![Stars](https://img.shields.io/github/stars/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test?label=Stars&color=yellow)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/stargazers)
 [![Language](https://img.shields.io/badge/Language-Java%20%26%20Kotlin-orange.svg)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 
@@ -282,7 +282,7 @@ By comparing performance under different implementation methods and load levels:
 
 ## Special Thanks
 
-Thanks to [KCrason](https://github.com/KCrason) for the original project and [razerdp](https://github.com/razerdp) for View caching concepts.
+Thanks to KCrason for the original project and [razerdp](https://github.com/razerdp) for View caching concepts.
 
 ## Future Plans
 

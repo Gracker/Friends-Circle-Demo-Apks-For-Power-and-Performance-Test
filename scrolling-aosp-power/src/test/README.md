@@ -1,6 +1,6 @@
 # 朋友圈功耗测试模块单元测试
 
-本目录包含了针对`wechatfriendforpower`模块的单元测试，主要测试功耗监控和朋友圈UI展示等核心功能。
+本目录包含了针对 `scrolling-aosp-power` 模块的单元测试，主要测试功耗监控和朋友圈 UI 展示等核心功能。
 
 ## 测试内容
 
@@ -28,13 +28,13 @@
 执行以下命令运行所有测试：
 
 ```
-./gradlew :wechatfriendforpower:testDebugUnitTest
+./gradlew :scrolling-aosp-power:testDebugUnitTest
 ```
 
 运行特定测试类：
 
 ```
-./gradlew :wechatfriendforpower:testDebugUnitTest --tests "com.android.wechatfriendforpower.PowerActivityTest"
+./gradlew :scrolling-aosp-power:testDebugUnitTest --tests "com.android.wechatfriendforpower.PowerActivityTest"
 ```
 
 ## 测试覆盖范围

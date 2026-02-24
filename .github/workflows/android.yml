@@ -80,6 +80,7 @@ jobs:
         :launch-compose:assembleRelease
         :launch-webview:assembleRelease
         :launch-gl:assembleRelease
+        :launch-game:assembleRelease
         :switch-aosp:assembleRelease
         :switch-flutter:assembleRelease
         :switch-webview:assembleRelease
@@ -177,7 +178,7 @@ jobs:
         fi
 
         # Launch Modules (Flavored)
-        for module in launch-aosp launch-compose launch-webview launch-gl; do
+        for module in launch-aosp launch-compose launch-webview launch-gl launch-game; do
           for flavor in light medium heavy; do
             if [ -f "$module/build/outputs/apk/$flavor/release/$module-$flavor-release.apk" ]; then
                cp "$module/build/outputs/apk/$flavor/release/$module-$flavor-release.apk" "release-apks/$module-$flavor-release-${{ steps.version.outputs.BUILD_TIME }}-${{ steps.version.outputs.SHORT_SHA }}.apk"
