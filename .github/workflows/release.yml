@@ -76,6 +76,7 @@ jobs:
           :launch-compose:assembleRelease \
           :launch-webview:assembleRelease \
           :launch-gl:assembleRelease \
+          :launch-game:assembleRelease \
           --parallel
 
     - name: Prepare Release Files
@@ -105,7 +106,7 @@ jobs:
           ## 📝 发布说明
           ${{ github.event.inputs.release_notes }}
 
-          ## 📦 包含的应用 (20 个模块)
+          ## 📦 包含的应用 (21 个模块)
 
           ### 🎯 滑动测试模块 (标准 Android UI + RenderThread)
           - **app** - 主应用模块
@@ -140,6 +141,7 @@ jobs:
           - **launch-compose** - Jetpack Compose (轻/中/重负载)
           - **launch-webview** - WebView 混合开发 (轻/中/重负载)
           - **launch-gl** - OpenGL ES (轻/中/重负载)
+          - **launch-game** - 游戏引擎 (轻/中/重负载)
 
           ## 🔧 安装说明
           1. 下载对应的APK文件
