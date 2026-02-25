@@ -100,6 +100,11 @@ public class GLMapView extends GLSurfaceView {
     }
 
     public void resetView() {
+        // Cancel any active fling animation to prevent it from overriding the reset
+        if (!scroller.isFinished()) {
+            scroller.forceFinished(true);
+        }
+        flingStarted = false;
         queueEvent(renderer::resetView);
         requestRender();
     }
