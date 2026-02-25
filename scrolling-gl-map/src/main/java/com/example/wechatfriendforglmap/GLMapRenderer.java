@@ -53,6 +53,7 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     private float offsetX = 0f;
     private float offsetY = 0f;
     private float zoom = 1f;
+    private boolean markersVisible = true;
 
     // Geometry buffers
     private FloatBuffer gridVertices;
@@ -152,6 +153,17 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     public void setZoom(float scaleFactor) {
         this.zoom *= scaleFactor;
         this.zoom = Math.max(0.5f, Math.min(5f, zoom));
+    }
+
+    public void resetView() {
+        this.offsetX = 0f;
+        this.offsetY = 0f;
+        this.zoom = 1f;
+    }
+
+    public boolean toggleMarkers() {
+        markersVisible = !markersVisible;
+        return markersVisible;
     }
 
     public void onScrollStart() {
@@ -593,6 +605,10 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     }
 
     private void drawMarkers() {
+        if (!markersVisible) {
+            return;
+        }
+
         GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
         GLES20.glUniform4f(colorHandle, 0.9f, 0.2f, 0.2f, 1.0f); // Red markers
 
