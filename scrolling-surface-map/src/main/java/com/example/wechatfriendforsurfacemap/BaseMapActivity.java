@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,21 +44,14 @@ public abstract class BaseMapActivity extends AppCompatActivity {
     protected abstract @LoadType.Type int getLoadType();
 
     private void setupBottomControls() {
-        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> {
-            // Zoom in functionality (placeholder)
-        });
+        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> showNotImplementedToast("缩放+"));
+        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> showNotImplementedToast("缩放-"));
+        findViewById(R.id.btn_location).setOnClickListener(v -> showNotImplementedToast("定位"));
+        findViewById(R.id.btn_layers).setOnClickListener(v -> showNotImplementedToast("图层"));
+    }
 
-        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> {
-            // Zoom out functionality (placeholder)
-        });
-
-        findViewById(R.id.btn_location).setOnClickListener(v -> {
-            // Current location functionality (placeholder)
-        });
-
-        findViewById(R.id.btn_layers).setOnClickListener(v -> {
-            // Layers functionality (placeholder)
-        });
+    private void showNotImplementedToast(String feature) {
+        Toast.makeText(this, feature + "功能待实现", Toast.LENGTH_SHORT).show();
     }
 }
 
