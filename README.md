@@ -4,7 +4,7 @@
 
 [![Android CI/CD](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/actions/workflows/android.yml/badge.svg)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/actions/workflows/android.yml)
 [![Release](https://img.shields.io/github/v/release/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test?label=Release&color=brightgreen)](https://github.com/Gracker/Friends-Circle-Demo-Apks-For-Power-and-Performance-Test/releases)
-[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://android-arsenal.com/api?level=24)
+[![API Level](https://img.shields.io/badge/API-24%2B-blue.svg)](https://developer.android.com/about/versions/nougat)
 [![AGP](https://img.shields.io/badge/AGP-8.7.3-blue.svg)](https://developer.android.com/build)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF.svg)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
@@ -316,7 +316,7 @@ OpenGL ES 2.0地图渲染Demo：
 
 ## 特别鸣谢
 
-感谢原项目作者 [KCrason](https://github.com/KCrason) 的杰出工作和 [razerdp](https://github.com/razerdp) 提供的 View 缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能、功耗和WebView测试模块。
+感谢原项目 [HighPerformanceFriendsCircle](https://github.com/ighsix/HighPerformanceFriendsCircle) 的作者与社区贡献，以及 [razerdp](https://github.com/razerdp) 提供的 View 缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能、功耗和WebView测试模块。
 
 ## 未来计划
 
