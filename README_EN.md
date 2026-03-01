@@ -282,7 +282,7 @@ By comparing performance under different implementation methods and load levels:
 
 ## Special Thanks
 
-Thanks to [KCrason](https://github.com/KCrason) for the original project and [razerdp](https://github.com/razerdp) for View caching concepts.
+Thanks to KCrason (GitHub profile link unavailable) for the original project and [razerdp](https://github.com/razerdp) for View caching concepts.
 
 ## Future Plans
 

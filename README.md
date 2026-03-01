@@ -316,7 +316,7 @@ OpenGL ES 2.0地图渲染Demo：
 
 ## 特别鸣谢
 
-感谢原项目作者 [KCrason](https://github.com/KCrason) 的杰出工作和 [razerdp](https://github.com/razerdp) 提供的 View 缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能、功耗和WebView测试模块。
+感谢原项目作者 KCrason（其 GitHub 主页链接已失效）的杰出工作和 [razerdp](https://github.com/razerdp) 提供的 View 缓存思路。本项目在原有基础上进行了扩展，增加了专门的性能、功耗和WebView测试模块。
 
 ## 未来计划
 
