@@ -1,0 +1,120 @@
+{
+  "version": "1.0.0",
+  "description": "Launch performance APK registry (extracted from automation-test/ after dir removal)",
+  "apk_source_dir": "../apk-released",
+  "launch_tests": {
+    "description": "启动性能测试 APK",
+    "apps": [
+      {
+        "name": "launch-aosp",
+        "base_package": "com.example.launch.aosp",
+        "activity": "com.example.launch.aosp.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.aosp.light",
+            "apk": "launch-aosp-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.aosp.medium",
+            "apk": "launch-aosp-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.aosp.heavy",
+            "apk": "launch-aosp-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-compose",
+        "base_package": "com.example.launch.compose",
+        "activity": "com.example.launch.compose.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.compose.light",
+            "apk": "launch-compose-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.compose.medium",
+            "apk": "launch-compose-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.compose.heavy",
+            "apk": "launch-compose-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-webview",
+        "base_package": "com.example.launch.webview",
+        "activity": "com.example.launch.webview.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.webview.light",
+            "apk": "launch-webview-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.webview.medium",
+            "apk": "launch-webview-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.webview.heavy",
+            "apk": "launch-webview-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-gl",
+        "base_package": "com.example.launch.gl",
+        "activity": "com.example.launch.gl.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.gl.light",
+            "apk": "launch-gl-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.gl.medium",
+            "apk": "launch-gl-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.gl.heavy",
+            "apk": "launch-gl-heavy-release-v1.0.0.apk"
+          }
+        ]
+      },
+      {
+        "name": "launch-game",
+        "base_package": "com.example.launch.game",
+        "activity": "com.example.launch.game.MainActivity",
+        "flavors": [
+          {
+            "name": "light",
+            "package": "com.example.launch.game.light",
+            "apk": "launch-game-light-release-v1.0.0.apk"
+          },
+          {
+            "name": "medium",
+            "package": "com.example.launch.game.medium",
+            "apk": "launch-game-medium-release-v1.0.0.apk"
+          },
+          {
+            "name": "heavy",
+            "package": "com.example.launch.game.heavy",
+            "apk": "launch-game-heavy-release-v1.0.0.apk"
+          }
+        ]
+      }
+    ]
+  }
+}

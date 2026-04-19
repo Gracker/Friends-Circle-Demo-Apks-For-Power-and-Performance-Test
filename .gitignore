@@ -121,11 +121,18 @@ fastlane/readme.md
 /perfetto-trace/
 Tools/trace/
 Tools/trace/**
+Tools/trace-release/
+Tools/results/
+Tools/logs/
+Tools/sql_tmp_check/
 *.pftrace
 *.ptrace
 
-# Automation Test
-automation-test/results/
-automation-test/__pycache__/
+# AI assistant / editor state
+.claude/
+.cursor/
+
+# Python cache
 __pycache__/
 *.pyc
+.omx/
