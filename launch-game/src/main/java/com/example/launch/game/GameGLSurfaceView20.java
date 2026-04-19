@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Random;
 
 import static android.opengl.GLES20.*;
 import static android.opengl.Matrix.*;
@@ -28,6 +29,7 @@ public class GameGLSurfaceView20 extends GLSurfaceView {
     private static final String TAG = "GameGLSurfaceView20";
     private static final int TARGET_FPS = 60;
     private static final int FRAME_TIME_MS = 1000 / TARGET_FPS;
+    private static final long PARTICLE_RANDOM_SEED = 0x6A09E667L;
 
     private GameRenderer renderer;
     private OnFrameUpdateListener frameUpdateListener;
@@ -149,6 +151,7 @@ public class GameGLSurfaceView20 extends GLSurfaceView {
 
         // 粒子系统
         private static final int PARTICLE_COUNT = 50;
+        private final Random particleRandom = new Random(PARTICLE_RANDOM_SEED);
         private FloatBuffer particleVertices;
         private FloatBuffer particleColors;
         private FloatBuffer particleVelocities;
@@ -178,19 +181,19 @@ public class GameGLSurfaceView20 extends GLSurfaceView {
 
             for (int i = 0; i < PARTICLE_COUNT; i++) {
                 // 位置
-                vertices[i * 3] = (float) (Math.random() * 2.0 - 1.0);
-                vertices[i * 3 + 1] = (float) (Math.random() * 2.0 - 1.0);
+                vertices[i * 3] = particleRandom.nextFloat() * 2.0f - 1.0f;
+                vertices[i * 3 + 1] = particleRandom.nextFloat() * 2.0f - 1.0f;
                 vertices[i * 3 + 2] = 0.0f;
 
                 // 速度
-                velocities[i * 3] = (float) (Math.random() * 0.02 - 0.01);
-                velocities[i * 3 + 1] = (float) (Math.random() * 0.02 - 0.01);
+                velocities[i * 3] = particleRandom.nextFloat() * 0.02f - 0.01f;
+                velocities[i * 3 + 1] = particleRandom.nextFloat() * 0.02f - 0.01f;
                 velocities[i * 3 + 2] = 0.0f;
 
                 // 颜色（偏向绿色）
-                colors[i * 3] = 0.2f + (float) Math.random() * 0.3f;      // R
-                colors[i * 3 + 1] = 0.5f + (float) Math.random() * 0.5f;  // G
-                colors[i * 3 + 2] = 0.2f + (float) Math.random() * 0.3f;  // B
+                colors[i * 3] = 0.2f + particleRandom.nextFloat() * 0.3f;      // R
+                colors[i * 3 + 1] = 0.5f + particleRandom.nextFloat() * 0.5f;  // G
+                colors[i * 3 + 2] = 0.2f + particleRandom.nextFloat() * 0.3f;  // B
             }
 
             particleVertices = createFloatBuffer(vertices);

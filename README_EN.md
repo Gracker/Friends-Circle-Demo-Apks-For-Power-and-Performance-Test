@@ -195,7 +195,7 @@ Dual window rendering demonstration:
 
 Mixed rendering combining two pipelines:
 
-- **Pure RenderThread Animation**: SurfaceView with dedicated render thread (top)
+- **Pure App-Managed Thread Animation (not system RenderThread)**: SurfaceView with dedicated render thread (top)
 - **Standard UI+RenderThread**: RecyclerView with normal View hierarchy (bottom)
 - **Simulates Video Overlay**: Like video player overlay on scrollable list
 - Supports 11 load types for analyzing mixed rendering performance

@@ -229,7 +229,7 @@
 
 混合两种渲染管线的Demo：
 
-- **纯RenderThread动画**：顶部SurfaceView使用独立渲染线程
+- **纯应用自管线程动画（非系统RenderThread）**：顶部SurfaceView使用独立渲染线程
 - **标准UI+RenderThread**：底部RecyclerView使用正常View层级
 - **模拟视频覆盖场景**：类似视频播放器叠加在可滑动列表上
 - 支持11种负载类型，分析混合渲染的性能特征

@@ -1,6 +1,5 @@
 package com.example.wechatfriendforwebview;
 
-import android.content.Context;
 import android.os.Trace;
 import android.util.Log;
 
@@ -8,13 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import com.example.loadconfig.LoadConfig;
+import com.example.loadconfig.LoadType;
 
 /**
  * WebView版朋友圈数据中心
@@ -22,12 +19,29 @@ import com.example.loadconfig.LoadConfig;
  */
 public class WebViewDataCenter {
     private static final String TAG = "WebViewDataCenter";
+    private static final int MINIMAL_ITEM_COUNT = 10;
+    private static final int LIGHT_ITEM_COUNT = 20;
+    private static final int MEDIUM_ITEM_COUNT = 50;
+    private static final int HEAVY_ITEM_COUNT = 100;
+
+    private static final int MINIMAL_MAX_COMMENTS = 2;
+    private static final int LIGHT_MAX_COMMENTS = 5;
+    private static final int MEDIUM_MAX_COMMENTS = 15;
+    private static final int HEAVY_MAX_COMMENTS = 30;
+
+    private static final int MINIMAL_MAX_PRAISES = 5;
+    private static final int LIGHT_MAX_PRAISES = 15;
+    private static final int MEDIUM_MAX_PRAISES = 35;
+    private static final int HEAVY_MAX_PRAISES = 60;
+    private static final long MORE_DATA_BATCH_SEED_DELTA = 1009L;
+    private static final long MORE_DATA_COUNT_SEED_DELTA = 31L;
 
     // 使用volatile保证多线程可见性，修复DCL问题
     private static volatile WebViewDataCenter instance;
 
     // 使用线程安全的ConcurrentHashMap替代HashMap
     private final Map<Integer, String> cachedJsonData = new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.atomic.AtomicInteger moreDataBatchCounter = new java.util.concurrent.atomic.AtomicInteger(0);
 
     // 私有构造函数
     private WebViewDataCenter() {
@@ -51,6 +65,7 @@ public class WebViewDataCenter {
      */
     public void clearCachedData() {
         cachedJsonData.clear();
+        moreDataBatchCounter.set(0);
     }
 
     /**
@@ -67,21 +82,7 @@ public class WebViewDataCenter {
         Trace.beginSection("WebViewDataCenter_generateJsonData");
 
         // 根据负载类型确定生成的朋友圈数量
-        int count;
-        switch (loadType) {
-            case com.example.loadconfig.LoadType.LIGHT:
-                count = 20;  // 轻负载，20条数据
-                break;
-            case com.example.loadconfig.LoadType.MEDIUM:
-                count = 50;  // 中负载，50条数据
-                break;
-            case com.example.loadconfig.LoadType.HEAVY:
-                count = 100; // 高负载，100条数据
-                break;
-            default:
-                count = 30;
-                break;
-        }
+        int count = getItemCountByLoadType(loadType);
 
         String jsonData = generateFriendCircleJsonData(count, loadType);
 
@@ -102,6 +103,8 @@ public class WebViewDataCenter {
     private String generateFriendCircleJsonData(int count, int loadType) {
         JSONArray friendCircleArray = new JSONArray();
         Random random = new Random(LoadConfig.DATA_GENERATION_SEED); // 使用统一配置的种子值，确保每次生成的数据顺序一致
+        final int maxComments = getMaxCommentsByLoadType(loadType);
+        final int maxPraises = getMaxPraisesByLoadType(loadType);
 
         try {
             // 第一条固定为"朋友圈"头部
@@ -146,22 +149,6 @@ public class WebViewDataCenter {
                 }
 
                 // 根据负载类型调整评论数量
-                int maxComments;
-                switch (loadType) {
-                    case com.example.loadconfig.LoadType.LIGHT:
-                        maxComments = 5;   // 轻负载: 0-4条评论
-                        break;
-                    case com.example.loadconfig.LoadType.MEDIUM:
-                        maxComments = 15;  // 中负载: 0-14条评论
-                        break;
-                    case com.example.loadconfig.LoadType.HEAVY:
-                        maxComments = 11;  // 高负载: 0-10条评论
-                        break;
-                    default:
-                        maxComments = 11;
-                        break;
-                }
-
                 // 随机选择评论数量
                 int commentCount = random.nextInt(maxComments);
                 JSONArray comments = new JSONArray();
@@ -185,22 +172,6 @@ public class WebViewDataCenter {
                 }
 
                 // 根据负载类型调整点赞数量
-                int maxPraises;
-                switch (loadType) {
-                    case com.example.loadconfig.LoadType.LIGHT:
-                        maxPraises = 15;   // 轻负载: 0-14个点赞
-                        break;
-                    case com.example.loadconfig.LoadType.MEDIUM:
-                        maxPraises = 35;   // 中负载: 0-34个点赞
-                        break;
-                    case com.example.loadconfig.LoadType.HEAVY:
-                        maxPraises = 21;   // 高负载: 0-20个点赞
-                        break;
-                    default:
-                        maxPraises = 21;
-                        break;
-                }
-
                 // 随机选择点赞数量
                 int praiseCount = random.nextInt(maxPraises);
                 JSONArray praises = new JSONArray();
@@ -257,8 +228,11 @@ public class WebViewDataCenter {
     public String getMoreFriendCircleJsonData(int count) {
         Trace.beginSection("WebViewDataCenter_generateMoreJsonData");
 
-        // 使用随机种子确保每次生成的数据不同但可控
-        Random random = new Random(System.currentTimeMillis());
+        int batchIndex = moreDataBatchCounter.getAndIncrement();
+        long seed = LoadConfig.DATA_GENERATION_SEED
+                + (long) count * MORE_DATA_COUNT_SEED_DELTA
+                + (long) batchIndex * MORE_DATA_BATCH_SEED_DELTA;
+        Random random = new Random(seed);
 
         JSONArray friendCircleArray = new JSONArray();
 
@@ -362,4 +336,49 @@ public class WebViewDataCenter {
             return "{\"data\":[]}";
         }
     }
-} 
+
+    private int getItemCountByLoadType(int loadType) {
+        switch (LoadType.getLoadLevel(loadType)) {
+            case 0:
+                return MINIMAL_ITEM_COUNT;
+            case 1:
+                return LIGHT_ITEM_COUNT;
+            case 2:
+                return MEDIUM_ITEM_COUNT;
+            case 3:
+                return HEAVY_ITEM_COUNT;
+            default:
+                return LIGHT_ITEM_COUNT;
+        }
+    }
+
+    private int getMaxCommentsByLoadType(int loadType) {
+        switch (LoadType.getLoadLevel(loadType)) {
+            case 0:
+                return MINIMAL_MAX_COMMENTS;
+            case 1:
+                return LIGHT_MAX_COMMENTS;
+            case 2:
+                return MEDIUM_MAX_COMMENTS;
+            case 3:
+                return HEAVY_MAX_COMMENTS;
+            default:
+                return LIGHT_MAX_COMMENTS;
+        }
+    }
+
+    private int getMaxPraisesByLoadType(int loadType) {
+        switch (LoadType.getLoadLevel(loadType)) {
+            case 0:
+                return MINIMAL_MAX_PRAISES;
+            case 1:
+                return LIGHT_MAX_PRAISES;
+            case 2:
+                return MEDIUM_MAX_PRAISES;
+            case 3:
+                return HEAVY_MAX_PRAISES;
+            default:
+                return LIGHT_MAX_PRAISES;
+        }
+    }
+}

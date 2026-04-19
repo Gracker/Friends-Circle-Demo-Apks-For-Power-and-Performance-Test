@@ -41,6 +41,14 @@
         // 150 个 DOM 元素，每个 50,000 次计算 = 7,500,000 总操作
         const container = document.getElementById('container');
         const startTime = performance.now();
+        let randomState = 0x6d2b79f5;
+
+        function seededRandom() {
+            randomState = (randomState * 1664525 + 1013904223) >>> 0;
+            return randomState / 4294967296;
+        }
+
+        Math.random = seededRandom;
 
         // Create data structures
         const dataMap = new Map();

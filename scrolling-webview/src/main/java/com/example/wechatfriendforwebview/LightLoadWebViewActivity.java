@@ -15,6 +15,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
 
     // 处理器实例
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean lightMonitoringInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,18 +31,31 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
      */
     @Override
     protected void performLoadTask() {
-        // 不执行任何负载，仅记录日志
-        Log.d(TAG, "低负载模式 - 仅在滚动时执行负载");
+        if (lightMonitoringInitialized) {
+            Log.d(TAG, "低负载模式 - 轻量监控已初始化，跳过重复初始化");
+            return;
+        }
+
+        if (executeLightMonitoring()) {
+            lightMonitoringInitialized = true;
+            Log.d(TAG, "低负载模式 - 已启动轻量监控");
+        } else {
+            Log.w(TAG, "低负载模式 - WebView未就绪，轻量监控未启动");
+        }
     }
 
     /**
      * 执行轻量级监控，不添加额外负载
      */
-    private void executeLightMonitoring() {
+    private boolean executeLightMonitoring() {
         Trace.beginSection("LightLoadWebView_executeLightMonitoring");
 
-        if (webView != null) {
-            webView.post(() -> {
+        if (webView == null) {
+            Trace.endSection();
+            return false;
+        }
+
+        webView.post(() -> {
                 // 初始化轻负载JavaScript
                 String initLightLoadJs = "javascript:" +
                         "var lightLoadEnabled = true;" +
@@ -245,16 +259,16 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
 
                 webView.evaluateJavascript(setupLightLoadJs, null);
             });
-        }
 
         Trace.endSection();
+        return true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         // 暂停监控
-        if (webView != null) {
+        if (lightMonitoringInitialized && webView != null) {
             webView.evaluateJavascript("javascript: lightLoadEnabled = false;", null);
         }
     }
@@ -263,7 +277,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     protected void onResume() {
         super.onResume();
         // 恢复监控
-        if (webView != null) {
+        if (lightMonitoringInitialized && webView != null) {
             webView.evaluateJavascript("javascript: lightLoadEnabled = true; requestAnimationFrame(performLightCalculation);", null);
         }
     }
@@ -272,7 +286,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     protected void onDestroy() {
         // 停止监控 - 在调用 super.onDestroy() 之前执行，因为基类会销毁 webView
         // 注意：此时 Activity 仍在销毁过程中，不需要检查 isActivityActive
-        if (webView != null) {
+        if (lightMonitoringInitialized && webView != null) {
             try {
                 webView.evaluateJavascript("javascript: lightLoadEnabled = false;", null);
             } catch (Exception e) {

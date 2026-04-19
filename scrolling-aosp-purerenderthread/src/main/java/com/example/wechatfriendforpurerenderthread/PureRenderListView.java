@@ -1,13 +1,12 @@
 package com.example.wechatfriendforpurerenderthread;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -16,24 +15,22 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.OverScroller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
+import androidx.core.content.ContextCompat;
 
-import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.UserBean;
+import com.example.scrolling.common.model.MomentsDataFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Pure RenderThread List View - all rendering happens on a separate thread.
  * UI Thread only handles touch events and passes scroll commands to render thread.
- * 
- * Key characteristics:
- * - SurfaceView provides a separate Surface for rendering
- * - Dedicated render thread handles all drawing operations
- * - UI Thread is kept free from rendering work
- * - Simulates WeChat Moments-style list items
  */
 public class PureRenderListView extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     private static final String TAG = "PureRenderListView";
@@ -43,17 +40,24 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private SurfaceHolder holder;
 
-    // Scroll state (accessed from both threads, needs synchronization)
+    // Scroll state (accessed from both threads)
     private volatile float scrollY = 0;
-    private volatile float targetScrollY = 0;
     private OverScroller scroller;
     private GestureDetector gestureDetector;
 
     // Item configuration
-    private static final int ITEM_HEIGHT = 300;
-    private static final int ITEM_COUNT = 100;
-    private static final int AVATAR_SIZE = 80;
-    private static final int PADDING = 20;
+    private static final int ITEM_HEIGHT = 360;
+    private static final int ITEM_COUNT = 2700;
+    private static final int AVATAR_SIZE = 88;
+    private static final int PADDING = 24;
+
+    // Shared color palette
+    private int colorBg;
+    private int colorItemBg;
+    private int colorName;
+    private int colorContent;
+    private int colorTime;
+    private int colorDivider;
 
     // Paints
     private Paint itemBgPaint;
@@ -66,25 +70,10 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
 
     // Load simulation
     private int loadType = LoadType.MINIMAL;
-    private final Random random = new Random(12345L);
     private LoadSimulator mLoadSimulator;
 
     // Data
-    private final List<ListItem> items = new ArrayList<>();
-
-    // Pre-generated content
-    private static final String[] NAMES = {"Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"};
-    private static final String[] CONTENTS = {
-            "Just had an amazing breakfast!",
-            "Working from home today...",
-            "Beautiful sunset tonight!",
-            "New project is exciting!",
-            "Weekend vibes!",
-            "Coffee time ☕",
-            "Learning something new!",
-            "Great meeting today!"
-    };
-    private static final String[] TIMES = {"Just now", "5 min ago", "10 min ago", "30 min ago", "1 hour ago", "2 hours ago"};
+    private volatile List<ListItem> items = new ArrayList<>();
 
     public PureRenderListView(Context context) {
         super(context);
@@ -106,33 +95,52 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         holder.addCallback(this);
 
         scroller = new OverScroller(context);
+        initColors(context);
+        initPaints();
+        initGestureDetector(context);
 
-        // Initialize paints
+        // Initialize data with default load type.
+        generateItems();
+
+        // Initialize load simulator
+        mLoadSimulator = new LoadSimulator();
+    }
+
+    private void initColors(Context context) {
+        colorBg = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_F2F2F2);
+        colorItemBg = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_FFFFFF);
+        colorName = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_697A9F);
+        colorContent = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_333333);
+        colorTime = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_999999);
+        colorDivider = ContextCompat.getColor(context, com.example.scrolling.common.R.color.base_DCDCDC);
+    }
+
+    private void initPaints() {
         itemBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        itemBgPaint.setColor(Color.WHITE);
+        itemBgPaint.setColor(colorItemBg);
 
         avatarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        avatarPaint.setColor(Color.parseColor("#2196F3"));
 
         namePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        namePaint.setColor(Color.parseColor("#1976D2"));
-        namePaint.setTextSize(40);
+        namePaint.setColor(colorName);
+        namePaint.setTextSize(36);
         namePaint.setFakeBoldText(true);
 
         contentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        contentPaint.setColor(Color.parseColor("#333333"));
-        contentPaint.setTextSize(36);
+        contentPaint.setColor(colorContent);
+        contentPaint.setTextSize(32);
 
         timePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        timePaint.setColor(Color.parseColor("#999999"));
-        timePaint.setTextSize(28);
+        timePaint.setColor(colorTime);
+        timePaint.setTextSize(26);
 
         dividerPaint = new Paint();
-        dividerPaint.setColor(Color.parseColor("#E0E0E0"));
+        dividerPaint.setColor(colorDivider);
 
         imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    }
 
-        // Initialize gesture detector
+    private void initGestureDetector(Context context) {
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -150,44 +158,62 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 scroller.fling(
-                    0, (int) scrollY,
-                    0, (int) -velocityY,
-                    0, 0,
-                    0, getMaxScrollY()
+                        0, (int) scrollY,
+                        0, (int) -velocityY,
+                        0, 0,
+                        0, getMaxScrollY()
                 );
                 return true;
             }
         });
-
-        // Generate items
-        generateItems();
-
-        // Initialize load simulator
-        mLoadSimulator = new LoadSimulator();
     }
 
     private void generateItems() {
-        Random r = new Random(LoadConfig.DATA_GENERATION_SEED);
-        for (int i = 0; i < ITEM_COUNT; i++) {
-            ListItem item = new ListItem();
-            item.name = NAMES[r.nextInt(NAMES.length)];
-            item.content = CONTENTS[r.nextInt(CONTENTS.length)];
-            item.time = TIMES[r.nextInt(TIMES.length)];
-            item.avatarColor = Color.HSVToColor(new float[]{r.nextFloat() * 360, 0.5f, 0.8f});
-            item.hasImage = r.nextFloat() > 0.5f;
-            if (item.hasImage) {
-                item.imageColor = Color.HSVToColor(new float[]{r.nextFloat() * 360, 0.3f, 0.9f});
+        List<FriendCircleBean> beans = MomentsDataFactory.create(loadType, ITEM_COUNT);
+        List<ListItem> generated = new ArrayList<>(beans.size());
+
+        for (int i = 0; i < beans.size(); i++) {
+            FriendCircleBean bean = beans.get(i);
+            if (bean == null) {
+                continue;
             }
-            items.add(item);
+
+            UserBean userBean = bean.getUserBean();
+            OtherInfoBean otherInfoBean = bean.getOtherInfoBean();
+
+            ListItem item = new ListItem();
+            item.name = userBean != null && !TextUtils.isEmpty(userBean.getUserName())
+                    ? userBean.getUserName() : "微信用户";
+            item.content = !TextUtils.isEmpty(bean.getContent()) ? bean.getContent() : "";
+            item.time = otherInfoBean != null && !TextUtils.isEmpty(otherInfoBean.getTime())
+                    ? otherInfoBean.getTime() : "刚刚";
+            item.source = otherInfoBean != null ? otherInfoBean.getSource() : null;
+            item.hasImage = bean.getImageUrls() != null && !bean.getImageUrls().isEmpty();
+            item.avatarColor = Color.HSVToColor(new float[]{
+                    Math.abs((item.name + i).hashCode()) % 360, 0.45f, 0.88f
+            });
+            if (item.hasImage) {
+                item.imageColor = Color.HSVToColor(new float[]{
+                        Math.abs((item.content + i).hashCode()) % 360, 0.25f, 0.95f
+                });
+            }
+            generated.add(item);
         }
+
+        items = generated;
+        Log.i(TAG, "Generated item count: " + generated.size() + ", loadType=" + LoadType.toLabel(loadType));
+        scrollY = Math.max(0, Math.min(scrollY, getMaxScrollY()));
     }
 
     private int getMaxScrollY() {
-        return Math.max(0, ITEM_COUNT * ITEM_HEIGHT - getHeight());
+        return Math.max(0, items.size() * ITEM_HEIGHT - getHeight());
     }
 
     public void setLoadType(@LoadType.Type int loadType) {
-        this.loadType = loadType;
+        if (this.loadType != loadType || items.isEmpty()) {
+            this.loadType = loadType;
+            generateItems();
+        }
     }
 
     @Override
@@ -224,7 +250,6 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         while (isRunning.get()) {
             long frameStart = System.nanoTime();
 
-            // Update scroller on render thread
             if (scroller.computeScrollOffset()) {
                 scrollY = scroller.getCurrY();
             }
@@ -268,74 +293,120 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         int width = getWidth();
         int height = getHeight();
 
-        // Clear background
-        canvas.drawColor(Color.parseColor("#F5F5F5"));
-
-        // Execute load simulation
+        canvas.drawColor(colorBg);
         executeLoad();
 
-        // Calculate visible items
+        List<ListItem> currentItems = items;
+        int itemCount = currentItems.size();
+        if (itemCount <= 0) {
+            return;
+        }
+
         int firstVisibleItem = (int) (scrollY / ITEM_HEIGHT);
         int lastVisibleItem = (int) ((scrollY + height) / ITEM_HEIGHT) + 1;
 
         firstVisibleItem = Math.max(0, firstVisibleItem);
-        lastVisibleItem = Math.min(ITEM_COUNT - 1, lastVisibleItem);
+        lastVisibleItem = Math.min(itemCount - 1, lastVisibleItem);
 
-        // Draw visible items
         for (int i = firstVisibleItem; i <= lastVisibleItem; i++) {
             float itemTop = i * ITEM_HEIGHT - scrollY;
-            drawItem(canvas, items.get(i), 0, itemTop, width, ITEM_HEIGHT);
+            drawItem(canvas, currentItems.get(i), 0, itemTop, width, ITEM_HEIGHT);
         }
 
-        // Draw header with load info
-        Paint headerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        headerPaint.setColor(Color.parseColor("#2196F3"));
-        canvas.drawRect(0, 0, width, 80, headerPaint);
-
-        Paint headerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        headerTextPaint.setColor(Color.WHITE);
-        headerTextPaint.setTextSize(36);
-        headerTextPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText("Pure RenderThread - " + LoadType.toLabel(loadType), width / 2f, 52, headerTextPaint);
+        Paint loadTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        loadTextPaint.setColor(Color.parseColor("#66000000"));
+        loadTextPaint.setTextSize(24);
+        canvas.drawText("Load: " + LoadType.toLabel(loadType), 16, 34, loadTextPaint);
+        canvas.drawText("Items: " + itemCount, 16, 66, loadTextPaint);
     }
 
     private void drawItem(Canvas canvas, ListItem item, float x, float y, float width, float height) {
-        // Item background
-        RectF itemRect = new RectF(x + 10, y + 5, x + width - 10, y + height - 5);
-        canvas.drawRoundRect(itemRect, 8, 8, itemBgPaint);
+        RectF itemRect = new RectF(x, y, x + width, y + height);
+        canvas.drawRect(itemRect, itemBgPaint);
 
-        // Avatar
         avatarPaint.setColor(item.avatarColor);
-        canvas.drawCircle(x + PADDING + AVATAR_SIZE / 2f, y + PADDING + AVATAR_SIZE / 2f, AVATAR_SIZE / 2f, avatarPaint);
+        float avatarCenterX = x + PADDING + AVATAR_SIZE / 2f;
+        float avatarCenterY = y + PADDING + AVATAR_SIZE / 2f;
+        canvas.drawCircle(avatarCenterX, avatarCenterY, AVATAR_SIZE / 2f, avatarPaint);
 
-        // Name
-        canvas.drawText(item.name, x + PADDING + AVATAR_SIZE + 20, y + PADDING + 40, namePaint);
+        float contentStartX = x + PADDING + AVATAR_SIZE + 20;
+        float contentMaxWidth = width - contentStartX - PADDING;
 
-        // Time
-        float timeWidth = timePaint.measureText(item.time);
-        canvas.drawText(item.time, x + width - PADDING - 10 - timeWidth, y + PADDING + 40, timePaint);
+        canvas.drawText(item.name, contentStartX, y + PADDING + 38, namePaint);
 
-        // Content
-        canvas.drawText(item.content, x + PADDING + AVATAR_SIZE + 20, y + PADDING + 90, contentPaint);
+        float contentTop = y + PADDING + 84;
+        float contentBottom = drawMultilineText(
+                canvas,
+                item.content,
+                contentStartX,
+                contentTop,
+                contentPaint,
+                contentMaxWidth,
+                3
+        );
 
-        // Image placeholder
         if (item.hasImage) {
             imagePaint.setColor(item.imageColor);
             RectF imageRect = new RectF(
-                x + PADDING + AVATAR_SIZE + 20,
-                y + PADDING + 110,
-                x + PADDING + AVATAR_SIZE + 220,
-                y + PADDING + 250
+                    contentStartX,
+                    contentBottom + 10,
+                    contentStartX + 230,
+                    contentBottom + 170
             );
             canvas.drawRoundRect(imageRect, 8, 8, imagePaint);
         }
 
-        // Divider
-        canvas.drawRect(x + PADDING, y + height - 1, x + width - PADDING, y + height, dividerPaint);
+        float timeY = y + height - 26;
+        canvas.drawText(item.time, contentStartX, timeY, timePaint);
+        if (!TextUtils.isEmpty(item.source)) {
+            float timeWidth = timePaint.measureText(item.time);
+            canvas.drawText(item.source, contentStartX + timeWidth + 16, timeY, timePaint);
+        }
+
+        canvas.drawRect(x, y + height - 1, x + width, y + height, dividerPaint);
+    }
+
+    private float drawMultilineText(
+            Canvas canvas,
+            String text,
+            float x,
+            float startY,
+            Paint paint,
+            float maxWidth,
+            int maxLines
+    ) {
+        if (TextUtils.isEmpty(text)) {
+            return startY;
+        }
+
+        int start = 0;
+        int textLength = text.length();
+        float y = startY;
+        float lineHeight = paint.getTextSize() + 10;
+
+        for (int line = 0; line < maxLines && start < textLength; line++) {
+            int count = paint.breakText(text, start, textLength, true, maxWidth, null);
+            if (count <= 0) {
+                break;
+            }
+
+            int end = start + count;
+            boolean isLastLine = (line == maxLines - 1);
+            if (isLastLine && end < textLength && count > 1) {
+                String ellipsisLine = text.substring(start, end - 1) + "…";
+                canvas.drawText(ellipsisLine, x, y, paint);
+            } else {
+                canvas.drawText(text, start, end, x, y, paint);
+            }
+
+            start = end;
+            y += lineHeight;
+        }
+
+        return y;
     }
 
     private void executeLoad() {
-        // 使用统一的负载中心执行负载
         if (mLoadSimulator != null) {
             mLoadSimulator.executeInFrameLoad(loadType, "PureRenderThread_doFrameLoad");
         }
@@ -355,10 +426,9 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         String name;
         String content;
         String time;
+        String source;
         int avatarColor;
         boolean hasImage;
         int imageColor;
     }
 }
-
-

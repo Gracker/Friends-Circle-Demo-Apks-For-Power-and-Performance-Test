@@ -33,6 +33,7 @@ import org.json.JSONObject;
  */
 public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity {
     private static final String TAG = "FriendCircleWebView";
+    private static final long WEBVIEW_JS_RANDOM_SEED_BASE = 0x13579BDFL;
 
     protected WebView webView;
     protected ProgressBar progressBar;
@@ -155,6 +156,9 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
                 // 页面加载完成后，隐藏进度条
                 progressBar.setVisibility(View.GONE);
 
+                // 重置 WebView 中的随机数生成器，确保每次进入场景轨迹一致
+                resetDeterministicJsRandom();
+
                 // 页面加载完成后，加载朋友圈数据
                 loadFriendCircleData();
             }
@@ -204,6 +208,27 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         Trace.endSection();
     }
 
+    protected long getDeterministicJsRandomSeed() {
+        return WEBVIEW_JS_RANDOM_SEED_BASE + (long) loadType * 100003L;
+    }
+
+    protected void resetDeterministicJsRandom() {
+        if (webView == null) {
+            return;
+        }
+        long seed = getDeterministicJsRandomSeed() & 0xFFFFFFFFL;
+        String resetRandomJs =
+                "javascript:(function(seed){" +
+                        "window.__hpfcRandState=(seed>>>0);" +
+                        "window.__hpfcRand=function(){" +
+                        "window.__hpfcRandState=(window.__hpfcRandState*1664525+1013904223)>>>0;" +
+                        "return window.__hpfcRandState/4294967296;" +
+                        "};" +
+                        "Math.random=window.__hpfcRand;" +
+                        "})(" + seed + ");";
+        webView.evaluateJavascript(resetRandomJs, null);
+    }
+
     /**
      * 初始化手势检测器
      */
@@ -245,16 +270,6 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 Log.d(TAG, "手势检测: onScroll");
-
-                // 在滚动时阻塞一段时间，减少为原来的1/10
-                if (Math.abs(distanceY) > 10) {
-                    try {
-                        Thread.sleep(3); // 从30ms减少到3ms
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "滚动等待被中断", e);
-                    }
-                }
-
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
         });
@@ -552,25 +567,12 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
                             break;
                         case MotionEvent.ACTION_UP:
                             actionName = "ACTION_UP";
-                            // 在触摸结束时阻塞一小段时间，减少为原来的1/10
-                            try {
-                                Thread.sleep(2); // 从20ms减少到2ms
-                            } catch (InterruptedException e) {
-                                Log.e(TAG, "触摸等待被中断", e);
-                            }
                             break;
                         case MotionEvent.ACTION_MOVE:
                             actionName = "ACTION_MOVE";
-                            // 仅在移动时，限制频率并阻塞，减少为原来的1/10
                             long currentTime = SystemClock.elapsedRealtime();
-                            if (currentTime - lastTouchTime > 30) { // 保持频率限制不变
+                            if (currentTime - lastTouchTime > 30) {
                                 lastTouchTime = currentTime;
-                                // 在滑动过程中，阻塞主线程一小段时间
-                                try {
-                                    Thread.sleep(5); // 从50ms减少到5ms
-                                } catch (InterruptedException e) {
-                                    Log.e(TAG, "触摸等待被中断", e);
-                                }
                             }
                             break;
                     }

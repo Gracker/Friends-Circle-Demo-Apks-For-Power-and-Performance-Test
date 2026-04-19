@@ -71,27 +71,25 @@ public class DualWindowDataCenter {
     }
 
     public List<FriendCircleBean> getFriendCircleBeans(int loadType) {
-        switch (loadType) {
-            case com.example.loadconfig.LoadType.LIGHT:
-                if (cachedLightLoadFriendCircleBeans == null) {
-                    cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
-                }
-                return cachedLightLoadFriendCircleBeans;
-            case com.example.loadconfig.LoadType.MEDIUM:
-                if (cachedMediumLoadFriendCircleBeans == null) {
-                    cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
-                }
-                return cachedMediumLoadFriendCircleBeans;
-            case com.example.loadconfig.LoadType.HEAVY:
-                if (cachedHeavyLoadFriendCircleBeans == null) {
-                    cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(loadType);
-                }
-                return cachedHeavyLoadFriendCircleBeans;
-            default:
+        switch (com.example.loadconfig.LoadType.getLoadLevel(loadType)) {
+            case 1:
                 if (cachedLightLoadFriendCircleBeans == null) {
                     cachedLightLoadFriendCircleBeans = generateFriendCircleBeans(com.example.loadconfig.LoadType.LIGHT);
                 }
                 return cachedLightLoadFriendCircleBeans;
+            case 2:
+                if (cachedMediumLoadFriendCircleBeans == null) {
+                    cachedMediumLoadFriendCircleBeans = generateFriendCircleBeans(com.example.loadconfig.LoadType.MEDIUM);
+                }
+                return cachedMediumLoadFriendCircleBeans;
+            case 3:
+                if (cachedHeavyLoadFriendCircleBeans == null) {
+                    cachedHeavyLoadFriendCircleBeans = generateFriendCircleBeans(com.example.loadconfig.LoadType.HEAVY);
+                }
+                return cachedHeavyLoadFriendCircleBeans;
+            case 0:
+            default:
+                return generateFriendCircleBeans(com.example.loadconfig.LoadType.MINIMAL);
         }
     }
 
@@ -187,22 +185,26 @@ public class DualWindowDataCenter {
         // 根据不同的负载类型，生成不同数量的评论
         int commentCount = 0;
 
-        switch (loadType) {
-            case com.example.loadconfig.LoadType.LIGHT:
+        switch (com.example.loadconfig.LoadType.getLoadLevel(loadType)) {
+            case 0:
+                // 最轻负载: 0-1条评论
+                commentCount = position % 2;
+                break;
+            case 1:
                 // 轻负载: 0-2条评论
                 commentCount = position % 3;
                 break;
-            case com.example.loadconfig.LoadType.MEDIUM:
+            case 2:
                 // 中负载: 5-12条评论
                 commentCount = position % 8 + 8;
                 break;
-            case com.example.loadconfig.LoadType.HEAVY:
+            case 3:
                 // 高负载: 15-29条评论
                 commentCount = position % 15 + 15;
                 break;
             default:
-                // 默认为轻负载
-                commentCount = position % 3;
+                // 默认为最轻负载
+                commentCount = position % 2;
                 break;
         }
 
@@ -264,22 +266,26 @@ public class DualWindowDataCenter {
         // 根据不同的负载类型，生成不同数量的点赞
         int praiseCount = 0;
 
-        switch (loadType) {
-            case com.example.loadconfig.LoadType.LIGHT:
+        switch (com.example.loadconfig.LoadType.getLoadLevel(loadType)) {
+            case 0:
+                // 最轻负载: 0-2个点赞
+                praiseCount = position % 3;
+                break;
+            case 1:
                 // 轻负载: 0-5个点赞
                 praiseCount = position % 6;
                 break;
-            case com.example.loadconfig.LoadType.MEDIUM:
+            case 2:
                 // 中负载: 5-12个点赞
                 praiseCount = position % 8 + 5;
                 break;
-            case com.example.loadconfig.LoadType.HEAVY:
+            case 3:
                 // 高负载: 10-20个点赞
                 praiseCount = position % 11 + 10;
                 break;
             default:
-                // 默认为轻负载
-                praiseCount = position % 6;
+                // 默认为最轻负载
+                praiseCount = position % 3;
                 break;
         }
 
@@ -375,4 +381,3 @@ public class DualWindowDataCenter {
         return LOCATIONS[position % LOCATIONS.length];
     }
 }
-

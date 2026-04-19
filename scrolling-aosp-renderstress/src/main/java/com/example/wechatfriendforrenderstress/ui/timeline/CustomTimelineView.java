@@ -110,14 +110,14 @@ public class CustomTimelineView extends ViewGroup {
 
     public void setLoadProfile(@LoadType.Type int loadProfile) {
         this.loadProfile = loadProfile;
-        if (loadProfile == LoadType.LIGHT) {
+        if (loadProfile == LoadType.MINIMAL) {
             notifyRenderStressStop();
         }
     }
 
     public void submitData(List<FriendCircleBean> beans, @LoadType.Type int loadType) {
         loadProfile = loadType;
-        if (loadProfile == LoadType.LIGHT) {
+        if (loadProfile == LoadType.MINIMAL) {
             notifyRenderStressStop();
         }
         data.clear();
@@ -369,7 +369,7 @@ public class CustomTimelineView extends ViewGroup {
     }
 
     private void notifyRenderStressStart() {
-        if (renderStressOverlay != null && loadProfile != LoadType.LIGHT) {
+        if (renderStressOverlay != null && loadProfile != LoadType.MINIMAL) {
             renderStressOverlay.start(loadProfile);
         }
         if (scrollCallback != null) {
@@ -386,4 +386,3 @@ public class CustomTimelineView extends ViewGroup {
         }
     }
 }
-

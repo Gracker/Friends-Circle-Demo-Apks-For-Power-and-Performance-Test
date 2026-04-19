@@ -245,9 +245,6 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (Math.abs(distanceY) > 10) {
-                    try { Thread.sleep(3); } catch (InterruptedException e) {}
-                }
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
         });

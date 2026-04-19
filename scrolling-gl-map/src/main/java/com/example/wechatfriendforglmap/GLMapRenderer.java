@@ -25,6 +25,15 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class GLMapRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "GLMapRenderer";
+    private static final long LOAD_TYPE_SEED_STRIDE = 1009L;
+    private static final int LIGHT_SCROLL_EXTRA_ITERATIONS = 1200;
+    private static final int MEDIUM_SCROLL_EXTRA_ITERATIONS = 8000;
+    private static final int HEAVY_SCROLL_EXTRA_ITERATIONS = 28000;
+    private static final int LONG_FRAME_SCROLL_EXTRA_ITERATIONS = 36000;
+    private static final int LIGHT_IDLE_EXTRA_ITERATIONS = 300;
+    private static final int MEDIUM_IDLE_EXTRA_ITERATIONS = 1800;
+    private static final int HEAVY_IDLE_EXTRA_ITERATIONS = 6000;
+    private static final int LONG_FRAME_IDLE_EXTRA_ITERATIONS = 8000;
 
     private int loadType = LoadType.MINIMAL;
     private LoadSimulator mLoadSimulator;
@@ -75,7 +84,9 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     private int parkVertexCount;
     private int riverVertexCount;
 
-    private final Random random = new Random(LoadConfig.COMPUTATION_SEED);
+    private Random rendererLoadRandom = new Random(LoadConfig.COMPUTATION_SEED);
+    private double rendererLoadAccumulator = 0.0;
+    private long rendererFrameCounter = 0;
 
     // Shaders
     private static final String VERTEX_SHADER = "uniform mat4 uMVPMatrix;" +
@@ -95,7 +106,14 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
         this.loadType = loadType;
         if (mLoadSimulator == null) {
             mLoadSimulator = new LoadSimulator();
+        } else {
+            mLoadSimulator.resetRandomState();
         }
+
+        // 负载类型变化时重置模块内伪随机状态，确保每次进入同档位表现一致
+        rendererLoadRandom = new Random(LoadConfig.COMPUTATION_SEED + loadType * LOAD_TYPE_SEED_STRIDE);
+        rendererLoadAccumulator = 0.0;
+        rendererFrameCounter = 0;
     }
 
     public void release() {
@@ -632,6 +650,50 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
             if (mLoadSimulator != null) {
                 mLoadSimulator.executeInFrameLoad(loadType, "GLMap_inFrameLoad");
             }
+        }
+
+        executeRendererSpecificLoad();
+    }
+
+    private void executeRendererSpecificLoad() {
+        int iterations = getRendererSpecificIterations();
+        if (iterations <= 0) {
+            return;
+        }
+
+        double acc = rendererLoadAccumulator + rendererFrameCounter * 0.001d;
+        for (int i = 0; i < iterations; i++) {
+            double x = rendererLoadRandom.nextDouble() * (i + 1);
+            double y = rendererLoadRandom.nextDouble() * (rendererFrameCounter + 1);
+            acc += Math.sin(x + acc * 0.0001d) * Math.cos(y);
+            acc = acc * 0.999999d + (x - y) * 0.000001d;
+        }
+
+        rendererLoadAccumulator = acc;
+        rendererFrameCounter++;
+    }
+
+    private int getRendererSpecificIterations() {
+        boolean scrolling = isScrolling;
+        switch (loadType) {
+            case LoadType.MINIMAL:
+                return 0;
+            case LoadType.LIGHT:
+            case LoadType.LIGHT_BETWEEN_FRAMES:
+            case LoadType.LIGHT_MIXED:
+                return scrolling ? LIGHT_SCROLL_EXTRA_ITERATIONS : LIGHT_IDLE_EXTRA_ITERATIONS;
+            case LoadType.MEDIUM:
+            case LoadType.MEDIUM_BETWEEN_FRAMES:
+            case LoadType.MEDIUM_MIXED:
+                return scrolling ? MEDIUM_SCROLL_EXTRA_ITERATIONS : MEDIUM_IDLE_EXTRA_ITERATIONS;
+            case LoadType.HEAVY:
+            case LoadType.HEAVY_BETWEEN_FRAMES:
+            case LoadType.HEAVY_MIXED:
+                return scrolling ? HEAVY_SCROLL_EXTRA_ITERATIONS : HEAVY_IDLE_EXTRA_ITERATIONS;
+            case LoadType.LONG_FRAME:
+                return scrolling ? LONG_FRAME_SCROLL_EXTRA_ITERATIONS : LONG_FRAME_IDLE_EXTRA_ITERATIONS;
+            default:
+                return 0;
         }
     }
 

@@ -16,13 +16,14 @@ import java.util.Random;
  */
 public class GameSimpleView extends View {
     private static final String TAG = "GameSimpleView";
+    private static final long PARTICLE_RANDOM_SEED = 0x5EED1234L;
 
     private boolean isLoading = false;
     private int loadingProgress = 0;
     private String loadingMessage = "";
     private Paint paint;
     private Paint textPaint;
-    private Random random = new Random();
+    private final Random random = new Random(PARTICLE_RANDOM_SEED);
     private long animationTime = 0;
 
     // 粒子数据

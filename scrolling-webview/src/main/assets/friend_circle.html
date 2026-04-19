@@ -618,7 +618,7 @@
                     type: 'normal',
                     username: '用户' + id,
                     content: '这是动态加载的第' + id + '条朋友圈内容。',
-                    time: Math.floor(Math.random() * 60) + '分钟前',
+                    time: ((id * 17) % 60 + 1) + '分钟前',
                     images: i % 3 === 0 ? ['local' + ((id % 11) + 1) + '.jpeg'] : [],
                     praises: i % 4 === 0 ? ['用户A', '用户B'] : [],
                     comments: i % 5 === 0 ? [

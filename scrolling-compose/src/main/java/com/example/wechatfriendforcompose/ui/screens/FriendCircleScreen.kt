@@ -390,7 +390,9 @@ private fun getDrawableId(context: android.content.Context, name: String): Int {
  */
 private class LoadSimulator(private val loadType: LoadType) {
     private val handler = Handler(Looper.getMainLooper())
-    private val random = Random(LoadConfig.COMPUTATION_SEED)
+    private val seedOffset = loadType.ordinal.toLong() * LoadConfig.LOAD_TYPE_SEED_STRIDE
+    private val computationRandom = Random(LoadConfig.COMPUTATION_SEED + seedOffset)
+    private val scheduleRandom = Random(LoadConfig.SCHEDULE_INTERVAL_SEED + seedOffset)
     private var isRunning = false
 
     // 绘制资源
@@ -407,10 +409,10 @@ private class LoadSimulator(private val loadType: LoadType) {
     fun simulateItemLoad() {
         trace("ComposeItemLoad") {
             val iterations = when (loadType) {
-                LoadType.MINIMAL -> 0
-                LoadType.LIGHT, LoadType.LIGHT_BETWEEN_FRAMES, LoadType.LIGHT_MIXED -> 5
-                LoadType.MEDIUM, LoadType.MEDIUM_BETWEEN_FRAMES, LoadType.MEDIUM_MIXED -> 800
-                LoadType.HEAVY, LoadType.HEAVY_BETWEEN_FRAMES, LoadType.HEAVY_MIXED -> 2000
+                LoadType.MINIMAL -> LoadConfig.ItemLoad.MINIMAL_TASK_INTENSITY
+                LoadType.LIGHT, LoadType.LIGHT_BETWEEN_FRAMES, LoadType.LIGHT_MIXED -> LoadConfig.ItemLoad.LIGHT_TASK_INTENSITY
+                LoadType.MEDIUM, LoadType.MEDIUM_BETWEEN_FRAMES, LoadType.MEDIUM_MIXED -> LoadConfig.ItemLoad.MEDIUM_TASK_INTENSITY
+                LoadType.HEAVY, LoadType.HEAVY_BETWEEN_FRAMES, LoadType.HEAVY_MIXED -> LoadConfig.ItemLoad.HEAVY_TASK_INTENSITY
             }
 
             performComputation(iterations)
@@ -421,7 +423,7 @@ private class LoadSimulator(private val loadType: LoadType) {
      * 启动持续负载（滚动时）
      */
     fun startContinuousLoad() {
-        if (loadType == LoadType.MINIMAL || loadType == LoadType.LIGHT) return
+        if (loadType == LoadType.MINIMAL) return
 
         isRunning = true
         handler.post(object : Runnable {
@@ -430,8 +432,9 @@ private class LoadSimulator(private val loadType: LoadType) {
 
                 trace("ComposeContinuousLoad") {
                     val iterations = when (loadType) {
-                        LoadType.MEDIUM, LoadType.MEDIUM_BETWEEN_FRAMES, LoadType.MEDIUM_MIXED -> 200
-                        LoadType.HEAVY, LoadType.HEAVY_BETWEEN_FRAMES, LoadType.HEAVY_MIXED -> 500
+                        LoadType.LIGHT, LoadType.LIGHT_BETWEEN_FRAMES, LoadType.LIGHT_MIXED -> LoadConfig.LightLoad.TASK_INTENSITY
+                        LoadType.MEDIUM, LoadType.MEDIUM_BETWEEN_FRAMES, LoadType.MEDIUM_MIXED -> LoadConfig.MediumLoad.TASK_INTENSITY
+                        LoadType.HEAVY, LoadType.HEAVY_BETWEEN_FRAMES, LoadType.HEAVY_MIXED -> LoadConfig.HeavyLoad.TASK_INTENSITY
                         else -> 0
                     }
                     performComputation(iterations)
@@ -462,8 +465,8 @@ private class LoadSimulator(private val loadType: LoadType) {
     private fun scheduleNextTask() {
         if (!isRunning) return
 
-        val interval = LoadConfig.MIN_TASK_INTERVAL_MS + 
-            random.nextLong(LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS)
+        val intervalRange = LoadConfig.MAX_TASK_INTERVAL_MS - LoadConfig.MIN_TASK_INTERVAL_MS + 1L
+        val interval = LoadConfig.MIN_TASK_INTERVAL_MS + scheduleRandom.nextLong(intervalRange)
 
         handler.postDelayed({
             if (!isRunning) return@postDelayed
@@ -487,14 +490,14 @@ private class LoadSimulator(private val loadType: LoadType) {
      */
     private fun performComputation(iterations: Int) {
         for (i in 0 until iterations) {
-            val x = random.nextFloat() * 100
-            val y = random.nextFloat() * 100
+            val x = computationRandom.nextFloat() * 100
+            val y = computationRandom.nextFloat() * 100
 
             paint.color = AndroidColor.argb(
-                random.nextInt(256),
-                random.nextInt(256),
-                random.nextInt(256),
-                random.nextInt(256)
+                computationRandom.nextInt(256),
+                computationRandom.nextInt(256),
+                computationRandom.nextInt(256),
+                computationRandom.nextInt(256)
             )
             canvas.drawCircle(x, y, 10f, paint)
 
@@ -520,14 +523,14 @@ private class LoadSimulator(private val loadType: LoadType) {
         // 图形绘制
         val graphicsCount = intensity / 3
         for (i in 0 until graphicsCount) {
-            val x = random.nextFloat() * 200
-            val y = random.nextFloat() * 200
+            val x = computationRandom.nextFloat() * 200
+            val y = computationRandom.nextFloat() * 200
             paint.color = AndroidColor.rgb(
-                random.nextInt(256),
-                random.nextInt(256),
-                random.nextInt(256)
+                computationRandom.nextInt(256),
+                computationRandom.nextInt(256),
+                computationRandom.nextInt(256)
             )
-            canvas.drawCircle(x, y, 5 + random.nextFloat() * 10, paint)
+            canvas.drawCircle(x, y, 5 + computationRandom.nextFloat() * 10, paint)
         }
     }
 
@@ -539,5 +542,3 @@ private class LoadSimulator(private val loadType: LoadType) {
         handler.removeCallbacksAndMessages(null)
     }
 }
-
-

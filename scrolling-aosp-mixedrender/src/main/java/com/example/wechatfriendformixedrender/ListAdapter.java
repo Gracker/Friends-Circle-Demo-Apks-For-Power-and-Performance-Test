@@ -1,7 +1,9 @@
 package com.example.wechatfriendformixedrender;
 
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Trace;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +12,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Random;
-
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.scrolling.common.beans.FriendCircleBean;
+import com.example.scrolling.common.beans.OtherInfoBean;
+import com.example.scrolling.common.beans.UserBean;
+import com.example.scrolling.common.model.MomentsDataFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Standard RecyclerView adapter that renders using normal UI + RenderThread pipeline.
@@ -22,31 +29,31 @@ import com.example.loadconfig.LoadType;
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private int loadType = LoadType.MINIMAL;
-    private final Random random = new Random(12345L);
+    private static final int ITEM_COUNT = 300;
     private LoadSimulator mLoadSimulator = new LoadSimulator();
+    private List<FriendCircleBean> mFriendCircleBeans = new ArrayList<>();
 
-    private static final int ITEM_COUNT = 100;
-    private static final String[] NAMES = {"Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"};
-    private static final String[] CONTENTS = {
-            "Working on new features today!",
-            "Just finished a great book",
-            "Coffee break time ☕",
-            "Meeting went well",
-            "Weekend plans!",
-            "Learning something new",
-            "Project update coming",
-            "Beautiful day outside"
-    };
+    public ListAdapter() {
+        refreshData();
+    }
 
     public void setLoadType(@LoadType.Type int loadType) {
-        this.loadType = loadType;
+        if (this.loadType != loadType || mFriendCircleBeans.isEmpty()) {
+            this.loadType = loadType;
+            refreshData();
+        }
+    }
+
+    private void refreshData() {
+        mFriendCircleBeans = MomentsDataFactory.create(loadType, ITEM_COUNT);
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_list, parent, false);
+                .inflate(com.example.scrolling.common.R.layout.item_moments_simple, parent, false);
         return new ViewHolder(view);
     }
 
@@ -54,14 +61,42 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Trace.beginSection("MixedRender_onBindViewHolder");
 
-        // Set data
-        holder.nameText.setText(NAMES[position % NAMES.length]);
-        holder.contentText.setText(CONTENTS[position % CONTENTS.length]);
-        holder.timeText.setText((position % 60) + " min ago");
+        FriendCircleBean bean = mFriendCircleBeans.get(position);
+        UserBean userBean = bean.getUserBean();
+        OtherInfoBean otherInfoBean = bean.getOtherInfoBean();
 
-        // Set avatar color
-        int hue = (position * 37) % 360;
-        holder.avatarView.setBackgroundColor(Color.HSVToColor(new float[]{hue, 0.5f, 0.8f}));
+        holder.nameText.setText(userBean != null ? userBean.getUserName() : "微信用户");
+        holder.contentText.setText(!TextUtils.isEmpty(bean.getContent()) ? bean.getContent() : "");
+        holder.timeText.setText(otherInfoBean != null && !TextUtils.isEmpty(otherInfoBean.getTime())
+                ? otherInfoBean.getTime() : "刚刚");
+
+        if (otherInfoBean != null && !TextUtils.isEmpty(otherInfoBean.getSource())) {
+            holder.sourceText.setVisibility(View.VISIBLE);
+            holder.sourceText.setText(otherInfoBean.getSource());
+        } else {
+            holder.sourceText.setVisibility(View.GONE);
+            holder.sourceText.setText("");
+        }
+
+        // Set avatar color as a circular placeholder
+        String userId = userBean != null ? userBean.getUserId() : String.valueOf(position);
+        int hue = Math.abs((userId + position).hashCode()) % 360;
+        GradientDrawable avatarDrawable = new GradientDrawable();
+        avatarDrawable.setShape(GradientDrawable.OVAL);
+        avatarDrawable.setColor(Color.HSVToColor(new float[]{hue, 0.45f, 0.88f}));
+        holder.avatarView.setBackground(avatarDrawable);
+
+        boolean hasImage = bean.getImageUrls() != null && !bean.getImageUrls().isEmpty();
+        if (hasImage) {
+            int imageHue = Math.abs((bean.getContent() + position).hashCode()) % 360;
+            GradientDrawable imageDrawable = new GradientDrawable();
+            imageDrawable.setCornerRadius(dp(holder.itemView, 8));
+            imageDrawable.setColor(Color.HSVToColor(new float[]{imageHue, 0.25f, 0.96f}));
+            holder.previewImage.setBackground(imageDrawable);
+            holder.previewImage.setVisibility(View.VISIBLE);
+        } else {
+            holder.previewImage.setVisibility(View.GONE);
+        }
 
         // Execute load
         executeLoad();
@@ -71,7 +106,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return ITEM_COUNT;
+        return mFriendCircleBeans.size();
+    }
+
+    private float dp(View view, int dp) {
+        return dp * view.getResources().getDisplayMetrics().density;
     }
 
     private void executeLoad() {
@@ -95,15 +134,18 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         View avatarView;
         TextView nameText;
         TextView contentText;
+        View previewImage;
         TextView timeText;
+        TextView sourceText;
 
         ViewHolder(View itemView) {
             super(itemView);
-            avatarView = itemView.findViewById(R.id.avatar);
-            nameText = itemView.findViewById(R.id.name);
-            contentText = itemView.findViewById(R.id.content);
-            timeText = itemView.findViewById(R.id.time);
+            avatarView = itemView.findViewById(com.example.scrolling.common.R.id.avatar);
+            nameText = itemView.findViewById(com.example.scrolling.common.R.id.name);
+            contentText = itemView.findViewById(com.example.scrolling.common.R.id.content);
+            previewImage = itemView.findViewById(com.example.scrolling.common.R.id.preview_image);
+            timeText = itemView.findViewById(com.example.scrolling.common.R.id.time);
+            sourceText = itemView.findViewById(com.example.scrolling.common.R.id.source);
         }
     }
 }
-

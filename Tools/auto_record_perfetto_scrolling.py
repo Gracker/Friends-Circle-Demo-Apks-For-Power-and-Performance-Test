@@ -3,7 +3,7 @@
 
 Workflow:
 1. Install all `apk-debug/scrolling-*-debug-*.apk`.
-2. For each APK and each load type (light/medium_between_frames/heavy_mixed):
+2. For each APK and each load type (minimal/heavy/heavy_between_frames/heavy_mixed):
    - launch app
    - enter load page
    - start Perfetto recording
@@ -30,20 +30,23 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 
 ANDROID_NS = "{http://schemas.android.com/apk/res/android}"
-DEFAULT_LOADS = ["light", "medium_between_frames", "heavy_mixed"]
+DEFAULT_LOADS = ["minimal", "heavy", "heavy_between_frames", "heavy_mixed"]
 DEFAULT_EXCLUDED_MODULES = {
     "scrolling-aosp-douyin",
     "scrolling-aosp-ebook",
+    "scrolling-aosp-picasso",
     "scrolling-aosp-power",
-    # GeckoView modules: currently packaged .so use 4KB LOAD alignment (2**12),
-    # which triggers 16KB alignment warning dialogs on target devices.
-    "scrolling-webview-texture",
-    "scrolling-webview-surface",
+    "scrolling-aosp-purerenderthread",
+    "scrolling-gl-map",
+    "scrolling-surface-map",
     "scrolling-webview-imagereader",
 }
 
 LOAD_BUTTON_IDS: Dict[str, List[str]] = {
+    "minimal": ["btn_minimal_load"],
     "light": ["btn_light_load"],
+    "heavy": ["btn_heavy_load"],
+    "heavy_between_frames": ["btn_heavy_between_frames", "btn_heavy_load_between_frames"],
     "medium_between_frames": ["btn_medium_load_between_frames", "btn_medium_between_frames"],
     "heavy_mixed": ["btn_heavy_mixed_load", "btn_heavy_mixed"],
 }
@@ -57,6 +60,10 @@ class ModuleMeta:
     launcher_activity: str
     manifest_activities: List[str]
     supports_activity_type: bool
+    # Explicitly declared supported loads for non-repo modules (e.g. binary Flutter builds).
+    supported_loads: Optional[Sequence[str]] = None
+    # Extra string key used with `am start` to enter a load for modules without discoverable code paths.
+    load_entry_key: Optional[str] = None
 
 
 @dataclass
@@ -101,7 +108,11 @@ def parse_bounds_rect(bounds: str) -> Optional[Tuple[int, int, int, int]]:
     match = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
     if not match:
         return None
-    return tuple(map(int, match.groups()))  # type: ignore[return-value]
+    x1 = int(match.group(1))
+    y1 = int(match.group(2))
+    x2 = int(match.group(3))
+    y2 = int(match.group(4))
+    return x1, y1, x2, y2
 
 
 class ADB:
@@ -460,6 +471,9 @@ def detect_manual_permission_reasons(module_dir: Path) -> List[str]:
 
 
 def module_supports_load(meta: ModuleMeta, load: str, module_text_cache: Dict[str, str]) -> bool:
+    if meta.supported_loads is not None:
+        return load in set(meta.supported_loads)
+
     text = module_text_cache.get(meta.module_name)
     if text is None:
         text = collect_module_text(meta.module_dir)
@@ -549,13 +563,12 @@ def install_apk(adb: ADB, meta: ModuleMeta) -> bool:
     if proc.returncode == 0 and ("Success" in out or out == ""):
         return True
 
-    # User requirement: any install failure should try uninstalling old/conflicting app
-    # version/signature first, then install again.
+    # 覆盖安装失败时，先卸载旧包再强制覆盖安装重试
     log("WARN", f"Install retry after uninstall: {meta.package_name}")
     if out:
         log("WARN", f"Install error (first try): {out}")
     adb.run(["uninstall", meta.package_name], timeout=60)
-    proc2 = adb.run(["install", str(meta.apk_path)], timeout=240)
+    proc2 = adb.run(["install", "-r", str(meta.apk_path)], timeout=240)
     out2 = combined_output(proc2)
     if proc2.returncode != 0 and out2:
         log("ERROR", f"Install error (second try): {out2}")
@@ -752,7 +765,8 @@ def wait_for_entered_target(
                 continue
 
             # Compose keeps one activity and changes route internally.
-            if meta.module_name == "scrolling-compose":
+            # Flutter binaries pass load via launch extras while keeping launcher Activity.
+            if meta.module_name == "scrolling-compose" or meta.load_entry_key:
                 return True
 
             if not component_matches_launcher(
@@ -791,7 +805,10 @@ def click_load_button(
 def load_to_int(load: str) -> int:
     # Mirrors load-config LoadType constants.
     mapping = {
+        "minimal": 0,
         "light": 1,
+        "heavy": 3,
+        "heavy_between_frames": 6,
         "medium_between_frames": 5,
         "heavy_mixed": 9,
     }
@@ -822,6 +839,8 @@ def direct_activity_candidates(meta: ModuleMeta, load: str) -> List[str]:
     def is_match(simple: str) -> bool:
         if simple.endswith("MainActivity"):
             return False
+        if load == "minimal":
+            return "Minimal" in simple
         if load == "light":
             return (
                 "Light" in simple
@@ -829,8 +848,17 @@ def direct_activity_candidates(meta: ModuleMeta, load: str) -> List[str]:
                 and "Mixed" not in simple
                 and "LongFrame" not in simple
             )
+        if load == "heavy":
+            return (
+                "Heavy" in simple
+                and "BetweenFrames" not in simple
+                and "Mixed" not in simple
+                and "LongFrame" not in simple
+            )
         if load == "medium_between_frames":
             return "Medium" in simple and "BetweenFrames" in simple
+        if load == "heavy_between_frames":
+            return "Heavy" in simple and "BetweenFrames" in simple
         if load == "heavy_mixed":
             return "Heavy" in simple and "Mixed" in simple
         return False
@@ -861,6 +889,23 @@ def enter_load_page(
     allow_main_entry: bool,
 ) -> Tuple[bool, str]:
     log("INFO", f"  Enter load `{load}` for {meta.module_name}")
+
+    # Flutter/binary APKs: entry is usually via launcher extras.
+    if meta.load_entry_key:
+        log("INFO", f"    Try method: activity_extra:{meta.load_entry_key}")
+        ok, out = adb.start_activity(
+            package=meta.package_name,
+            activity=meta.launcher_activity,
+            string_extras={meta.load_entry_key: load},
+            force_stop=False,
+        )
+        if ok:
+            time.sleep(wait_after_entry_sec)
+            if wait_for_entered_target(adb, meta, timeout_sec=2.5):
+                return True, f"{meta.load_entry_key}_extra"
+        if out:
+            short = summarize_am_start_output(out)
+            log("WARN", f"      activity_extra failed: {short}")
 
     # CustomScroll modules use one feed activity + int load extra.
     for maybe_feed in (".CustomScrollFeedActivity",):
@@ -1236,7 +1281,7 @@ def build_arg_parser(repo_root: Path) -> argparse.ArgumentParser:
         "--loads",
         nargs="+",
         default=DEFAULT_LOADS,
-        choices=["light", "medium_between_frames", "heavy_mixed"],
+        choices=["minimal", "heavy", "heavy_between_frames", "heavy_mixed"],
         help="Loads to run for each apk",
     )
     parser.add_argument(

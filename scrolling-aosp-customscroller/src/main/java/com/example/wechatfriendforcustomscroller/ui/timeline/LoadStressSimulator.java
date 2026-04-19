@@ -53,6 +53,10 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     public void startBackgroundTasks(@LoadType.Type int loadType) {
         mCurrentLoadType = loadType;
         mIsRunning = true;
+        // 每次开始测试都重置伪随机状态，保证可复现
+        mLoadSimulator.resetRandomState();
+        resetStaticLoadSimulatorState();
+        resetLongFrameState();
     }
 
     /**
@@ -183,6 +187,12 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
             sStaticLoadSimulator = new LoadSimulator();
         }
         return sStaticLoadSimulator;
+    }
+
+    private static void resetStaticLoadSimulatorState() {
+        if (sStaticLoadSimulator != null) {
+            sStaticLoadSimulator.resetRandomState();
+        }
     }
 
     public static void runAdapterLoad(@LoadType.Type int loadType) {

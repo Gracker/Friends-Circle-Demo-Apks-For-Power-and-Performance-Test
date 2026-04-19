@@ -231,13 +231,6 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                if (Math.abs(distanceY) > 10) {
-                    try {
-                        Thread.sleep(3);
-                    } catch (InterruptedException e) {
-                        Log.e(TAG, "滚动等待被中断", e);
-                    }
-                }
                 return super.onScroll(e1, e2, distanceX, distanceY);
             }
         });
@@ -327,10 +320,8 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_UP:
-                        try { Thread.sleep(2); } catch (InterruptedException e) {}
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        try { Thread.sleep(5); } catch (InterruptedException e) {}
                         break;
                 }
 

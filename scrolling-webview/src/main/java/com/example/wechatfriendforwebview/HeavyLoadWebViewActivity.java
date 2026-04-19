@@ -15,6 +15,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
 
     // 处理器实例
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean heavyLoadInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,8 +31,13 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
      */
     @Override
     protected void performLoadTask() {
-        // 不执行任何负载，仅记录日志
-        Log.d(TAG, "重负载模式 - 仅在滚动时执行负载");
+        if (heavyLoadInitialized) {
+            Log.d(TAG, "重负载循环已初始化，跳过重复初始化");
+            return;
+        }
+        Log.d(TAG, "重负载模式 - 启动滚动期持续重负载");
+        executeHeavyJavaScriptLoad();
+        heavyLoadInitialized = true;
     }
 
     /**
@@ -659,7 +665,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     protected void onPause() {
         super.onPause();
         // 暂停JavaScript负载任务
-        if (webView != null) {
+        if (webView != null && heavyLoadInitialized) {
             webView.evaluateJavascript("javascript: heavyLoadEnabled = false;", null);
         }
     }
@@ -668,7 +674,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     protected void onResume() {
         super.onResume();
         // 恢复JavaScript负载任务
-        if (webView != null) {
+        if (webView != null && heavyLoadInitialized) {
             webView.evaluateJavascript("javascript: heavyLoadEnabled = true; requestAnimationFrame(performHeavyCalculation);", null);
         }
     }
@@ -676,9 +682,10 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     @Override
     protected void onDestroy() {
         // 停止JavaScript负载任务
-        if (webView != null) {
+        if (webView != null && heavyLoadInitialized) {
             webView.evaluateJavascript("javascript: heavyLoadEnabled = false;", null);
         }
+        heavyLoadInitialized = false;
         super.onDestroy();
     }
-} 
+}

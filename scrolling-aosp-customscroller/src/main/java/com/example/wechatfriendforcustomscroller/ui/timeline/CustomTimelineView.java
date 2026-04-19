@@ -110,14 +110,14 @@ public class CustomTimelineView extends ViewGroup {
 
     public void setLoadProfile(@LoadType.Type int loadProfile) {
         this.loadProfile = loadProfile;
-        if (loadProfile == LoadType.LIGHT) {
+        if (loadProfile == LoadType.MINIMAL) {
             stopContinuousLoad();
         }
     }
 
     public void submitData(List<FriendCircleBean> beans, @LoadType.Type int loadType) {
         loadProfile = loadType;
-        if (loadProfile == LoadType.LIGHT) {
+        if (loadProfile == LoadType.MINIMAL) {
             stopContinuousLoad();
         }
         data.clear();
@@ -353,7 +353,7 @@ public class CustomTimelineView extends ViewGroup {
     }
 
     private void startContinuousLoadIfNeeded() {
-        if (continuousLoadRunning || loadProfile == LoadType.LIGHT) {
+        if (continuousLoadRunning || loadProfile == LoadType.MINIMAL) {
             return;
         }
         continuousLoadRunning = true;
@@ -393,4 +393,3 @@ public class CustomTimelineView extends ViewGroup {
         return new LayoutParams(p);
     }
 }
-

@@ -135,7 +135,9 @@ public class LoadScheduler implements DefaultLifecycleObserver, Choreographer.Fr
     @Override
     public void onResume(@NonNull LifecycleOwner owner) {
         mIsLifecycleResumed = true;
-        // 重置状态
+        // 每次恢复时重置伪随机状态，保证测试可复现
+        mLoadSimulator.resetRandomState();
+        // 重置调度状态
         updateActiveState();
     }
 

@@ -187,7 +187,7 @@ public class LoadSimulator {
         mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
 
         // 命中时间窗口后，再按伪随机概率决定是否执行
-        if (!shouldExecuteByProbability(level)) {
+        if (!shouldExecuteByProbability(loadType)) {
             return;
         }
 
@@ -233,8 +233,8 @@ public class LoadSimulator {
      * 伪随机判定当前时机是否真正执行负载
      * 使用固定种子随机数，确保每次测试触发序列可重现
      */
-    private boolean shouldExecuteByProbability(int loadLevel) {
-        float probability = LoadConfig.getTaskProbabilityByLevel(loadLevel);
+    private boolean shouldExecuteByProbability(@LoadType.Type int loadType) {
+        float probability = LoadConfig.getTaskProbability(loadType);
         if (probability <= 0f) {
             return false;
         }
@@ -276,7 +276,7 @@ public class LoadSimulator {
         mNextDoFrameTarget = mDoFrameCounter + calculateNextDoFrameInterval(level);
 
         // 命中时间窗口后，再按伪随机概率决定是否执行
-        if (!shouldExecuteByProbability(level)) {
+        if (!shouldExecuteByProbability(loadType)) {
             return;
         }
 
@@ -335,7 +335,7 @@ public class LoadSimulator {
         mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
 
         // 命中时间窗口后，再按伪随机概率决定是否执行
-        if (!shouldExecuteByProbability(level)) {
+        if (!shouldExecuteByProbability(loadType)) {
             return;
         }
 
@@ -409,7 +409,7 @@ public class LoadSimulator {
         mNextBetweenFrameTarget = mBetweenFrameCounter + calculateNextBetweenFrameInterval(level);
 
         // 命中时间窗口后，再按伪随机概率决定是否执行
-        if (!shouldExecuteByProbability(level)) {
+        if (!shouldExecuteByProbability(loadType)) {
             return;
         }
 

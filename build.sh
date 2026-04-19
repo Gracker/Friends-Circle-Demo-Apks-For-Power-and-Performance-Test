@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # 统一构建脚本 -- 编译所有模块并复制APK
+#   ./build.sh          默认构建 Debug + Release
 #   ./build.sh debug    构建Debug版本（启用TraceFix插桩）
 #   ./build.sh release  构建Release版本（需要签名配置）
 # 作者: Chris
@@ -23,14 +24,38 @@ log_error()   { echo -e "${RED}❌ $1${NC}"; }
 log_header()  { echo -e "${PURPLE}🚀 $1${NC}"; }
 log_file()    { echo -e "${CYAN}   📱 $1${NC}"; }
 
+# ── 输出目录清理 ──────────────────────────────────────────
+clean_output_dirs() {
+    local dirs=("apk-debug" "apk-release")
+    for dir in "${dirs[@]}"; do
+        mkdir -p "$dir"
+        find "$dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        log_info "已清理目录: $dir"
+    done
+}
+
 # ── 参数解析 ──────────────────────────────────────────────
 BUILD_TYPE="${1:-}"
-if [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
-    echo "用法: $0 <debug|release>"
+if [ -n "$BUILD_TYPE" ] && [ "$BUILD_TYPE" != "debug" ] && [ "$BUILD_TYPE" != "release" ]; then
+    echo "用法: $0 [debug|release]"
     echo ""
-    echo "  debug   -- 构建Debug APK，启用TraceFix插桩（无需签名配置）"
-    echo "  release -- 构建Release APK，需要密钥库签名配置"
+    echo "  (无参数) -- 默认先清理 apk-debug/apk-release，再依次构建 debug + release"
+    echo "  debug    -- 先清理 apk-debug/apk-release，再构建Debug APK（启用TraceFix插桩）"
+    echo "  release  -- 先清理 apk-debug/apk-release，再构建Release APK（需要签名配置）"
     exit 1
+fi
+
+if [ -z "$BUILD_TYPE" ]; then
+    log_header "未指定构建类型，默认执行: debug + release"
+    clean_output_dirs
+    BUILD_SH_SKIP_OUTPUT_CLEAN=1 "$0" debug
+    BUILD_SH_SKIP_OUTPUT_CLEAN=1 "$0" release
+    log_success "Debug + Release 全部构建完成!"
+    exit 0
+fi
+
+if [ "${BUILD_SH_SKIP_OUTPUT_CLEAN:-0}" != "1" ]; then
+    clean_output_dirs
 fi
 
 # ── 构建类型参数 ──────────────────────────────────────────
@@ -38,14 +63,14 @@ if [ "$BUILD_TYPE" = "debug" ]; then
     BUILD_VARIANT="Debug"
     APK_SUFFIX="debug"
     OUTPUT_DIR="apk-debug"
-    GRADLE_ARGS=(assembleDebug --parallel -PenableTraceFix=true)
+    GRADLE_ARGS=(clean assembleDebug --parallel -PenableTraceFix=true)
     INSTALL_SCRIPT="install_all_debug_apks.sh"
     INSTALL_LABEL="Debug APK（含TraceFix插桩）"
 else
     BUILD_VARIANT="Release"
     APK_SUFFIX="release"
-    OUTPUT_DIR="apk-released"
-    GRADLE_ARGS=(assembleRelease --parallel)
+    OUTPUT_DIR="apk-release"
+    GRADLE_ARGS=(clean assembleRelease --parallel)
     INSTALL_SCRIPT="install_all_apks.sh"
     INSTALL_LABEL="${BUILD_VARIANT} APK"
 fi

@@ -22,6 +22,7 @@
 # Build directories
 /build
 /*/build
+build-logic/bin/
 .externalNativeBuild
 .cxx/
 /captures
