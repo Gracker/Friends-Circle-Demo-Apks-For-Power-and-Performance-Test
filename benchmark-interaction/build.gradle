@@ -1,0 +1,12 @@
+plugins {
+    id 'convention.android-app'
+}
+
+android {
+    namespace 'com.example.benchmark.interaction'
+
+    defaultConfig {
+        applicationId "com.example.benchmark.interaction"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+}
