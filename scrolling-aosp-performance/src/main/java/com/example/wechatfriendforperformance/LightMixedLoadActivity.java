@@ -21,6 +21,7 @@ import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAd
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 /**
  * Light Mixed Load Activity
@@ -79,7 +80,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                     mHandler.removeCallbacksAndMessages(null);
                 } else if (!mIsScrolling) {
@@ -100,7 +101,7 @@ public class LightMixedLoadActivity extends AppCompatActivity implements Choreog
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
             // 帧间隔由 LoadSimulator 统一控制
             mLoadSimulator.executeDoFrameLoad(mLoadType, "MixedLoad_doFrame");
-            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"));
+            mHandler.post(() -> { if (mIsScrolling) { mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"); } });
             mChoreographer.postFrameCallback(this);
         }
     }

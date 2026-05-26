@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 /**
  * Base Activity demonstrating mixed rendering:
@@ -21,6 +22,7 @@ public abstract class BaseMixedRenderActivity extends AppCompatActivity {
     protected PureRenderAnimationView animationView;
     protected RecyclerView recyclerView;
     protected ListAdapter adapter;
+    private RecyclerView.OnScrollListener scrollLoadListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,8 +42,31 @@ public abstract class BaseMixedRenderActivity extends AppCompatActivity {
         adapter = new ListAdapter();
         adapter.setLoadType(loadType);
         recyclerView.setAdapter(adapter);
+
+        scrollLoadListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
+                boolean loadEnabled = ScrollLoadGate.isInertiaState(newState);
+                adapter.setLoadEnabled(loadEnabled);
+                animationView.setLoadEnabled(loadEnabled);
+            }
+        };
+        recyclerView.addOnScrollListener(scrollLoadListener);
     }
 
     protected abstract @LoadType.Type int getLoadType();
-}
 
+    @Override
+    protected void onDestroy() {
+        if (recyclerView != null && scrollLoadListener != null) {
+            recyclerView.removeOnScrollListener(scrollLoadListener);
+        }
+        if (adapter != null) {
+            adapter.release();
+        }
+        if (animationView != null) {
+            animationView.release();
+        }
+        super.onDestroy();
+    }
+}

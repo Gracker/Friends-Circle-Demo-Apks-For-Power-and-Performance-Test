@@ -16,6 +16,7 @@ import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapte
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 import java.util.Random;
 
@@ -73,7 +74,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;
@@ -98,7 +99,7 @@ public class LightLoadBetweenFramesActivity extends AppCompatActivity implements
         if (mIsBetweenFrameLoadEnabled && mIsScrolling) {
             mFrameCount++;
             if (mFrameCount >= mNextTriggerFrame) {
-                mHandler.post(() -> mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFrames_load"));
+                mHandler.post(() -> { if (mIsScrolling) { mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "LightBetweenFrames_load"); } });
                 mFrameCount = 0;
                 mNextTriggerFrame = getNextFrameInterval();
             }

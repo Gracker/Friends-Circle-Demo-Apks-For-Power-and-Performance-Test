@@ -23,12 +23,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,19 +70,41 @@ fun FriendCircleScreen(
     val loadSimulator = remember(loadType) {
         LoadSimulator(loadType)
     }
+    var isInertiaScrolling by remember { mutableStateOf(false) }
+    val inertiaScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source == NestedScrollSource.UserInput) {
+                    isInertiaScrolling = false
+                }
+                return Offset.Zero
+            }
 
-    // 监听滚动状态，触发负载模拟
-    LaunchedEffect(listState.isScrollInProgress) {
-        if (listState.isScrollInProgress) {
-            loadSimulator.startContinuousLoad()
-        } else {
-            loadSimulator.stopContinuousLoad()
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                isInertiaScrolling = true
+                return Velocity.Zero
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                isInertiaScrolling = false
+                return Velocity.Zero
+            }
         }
     }
 
-    // 启动持续负载（混合模式）
+    val shouldRunLoad = listState.isScrollInProgress && isInertiaScrolling
+
+    // 只在 fling 惯性滚动期间触发负载模拟
+    LaunchedEffect(shouldRunLoad) {
+        if (shouldRunLoad) {
+            loadSimulator.startContinuousLoad()
+            loadSimulator.startScheduledLoad()
+        } else {
+            loadSimulator.stop()
+        }
+    }
+
     DisposableEffect(loadType) {
-        loadSimulator.startScheduledLoad()
         onDispose {
             loadSimulator.stop()
         }
@@ -86,7 +113,9 @@ fun FriendCircleScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(inertiaScrollConnection)
         ) {
             // Header
             item {
@@ -101,8 +130,9 @@ fun FriendCircleScreen(
                 items = friendCircleData,
                 key = { it.id }
             ) { item ->
-                // 每个item渲染时模拟负载
-                loadSimulator.simulateItemLoad()
+                if (shouldRunLoad) {
+                    loadSimulator.simulateItemLoad()
+                }
 
                 FriendCircleItem(
                     item = item,

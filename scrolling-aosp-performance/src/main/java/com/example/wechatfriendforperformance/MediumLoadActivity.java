@@ -18,6 +18,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAdapter;
 
 /**
@@ -67,7 +68,7 @@ public class MediumLoadActivity extends AppCompatActivity implements Choreograph
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;

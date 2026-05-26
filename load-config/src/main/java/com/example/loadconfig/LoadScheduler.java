@@ -70,10 +70,10 @@ public class LoadScheduler implements DefaultLifecycleObserver, Choreographer.Fr
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    setScrolling(false);
-                } else {
+                if (ScrollLoadGate.isInertiaState(newState)) {
                     setScrolling(true);
+                } else {
+                    setScrolling(false);
                 }
             }
         };

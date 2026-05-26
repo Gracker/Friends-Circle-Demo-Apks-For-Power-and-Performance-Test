@@ -196,10 +196,16 @@ public final class LoadStressSimulator implements Choreographer.FrameCallback {
     }
 
     public static void runAdapterLoad(@LoadType.Type int loadType) {
-        getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_bindLoad");
+        LoadStressSimulator simulator = getInstance();
+        if (simulator.mIsScrolling) {
+            getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_bindLoad");
+        }
     }
 
     public static void runContinuousLoad(@LoadType.Type int loadType) {
-        getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_continuousLoad");
+        LoadStressSimulator simulator = getInstance();
+        if (simulator.mIsScrolling) {
+            getStaticLoadSimulator().executeInFrameLoad(loadType, "CustomScrollAdapter_continuousLoad");
+        }
     }
 }

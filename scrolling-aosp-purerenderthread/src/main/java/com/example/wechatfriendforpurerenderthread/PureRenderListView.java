@@ -44,6 +44,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     private volatile float scrollY = 0;
     private OverScroller scroller;
     private GestureDetector gestureDetector;
+    private volatile boolean isFlinging = false;
 
     // Item configuration
     private static final int ITEM_HEIGHT = 360;
@@ -144,6 +145,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                isFlinging = false;
                 scroller.forceFinished(true);
                 return true;
             }
@@ -163,6 +165,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
                         0, 0,
                         0, getMaxScrollY()
                 );
+                isFlinging = !scroller.isFinished();
                 return true;
             }
         });
@@ -252,6 +255,9 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
 
             if (scroller.computeScrollOffset()) {
                 scrollY = scroller.getCurrY();
+                isFlinging = true;
+            } else if (isFlinging) {
+                isFlinging = false;
             }
 
             Canvas canvas = null;
@@ -407,7 +413,7 @@ public class PureRenderListView extends SurfaceView implements SurfaceHolder.Cal
     }
 
     private void executeLoad() {
-        if (mLoadSimulator != null) {
+        if (mLoadSimulator != null && isFlinging) {
             mLoadSimulator.executeInFrameLoad(loadType, "PureRenderThread_doFrameLoad");
         }
     }

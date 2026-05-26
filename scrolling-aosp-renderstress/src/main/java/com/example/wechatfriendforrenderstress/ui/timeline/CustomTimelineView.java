@@ -199,7 +199,7 @@ public class CustomTimelineView extends ViewGroup {
                 isBeingDragged = !customOverScroller.isFinished();
                 customOverScroller.forceFinished();
                 removeCallbacks(flingRunnable);
-                notifyRenderStressStart();
+                notifyRenderStressStop();
                 initVelocityTracker();
                 velocityTracker.addMovement(ev);
                 break;
@@ -215,7 +215,6 @@ public class CustomTimelineView extends ViewGroup {
                     lastMotionY = y;
                     initVelocityTracker();
                     velocityTracker.addMovement(ev);
-                    notifyRenderStressStart();
                     return true;
                 }
                 break;
@@ -233,6 +232,7 @@ public class CustomTimelineView extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 customOverScroller.forceFinished();
                 removeCallbacks(flingRunnable);
+                notifyRenderStressStop();
                 activePointerId = event.getPointerId(0);
                 lastMotionY = event.getY();
                 break;
@@ -245,7 +245,6 @@ public class CustomTimelineView extends ViewGroup {
                 float dy = lastMotionY - y;
                 if (!isBeingDragged && Math.abs(dy) > touchSlop) {
                     isBeingDragged = true;
-                    notifyRenderStressStart();
                 }
                 if (isBeingDragged) {
                     scrollByInternal((int) dy);
@@ -291,8 +290,10 @@ public class CustomTimelineView extends ViewGroup {
             return;
         }
         customOverScroller.fling(scrollOffset, velocityY, 0, getMaxScrollRange());
-        notifyRenderStressStart();
-        ViewCompat.postOnAnimation(this, flingRunnable);
+        if (!customOverScroller.isFinished()) {
+            notifyRenderStressStart();
+            ViewCompat.postOnAnimation(this, flingRunnable);
+        }
     }
 
     private void endDrag() {

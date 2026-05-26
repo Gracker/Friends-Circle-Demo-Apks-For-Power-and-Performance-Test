@@ -51,6 +51,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     protected boolean isFling = false;
     protected int flingFrameCount = 0;
     protected final int MAX_FLING_FRAMES = 200;
+    private Runnable flingRunnable;
 
     private Surface surface;
 
@@ -191,6 +192,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                stopFlingLoad();
                 return true;
             }
 
@@ -215,7 +217,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         flingFrameCount = 0;
         executeFlingLoad();
 
-        Runnable flingRunnable = new Runnable() {
+        flingRunnable = new Runnable() {
             @Override
             public void run() {
                 if (!isActivityActive) {
@@ -238,6 +240,15 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
         }
     }
 
+    protected void stopFlingLoad() {
+        isFling = false;
+        flingFrameCount = 0;
+        if (mHandler != null && flingRunnable != null) {
+            mHandler.removeCallbacks(flingRunnable);
+        }
+        flingRunnable = null;
+    }
+
     protected abstract void executeFlingLoad();
 
     private void loadFriendCircleHtml() {
@@ -254,7 +265,6 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
                         String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
                         geckoSession.loadUri(jsCode);
                     }
-                    performLoadTask();
                 } catch (Exception e) {
                     Log.e(TAG, "加载朋友圈数据失败", e);
                 }
@@ -286,7 +296,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     protected void onPause() {
         super.onPause();
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
         if (geckoSession != null) {
             geckoSession.setActive(false);
         }
@@ -304,7 +314,7 @@ public abstract class BaseGeckoViewTextureActivity extends Activity {
     @Override
     protected void onDestroy() {
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);

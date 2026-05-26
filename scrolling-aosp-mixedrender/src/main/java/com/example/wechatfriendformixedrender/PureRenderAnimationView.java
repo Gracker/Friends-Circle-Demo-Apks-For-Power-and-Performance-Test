@@ -36,6 +36,7 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
     private int loadType = LoadType.MINIMAL;
     private final Random random = new Random(12345L);
     private LoadSimulator mLoadSimulator;
+    private volatile boolean loadEnabled = false;
 
     public PureRenderAnimationView(Context context) {
         super(context);
@@ -69,6 +70,10 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
 
     public void setLoadType(@LoadType.Type int loadType) {
         this.loadType = loadType;
+    }
+
+    public void setLoadEnabled(boolean enabled) {
+        loadEnabled = enabled;
     }
 
     @Override
@@ -186,7 +191,7 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
 
     private void executeLoad() {
         // 使用统一的负载中心执行负载
-        if (mLoadSimulator != null) {
+        if (mLoadSimulator != null && loadEnabled) {
             mLoadSimulator.executeInFrameLoad(loadType, "PureRenderAnimation_doFrameLoad");
         }
     }
@@ -201,4 +206,3 @@ public class PureRenderAnimationView extends SurfaceView implements SurfaceHolde
         }
     }
 }
-

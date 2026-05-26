@@ -31,13 +31,7 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
      */
     @Override
     protected void performLoadTask() {
-        if (heavyLoadInitialized) {
-            Log.d(TAG, "重负载循环已初始化，跳过重复初始化");
-            return;
-        }
-        Log.d(TAG, "重负载模式 - 启动滚动期持续重负载");
-        executeHeavyJavaScriptLoad();
-        heavyLoadInitialized = true;
+        Log.d(TAG, "重负载模式 - 等待 fling 后执行负载");
     }
 
     /**
@@ -673,10 +667,6 @@ public class HeavyLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 恢复JavaScript负载任务
-        if (webView != null && heavyLoadInitialized) {
-            webView.evaluateJavascript("javascript: heavyLoadEnabled = true; requestAnimationFrame(performHeavyCalculation);", null);
-        }
     }
 
     @Override

@@ -46,8 +46,6 @@ public class GLMapView extends GLSurfaceView {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 // Fix inverted Y direction by passing negative distanceY
-                // Also track scroll state for LongFrame load
-                renderer.onScrollStart();
                 renderer.setOffset(-distanceX, -distanceY);
                 requestRender();
                 return true;
@@ -55,8 +53,6 @@ public class GLMapView extends GLSurfaceView {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                renderer.onScrollStart(); // Ensure scroll state (long frame) is active during fling
-
                 // Reset fling tracking state
                 mLastFlingX = 0;
                 mLastFlingY = 0;
@@ -66,8 +62,12 @@ public class GLMapView extends GLSurfaceView {
                 scroller.fling(0, 0, (int) velocityX, (int) velocityY,
                         Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-                // Trigger animation loop
-                postInvalidateOnAnimation();
+                if (!scroller.isFinished()) {
+                    renderer.onScrollStart();
+                    postInvalidateOnAnimation();
+                } else {
+                    renderer.onScrollStop();
+                }
                 return true;
             }
         });
@@ -139,6 +139,7 @@ public class GLMapView extends GLSurfaceView {
             if (!scroller.isFinished()) {
                 scroller.forceFinished(true);
             }
+            renderer.onScrollStop();
             flingStarted = false;
             mLastFlingX = 0;
             mLastFlingY = 0;

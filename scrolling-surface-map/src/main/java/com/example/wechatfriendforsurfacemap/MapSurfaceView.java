@@ -121,6 +121,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                onScrollStateChanged(false);
                 scroller.forceFinished(true);
                 return true;
             }
@@ -140,6 +141,7 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                     Integer.MIN_VALUE, Integer.MAX_VALUE,
                     Integer.MIN_VALUE, Integer.MAX_VALUE
                 );
+                onScrollStateChanged(!scroller.isFinished());
                 return true;
             }
         });
@@ -271,6 +273,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
             if (scroller.computeScrollOffset()) {
                 offsetX = scroller.getCurrX();
                 offsetY = scroller.getCurrY();
+                onScrollStateChanged(true);
+            } else if (isScrolling) {
+                onScrollStateChanged(false);
             }
 
             Canvas canvas = null;
@@ -287,8 +292,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
                 }
             }
 
-            // 每帧调用帧间负载（由 LoadSimulator 统一控制伪随机帧间隔）
-            executeBetweenFrameLoad();
+            if (isScrolling) {
+                executeBetweenFrameLoad();
+            }
 
             // Frame rate limiting (~60fps)
             try {
@@ -318,7 +324,9 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         }
 
         // Execute in-frame load
-        executeInFrameLoad();
+        if (isScrolling) {
+            executeInFrameLoad();
+        }
 
         // Draw tiles
         for (int tileX = startTileX; tileX <= endTileX; tileX++) {
@@ -391,5 +399,4 @@ public class MapSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
         }
     }
 }
-
 

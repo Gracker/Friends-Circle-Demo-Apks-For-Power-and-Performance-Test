@@ -239,6 +239,7 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
             @Override
             public boolean onDown(MotionEvent e) {
                 Log.d(TAG, "手势检测: onDown");
+                stopFlingLoad();
                 return true; // 返回true以便能够检测到后续手势
             }
 
@@ -328,6 +329,15 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
 
         // 安排后续帧
         flingHandler.postDelayed(flingRunnable, 16);
+    }
+
+    protected void stopFlingLoad() {
+        isFling = false;
+        flingFrameCount = 0;
+        if (flingHandler != null && flingRunnable != null) {
+            flingHandler.removeCallbacks(flingRunnable);
+        }
+        flingRunnable = null;
     }
 
     /**
@@ -498,6 +508,7 @@ public abstract class BaseFriendCircleWebViewActivity extends AppCompatActivity 
         super.onPause();
         // 标记 Activity 不再活跃
         isActivityActive = false;
+        stopFlingLoad();
     }
 
     @Override

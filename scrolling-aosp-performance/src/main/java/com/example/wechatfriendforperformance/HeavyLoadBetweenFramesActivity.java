@@ -22,6 +22,7 @@ import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAd
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 import java.util.Random;
 
@@ -84,7 +85,7 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;
@@ -114,7 +115,9 @@ public class HeavyLoadBetweenFramesActivity extends AppCompatActivity implements
             // 当达到下一次触发帧时，执行帧间负载（使用 Handler.post 确保在帧间执行）
             if (mFrameCount >= mNextTriggerFrame) {
                 mHandler.post(() -> {
-                    mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "BetweenFrames_load");
+                    if (mIsScrolling) {
+                        mLoadSimulator.executePureBetweenFrameLoad(mLoadType, "BetweenFrames_load");
+                    }
                 });
                 mFrameCount = 0;
                 mNextTriggerFrame = getNextFrameInterval();

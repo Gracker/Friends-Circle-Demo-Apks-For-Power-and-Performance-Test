@@ -49,6 +49,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     protected boolean isFling = false;
     protected int flingFrameCount = 0;
     protected final int MAX_FLING_FRAMES = 200;
+    private Runnable flingRunnable;
 
     private boolean surfaceReady = false;
     private int surfaceWidth = 0;
@@ -210,6 +211,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                stopFlingLoad();
                 return true;
             }
 
@@ -243,7 +245,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         flingFrameCount = 0;
         executeFlingLoad();
 
-        Runnable flingRunnable = new Runnable() {
+        flingRunnable = new Runnable() {
             @Override
             public void run() {
                 // 检查 Activity 是否仍然活跃
@@ -268,6 +270,15 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         if (mHandler != null) {
             mHandler.postDelayed(flingRunnable, 16);
         }
+    }
+
+    protected void stopFlingLoad() {
+        isFling = false;
+        flingFrameCount = 0;
+        if (mHandler != null && flingRunnable != null) {
+            mHandler.removeCallbacks(flingRunnable);
+        }
+        flingRunnable = null;
     }
 
     protected abstract void executeFlingLoad();
@@ -298,7 +309,6 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
                         Log.d(TAG, "朋友圈数据已发送到 GeckoView");
                     }
 
-                    performLoadTask();
                 } catch (Exception e) {
                     Log.e(TAG, "加载朋友圈数据失败", e);
                 }
@@ -366,7 +376,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
         super.onPause();
         // 标记 Activity 不再活跃
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
         if (geckoSession != null) {
             geckoSession.setActive(false);
         }
@@ -385,7 +395,7 @@ public abstract class BaseGeckoViewSurfaceActivity extends Activity {
     protected void onDestroy() {
         // 首先标记 Activity 已销毁
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
 
         // 清理 Handler
         if (mHandler != null) {

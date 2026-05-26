@@ -52,6 +52,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
     protected boolean isFling = false;
     protected int flingFrameCount = 0;
     protected final int MAX_FLING_FRAMES = 200;
+    private Runnable flingRunnable;
 
     private Surface surface;
 
@@ -184,9 +185,10 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
 
             @Override
             public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
-                // 模拟 ImageReader 的开销：每帧获取 Bitmap
-                // 这模拟了 ImageReader.acquireLatestImage() -> toBitmap 的过程
-                simulateImageReaderOverhead();
+                if (isFling) {
+                    // ImageReader overhead is synthetic load; only run it during inertia.
+                    simulateImageReaderOverhead();
+                }
             }
         });
 
@@ -232,6 +234,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
+                stopFlingLoad();
                 return true;
             }
 
@@ -256,7 +259,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
         flingFrameCount = 0;
         executeFlingLoad();
 
-        Runnable flingRunnable = new Runnable() {
+        flingRunnable = new Runnable() {
             @Override
             public void run() {
                 if (!isActivityActive) {
@@ -279,6 +282,15 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
         }
     }
 
+    protected void stopFlingLoad() {
+        isFling = false;
+        flingFrameCount = 0;
+        if (mHandler != null && flingRunnable != null) {
+            mHandler.removeCallbacks(flingRunnable);
+        }
+        flingRunnable = null;
+    }
+
     protected abstract void executeFlingLoad();
 
     private void loadFriendCircleHtml() {
@@ -295,7 +307,6 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
                         String jsCode = "javascript:loadFriendCircleData(" + jsonData + ")";
                         geckoSession.loadUri(jsCode);
                     }
-                    performLoadTask();
                 } catch (Exception e) {
                     Log.e(TAG, "加载朋友圈数据失败", e);
                 }
@@ -327,7 +338,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
     protected void onPause() {
         super.onPause();
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
         if (geckoSession != null) {
             geckoSession.setActive(false);
         }
@@ -345,7 +356,7 @@ public abstract class BaseGeckoViewImageReaderActivity extends Activity {
     @Override
     protected void onDestroy() {
         isActivityActive = false;
-        isFling = false;
+        stopFlingLoad();
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);

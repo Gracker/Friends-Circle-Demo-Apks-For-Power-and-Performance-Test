@@ -52,7 +52,7 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             // 测试成功后直接执行负载
             if (value != null && !value.equals("null")) {
                 // 中负载JavaScript
-                String loadJs = 
+                String loadJs =
                     "(function() {\n" +
                     "  var startTime = performance.now();\n" +
                     "  \n" +
@@ -146,10 +146,6 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 恢复JavaScript负载任务
-        if (webView != null) {
-            webView.evaluateJavascript("javascript: mediumLoadEnabled = true; requestAnimationFrame(performMediumCalculation);", null);
-        }
     }
 
     @Override
@@ -160,4 +156,4 @@ public class MediumLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
         }
         super.onDestroy();
     }
-} 
+}

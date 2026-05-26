@@ -1,7 +1,6 @@
 package com.example.wechatfriendforcustomscroller.ui.timeline;
 
 import android.content.Context;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -199,7 +198,7 @@ public class CustomTimelineView extends ViewGroup {
                 isBeingDragged = !customOverScroller.isFinished();
                 customOverScroller.forceFinished();
                 removeCallbacks(flingRunnable);
-                startContinuousLoadIfNeeded();
+                stopContinuousLoad();
                 initVelocityTracker();
                 velocityTracker.addMovement(ev);
                 break;
@@ -215,7 +214,6 @@ public class CustomTimelineView extends ViewGroup {
                     lastMotionY = y;
                     initVelocityTracker();
                     velocityTracker.addMovement(ev);
-                    startContinuousLoadIfNeeded();
                     return true;
                 }
                 break;
@@ -233,6 +231,7 @@ public class CustomTimelineView extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 customOverScroller.forceFinished();
                 removeCallbacks(flingRunnable);
+                stopContinuousLoad();
                 activePointerId = event.getPointerId(0);
                 lastMotionY = event.getY();
                 break;
@@ -245,7 +244,6 @@ public class CustomTimelineView extends ViewGroup {
                 float dy = lastMotionY - y;
                 if (!isBeingDragged && Math.abs(dy) > touchSlop) {
                     isBeingDragged = true;
-                    startContinuousLoadIfNeeded();
                 }
                 if (isBeingDragged) {
                     scrollByInternal((int) dy);
@@ -292,8 +290,10 @@ public class CustomTimelineView extends ViewGroup {
             return;
         }
         customOverScroller.fling(scrollOffset, velocityY, 0, getMaxScrollRange());
-        startContinuousLoadIfNeeded();
-        ViewCompat.postOnAnimation(this, flingRunnable);
+        if (!customOverScroller.isFinished()) {
+            startContinuousLoadIfNeeded();
+            ViewCompat.postOnAnimation(this, flingRunnable);
+        }
     }
 
     private void endDrag() {

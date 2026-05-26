@@ -166,7 +166,7 @@ public class CustomScrollFeedActivity extends AppCompatActivity implements Chore
         } else if (LoadType.isMixedLoad(loadType)) {
             // 混合负载：每帧调用 doFrame 和 betweenFrame，由 LoadSimulator 统一控制伪随机帧间隔
             mLoadSimulator.executeDoFrameLoad(loadType, "RenderStress_doFrameLoad");
-            handler.post(() -> mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad"));
+            handler.post(() -> { if (isScrolling) { mLoadSimulator.executeBetweenFrameLoad(loadType, "RenderStress_betweenFrameLoad"); } });
         }
 
         choreographer.postFrameCallback(this);

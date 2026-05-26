@@ -32,6 +32,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private static final int ITEM_COUNT = 300;
     private LoadSimulator mLoadSimulator = new LoadSimulator();
     private List<FriendCircleBean> mFriendCircleBeans = new ArrayList<>();
+    private boolean loadEnabled = false;
 
     public ListAdapter() {
         refreshData();
@@ -42,6 +43,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             this.loadType = loadType;
             refreshData();
         }
+    }
+
+    public void setLoadEnabled(boolean enabled) {
+        loadEnabled = enabled;
     }
 
     private void refreshData() {
@@ -115,7 +120,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private void executeLoad() {
         // 使用统一的负载中心执行负载
-        if (mLoadSimulator != null) {
+        if (mLoadSimulator != null && loadEnabled) {
             mLoadSimulator.executeInFrameLoad(loadType, "MixedRender_UIThread_doFrameLoad");
         }
     }

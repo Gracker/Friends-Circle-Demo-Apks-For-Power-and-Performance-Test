@@ -31,17 +31,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
      */
     @Override
     protected void performLoadTask() {
-        if (lightMonitoringInitialized) {
-            Log.d(TAG, "低负载模式 - 轻量监控已初始化，跳过重复初始化");
-            return;
-        }
-
-        if (executeLightMonitoring()) {
-            lightMonitoringInitialized = true;
-            Log.d(TAG, "低负载模式 - 已启动轻量监控");
-        } else {
-            Log.w(TAG, "低负载模式 - WebView未就绪，轻量监控未启动");
-        }
+        Log.d(TAG, "低负载模式 - 等待 fling 后执行负载");
     }
 
     /**
@@ -276,10 +266,6 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 恢复监控
-        if (lightMonitoringInitialized && webView != null) {
-            webView.evaluateJavascript("javascript: lightLoadEnabled = true; requestAnimationFrame(performLightCalculation);", null);
-        }
     }
 
     @Override
@@ -323,7 +309,7 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             // 测试成功后直接执行负载
             if (value != null && !value.equals("null")) {
                 // 低负载JavaScript
-                String loadJs = 
+                String loadJs =
                     "(function() {\n" +
                     "  var startTime = performance.now();\n" +
                     "  \n" +
@@ -405,4 +391,4 @@ public class LightLoadWebViewActivity extends BaseFriendCircleWebViewActivity {
             }
         });
     }
-} 
+}

@@ -623,8 +623,12 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     }
 
     private void executeLoad() {
+        if (!isScrolling) {
+            return;
+        }
+
         // Check and execute long frame load
-        if (LoadType.isLongFrameLoad(loadType) && isScrolling) {
+        if (LoadType.isLongFrameLoad(loadType)) {
             checkAndExecuteLongFrame();
         }
 
@@ -674,24 +678,23 @@ public class GLMapRenderer implements GLSurfaceView.Renderer {
     }
 
     private int getRendererSpecificIterations() {
-        boolean scrolling = isScrolling;
         switch (loadType) {
             case LoadType.MINIMAL:
                 return 0;
             case LoadType.LIGHT:
             case LoadType.LIGHT_BETWEEN_FRAMES:
             case LoadType.LIGHT_MIXED:
-                return scrolling ? LIGHT_SCROLL_EXTRA_ITERATIONS : LIGHT_IDLE_EXTRA_ITERATIONS;
+                return LIGHT_SCROLL_EXTRA_ITERATIONS;
             case LoadType.MEDIUM:
             case LoadType.MEDIUM_BETWEEN_FRAMES:
             case LoadType.MEDIUM_MIXED:
-                return scrolling ? MEDIUM_SCROLL_EXTRA_ITERATIONS : MEDIUM_IDLE_EXTRA_ITERATIONS;
+                return MEDIUM_SCROLL_EXTRA_ITERATIONS;
             case LoadType.HEAVY:
             case LoadType.HEAVY_BETWEEN_FRAMES:
             case LoadType.HEAVY_MIXED:
-                return scrolling ? HEAVY_SCROLL_EXTRA_ITERATIONS : HEAVY_IDLE_EXTRA_ITERATIONS;
+                return HEAVY_SCROLL_EXTRA_ITERATIONS;
             case LoadType.LONG_FRAME:
-                return scrolling ? LONG_FRAME_SCROLL_EXTRA_ITERATIONS : LONG_FRAME_IDLE_EXTRA_ITERATIONS;
+                return LONG_FRAME_SCROLL_EXTRA_ITERATIONS;
             default:
                 return 0;
         }

@@ -44,6 +44,7 @@ import java.util.Random;
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 /**
  * 双窗口模块专用的朋友圈适配器，支持不同负载级别
@@ -127,7 +128,7 @@ public class DualWindowFriendCircleAdapter extends RecyclerView.Adapter<Recycler
         mFrameLoadRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mIsScrolling) {
+                if (mIsScrolling && ScrollLoadGate.shouldRunForRecyclerView(mRecyclerView)) {
                     mLoadSimulator.executeInFrameLoad(mLoadType, "DualWindowAdapter_continuousLoad");
                     mHandler.postDelayed(this, 16); // 约60fps
                 }
@@ -454,7 +455,9 @@ public class DualWindowFriendCircleAdapter extends RecyclerView.Adapter<Recycler
         });
 
         // 模拟计算负载
-        mLoadSimulator.executeInFrameLoad(mLoadType, "DualWindowAdapter_bindLoad");
+        if (ScrollLoadGate.shouldRunForRecyclerView(mRecyclerView)) {
+            mLoadSimulator.executeInFrameLoad(mLoadType, "DualWindowAdapter_bindLoad");
+        }
     }
 
     /**

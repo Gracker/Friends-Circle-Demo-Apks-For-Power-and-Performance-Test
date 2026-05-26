@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 import com.example.wechatfriendfordualwindow.adapters.DualWindowFriendCircleAdapter;
 import com.example.scrolling.common.beans.FriendCircleBean;
 
@@ -104,7 +105,7 @@ public abstract class BaseDualWindowActivity extends AppCompatActivity implement
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                     if (isSecondWindowAdded) {
                         secondWindowView.stopAnimation();

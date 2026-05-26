@@ -58,6 +58,7 @@ import java.util.Random;
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 /**
  * 视频朋友圈适配器 - 基于原PerformanceFriendCircleAdapter
@@ -65,7 +66,7 @@ import com.example.loadconfig.LoadType;
  * 使用统一的 LoadConfig 和 LoadType 进行负载配置
  */
 @OptIn(markerClass = UnstableApi.class)
-public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
+public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements OnItemClickPopupMenuListener {
 
     private static final String TAG = "VideoFriendCircleAdapter";
@@ -151,7 +152,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         mFrameLoadRunnable = new Runnable() {
             @Override
             public void run() {
-                if (mIsScrolling) {
+                if (mIsScrolling && ScrollLoadGate.shouldRunForRecyclerView(mRecyclerView)) {
                     mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_continuousLoad");
                     mHandler.postDelayed(this, 16); // 约60fps
                 }
@@ -169,6 +170,8 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
+                // Playback state follows any list movement, while synthetic load below
+                // is additionally gated by ScrollLoadGate and only runs during inertia.
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     mIsScrolling = false;
                     checkAndPlayVisibleVideo();
@@ -475,7 +478,9 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         // 新增：处理视频类型
         if (holder instanceof VideoViewHolder) {
             bindVideoViewHolder((VideoViewHolder) holder, friendCircleBean, position);
-            mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
+            if (ScrollLoadGate.shouldRunForRecyclerView(mRecyclerView)) {
+                mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
+            }
             return;
         }
 
@@ -582,7 +587,7 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
 
                     TextView textView = new TextView(mContext);
                     textView.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT, 
+                            LinearLayout.LayoutParams.MATCH_PARENT,
                             LinearLayout.LayoutParams.WRAP_CONTENT));
                     textView.setTextColor(mContext.getResources().getColor(R.color.base_333333));
                     textView.setTextSize(14);
@@ -645,7 +650,9 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
         });
 
         // 模拟计算负载
-        mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
+        if (ScrollLoadGate.shouldRunForRecyclerView(mRecyclerView)) {
+            mLoadSimulator.executeInFrameLoad(mLoadType, "VideoAdapter_bindLoad");
+        }
     }
 
     /**
@@ -1082,4 +1089,4 @@ public class VideoFriendCircleAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }
     }
-} 
+}

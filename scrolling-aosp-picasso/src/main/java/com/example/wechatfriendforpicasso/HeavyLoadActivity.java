@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 import com.example.wechatfriendforpicasso.adapters.PerformanceFriendCircleAdapter;
 
 /**
@@ -59,7 +60,7 @@ public class HeavyLoadActivity extends AppCompatActivity implements Choreographe
         mScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                 } else if (!mIsScrolling) {
                     mIsScrolling = true;

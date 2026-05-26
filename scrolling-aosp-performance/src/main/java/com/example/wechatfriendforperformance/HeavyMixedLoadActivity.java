@@ -21,6 +21,7 @@ import com.example.wechatfriendforperformance.adapters.PerformanceFriendCircleAd
 import com.example.loadconfig.LoadConfig;
 import com.example.loadconfig.LoadSimulator;
 import com.example.loadconfig.LoadType;
+import com.example.loadconfig.ScrollLoadGate;
 
 /**
  * Heavy Mixed Load Activity, combines heavy doFrame load + heavy between-frame load
@@ -98,7 +99,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
 
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (!ScrollLoadGate.isInertiaState(newState)) {
                     mIsScrolling = false;
                     mHandler.removeCallbacksAndMessages(null);
                     Log.d(TAG, "列表停止滚动，停止负载任务");
@@ -123,7 +124,7 @@ public class HeavyMixedLoadActivity extends AppCompatActivity implements Choreog
         if (mIsTaskSchedulingEnabled && mIsScrolling) {
             // 帧间隔由 LoadSimulator 统一控制
             mLoadSimulator.executeDoFrameLoad(mLoadType, "MixedLoad_doFrame");
-            mHandler.post(() -> mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"));
+            mHandler.post(() -> { if (mIsScrolling) { mLoadSimulator.executeBetweenFrameLoad(mLoadType, "MixedLoad_betweenFrame"); } });
             mChoreographer.postFrameCallback(this);
         }
     }
