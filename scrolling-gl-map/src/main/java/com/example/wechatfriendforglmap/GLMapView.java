@@ -89,6 +89,26 @@ public class GLMapView extends GLSurfaceView {
         }
     }
 
+    public void zoomIn() {
+        queueEvent(() -> renderer.setZoom(1.2f));
+        requestRender();
+    }
+
+    public void zoomOut() {
+        queueEvent(() -> renderer.setZoom(1f / 1.2f));
+        requestRender();
+    }
+
+    public void resetView() {
+        queueEvent(renderer::resetView);
+        requestRender();
+    }
+
+    public void toggleMarkers() {
+        queueEvent(renderer::toggleMarkers);
+        requestRender();
+    }
+
     // We need to keep track of last fling position to calculate deltas
     private int mLastFlingX;
     private int mLastFlingY;

@@ -38,21 +38,13 @@ public abstract class BaseGLMapActivity extends AppCompatActivity {
     protected abstract @LoadType.Type int getLoadType();
 
     private void setupBottomControls() {
-        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> {
-            // Zoom in functionality (placeholder)
-        });
+        findViewById(R.id.btn_zoom_in).setOnClickListener(v -> glMapView.zoomIn());
 
-        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> {
-            // Zoom out functionality (placeholder)
-        });
+        findViewById(R.id.btn_zoom_out).setOnClickListener(v -> glMapView.zoomOut());
 
-        findViewById(R.id.btn_location).setOnClickListener(v -> {
-            // Current location functionality (placeholder)
-        });
+        findViewById(R.id.btn_location).setOnClickListener(v -> glMapView.resetView());
 
-        findViewById(R.id.btn_layers).setOnClickListener(v -> {
-            // Layers functionality (placeholder)
-        });
+        findViewById(R.id.btn_layers).setOnClickListener(v -> glMapView.toggleMarkers());
     }
 
     @Override
